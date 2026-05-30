@@ -1,0 +1,11 @@
+# CSP compiled classes
+*.INT
+*.OBJ
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
