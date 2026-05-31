@@ -1,0 +1,838 @@
+Class web.DHCWLfeeSum Extends (%RegisteredObject, %XML.Adaptor)
+{
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getarcitem","氯化钠")
+Query getarcitem(Input As %String) As websys.Query(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+}
+
+ClassMethod getarcitemExecute(ByRef qHandle As %Binary, Input As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	i Input="" s qHandle=$lb(0,repid,0) q $$$OK
+	//^ARCIM({ARCIM_Subscript},{ARCIM_Version})
+	s arcsub=""
+	f  s arcsub=$o(^ARCIM(arcsub)) q:arcsub=""  d
+	.q:+arcsub="0"
+	.s ver="" f  s ver=$o(^ARCIM(arcsub,ver)) q:ver=""  d
+	..s TRowid=arcsub_"||"_ver
+	..s TCode=$p($g(^ARCIM(arcsub,ver,1)),"^",1)
+	..s TDesc=$p($g(^ARCIM(arcsub,ver,1)),"^",2)
+
+	..q:(TDesc'[Input)&&(Input '= "")
+	..d GetInsuAreaNo
+	s qHandle=$lb(0,repid,0)
+	q $$$OK
+	
+GetInsuAreaNo    
+	s Data=$lb(TRowid,TCode,TDesc)
+ 	s ^CacheTemp(repid,ind)=Data
+ 	s ind=ind+1
+ 	q
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getdrugtype","")
+Query getdrugtype(Input As %String = "") As websys.Query(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+}
+
+ClassMethod getdrugtypeExecute(ByRef qHandle As %Binary, Input As %String = "") As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	s qHandle=$lb(0,repid,0) 
+	s pinst=""
+	f  s pinst=$o(^CD.PHA.IN.STAT(pinst))  q:(pinst = "")   d
+	.q:pinst="INCI"
+    .s statcode=$p(^CD.PHA.IN.STAT(pinst),"^",1)
+    .s statdesc=$p(^CD.PHA.IN.STAT(pinst),"^",2)
+    .q:'$d(^CD.PHA.IN.STAT(pinst,"C"))
+    .s itm=""
+    .f  s itm=$o(^CD.PHA.IN.STAT(pinst,"C",itm))  q:(itm = "")   d
+    ..s codesubcode=$p(^CD.PHA.IN.STAT(pinst,"C",itm),"^",2)
+    ..s codesub=$p(^CD.PHA.IN.STAT(pinst,"C",itm),"^",3)
+	..s TCode=codesubcode
+	..s TDesc=codesub_"("_statdesc_")"
+	..s TRowid=pinst_"||"_itm
+	..q:(TDesc'[Input)&&(Input '= "")
+	..d GetDrugType
+	s qHandle=$lb(0,repid,0)
+	q $$$OK
+	
+GetDrugType    
+	s Data=$lb(TRowid,TCode,TDesc)
+ 	s ^CacheTemp(repid,ind)=Data
+ 	s ind=ind+1
+ 	q
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getadmtype")
+Query getadmtype(Input As %String = "") As websys.Query(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+}
+
+ClassMethod getadmtypeExecute(ByRef qHandle As %Binary, Input As %String = "") As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+    s typestr="I^I^住院@O^O^门诊@E^E^急诊@H^H^体检"
+    s len=$l(typestr,"@")
+    f i=1:1:len d
+    .s sub=$p(typestr,"@",i)
+	.s TRowid=$p(sub,"^",1)
+	.s TCode=$p(sub,"^",2)
+	.s TDesc=$p(sub,"^",3)
+	.q:(TDesc'[Input)&&(Input '= "")
+	.d GetInsuAreaNo
+	s qHandle=$lb(0,repid,0)
+	q $$$OK
+	
+GetInsuAreaNo    
+	s Data=$lb(TRowid,TCode,TDesc)
+ 	s ^CacheTemp(repid,ind)=Data
+ 	s ind=ind+1
+ 	q
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getLoc","血")
+Query gettaritem(Input As %String) As %Library.SQLQuery(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+	SELECT TARI_RowId AS TRowid, TARI_Code AS TCode, TARI_Desc AS TDesc FROM SQLUser.DHC_TarItem 
+	WHERE  TARI_Desc LIKE "%"_:Input_"%"
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getLoc","血")
+Query getLoc(Input As %String) As %Library.SQLQuery(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+	
+	SELECT CTLOC_RowID AS TRowid,CTLOC_Code AS TCode, CTLOC_Desc AS TDesc
+	FROM SQLUser.CT_Loc WHERE  CTLOC_Desc LIKE "%"_:Input_"%"
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getDiag","血")
+Query getDiag(Input As %String) As %Library.SQLQuery(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+	SELECT MRCID_RowId AS TRowid,MRCID_ICD9CM_Code AS TCode,MRCID_Desc AS TDesc FROM  SQLUser.MRC_ICDDx
+	WHERE  MRCID_Desc LIKE "%"_:Input_"%" and MRCID_DateActiveTo is NULL
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getArcSum","药")
+Query getArcSum(Input As %String) As %Library.SQLQuery(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+	SELECT ARCIC_RowId as TRowid, ARCIC_Code as TCode, ARCIC_Desc as TDesc FROM SQLUser.ARC_ItemCat WHERE ARCIC_Desc LIKE "%"_:Input_"%"
+}
+
+/// D ##class(%ResultSet).RunQuery("web.DHCWLfeeSum","getTarecsub","药")
+Query getTarecsub(Input As %String) As %Library.SQLQuery(ROWSPEC = "TRowid:%String,TCode:%String,TDesc:%String")
+{
+	SELECT TAREC_RowId as TRowid, TAREC_Code as TCode, TAREC_Desc as TDesc FROM SQLUser.DHC_TarEMCCate WHERE TAREC_Desc LIKE "%"_:Input_"%"
+}
+
+/// 根据医嘱id获取执行天数
+/// w ##class(web.DHCWLfeeSum).getZXDAYS("7629679||532")
+ClassMethod getZXDAYS(oeori)
+{
+	k ^||TEMPDHCWL($j,"getZXDAYS")
+	//q 0
+	s zxdays=0
+	q:oeori="" 0
+	s ord=$p(oeori,"||",1)
+	s tsub=$p(oeori,"||",2)
+	s arcid=$p(^OEORD(ord,"I",tsub,1),"^",2)
+	q:arcid="" 0
+	s exsdate=""
+	f  s exsdate=$O(^OEORDi(0,"ARCIM",ord,arcid,exsdate))  q:exsdate=""  d
+	.q:+exsdate=0
+	.s sub=""
+	.f  s sub=$O(^OEORDi(0,"ARCIM",ord,arcid,exsdate,sub))  q:sub=""  d
+	..q:+sub=0
+	..q:'$d(^OEORD(ord,"I",sub,"X"))
+	..s ore=""
+	..f  s ore=$o(^OEORD(ord,"I",sub,"X",ore)) q:ore=""  d
+	...q:+ore=0
+	...s execdata=$g(^OEORD(ord,"I",sub,"X",ore))
+	...s OEOREStatus=$p(execdata,"^",16)
+	...q:OEOREStatus'="1"
+	...s exsdate2=$p(execdata,"^",1)
+	...i '$d(^||TEMPDHCWL($j,"getZXDAYS",exsdate2)) d
+	....s zxdays=+zxdays+1
+	....s ^||TEMPDHCWL($j,"getZXDAYS",exsdate2)=""
+	q zxdays
+}
+
+/// 根据医嘱id获取执行天数
+/// w ##class(web.DHCWLfeeSum).getZXDAYS2("7139279||91||1")
+ClassMethod getZXDAYS2(oeore)
+{
+	
+	s zxdays="",dayct=0
+	//q:oeore="" 0
+	s ord=$p(oeore,"||",1)
+	s tsub=$p(oeore,"||",2)
+	s ore=$p(oeore,"||",3)
+	s exsdate=$p($g(^OEORD(ord,"I",tsub,"X",ore)),"^",1)
+	s freqdr=$p(^OEORD(ord,"I",tsub,2),"^",4)
+	s freq=$p($g(^PHCFR(freqdr)),"^",1)
+	s factor=+$p($g(^PHCFR(freqdr)),"^",2)
+	i factor=0 s factor=1
+	s arcid=$p(^OEORD(ord,"I",tsub,1),"^",2)
+	
+	//^OEORDi(0,"DateARCIM",{OEORE_ExStDate},$P($G(^OEORD({OE_Order.OEORD_RowId},"I",{OE_OrdItem.OEORI_Childsub},1)),"^",2),{OE_Order.OEORD_RowId},{OE_OrdItem.OEORI_Childsub},{OEORE_Childsub})
+	
+	q:arcid="" 0
+	s sub=""
+	f  s sub=$O(^OEORDi(0,"DateARCIM",exsdate,arcid,ord,sub))  q:sub=""  d
+	.s ore=""
+	.f  s ore=$O(^OEORDi(0,"DateARCIM",exsdate,arcid,ord,sub,ore)) q:ore=""  d
+	..q:+ore=0
+	..s execdata=$g(^OEORD(ord,"I",sub,"X",ore))
+	..s OEOREStatus=$p(execdata,"^",16)
+	..q:OEOREStatus'="1"
+	..s dayct=dayct+1
+	s ret=freq_" "_$zd(exsdate,3)_"："_dayct_"次"
+	i factor<dayct s ret=ret_"(异常)"
+	q ret
+}
+
+/// 根据收费项id获取单日数量
+/// w ##class(web.DHCWLfeeSum).gettardayct(7186178,5915,67255)
+/// w ##class(web.DHCWLfeeSum).gettardayct(7186201,5915,67255)
+ClassMethod gettardayct(adm2 = "", tarid2 = "", date2 = "")
+{
+	s dayct2=0,admct2=0
+	q:(adm2 = "")||(tarid2 = "")||(date2 = "") 0
+	q:'$d(^DHCWorkLoad(0,"PAADM",adm2)) 0
+	s wlid2=""
+	f  s wlid2=$o(^DHCWorkLoad(0,"PAADM",adm2,wlid2)) q:wlid2=""  d
+	.q:+wlid2=0
+	.s qty2=+$P($g(^DHCWorkLoad(wlid2)),"^",15)
+	.s tardr2=$P(^DHCWorkLoad(wlid2),"^",22)
+	.q:tardr2'=tarid2
+	.s admct2=admct2+qty2
+	.s ordate2=$P(^DHCWorkLoad(wlid2),"^",5)
+	.q:(date2 '= "")&&(ordate2 '= date2)
+	.s dayct2=dayct2+qty2
+	q dayct2_"(共计:"_admct2_")"
+}
+
+/// d ##Class(%ResultSet).RunQuery("web.DHCWLfeeSum","getfeesum","2024-05-01","2024-05-31","11996||1^17048||1","","","","2","","","","1","","","","","")
+Query getfeesum(SDate As %String, EDate As %String, Arcitems As %String = "", PatDeps As %String = "", RecDeps As %String = "", ItemSubs As %String = "", HZFlag As %String = "", ItemTarecs As %String = "", Taritems As %String = "", ResDeps As %String = "", ExtType As %String = "", Arcitems2 As %String = "", Atype As %String = "", drugtype As %String = "", Taritems2 As %String = "", Diag As %String = "") As %Query(ROWSPEC = "arccode:%String:医嘱代码,arcdesc:%String:医嘱名称,code:%String:收费项代码,desc:%String:收费项名称,qty:%String:数量,price:%String:单价,totalprice:%String:金额,name:%String:姓名,REGNO:%String:登记号,patdepdesc:%String:开单科室,recdepdesc:%String:接收科室,ResDoc:%String:开单医生,Admreason:%String:费别,JFDate:%String:计费日期,OESdate:%String:医嘱日期,Iadmtype:%String:医疗类别,xzlx:%String:险种类型,ydflag:%String:地区,resdepdesc:%String:病人科室,oeori:%String:医嘱id,pbdr:%String:账单号,medno:%String:住院号,admtype:%String:类型,adm:%String:就诊号,XB:%String:性别,ZJH:%String:证件号,dayct:%String:当日计费,exqty2:%String:当日计费(同时),zyts:%String:住院天数,arcstr:%String:医嘱串,PAADMAdmDate:%String:就诊日期,oeore:%String:执行记录ID,diagstr:%String:诊断,zxdays:%String:执行天数,age:%String:年龄,admdep:%String:就诊科室") [ SqlProc ]
+{
+}
+
+ClassMethod getfeesumExecute(ByRef qHandle As %Binary, SDate As %String, EDate As %String, Arcitems As %String = "", PatDeps As %String = "", RecDeps As %String = "", ItemSubs As %String = "", HZFlag As %String = "", ItemTarecs As %String = "", Taritems As %String = "", ResDeps As %String = "", ExtType As %String = "", Arcitems2 As %String = "", Atype As %String = "", drugtype As %String = "", Taritems2 As %String = "", Diag As %String = "") As %Status
+{
+	
+	//SDate, EDate, Arcitems, PatDeps, RecDeps,ItemSubs
+	//^DHCWorkLoad(0,"ORDDATE",{WorkLoad_OrdDate},{WorkLoad_Rowid})
+	s ^tyl("feesum")=$lb(SDate, EDate, Arcitems, PatDeps, RecDeps,ItemSubs,HZFlag, ItemTarecs,Taritems, ResDeps,ExtType,Arcitems2, Atype, drugtype,Taritems2,Diag)
+ 	s repid=$I(^CacheTemp)
+	if $g(ind)="" s ind=1
+    s qHandle=$lb(0,repid,0)
+    k ^||TEMPDHCWL($j)
+    q:(SDate = "")||(EDate = "") $$$OK
+    q:(Arcitems = "")&&(PatDeps = "")&&(RecDeps = "")&&(ResDeps = "")&&(ItemSubs = "")&&(ItemTarecs = "")&&(Taritems = "") $$$OK
+    ;k ^temptylmzyzb
+    i Arcitems'="" d
+    .f i=1:1:$l(Arcitems,"^") d
+    ..s sub=$p(Arcitems,"^",i)
+    ..s ^||TEMPDHCWL($j,"Arcitems",sub)=""
+    i PatDeps'="" d
+    .f i=1:1:$l(PatDeps,"^") d
+    ..s sub=$p(PatDeps,"^",i)
+    ..s ^||TEMPDHCWL($j,"PatDeps",sub)=""
+    i RecDeps'="" d
+    .f i=1:1:$l(RecDeps,"^") d
+    ..s sub=$p(RecDeps,"^",i)
+    ..s ^||TEMPDHCWL($j,"RecDeps",sub)=""
+    i ResDeps'="" d
+    .f i=1:1:$l(ResDeps,"^") d
+    ..s sub=$p(ResDeps,"^",i)
+    ..s ^||TEMPDHCWL($j,"ResDeps",sub)=""
+    i ItemSubs'="" d
+    .f i=1:1:$l(ItemSubs,"^") d
+    ..s sub=$p(ItemSubs,"^",i)
+    ..s ^||TEMPDHCWL($j,"ItemSubs",sub)=""
+    i ItemTarecs'="" d
+    .f i=1:1:$l(ItemTarecs,"^") d
+    ..s sub=$p(ItemTarecs,"^",i)
+    ..s ^||TEMPDHCWL($j,"ItemTarecs",sub)=""
+    i Taritems'="" d
+    .f i=1:1:$l(Taritems,"^") d
+    ..s sub=$p(Taritems,"^",i)
+    ..s ^||TEMPDHCWL($j,"Taritems",sub)=""
+    i Arcitems2'="" d
+    .f i=1:1:$l(Arcitems2,"^") d
+    ..s sub=$p(Arcitems2,"^",i)
+    ..s ^||TEMPDHCWL($j,"Arcitems2",sub)=""
+    
+    i Atype'="" d
+    .f i=1:1:$l(Atype,"^") d
+    ..s sub=$p(Atype,"^",i)
+    ..s ^||TEMPDHCWL($j,"Atype",sub)=""
+    
+    i Taritems2'="" d
+    .f i=1:1:$l(Taritems2,"^") d
+    ..s sub=$p(Taritems2,"^",i)
+    ..s ^||TEMPDHCWL($j,"Taritems2",sub)=""
+    
+    
+    i SDate["-" d
+    .s SDate=$zdh(SDate,3)
+    .s EDate=$zdh(EDate,3)
+    i SDate["/" d
+    .s SDate=$zdh(SDate,4)
+    .s EDate=$zdh(EDate,4)
+
+
+	i $D(^||TEMPDHCWL($j,"Arcitems2"))&&(HZFlag = "2")  d getexarcitems2
+	i $D(^||TEMPDHCWL($j,"Taritems2"))&&(HZFlag = "2") d getexttaritmes2
+
+	
+    s count=1
+    
+    i $D(^||TEMPDHCWL($j,"Arcitems")) d
+    .f day=SDate:1:EDate  d
+    ..s ItemOrdr="" 
+    ..f  s ItemOrdr=$o(^DHCWorkLoad(0,"DateItemOrd",day,ItemOrdr)) q:ItemOrdr=""  d
+    ...q:$D(^||TEMPDHCWL($j,"Arcitems"))&&'$D(^||TEMPDHCWL($j,"Arcitems",ItemOrdr))
+    ...s WLRowid=""
+    ...f  s WLRowid=$O(^DHCWorkLoad(0,"DateItemOrd",day,ItemOrdr,WLRowid)) q:WLRowid=""  d
+d ..ProcessWLRecord(WLRowid, day, HZFlag, ExtType, drugtype, .count)
+	.i HZFlag="1" d output2
+	
+	e  i $D(^||TEMPDHCWL($j,"Taritems")) d
+    .s tardr=""
+    .f  s tardr=$o(^DHCWorkLoad(0,"TARITEM",tardr)) q:tardr=""  d
+    ..q:$D(^||TEMPDHCWL($j,"Taritems"))&&'$D(^||TEMPDHCWL($j,"Taritems",tardr))
+    ..s WLRowid=""
+    ..f  s WLRowid=$O(^DHCWorkLoad(0,"TARITEM",tardr,WLRowid)) q:WLRowid=""  d
+    ...s ItemOrdr=$P(^DHCWorkLoad(WLRowid),"^",2)
+    ...s day=$P(^DHCWorkLoad(WLRowid),"^",5)
+    ...q:day>EDate
+    ...q:day<SDate
+    ...s pbddr=$P(^DHCWorkLoad(WLRowid),"^",48)
+    
+    ...s pbdr=+pbddr
+    ...q:+pbdr=0
+    ...s payflag=$p($g(^DHCPB(pbdr)),"^",16)
+    ...s refundflag=$p($g(^DHCPB(pbdr)),"^",17)
+    ...q:(payflag '= "P")&&(payflag '= "B")
+    ...q:refundflag'=""
+    
+    ...s billdatetime=""
+    ...i pbddr'=""  d
+    ....s billdate=$p($g(^DHCPB(+pbddr,"O",$p(pbddr,"||",2),"D",$p(pbddr,"||",3))),"^",11)
+    ....s billtime=$p($g(^DHCPB(+pbddr,"O",$p(pbddr,"||",2),"D",$p(pbddr,"||",3))),"^",12)
+    ....s billdatetime=$zd(billdate,3)_" "_$zt(billtime,1)
+    
+        d ..ProcessWLRecord(WLRowid, day, HZFlag, ExtType, drugtype, .count)
+	.i HZFlag="1" d output2
+	
+	
+	e  i $D(^||TEMPDHCWL($j,"RecDeps")) d
+    .f day=SDate:1:EDate  d
+    ..s recdepdr="" 
+    ..f  s recdepdr=$o(^DHCWorkLoad(0,"ORDDATERECDEP",day,recdepdr)) q:recdepdr=""  d
+    ...q:$D(^||TEMPDHCWL($j,"RecDeps"))&&'$D(^||TEMPDHCWL($j,"RecDeps",recdepdr))
+    ...s WLRowid=""
+    ...f  s WLRowid=$O(^DHCWorkLoad(0,"ORDDATERECDEP",day,recdepdr,WLRowid)) q:WLRowid=""  d
+    ....q:+WLRowid=0
+        d ..ProcessWLRecord(WLRowid, day, HZFlag, ExtType, drugtype, .count)
+	.i HZFlag="1" d output2
+	
+	e  i $D(^||TEMPDHCWL($j,"ResDeps")) d
+    .f day=SDate:1:EDate  d
+    ..s resdepdr="" 
+    ..f  s resdepdr=$o(^DHCWorkLoad(0,"ORDDATERESDEP",day,resdepdr)) q:resdepdr=""  d
+    ...q:$D(^||TEMPDHCWL($j,"ResDeps"))&&'$D(^||TEMPDHCWL($j,"ResDeps",resdepdr))
+    ...s WLRowid=""
+    ...f  s WLRowid=$O(^DHCWorkLoad(0,"ORDDATERESDEP",day,resdepdr,WLRowid)) q:WLRowid=""  d
+    ....q:+WLRowid=0
+        d ..ProcessWLRecord(WLRowid, day, HZFlag, ExtType, drugtype, .count)
+	.i HZFlag="1" d output2
+	e  d
+    .f day=SDate:1:EDate  d
+    ..s WLRowid=""
+    ..f  s WLRowid=$O(^DHCWorkLoad(0,"ORDDATE",day,WLRowid)) q:WLRowid=""  d
+        d ..ProcessWLRecord(WLRowid, day, HZFlag, ExtType, drugtype, .count)
+	.i HZFlag="1" d output2
+
+	i HZFlag'="1" d 
+	.s index=""
+	.f  s index=$o(^||TEMPDHCWL($j,"Detail",index)) q:index=""  d
+	..s Data=$g(^||TEMPDHCWL($j,"Detail",index))
+	..s oeori=$lg(Data,20)
+	..s oeore=$lg(Data,32)
+	..s arcid=$p(^OEORD(+oeori,"I",$p(oeori,"||",2),1),"^",2)
+	..s arcdesc=$p($g(^ARCIM(+arcid,$p(arcid,"||",2),1)),"^",2)
+	..s zxdays=""
+	..i HZFlag'="3" d
+	...i arcdesc["静脉输液" d
+	....s zxdays=..getZXDAYS2(oeore)
+	...e  d
+	....s zxdays=..getZXDAYS(oeori)
+	
+	
+	..s pbdr=$lg(Data,21)
+	..s adm=$lg(Data,24)
+	..s papmiid=$p(^PAADM(adm),"^",1)
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s admdep=$p($g(^CTLOC(admdepdr)),"^",2)
+	
+	..s dob=$p(^PAPER(papmiid,"ALL"),"^",6)
+	..//s admdate=$p($g(^PAADM(adm)),"^",6)
+	..s age=$ZD(dob,3)  //##class(web.DHCBillInterface).GetPapmiAge(papmiid,adm,"",admdate)
+	..i HZFlag="3" s diagstr=""
+	..e  s diagstr=##Class(web.DHCWLQueryFunction).GetPatDiagnos(adm,"")
+	..s diagstr=$p(diagstr,"^",1)
+	..s diagstr=$tr(diagstr," ",",")
+	..s diagflag=0
+	..i Diag'="" d
+	...s len=$l(Diag,"^")
+	...f i=1:1:len d
+	....s diagsub=$p(Diag,"^",i)
+	....s diagdesc=$p(^MRC("ID",diagsub),"^",2)
+	....i diagstr[diagdesc  s diagflag=1
+	..q:(diagflag = 0)&&(Diag '= "")
+	..s sumqty=$g(^||TEMPDHCWL($j,"QTYSUM",pbdr,oeori))
+	..q:sumqty=0
+	..s ^CacheTemp(repid,ind)=Data_$lb(diagstr)_$lb(zxdays)_$lb(age)_$lb(admdep)
+ 	..s ind=ind+1
+ 	s qHandle=$lb(0,repid,0)
+	k ^||TEMPDHCWL($j)
+	q $$$OK
+	
+getexttaritmes2
+	f day=SDate:1:EDate  d
+    .s ItemOrdr="" 
+    .f  s ItemOrdr=$o(^DHCWorkLoad(0,"DateItemOrd",day,ItemOrdr)) q:ItemOrdr=""  d
+    ..s WLRowid=""
+    ..f  s WLRowid=$O(^DHCWorkLoad(0,"DateItemOrd",day,ItemOrdr,WLRowid)) q:WLRowid=""  d
+    ...s tarid=$P(^DHCWorkLoad(WLRowid),"^",22)
+    ...//b ;0000
+    ...q:$D(^||TEMPDHCWL($j,"Taritems2"))&&'$D(^||TEMPDHCWL($j,"Taritems2",tarid))
+    ...q:$D(^||TEMPDHCWL($j,"Taritems",tarid))
+    ...//b ;111
+    ...s fee=$P(^DHCWorkLoad(WLRowid),"^",16)
+    ...s price=$P(^DHCWorkLoad(WLRowid),"^",14)
+    ...s qty=$P(^DHCWorkLoad(WLRowid),"^",15)
+    ...s type=$P(^DHCWorkLoad(WLRowid),"^",4)
+    ...s adm=$P(^DHCWorkLoad(WLRowid),"^",12)
+    ...s oeore=$P(^DHCWorkLoad(WLRowid),"^",54)
+    ...s oeori=$P(^DHCWorkLoad(WLRowid),"^",21)
+    ...s zflag=0
+    ...i oeore'="" s zflag=..feeflag(oeore)
+    ...e  s zflag=..feeflag2(oeori)
+    ...i zflag="1" d
+    ....s ^||TEMPDHCWL($j,"Taritems2-adm",adm)=$g(^||TEMPDHCWL($j,"Taritems2-adm",adm))+qty
+    ....s ^||TEMPDHCWL($j,"Taritems2-day",adm,day)=$g(^||TEMPDHCWL($j,"Taritems2-day",adm,day))+qty
+    q
+    
+getexarcitems2
+	k ^||TEMPDHCWL($j,"Arcitems2-desc")
+    f day2=SDate:1:EDate  d
+    .s ItemOrdr="" 
+    .f  s ItemOrdr=$o(^DHCWorkLoad(0,"DateItemOrd",day2,ItemOrdr)) q:ItemOrdr=""  d
+    ..q:$D(^||TEMPDHCWL($j,"Arcitems2"))&&'$D(^||TEMPDHCWL($j,"Arcitems2",ItemOrdr))
+    ..q:$D(^||TEMPDHCWL($j,"Arcitems",ItemOrdr))
+    ..s WLRowid=""
+    ..f  s WLRowid=$O(^DHCWorkLoad(0,"DateItemOrd",day2,ItemOrdr,WLRowid)) q:WLRowid=""  d
+    ...s fee=$P(^DHCWorkLoad(WLRowid),"^",16)
+    ...s price=$P(^DHCWorkLoad(WLRowid),"^",14)
+    ...s qty=$P(^DHCWorkLoad(WLRowid),"^",15)
+    ...s type=$P(^DHCWorkLoad(WLRowid),"^",4)
+    ...s adm=$P(^DHCWorkLoad(WLRowid),"^",12)
+    ...s oeore=$P(^DHCWorkLoad(WLRowid),"^",54)
+    ...s oeori=$P(^DHCWorkLoad(WLRowid),"^",21)
+    ...s arcdesc=$p(^ARCIM(+ItemOrdr,$p(ItemOrdr,"||",2),1),"^",2)
+    ...s zflag=0
+    ...i oeore'="" s zflag=..feeflag(oeore)
+    ...e  s zflag=..feeflag2(oeori)
+    ...i zflag="1" d
+    ....s ^||TEMPDHCWL($j,"Arcitems2-adm",adm)=$g(^||TEMPDHCWL($j,"Arcitems2-adm",adm))+qty
+    ....s ^||TEMPDHCWL($j,"Arcitems2-day",adm,day2)=$g(^||TEMPDHCWL($j,"Arcitems2-day",adm,day2))+qty
+    ....q:$d(^||TEMPDHCWL($j,"Arcitems2-desc",adm,arcdesc))
+    ....s ^||TEMPDHCWL($j,"Arcitems2-adm-desc",adm)=$g(^||TEMPDHCWL($j,"Arcitems2-adm-desc",adm))_","_arcdesc
+    ....s ^||TEMPDHCWL($j,"Arcitems2-day-desc",adm,day2)=$g(^||TEMPDHCWL($j,"Arcitems2-day-desc",adm,day2))_","_arcdesc
+    ....s ^||TEMPDHCWL($j,"Arcitems2-desc",adm,arcdesc)=""
+    q
+    
+output2
+
+	s arcid="",total=0,(name,REGNO,patdepdesc,recdepdesc,ResDoc,XB,ZJH)=""
+	f  s arcid=$O(^||TEMPDHCWL($j,"FEESUM",arcid)) q:arcid=""  d
+	.s tarid=""
+	.f  s tarid=$O(^||TEMPDHCWL($j,"FEESUM",arcid,tarid)) q:tarid=""  d
+	..s price=""
+	..f  s price=$O(^||TEMPDHCWL($j,"FEESUM",arcid,tarid,price)) q:price=""  d
+	...s tarcode=$P(^DHCTARI(tarid),"^",1)
+	...s tardesc=$P(^DHCTARI(tarid),"^",2)
+	...s arccode=$P(^ARCIM(+arcid,$p(arcid,"||",2),1),"^",1)
+	...s arcdesc=$P(^ARCIM(+arcid,$p(arcid,"||",2),1),"^",2)
+	...s qty=$g(^||TEMPDHCWL($j,"FEESUM",arcid,tarid,price,"QTY"))
+	...s totalfee=$g(^||TEMPDHCWL($j,"FEESUM",arcid,tarid,price))
+	...s total=total+totalfee
+	...s Data=$lb(arccode,arcdesc,tarcode,tardesc,qty,price,totalfee,name,REGNO,patdepdesc,recdepdesc,ResDoc,"","","","","","","","","","","","","","","","")
+    ...s ^CacheTemp(repid,ind)=Data
+ 	...s ind=ind+1
+ 	s Data=$lb("","","","","","合计：",total,name,REGNO,patdepdesc,recdepdesc,ResDoc,"","","","","","","","","","","","","","","","")
+    s ^CacheTemp(repid,ind)=Data
+ 	s ind=ind+1
+ 	q
+}
+
+ClassMethod getfeesumFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = getfeesumExecute ]
+{
+ 	s AtEnd=$li(qHandle,1)
+ 	s repid=$li(qHandle,2)
+ 	s ind=$li(qHandle,3)
+ 	s ind=$o(^CacheTemp(repid,ind))
+ 	if ind="" {				// if there are no more rows, finish fetching
+ 		s AtEnd=1
+ 		s Row=""
+ 	}
+ 	else      {				// fetch row
+ 		s Row=^CacheTemp(repid,ind)
+ 	}
+ 	// Save QHandle
+ 	s qHandle=$lb(AtEnd,repid,ind)
+	q $$$OK
+}
+
+ClassMethod getfeesumClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = getfeesumExecute ]
+{
+	s repid=$li(qHandle,2)
+ 	k ^CacheTemp(repid)
+ 	q $$$OK
+}
+
+/// 处理单条 WorkLoad 记录 — 公共筛选与数据提取
+/// 供 getfeesumExecute 各分支调用，统一应用所有筛选条件
+/// 返回: 1=已处理(需 count+1) / ""=被过滤
+ClassMethod ProcessWLRecord(WLRowid As %String, day As %String, HZFlag As %String, ExtType As %String, drugtype As %String, ByRef count As %Integer) As %String [ Private ]
+{
+	s ret=""
+
+	; --- 基础数据提取 ---
+	s fee=$P(^DHCWorkLoad(WLRowid),"^",16)
+	s price=$P(^DHCWorkLoad(WLRowid),"^",14)
+	s qty=$P(^DHCWorkLoad(WLRowid),"^",15)
+	s type=$P(^DHCWorkLoad(WLRowid),"^",4)
+
+	; 账单筛选
+	s pbddr=$P(^DHCWorkLoad(WLRowid),"^",48)
+	s pbdr=+pbddr
+	q:pbdr=0 ""
+	s payflag=$p($g(^DHCPB(pbdr)),"^",16)
+	s refundflag=$p($g(^DHCPB(pbdr)),"^",17)
+	q:(payflag '= "P")&&(payflag '= "B") ""
+	q:refundflag'="" ""
+
+	s billdatetime=""
+	i pbddr'="" d
+	. s billdate=$p($g(^DHCPB(+pbddr,"O",$p(pbddr,"||",2),"D",$p(pbddr,"||",3))),"^",11)
+	. s billtime=$p($g(^DHCPB(+pbddr,"O",$p(pbddr,"||",2),"D",$p(pbddr,"||",3))),"^",12)
+	. s billdatetime=$zd(billdate,3)_" "_$zt(billtime,1)
+
+	; 就诊类型筛选
+	q:$d(^||TEMPDHCWL($j,"Atype"))&&'$d(^||TEMPDHCWL($j,"Atype",type)) ""
+
+	; 患者信息
+	s adm=$P(^DHCWorkLoad(WLRowid),"^",12)
+	s papmidr=$P(^DHCWorkLoad(WLRowid),"^",13)
+	s REGNO=$P(^PAPER(papmidr,"PAT",1),"^",2)
+	s medno=$P(^PAPER(papmidr,"PAT",1),"^",22)
+	s name=$P(^PAPER(papmidr,"ALL"),"^",1)
+	s XB=""
+	s sexId=$p($g(^PAPER(papmidr,"ALL")),"^",7)
+	s:sexId'="" XB=$p(^CT("SEX",sexId),"^",2)
+	s ZJH=$p($g(^PAPER(papmidr,"PAT",3)),"^",6)
+
+	; 医嘱子分类筛选
+	s TarCate=$p(^DHCWorkLoad(WLRowid),"^",9)
+	q:$D(^||TEMPDHCWL($j,"ItemSubs"))&&'$D(^||TEMPDHCWL($j,"ItemSubs",TarCate)) ""
+
+	; 费别检查
+	s oeori=$p($g(^DHCWorkLoad(WLRowid)),"^",21)
+	s oeore=$p($g(^DHCWorkLoad(WLRowid)),"^",54)
+	s oeflag=..feeflag2(oeori)
+	q:oeflag'=1 ""
+
+	s pbdr=$p($g(^DHCWorkLoad(WLRowid)),"^",20)
+
+	; 扩展医嘱项/收费项筛选
+	s exqty=$g(^||TEMPDHCWL($j,"Arcitems2-adm",adm))
+	s exqty2=$g(^||TEMPDHCWL($j,"Arcitems2-day",adm,day))
+	q:(ExtType = "1")&&('(exqty > 0))&&($D(^||TEMPDHCWL($j,"Arcitems2"))) ""
+	q:(ExtType = "2")&&('(exqty2 > 0))&&($D(^||TEMPDHCWL($j,"Arcitems2"))) ""
+
+	s tarexqty=$g(^||TEMPDHCWL($j,"Taritems2-adm",adm))
+	s tarexqty2=$g(^||TEMPDHCWL($j,"Taritems2-day",adm,day))
+	q:(ExtType = "1")&&('(tarexqty > 0))&&($D(^||TEMPDHCWL($j,"Taritems2"))) ""
+	q:(ExtType = "2")&&('(tarexqty2 > 0))&&($D(^||TEMPDHCWL($j,"Taritems2"))) ""
+
+	; 住院天数
+	s zyts=""
+	s PAADMOutDate=$p($g(^PAADM(adm)),"^",59)
+	s PAADMAdmDate=$p($g(^PAADM(adm)),"^",6)
+	i PAADMOutDate'="" d
+	. s zyts=PAADMOutDate-PAADMAdmDate
+	e  d
+	. s zyts=(+$h)-PAADMAdmDate
+	i zyts="0" s zyts=1
+
+	; 费别
+	s admreason=""
+	s admreasondr=$p(^PAADM(adm,1),"^",7)
+	i admreasondr'="" s admreason=$p(^PAC("ADMREA",admreasondr),"^",2)
+
+	; 医嘱日期
+	s oesdate=$p(^OEORD(+oeori,"I",$p(oeori,"||",2),1),"^",9)
+	s oestime=$p(^OEORD(+oeori,"I",$p(oeori,"||",2),1),"^",10)
+	s oedatetime=$zd(oesdate,3)_" "_$zt(oestime,1)
+
+	; 医保信息
+	i (HZFlag = "1")||(HZFlag = "3") s insustr=""
+	e  s insustr=..GetINSUInfo2(pbdr)
+	s Iadmtype=$p(insustr,"^",1)
+	s xzlx=$p(insustr,"^",2)
+	s ydflag=$p(insustr,"^",3)
+
+	; 医嘱项/收费项筛选
+	s ItemOrdr=$P(^DHCWorkLoad(WLRowid),"^",2)
+	q:$D(^||TEMPDHCWL($j,"Arcitems"))&&'$D(^||TEMPDHCWL($j,"Arcitems",ItemOrdr)) ""
+	s tardr=$P(^DHCWorkLoad(WLRowid),"^",22)
+	q:$D(^||TEMPDHCWL($j,"Taritems"))&&'$D(^||TEMPDHCWL($j,"Taritems",tardr)) ""
+
+	; 药品分类筛选
+	s incid=$o(^INCI(0,"ARCIM_DR",+ItemOrdr,""))
+	q:(..getdrugtypebyinci(incid, drugtype)'=1)&&(drugtype '= "")&&(incid '= "") ""
+
+	; 开单科室
+	s patdepdr=$P(^DHCWorkLoad(WLRowid),"^",23)
+	q:$D(^||TEMPDHCWL($j,"PatDeps"))&&'$D(^||TEMPDHCWL($j,"PatDeps",patdepdr)) ""
+	s patdepdesc=$p(^CTLOC(patdepdr),"^",2)
+	i patdepdesc["-" s patdepdesc=$p(patdepdesc,"-",2)
+
+	; 接收科室
+	s recdepdr=$P(^DHCWorkLoad(WLRowid),"^",1)
+	q:$D(^||TEMPDHCWL($j,"RecDeps"))&&'$D(^||TEMPDHCWL($j,"RecDeps",recdepdr)) ""
+	s recdepdesc=$p(^CTLOC(recdepdr),"^",2)
+	i recdepdesc["-" s recdepdesc=$p(recdepdesc,"-",2)
+
+	; 病人科室
+	s resdepdr=$P(^DHCWorkLoad(WLRowid),"^",3)
+	q:$D(^||TEMPDHCWL($j,"ResDeps"))&&'$D(^||TEMPDHCWL($j,"ResDeps",resdepdr)) ""
+	s resdepdesc=$p(^CTLOC(resdepdr),"^",2)
+	i resdepdesc["-" s resdepdesc=$p(resdepdesc,"-",2)
+
+	; 收费子分类筛选
+	s TARECDr=$p(^DHCWorkLoad(WLRowid),"^",41)
+	q:$D(^||TEMPDHCWL($j,"ItemTarecs"))&&'$D(^||TEMPDHCWL($j,"ItemTarecs",TARECDr)) ""
+
+	; 医生信息
+	s ResDocDr=$P(^DHCWorkLoad(WLRowid),"^",19)
+	s ResDoc=""
+	i ResDocDr'="" S ResDoc=$p($g(^CTPCP(ResDocDr,1)),"^",2)
+	i +$h>"67750" s ResDoc=""
+
+	; --- 累加汇总 ---
+	s ^||TEMPDHCWL($j,"QTYSUM",pbdr,oeori)=+$g(^||TEMPDHCWL($j,"QTYSUM",pbdr,oeori))+qty
+	s ^||TEMPDHCWL($j,"FEESUM",ItemOrdr,tardr,price)=+$g(^||TEMPDHCWL($j,"FEESUM",ItemOrdr,tardr,price))+fee
+	s ^||TEMPDHCWL($j,"FEESUM",ItemOrdr,tardr,price,"QTY")=+$g(^||TEMPDHCWL($j,"FEESUM",ItemOrdr,tardr,price,"QTY"))+qty
+
+	; 非汇总模式：构建明细记录
+	i HZFlag'="1" d
+	. s tarcode=$P(^DHCTARI(tardr),"^",1)
+	. s tardesc=$P(^DHCTARI(tardr),"^",2)
+	. s arccode=$P(^ARCIM(+ItemOrdr,$p(ItemOrdr,"||",2),1),"^",1)
+	. s arcdesc=$P(^ARCIM(+ItemOrdr,$p(ItemOrdr,"||",2),1),"^",2)
+	. s partDesc=##class(web.DHCAPPInterface).GetExaReqPartDesc(oeori)
+	. i partDesc'="" s arcdesc=arcdesc_"-"_partDesc
+	. s arcstr=""
+	. i (ExtType = "1")&&($D(^||TEMPDHCWL($j,"Arcitems2"))) s arcstr=$g(^||TEMPDHCWL($j,"Arcitems2-adm-desc",adm))
+	. i (ExtType = "2")&&($D(^||TEMPDHCWL($j,"Arcitems2"))) s arcstr=$g(^||TEMPDHCWL($j,"Arcitems2-day-desc",adm,day))
+	. s arcstr=arcdesc_arcstr
+	. S admtype="住院"
+	. i type="O"  S admtype="门诊"
+	. i type="E"  S admtype="急诊"
+	. i type="H"  S admtype="体检"
+	. i (HZFlag = "3") s dayct=""
+	. e  s dayct=..gettardayct(adm,tardr,day)
+	. s ^||TEMPDHCWL($j,"Detail",count)=$lb(arccode,arcdesc,tarcode,tardesc,qty,price,fee,name,REGNO,patdepdesc,recdepdesc,ResDoc,admreason,billdatetime,oedatetime,Iadmtype,xzlx,ydflag,resdepdesc,oeori,pbdr,medno,admtype,adm,XB,ZJH,dayct,exqty2,zyts,arcstr,$zd(PAADMAdmDate,3),oeore)
+	. s count=count+1
+
+	q 1
+}
+
+/// 判断统计类型，入参类型代码、incid
+/// w ##Class("web.HNYZDHCTYL").dhcwlflag("HuNanLcyyzk","tqmxhtjhs","4245")
+ClassMethod getdrugtypebyinci(incid As %String, drugtypestr) As %String
+{
+	s flag=0
+	q:incid="" flag
+	q:'$d(^CD.PHA.IN.STAT("INCI",incid)) flag
+	s typeid=""
+    f  s typeid=$o(^CD.PHA.IN.STAT("INCI",incid,typeid)) q:typeid=""  d
+    .s catid=""
+    .f  s catid=$o(^CD.PHA.IN.STAT("INCI",incid,typeid,catid)) q:catid=""  d
+    .q:(("^"_drugtypestr_"^")'[("^"_typeid_"||"_catid_"^"))
+    .s flag=1
+	q flag
+}
+
+/// creator:tyl
+/// date:20230117
+/// desc:获取医保补助类别
+/// w ##class(DHCDoc.OPDoc.AjaxInterface).GetBZLB(5617405)     
+ClassMethod GetINSUInfo(EpisodeID As %String)
+{
+	q:EpisodeID="" ""
+	q:'$d(^DHCINADM("0","ADM",EpisodeID)) ""
+	s (AdmType,XZLX,ydflag)=""
+	s inadm=""
+	f  s inadm=$o(^DHCINADM("0","ADM",EpisodeID,inadm),-1) q:(inadm = "")  d
+	.q:+inadm=0
+	
+	.s activeflag=$P(^DHCINADM(inadm),"^",11)
+	.q:(activeflag '= "A")&&(activeflag '= "O")
+	.s Adminfo=$g(^DHCINADM(inadm))
+	.s TmpInsuType=$p(Adminfo,"^",18) ;医保类型
+	.q:TmpInsuType'="00A"
+	.s centerid=$p(Adminfo,"^",8) ;中心
+	.s CenterDesc=##class(web.INSUDicDataCom).GetDicByCodeAndInd("YAB00300A",centerid,4,2)
+	.s TmpInsuAdmType=$p(Adminfo,"^",14)  ;医疗类别
+	.i TmpInsuAdmType'="" s AdmType=##class(web.INSUDicDataCom).GetDicByCodeAndInd("med_type00A",TmpInsuAdmType,4,2)
+	.s ydflag="异地"
+    .s XZLX=$p(Adminfo,"^",36)   ;险种类型（adm:4528442 虚拟调度单位,登记职工结算城乡）
+    .q:(XZLX '= "310")&&(XZLX '= "390")
+    .i XZLX="310" d
+    ..i (CenterDesc["永州") s ydflag="永州"
+    ..i (CenterDesc["冷水滩") s ydflag="冷水滩"
+    ..i (centerid'["4311")&&(centerid["43") s ydflag="省内异地"
+    ..i (centerid'["43") s ydflag="跨省异地"
+	.i XZLX="390" d
+    ..i (CenterDesc["冷水滩") s ydflag="冷水滩"
+    ..i (centerid'["4311")&&(centerid["43") s ydflag="省内异地"
+    ..i (centerid'["43") s ydflag="跨省异地"
+    .i (TmpInsuAdmType = "22")&&(XZLX = "390") s ydflag=ydflag_"意外"
+	.s:XZLX="310" XZLX="职工"
+	.s:XZLX="390" XZLX="城乡"
+	Q AdmType_"^"_XZLX_"^"_ydflag
+}
+
+/// creator:tyl
+/// date:20230117
+/// desc:获取医保补助类别
+/// w ##class(web.DHCWLfeeSum).GetINSUInfo2(2880855)     
+ClassMethod GetINSUInfo2(pbdr)
+{
+	
+	//^DHCINDIV("0","DHCInvPrt",{INPAY_DhcInvPrtDr},{INPAY_Rowid})
+	//^DHCINDIV("0","DHCPB",{INPAY_DHCpblDr},{INPAY_Rowid})
+	
+	q:(pbdr = "") ""
+	
+	//$d(^DHCBCI(0,"Bill",{DHCBCI_PatBillDR},{DHCBCI_Rowid})
+	s inv=""
+	i $d(^DHCBCI(0,"Bill",pbdr)) d
+	.s bciid=$o(^DHCBCI(0,"Bill",pbdr,""),-1)
+	.q:bciid=""
+	.s inv=$p(^DHCBCI(bciid),"^",1)
+	s inpayid=""
+	i inv'="" d
+	.s inpayid=$o(^DHCINDIV("0","DHCInvPrt",inv,""),-1)
+	e  d
+	.s inpayid=$o(^DHCINDIV("0","DHCPB",pbdr,""),-1)
+	q:inpayid="" ""
+	s payflag=$p(^DHCINDIV(inpayid),"^",5)
+	q:payflag'="I" ""
+	S inadm=$p(^DHCINDIV(inpayid),"^",2)
+	s (AdmType,XZLX,ydflag)=""
+	s activeflag=$P(^DHCINADM(inadm),"^",11)
+	q:(activeflag '= "A")&&(activeflag '= "O") AdmType_"^"_XZLX_"^"_ydflag
+	s Adminfo=$g(^DHCINADM(inadm))
+	s TmpInsuType=$p(Adminfo,"^",18) ;医保类型
+	q:TmpInsuType'="00A" AdmType_"^"_XZLX_"^"_ydflag
+	s centerid=$p(Adminfo,"^",8) ;中心
+	s CenterDesc=##class(web.INSUDicDataCom).GetDicByCodeAndInd("YAB00300A",centerid,4,2)
+	s TmpInsuAdmType=$p(Adminfo,"^",14)  ;医疗类别
+	i TmpInsuAdmType'="" s AdmType=##class(web.INSUDicDataCom).GetDicByCodeAndInd("med_type00A",TmpInsuAdmType,4,2)
+	s ydflag="异地"
+    s XZLX=$p(Adminfo,"^",36)   ;险种类型（adm:4528442 虚拟调度单位,登记职工结算城乡）
+    q:(XZLX '= "310")&&(XZLX '= "390") AdmType_"^"_XZLX_"^"_ydflag
+    i XZLX="310" d
+    .i (CenterDesc["永州") s ydflag="永州"
+    .i (CenterDesc["冷水滩") s ydflag="冷水滩"
+    .i (centerid'["4311")&&(centerid["43") s ydflag="省内异地"
+    .i (centerid'["43") s ydflag="跨省异地"
+	i XZLX="390" d
+    .i (CenterDesc["冷水滩") s ydflag="冷水滩"
+    .i (centerid'["4311")&&(centerid["43") s ydflag="省内异地"
+    .i (centerid'["43") s ydflag="跨省异地"
+    i (TmpInsuAdmType = "22")&&(XZLX = "390") s ydflag=ydflag_"意外"
+	s:XZLX="310" XZLX="职工"
+	s:XZLX="390" XZLX="城乡"
+	Q AdmType_"^"_XZLX_"^"_ydflag
+}
+
+/// ^DHCWorkLoad(0,"OEORE",{WorkLoad_OEORE_Dr},{WorkLoad_Rowid})
+/// w ##class(web.DHCWLfeeSum).feeflag2("6850929||9")     
+ClassMethod feeflag(orore As %String)
+{
+	q:orore="" "" 
+	s ret ="",sqty=0
+	q:'$d(^DHCWorkLoad(0,"OEORE",orore)) ""
+	s wlid=""
+	f  s wlid=$o(^DHCWorkLoad(0,"OEORE",orore,wlid)) q:wlid=""  d
+	.q:+wlid=0
+	.s qty=$P(^DHCWorkLoad(wlid),"^",15)
+	.s sqty=sqty+qty
+	i sqty>0 s ret=1
+	q ret
+}
+
+ClassMethod feeflag2(oeori As %String)
+{
+	q:oeori="" "" 
+	s ret ="",sqty=0
+	q:'$d(^DHCWorkLoad(0,"OEORI",oeori)) ""
+	s wlid=""
+	f  s wlid=$o(^DHCWorkLoad(0,"OEORI",oeori,wlid)) q:wlid=""  d
+	.q:+wlid=0
+	.s qty=$P(^DHCWorkLoad(wlid),"^",15)
+	.s sqty=sqty+qty
+	i sqty>0 s ret=1
+	q ret
+}
+
+/// 根据医嘱id获取当日数量
+/// w ##class(web.HNYZDHCTYL8).getZXDAYS("7705595||19")
+ClassMethod getdayct(oeori, date)
+{
+	
+		
+	s dayct=0
+	q:oeori="" 0
+	s ord=$p(oeori,"||",1)
+	s tsub=$p(oeori,"||",2)
+	s arcid=$p(^OEORD(ord,"I",tsub,1),"^",2)
+	s adm=$p(^OEORD(ord),"^",1)
+	
+	q:'$d(^DHCWorkLoad(0,"PAADM",adm)) 0
+	s wlid=""
+	f  s wlid=$o(^DHCWorkLoad(0,"PAADM",adm,wlid)) q:wlid=""  d
+	.q:+wlid=0
+	.s ordate=$P(^DHCWorkLoad(wlid),"^",5)
+	.q:(date '= "")&&(ordate '= date)
+	.s arcdr=$P(^DHCWorkLoad(wlid),"^",2)
+	.q:arcdr'=arcid
+	.s qty=$P(^DHCWorkLoad(wlid),"^",15)
+	.s dayct=dayct+qty
+	
+	q dayct
+}
+
+}

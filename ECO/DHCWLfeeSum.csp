@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<!-- DHCWLfeeSum.csp — HISUI 收入项目汇总查询（计费时间） -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><EXTHEALTH:TRANSLATE id=title>##(%session.Get("TITLE"))##</EXTHEALTH:TRANSLATE></title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI></HISUI>
+<ADDINS require="CmdShell"/>
+<style>
+    p { margin-bottom: 8px; }
+
+    .inputlist li, .inputlist2 li {
+        list-style: none;
+        margin-bottom: 5px;
+        height: 25px;
+        background-color: lightblue;
+        box-shadow: 2px 2px 3px #aaaaaa;
+    }
+    .inputlist li:hover { background-color: lightyellow; }
+
+    ul { padding: 2px; }
+
+    .icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        float: right;
+    }
+
+    #inputsub { overflow: hidden; }
+</style>
+</head>
+
+<body>
+
+<div id="cc" class="hisui-layout" data-options="fit:true">
+
+    <div data-options="region:'north',title:'收入项目汇总查询(计费时间)',split:true,showCollapsedTitle:true,iconCls:'icon-w-list'"
+         style="height:100px;padding:2px;">
+        <table style="padding-top:15px">
+        <tr>
+            <td>开始时间：</td>
+            <td><input id="SDate" type="text" class="hisui-datebox" style="width:140px"></td>
+            <td>结束时间：</td>
+            <td><input id="EDate" type="text" class="hisui-datebox" style="width:140px"></td>
+            <td style="width:20px"></td>
+            <td>显示：</td>
+            <td id="hzflag" class="fs0">
+                <input class="hisui-radio" type="radio" label="汇总" name="yesno" value="1" checked="true">
+                <input class="hisui-radio" type="radio" label="明细" name="yesno" value="2">
+                <input class="hisui-radio" type="radio" label="明细（快速精简）" name="yesno" value="3">
+            </td>
+            <td style="width:20px"></td>
+            <td><a href="#" class="hisui-linkbutton" data-options="iconCls:'icon-search'" id="btnSearch" style="width:120px">搜索</a></td>
+            <td style="width:20px"></td>
+            <td><a id="BExport" href="#" class="hisui-linkbutton" data-options="iconCls:'icon-w-export'">导出</a></td>
+        </tr>
+        </table>
+    </div>
+
+    <div data-options="region:'west',title:'检索入参列表',iconCls:'icon-w-list',split:true,showCollapsedTitle:true"
+         style="width:300px;padding:2px;margin:2px;">
+        <div class="hisui-accordion" style="width:300px;height:768px;float:left;" data-options="border:false">
+            <div title="统计条件" data-options="iconCls:'icon-w-update',selected:true" style="overflow:auto;padding:10px;background-color:#EBEBEB;">
+                <div id="Input" style="width:100%;height:100%;">
+                    <ul style="width:100%;height:100%;">
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>医嘱名称：</span><input id="arcitem" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>开单科室：</span><input id="patdep" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>接收科室：</span><input id="recdep" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>医嘱分类：</span><input id="arcsub" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>核算子类：</span><input id="tarecsub" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>收费名称：</span><input id="taritem" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>(快)病人科室：</span><input id="resdep" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>就诊类型：</span><input id="admtype" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>药品分类：</span><input id="drugtype" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                        <li class="inputsub" style="width:100%;">
+                            <p><span>(明细有效)诊断：</span><input id="diag" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist"></ul></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div title="医保扩展条件（同时收取）" data-options="iconCls:'icon-w-import'" style="padding:10px;background-color:#EBEBEB;">
+                <div id="extInput" style="width:100%;height:30%;">
+                    <ul style="width:100%;height:100%;">
+                        <li class="inputsub2" style="width:100%;height:30px;text-align:center;">
+                            <input class="hisui-radio" type="radio" label="同一次就诊" name="yesno2" value="Y" checked="true" data-options="required:true,requiredSel:true">
+                            <input class="hisui-radio" type="radio" label="同一天" name="yesno2" value="N" data-options="required:true,requiredSel:true">
+                            <br>
+                        </li>
+                        <li class="inputsub2" style="width:100%;">
+                            <p><span>医嘱名称：</span><input id="arcitem2" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist2"></ul></div>
+                        </li>
+                        <li class="inputsub2" style="width:100%;">
+                            <p><span>收费名称：</span><input id="taritem2" class="textbox" style="width:150px;"/></p>
+                            <div><ul class="inputlist2"></ul></div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div title="费用列表" data-options="region:'center',headerCls:'panel-header-gray',iconCls:'icon-paper',closable:false,collapsible:false,minimizable:false,maximizable:false">
+        <div id="mygrid"></div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="../scripts/DHCCPMRQCommon.js"></script>
+<script type="text/javascript" src="../scripts/dhcdoc/tools/tools.hui.js"></script>
+<script type="text/javascript" src="../scripts/DHCWLfeeSum.js"></script>
+
+</body>
+</html>
