@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番茄钟 — 计时器</title>
+<style>
+  :root {
+    --border-color: #95B8E7;
+    --panel-bg: #F9FBFF;
+    --title-bg: #E4F0FF;
+    --title-color: #15428b;
+    --page-bg: #cee4ff;
+    --blue: #017bce;
+    --blue-dark: #015a9e;
+    --focus-bg: #ffe48d;
+    --danger: #E53E3E;
+    --success: #38A169;
+    --gray-500: #8B95A1;
+    --gray-700: #4A5568;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+    font-size: 14px;
+    background: var(--page-bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .panel {
+    width: 420px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  /* 标题栏 */
+  .maintitle {
+    height: 32px;
+    line-height: 32px;
+    background: var(--title-bg);
+    color: var(--title-color);
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 28px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .panel-body {
+    padding: 24px 30px 20px;
+  }
+
+  /* 计时器圆环区 */
+  .timer-ring-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 240px;
+    height: 240px;
+    margin: 0 auto 16px;
+  }
+
+  .timer-ring-wrap svg {
+    transform: rotate(-90deg);
+    width: 240px;
+    height: 240px;
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: #E2E6EA;
+    stroke-width: 8;
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke: var(--blue);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s linear;
+  }
+  .ring-progress.break-mode { stroke: var(--success); }
+
+  .timer-text-wrap {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .timer-time {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gray-700);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .timer-label {
+    font-size: 0.78rem;
+    color: var(--gray-500);
+    margin-top: 6px;
+    font-weight: 500;
+  }
+
+  /* 预设按钮行 */
+  .preset-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .preset-row button {
+    height: 28px;
+    padding: 0 14px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    background: linear-gradient(to bottom, #ffffff 0, #eeeeee 100%);
+    color: var(--gray-700);
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-row button:hover { background: linear-gradient(to bottom, #CDCDCD 0, #ECECEC 100%); }
+  .preset-row button.active {
+    border-color: var(--blue);
+    background: var(--title-bg);
+    color: var(--title-color);
+    font-weight: 600;
+  }
+
+  /* 自定义输入行 */
+  .custom-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    font-size: 0.8rem;
+    color: var(--gray-500);
+  }
+
+  .custom-row input {
+    width: 60px;
+    height: 26px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    text-align: center;
+    color: var(--gray-700);
+    outline: none;
+  }
+  .custom-row input:focus {
+    border-color: #6b9cde;
+    box-shadow: 0 0 3px 0 var(--border-color);
+    background: var(--focus-bg);
+  }
+
+  /* 控制按钮 */
+  .control-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .i-btn {
+    width: 110px;
+    height: 30px;
+    border: 1px solid #bbb;
+    border-radius: 5px;
+    background: linear-gradient(to bottom, #ffffff 0, #eeeeee 100%);
+    color: var(--gray-700);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .i-btn:hover { background: linear-gradient(to bottom, #CDCDCD 0, #ECECEC 100%); }
+  .i-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .i-btn-primary {
+    background: linear-gradient(to bottom, #017bce 0, #015a9e 100%);
+    border-color: #015a9e;
+    color: #fff;
+  }
+  .i-btn-primary:hover { background: linear-gradient(to bottom, #0167b0 0, #014a85 100%); }
+
+  /* 闪烁动画 */
+  @keyframes blink-border {
+    0%, 100% { border-color: var(--border-color); }
+    50%      { border-color: var(--danger); }
+  }
+  .panel.alarm { animation: blink-border 0.6s ease-in-out 4; }
+
+  /* 页脚 */
+  .panel-footer {
+    padding: 8px 20px;
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    background: #fff;
+  }
+</style>
+</head>
+<body>
+
+<div class="panel" id="panel">
+  <div class="maintitle">番茄钟</div>
+
+  <div class="panel-body">
+    <!-- 圆环 -->
+    <div class="timer-ring-wrap">
+      <svg viewBox="0 0 240 240">
+        <circle class="ring-bg" cx="120" cy="120" r="108"/>
+        <circle class="ring-progress" id="ring" cx="120" cy="120" r="108"
+          stroke-dasharray="678.584" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text-wrap">
+        <div class="timer-time" id="timeDisplay">25:00</div>
+        <div class="timer-label" id="modeLabel">工作</div>
+      </div>
+    </div>
+
+    <!-- 预设 -->
+    <div class="preset-row">
+      <button data-min="25" class="active" id="presetWork">25 分 (工作)</button>
+      <button data-min="5"  id="presetBreak">5 分 (休息)</button>
+      <button data-min="15" id="preset15">15 分 (工作)</button>
+    </div>
+
+    <!-- 自定义 -->
+    <div class="custom-row">
+      <label>自定义：</label>
+      <input type="number" id="customMin" value="10" min="1" max="120"> 分钟
+      <button class="i-btn" style="width:50px;height:24px;font-size:0.75rem;" id="btnCustom">设定</button>
+    </div>
+
+    <!-- 控制 -->
+    <div class="control-row">
+      <button class="i-btn i-btn-primary" id="btnStart">开始</button>
+      <button class="i-btn" id="btnPause" disabled>暂停</button>
+      <button class="i-btn" id="btnReset">重置</button>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    番茄工作法：专注 25 分钟 → 休息 5 分钟
+  </div>
+</div>
+
+<script>
+$(function() {
+  var CIRCUMFERENCE = 2 * Math.PI * 108; // r=108
+  $('#ring').css('stroke-dasharray', CIRCUMFERENCE);
+
+  var state = {
+    totalSeconds: 25 * 60,
+    remainingSeconds: 25 * 60,
+    isRunning: false,
+    isBreak: false,
+    intervalId: null
+  };
+
+  /** 更新显示 */
+  function updateDisplay() {
+    var m = Math.floor(state.remainingSeconds / 60);
+    var s = state.remainingSeconds % 60;
+    $('#timeDisplay').text(
+      String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0')
+    );
+
+    // 进度环
+    var fraction = 1 - (state.remainingSeconds / state.totalSeconds);
+    var offset = CIRCUMFERENCE * (1 - fraction);
+    $('#ring').css('stroke-dashoffset', offset);
+
+    // 休息模式颜色
+    $('#ring').toggleClass('break-mode', state.isBreak);
+    $('#modeLabel').text(state.isBreak ? '休息' : '工作');
+
+    // 页面标题
+    var mode = state.isBreak ? '休息' : '专注';
+    document.title = $('#timeDisplay').text() + ' — ' + mode + ' — 番茄钟';
+  }
+
+  /** 停止计时器 */
+  function stopTimer() {
+    if (state.intervalId) { clearInterval(state.intervalId); state.intervalId = null; }
+    state.isRunning = false;
+    $('#btnStart').text('开始').removeClass('i-btn-primary').css({'background':'','border-color':'','color':''});
+    $('#btnStart').addClass('i-btn-primary');
+    $('#btnPause').prop('disabled', true);
+    $('#btnStart').prop('disabled', false);
+  }
+
+  /** 计时完成 */
+  function onComplete() {
+    stopTimer();
+    state.isRunning = false;
+    state.remainingSeconds = 0;
+    updateDisplay();
+
+    // 声音
+    playBeep();
+
+    // 闪烁
+    $('#panel').addClass('alarm');
+    setTimeout(function() { $('#panel').removeClass('alarm'); }, 2600);
+
+    // 按钮复位
+    $('#btnStart').text('重新开始').addClass('i-btn-primary');
+    $('#btnStart').prop('disabled', false);
+    $('#btnPause').prop('disabled', true);
+  }
+
+  /** 开始 */
+  function startTimer() {
+    if (state.remainingSeconds <= 0) { resetTimer(); }
+
+    state.isRunning = true;
+    $('#btnStart').prop('disabled', true);
+    $('#btnPause').prop('disabled', false);
+
+    state.intervalId = setInterval(function() {
+      state.remainingSeconds--;
+      updateDisplay();
+
+      if (state.remainingSeconds <= 0) {
+        stopTimer();
+        state.remainingSeconds = 0;
+        updateDisplay();
+        playBeep();
+        $('#panel').addClass('alarm');
+        setTimeout(function() { $('#panel').removeClass('alarm'); }, 2600);
+        $('#btnStart').text('重新开始').addClass('i-btn-primary').prop('disabled', false);
+        $('#btnPause').prop('disabled', true);
+      }
+    }, 1000);
+  }
+
+  /** 暂停 */
+  function pauseTimer() {
+    stopTimer();
+    $('#btnStart').text('继续').addClass('i-btn-primary');
+    $('#btnStart').prop('disabled', false);
+  }
+
+  /** 重置 */
+  function resetTimer() {
+    stopTimer();
+    state.remainingSeconds = state.totalSeconds;
+    updateDisplay();
+    $('#btnStart').text('开始').addClass('i-btn-primary').prop('disabled', false);
+  }
+
+  /** 切换预设 */
+  function setPreset(minutes, isBreak, $btn) {
+    stopTimer();
+    state.totalSeconds = minutes * 60;
+    state.remainingSeconds = state.totalSeconds;
+    state.isBreak = !!isBreak;
+    updateDisplay();
+
+    $('.preset-row button').removeClass('active');
+    if ($btn) $btn.addClass('active');
+    $('#customMin').val(minutes);
+
+    $('#btnStart').text('开始').addClass('i-btn-primary').prop('disabled', false);
+    $('#btnPause').prop('disabled', true);
+  }
+
+  /** 提示音 — Web Audio API */
+  function playBeep() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      for (var i = 0; i < 3; i++) {
+        (function(delay) {
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = 880;
+          gain.gain.setValueAtTime(0.3, ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + delay);
+          osc.stop(ctx.currentTime + delay + 0.3);
+        })(i * 0.25);
+      }
+    } catch(e) {}
+  }
+
+  // ============ 事件 ============
+  $('#btnStart').on('click', function() { startTimer(); });
+  $('#btnPause').on('click', function() { pauseTimer(); });
+  $('#btnReset').on('click', function() { resetTimer(); });
+
+  $('#btnCustom').on('click', function() {
+    var min = parseInt($('#customMin').val()) || 25;
+    setPreset(min, false, null);
+  });
+
+  $('#presetWork').on('click', function()  { setPreset(25, false, $(this)); });
+  $('#presetBreak').on('click', function() { setPreset(5, true, $(this)); });
+  $('#preset15').on('click', function()   { setPreset(15, false, $(this)); });
+
+  // ============ 初始化 ============
+  $('#ring').attr('stroke-dasharray', CIRCUMFERENCE).css('stroke-dashoffset', '0');
+  updateDisplay();
+});
+</script>
+</body>
+</html>

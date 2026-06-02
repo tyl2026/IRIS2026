@@ -31,11 +31,16 @@
 | 用途 | 色值 | 说明 |
 |------|------|------|
 | 主色调 | `#017bce` | 菜单栏背景 |
+| 菜单选中底色 | `#0063a7` | 菜单项选中态 |
 | 标题文字 | `#15428b` | 深蓝 |
-| 主边框 | `#95B8E7` | 输入框、面板边框 |
+| 主边框 | `#958BE7` | 输入框、面板边框 |
 | 面板背景 | `#F9FBFF` | 表单区、表格容器 |
 | 标题栏背景 | `#E4F0FF` | `.maintitle` / `.formtitle` |
 | 页面底色 | `#cee4ff` | BODY 背景 |
+| 表头底色 | `#FAFAFA` | 列表表头 |
+| 奇数行底色 | `#ffffff` | 表格奇数行 |
+| 偶数行底色 | `#FAFAFA` | 表格偶数行 |
+| 按钮底色 | `#FAFAFA` | 按钮默认背景 |
 | Focus 高亮 | `#ffe48d` | 输入框获焦背景 |
 | Focus 边框 | `#6b9cde` | 输入框获焦边框 |
 | 禁用背景 | `#dddddd` | 只读/禁用字段 |
@@ -57,15 +62,15 @@ HISUI 按钮使用 `hisui-linkbutton`，图标用 `iconCls`（如 `icon-search`�
 
 ## 4. 输入框
 
-- 边框：`1px solid #95B8E7`，高度 `24px`
-- Focus：`border-color: #6b9cde`，`box-shadow: 0 0 3px 0 #95B8E7`，背景 `#ffe48d`
+- 边框：`1px solid #958BE7`，高度 `24px`
+- Focus：`border-color: #6b9cde`，`box-shadow: 0 0 3px 0 #958BE7`，背景 `#ffe48d`
 - 禁用态：`.disabledField` — 背景 `#dddddd`
 - HISUI 控件：`hisui-datebox`、`hisui-validatebox`、`hisui-combobox`
 
 ## 5. 表格 (`.tblList`)
 
-- 表头：`background: linear-gradient(to bottom, #F9F9F9 0, #efefef 100%)`，高度 `25px`
-- 表头边框：上 `#95B8E7`，右虚线 `#CCCCCC`，下实线 `#CCCCCC`
+- 表头：背景 `#FAFAFA`，高度 `25px`
+- 表头边框：上 `#958BE7`，右虚线 `#CCCCCC`，下实线 `#CCCCCC`
 - 奇数行 `#ffffff`，偶数行 `#FAFAFA`
 - 悬停行 `#eaf2ff`，选中行 `#FFE48D`
 - 固定列宽 `120px`，`word-break: break-all`
@@ -75,7 +80,7 @@ HISUI 按钮使用 `hisui-linkbutton`，图标用 `iconCls`（如 `icon-search`�
 
 - 字号 `14px`，颜色 `#15428b`，加粗
 - 背景 `#E4F0FF`，`padding-left: 28px`（留图标位）
-- 边框 `1px #95B8E7 solid`，高度 `23px`
+- 边框 `1px #958BE7 solid`，高度 `23px`
 
 ## 7. Tab 标签 (`.tabstitle`)
 
