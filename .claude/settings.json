@@ -1,24 +1,24 @@
 {
   "skills": [
-    {
-      "name": "iris-code-formatter",
-      "description": "对 InterSystems IRIS/Cache ObjectScript 代码进行格式化检查、审查和自动修正。支持变量命名、方法命名、锁、事务、陷阱、格式、空行、注释等多个维度的规范检查。用于格式化/审查/修正 .cls 和 .csp 中的 ObjectScript 代码。",
-      "path": "skills/iris-code-formatter/SKILL.md"
-    },
-    {
-      "name": "skill-creator",
-      "description": "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.",
-      "path": "skills/skill-creator/SKILL.md"
-    },
-    {
-      "name": "frontend-design",
-      "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.",
-      "path": "skills/frontend-design/SKILL.md"
-    },
-    {
-      "name": "karpathy-guidelines",
-      "description": "Behavioral guidelines to reduce common LLM coding mistakes. Use when writing, reviewing, or refactoring code to avoid overcomplication, make surgical changes, surface assumptions, and define verifiable success criteria.",
-      "path": "skills/karpathy-guidelines/SKILL.md"
-    }
+    { "name": "iris-code-formatter", "path": "skills/iris-code-formatter/SKILL.md" },
+    { "name": "skill-creator", "path": "skills/skill-creator/SKILL.md" },
+    { "name": "frontend-design", "path": "skills/frontend-design/SKILL.md" },
+    { "name": "karpathy-guidelines", "path": "skills/karpathy-guidelines/SKILL.md" },
+    { "name": "brainstorming", "path": "skills/superpowers-skills/brainstorming/SKILL.md" },
+    { "name": "dispatching-parallel-agents", "path": "skills/superpowers-skills/dispatching-parallel-agents/SKILL.md" },
+    { "name": "doc-reader-analyzer", "path": "skills/superpowers-skills/doc-reader-analyzer/SKILL.md" },
+    { "name": "executing-plans", "path": "skills/superpowers-skills/executing-plans/SKILL.md" },
+    { "name": "finishing-a-development-branch", "path": "skills/superpowers-skills/finishing-a-development-branch/SKILL.md" },
+    { "name": "iris-database-dev", "path": "skills/superpowers-skills/iris-database-dev/SKILL.md" },
+    { "name": "receiving-code-review", "path": "skills/superpowers-skills/receiving-code-review/SKILL.md" },
+    { "name": "requesting-code-review", "path": "skills/superpowers-skills/requesting-code-review/SKILL.md" },
+    { "name": "subagent-driven-development", "path": "skills/superpowers-skills/subagent-driven-development/SKILL.md" },
+    { "name": "systematic-debugging", "path": "skills/superpowers-skills/systematic-debugging/SKILL.md" },
+    { "name": "test-driven-development", "path": "skills/superpowers-skills/test-driven-development/SKILL.md" },
+    { "name": "using-git-worktrees", "path": "skills/superpowers-skills/using-git-worktrees/SKILL.md" },
+    { "name": "using-superpowers", "path": "skills/superpowers-skills/using-superpowers/SKILL.md" },
+    { "name": "verification-before-completion", "path": "skills/superpowers-skills/verification-before-completion/SKILL.md" },
+    { "name": "writing-plans", "path": "skills/superpowers-skills/writing-plans/SKILL.md" },
+    { "name": "writing-skills", "path": "skills/superpowers-skills/writing-skills/SKILL.md" }
   ]
 }
