@@ -21,18 +21,19 @@
 
 **以下情况必须先与用户确认，不得直接修改代码或文件：**
 
-| 场景 | 正确做法 | 错误做法 |
-|------|---------|---------|
-| Global 名/索引名不确定 | 查找 XML/CSV 工具表验证，无文件则请用户提供或终端测试 | 凭经验猜测 |
-| 字段 Piece 位置不确定 | 读取工具表 CSV 的 `propertyPiece` 字段确认 | 用 SQL 列号、凭记忆推测 |
-| 数据链路不明确 | 终端 `zw` 逐层验证，贴输出给用户确认 | 直接改代码"试试看" |
-| 需求理解有歧义 | 列出方案让用户确认后再动手 | 直接按自己理解写代码 |
-| 子表/子节点结构未知 | 通过 XML Storage 或终端验证 | 假设下标名如 `"I"` / `"ITEM"` |
-| 业务逻辑不确定 | 问用户或看参考代码 | 臆断业务规则 |
-| 终端输出为空/异常 | 把输出贴给用户分析 | 忽略异常继续改代码 |
+| 场景                    | 正确做法                                                       | 错误做法                                         |
+| ----------------------- | -------------------------------------------------------------- | ------------------------------------------------ |
+| Global 名/索引名不确定  | 查找 XML/CSV 工具表验证，无文件则请用户提供或终端测试          | 凭经验猜测                                       |
+| 字段 Piece 位置不确定   | 读取工具表 CSV 的`propertyPiece` 字段确认                    | 用 SQL 列号、凭记忆推测                          |
+| 数据链路不明确          | 终端`zw` 逐层验证，贴输出给用户确认                          | 直接改代码"试试看"                               |
+| 需求理解有歧义          | 列出方案让用户确认后再动手                                     | 直接按自己理解写代码                             |
+| 子表/子节点结构未知     | 通过 XML Storage 或终端验证                                    | 假设下标名如`"I"` / `"ITEM"`                 |
+| 业务逻辑不确定          | 问用户或看参考代码                                             | 臆断业务规则                                     |
+| 终端输出为空/异常       | 把输出贴给用户分析                                             | 忽略异常继续改代码                               |
 | **编译/运行报错** | **先定位行号 → 读上下文 → 分析根因 → 确认后单点修改** | **盲目试改、批量替换、未确认根因就动代码** |
 
 > **核心原则**：
+>
 > 1. 数据、问题、需求、方案，凡未经工具表验证或用户确认的，一律不准修改代码。先问、先查、先验证，再动手。
 > 2. **只修改用户要求修改的内容**，不顺手重构、不顺便优化、不扩展范围。用户说修 A 就只修 A，不动 B/C/D。
 > 3. **发现问题立即反馈**，不隐瞒、不绕过、不自作主张修复。
@@ -326,16 +327,7 @@ do ##class(ApacheII.Setup).Run()
 
 ### IRIS 编译陷阱 (CLS 生成必检)
 
-**① 后置表达式含运算符必须加括号**
-
-```objectscript
-#; 错误 — 编译报错
-q:admId = ""
-#; 正确
-q:(admId = "")
-```
-
-**② 后置条件运算符紧贴操作数，`)&&(` 不空格**
+**①  后置条件运算符紧贴操作数，`)&&(` 不空格**
 
 ```objectscript
 #; 错误 — 空格导致 #1012
@@ -356,14 +348,14 @@ s:(a = "") && (b = c) val = 1
 q:(a = "") && (b = c)
 
 #; 正确
-s:((a = "")&&(b = c)) val = 1
-q:((a = "")&&(b = c))
+s:((a="")&&(b=c)) val = 1
+q:((a="")&&(b=c))
 
 #; 错误
 q:disDateH = ""!(disDateH < sttDateH)
 
 #; 正确 — 注意 )||( 之间绝对不加空格
-q:(disDateH = "")||(disDateH < sttDateH)
+q:(disDateH="")||(disDateH < sttDateH)
 ```
 
 **③ `continue` 仅限循环内，子程序用 `q`**
@@ -485,28 +477,6 @@ continue:(curBatNo [ batchNo)
 
 **通用约定**：全局字体 `"Microsoft Yahei"`；CSV 导出带 BOM 兼容 Excel UTF-8；命名空间运行时切换到 `DHC-APP`；ObjectScript 字符串拼接用 `_` 不用 `+`。
 
-#### HISUI $.q() 调用规范
-
-`$.q()` 是 HISUI 封装的数据查询方法（定义在 `tools.hui.js`），参数为**对象格式**，非位置参数：
-
-```javascript
-// 正确：对象参数 + 成功/失败回调
-$.q({
-    ClassName: 'web.YZSY.ClassName',
-    QueryName: 'QueryName',
-    rows: 99999,
-    Param1: value1,        // 查询参数直接作为对象属性
-    Param2: value2
-}, function (data) {
-    var rs = data.rows || data || [];
-    // rs 即 CacheTemp 返回的结果集
-}, function () {
-    $.messager.alert('错误', '查询失败，请重试', 'error');
-});
-```
-
-> `session['LOGON.HOSPID']` 可获取当前登录院区 ID。
-
 #### CSP 页面结构规范
 
 ```html
@@ -534,11 +504,61 @@ $.q({
 ```
 
 **关键约束**：
+
 - 组件用 `hisui-*` 类：`hisui-layout`、`hisui-datebox`、`hisui-combobox`、`hisui-linkbutton`、`hisui-datagrid`
 - 事件用**内联 `onclick`**，不在 JS 中用 jQuery `.click()` 绑定
 - **禁止** CSP 内嵌 `<script>` 逻辑块，所有 JS 放在外部文件
 - 日期框/下拉框在 JS 中用 `$('#id').datebox('setValue', date)` / `.combobox({...})` 初始化
 - 日期预设用 `datebox('setValue', Date对象)`，不用字符串；高亮按钮用 `querySelectorAll` + `window.event.target`
+
+### HISUI 前后端数据交互
+
+HISUI 框架通过 `$cm()` / `$m()` 封装前端到 IRIS 后台的调用，参数为**对象格式**。
+
+| API | 用途 | 返回值 |
+|-----|------|--------|
+| `$cm(data, success, error)` | 调用后台 Method / Query | JSON 对象（自动 parse） |
+| `$m(data, success, error)` | 调用后台方法 | 原始文本，不自动 parse |
+
+**data 参数结构**：
+
+```javascript
+$cm({
+    ClassName:     "web.YZSY.ClassName",   // 必填，包名.类名
+    MethodName:    "MethodName",           // 与 QueryName 二选一（MethodName 优先）
+    QueryName:     "QueryName",            // 与 MethodName 二选一
+    wantreturnval: 1,                     // 1=有返回值(do) 0=无返回值(set) 默认1
+    ResultSetType: "array",               // array: [{},{},{}] | 不配: {"rows":[...],"total":N}
+    page:          1,                     // 分页页码
+    rows:          20,                    // 每页条数
+    // ... 其他自定义参数直接作为后台方法/Query 入参
+})
+```
+
+**Query 入参映射**：前端参数名直接对应 Query 入参名。前端传 `{SttDate:"2026-01-01"}` → Query `SttDate As %String`。
+
+**ResultSetType 决策**：
+
+| 场景 | ResultSetType | 返回格式 |
+|------|---------------|----------|
+| datagrid / treegrid | 不配（默认） | `{"rows":[...],"total":N}` |
+| combobox / combotree | `"array"` | `[{...},{...}]` |
+| 导出 CSV | `"Excel"` | 下载链接 |
+
+**调用模式**：
+
+| 场景 | API | 说明 |
+|------|-----|------|
+| 后台方法，返回 JSON | `$cm()` | 自动 JSON.parse |
+| 后台方法，返回非 JSON | `$m()` | 原始文本 |
+| 写入操作 | `$cm({wantreturnval:0})` | set 方式，无返回值 |
+| 后台 Query | `$cm()` | MethodName 不传 |
+| 同步调用 | `$cm(data, false)` | 不推荐，阻塞 UI |
+
+**关键约束**：
+- 框架内置 XSS/SQL 注入关键词过滤（正则边界匹配，非简单包含）
+- 依赖 jQuery + websys.jquery.js
+- 数组入参：JS `["a","b"]` → 后台 `plist(1)="a", plist(2)="b"`
 
 ### 前端 JS 兼容性约束
 
@@ -552,22 +572,23 @@ HIS 客户端为 IE11 内核，**禁止 ES6+ API**：
 | `padStart`/`startsWith`/`includes` | `indexOf`/手动补位             |
 | `for...of`                             | `for (var i=0;...)`            |
 | `Array.from()`                         | `Array.prototype.slice.call()` |
-| `new Set()` / `new Map()`             | 用对象 `{}` 替代                |
+| `new Set()` / `new Map()`            | 用对象`{}` 替代                |
 
 ### HISUI JS 陷阱（避坑指南）
 
 以下常见 HISUI 前端写法会报错或返回无效数据，必须用右侧替代：
 
-| 禁用 | 原因 | 替代 |
-|------|------|------|
-| `$(sel).textbox('setValue',v)` / `$(sel).textbox('getValue')` | `hisui-validatebox` 未初始化时无 `.textbox()` 方法 | `$(sel).val(v)` / `$(sel).val()` |
-| `$cm({...}, callback)` | 客户端 `$cm` 可能未定义 | `$.ajax({url: $URL + '?ClassName=...&QueryName=...', ...})` |
-| `$lb(...)` / `websys.Page.Encrypt(...)` | 客户端 `$lb` 不可用 | CSP `OnPreHTTP` 加 Method 代理，JS 侧直接 `$URL?MethodName=...` |
-| `.combobox({data:[], onSelect:fn})` 缺 `filter` | 下拉输入框无法检索 | 必须加 `filter: function(q,row){...}` 或改用服务端检索 |
-| `<table data-options="columns:[[{..., formatter: function(){...}}]]">` | CSP 编译器 `#5928` 解析错误 | 空 `<table>` + JS 中 `$('#dg').datagrid({columns:...})` |
-| `.combobox('loadData', rows)` 单独调用 | 仅刷新数据，不补缺失选项 | 改用 `.combobox({data:rows, filter:..., onSelect:...})` 完整重建 |
+| 禁用                                                                     | 原因                                                               | 替代                                                              |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `$(sel).textbox('setValue',v)` / `$(sel).textbox('getValue')`        | `hisui-validatebox` 未初始化时无 `.textbox()` 方法             | `$(sel).val(v)` / `$(sel).val()`                              |
+| `$cm({...}, callback)` | 客户端 `$cm` 可能未定义                     | `$.ajax({url: $URL + '?ClassName=...&QueryName=...', ...})`      |                                                                   |
+| `$lb(...)` / `websys.Page.Encrypt(...)` | 客户端 `$lb` 不可用      | CSP`OnPreHTTP` 加 Method 代理，JS 侧直接 `$URL?MethodName=...` |                                                                   |
+| `.combobox({data:[], onSelect:fn})` 缺 `filter`                      | 下拉输入框无法检索                                                 | 必须加`filter: function(q,row){...}` 或改用服务端检索           |
+| `<table data-options="columns:[[{..., formatter: function(){...}}]]">` | CSP 编译器`#5928` 解析错误                                       | 空`<table>` + JS 中 `$('#dg').datagrid({columns:...})`        |
+| `.combobox('loadData', rows)` 单独调用                                 | 仅刷新数据，不补缺失选项                                           | 改用`.combobox({data:rows, filter:..., onSelect:...})` 完整重建 |
 
 **服务端检索 combobox 模板**（大数据量下拉）：
+
 ```javascript
 function loadSearchCombo(selector, queryName, onSelectFn) {
     $(selector).combobox({
@@ -594,6 +615,7 @@ function loadSearchCombo(selector, queryName, onSelectFn) {
 ```
 
 **CSP Method 代理模板**（调用后端类方法）：
+
 ```html
 <csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
     s %response.CharSet = "utf-8"
@@ -606,6 +628,7 @@ function loadSearchCombo(selector, queryName, onSelectFn) {
     q 1
 </csp:method>
 ```
+
 JS 侧调用：`$.ajax({url: $URL + '?ClassName=...&MethodName=Save&paramName=...', type:'GET', ...})`
 
 ### 第三方 JS 库路径
@@ -799,8 +822,7 @@ with open(path, 'w', encoding='utf-8', newline='') as f:
 
 ## 参考文件索引
 
-| 文件 | 内容 | 何时查阅 |
-|------|------|----------|
-| `references/his-ui-style-guide.md` | UI 风格规范：颜色、按钮、表格、HISUI 组件、页面模板 | 开发前端页面/组件 |
-| `references/his-global-reference.md` | Global 详细字段、索引链 | 涉及 Global 读写/需求分析 |
-
+| 文件                                   | 内容                                                | 何时查阅                  |
+| -------------------------------------- | --------------------------------------------------- | ------------------------- |
+| `references/his-ui-style-guide.md`   | UI 风格规范：颜色、按钮、表格、HISUI 组件、页面模板 | 开发前端页面/组件         |
+| `references/his-global-reference.md` | Global 详细字段、索引链                             | 涉及 Global 读写/需求分析 |
