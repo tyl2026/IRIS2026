@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"D:/claude code/IRIS/HISUI-优化/00原文件/DHCPEFetchReport.hisui.js.txt\" \"D:/claude code/IRIS/HISUI-优化/01优化中/DHCPEFetchReport.hisui.js.txt\")",
+      "Bash(python \"D:/claude code/IRIS/HISUI-优化/01优化中/_patch.py\")"
+    ],
+    "additionalDirectories": [
+      "D:\\claude code\\IRIS\\HISUI-优化\\00原文件"
+    ]
+  }
+}

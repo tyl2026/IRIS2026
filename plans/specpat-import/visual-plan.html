@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>特殊患者管理 — 批量导入功能 实现计划</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:"Microsoft Yahei",sans-serif; font-size:14px; color:#333; background:#f5f7fa; line-height:1.7; }
+.container { max-width:960px; margin:0 auto; padding:24px 20px; }
+
+.header { background:linear-gradient(135deg,#15428b,#017bce); color:#fff; padding:32px 40px; border-radius:12px; margin-bottom:24px; }
+.header h1 { font-size:22px; margin-bottom:6px; }
+.header .meta { font-size:13px; opacity:0.8; }
+
+.card { background:#fff; border:1px solid #e0e4e8; border-radius:8px; margin-bottom:20px; overflow:hidden; }
+.card-title { background:#E4F0FF; color:#15428b; font-weight:bold; font-size:15px; padding:12px 20px; border-bottom:1px solid #CDDEEE; }
+.card-body { padding:20px; }
+
+.flow { display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center; padding:16px; font-size:13px; }
+.flow-step { background:#F0F6FF; border:1px solid #95B8E7; border-radius:8px; padding:14px 18px; text-align:center; min-width:90px; }
+.flow-arrow { color:#017bce; font-size:18px; font-weight:bold; }
+.flow-row { display:flex; gap:12px; align-items:center; justify-content:center; margin-top:10px; }
+
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#FAFAFA; color:#15428b; font-weight:bold; padding:10px 12px; border:1px solid #ddd; text-align:left; }
+td { padding:8px 12px; border:1px solid #eee; }
+tr:nth-child(even) td { background:#FAFAFA; }
+
+.file-tree { font-family:Consolas,monospace; font-size:13px; line-height:2; }
+.file-tree .a { color:#22863a; }
+.file-tree .m { color:#005cc5; }
+.file-tree .badge { font-size:11px; padding:1px 6px; border-radius:3px; margin-left:6px; }
+.file-tree .badge-a { background:#dcffe4; color:#22863a; }
+.file-tree .badge-m { background:#dbedff; color:#005cc5; }
+
+.code-block { background:#1e1e1e; color:#d4d4d4; font-family:Consolas,monospace; font-size:12px; padding:16px; border-radius:6px; overflow-x:auto; line-height:1.6; }
+.code-block .kw { color:#569cd6; }
+.code-block .str { color:#ce9178; }
+.code-block .cm { color:#6a9955; }
+.code-block .fn { color:#dcdcaa; }
+.code-block .num { color:#b5cea8; }
+
+.qa { margin-bottom:12px; }
+.qa .q { font-weight:bold; color:#15428b; margin-bottom:4px; }
+.qa .opts { display:flex; gap:8px; flex-wrap:wrap; }
+.qa .opt { background:#F0F6FF; border:1px solid #95B8E7; border-radius:6px; padding:6px 12px; font-size:13px; }
+.qa .opt.rec { border-color:#017bce; background:#E8F4FD; }
+
+.checklist { list-style:none; }
+.checklist li { padding:6px 0; border-bottom:1px solid #f0f0f0; }
+.checklist li:before { content:"☐ "; color:#aaa; margin-right:8px; }
+
+.callout { background:#FFF8E1; border-left:4px solid #f5a623; padding:10px 16px; border-radius:4px; margin:12px 0; font-size:13px; }
+.callout.info { background:#E8F4FD; border-left-color:#017bce; }
+.callout.warn { background:#FFF3E0; border-left-color:#fd7201; }
+
+.section-label { color:#15428b; font-weight:bold; font-size:14px; margin:16px 0 8px; }
+.section-label:first-child { margin-top:0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>特殊患者管理 — 批量导入功能（Excel 版）</h1>
+  <div class="meta">目标页面: dhcspecpat.hui.csp &nbsp;|&nbsp; 涉及 5 个文件 &nbsp;|&nbsp; 前端 SheetJS 解析 .xlsx &nbsp;|&nbsp; 2026-06-27</div>
+</div>
+
+<!-- 1. Overview -->
+<div class="card">
+  <div class="card-title">概述</div>
+  <div class="card-body">
+    <p>为特殊患者管理页面增加<strong>Excel 批量导入</strong>功能。完整流程：</p>
+    <div class="flow">
+      <div class="flow-step">下载<br>.xlsx 模板</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">Excel/WPS<br>填写数据</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">上传<br>.xlsx 文件</div>
+    </div>
+    <div class="flow-row">
+      <div class="flow-step">SheetJS<br>前端解析</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">逐行<br>校验</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">插入 /<br>跳过</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">结果<br>报告</div>
+    </div>
+    <div class="callout info" style="margin-top:16px;">
+      <strong>架构决策：</strong>前端用 SheetJS 库解析 .xlsx → 转为 TSV 字符串 → 发送后端。后端 ImportPatList 接收统一数据格式无需改动。复用现有 <code>InsertPatList</code> 的去重+日期校验。
+    </div>
+  </div>
+</div>
+
+<!-- 2. Data Model -->
+<div class="card">
+  <div class="card-title">Excel 模板列 → Global 字段映射</div>
+  <div class="card-body">
+    <table>
+      <tr><th>Excel 列</th><th>持久化字段</th><th>Global 位</th><th>必填</th><th>说明</th></tr>
+      <tr><td>患者姓名</td><td>DHCSPName</td><td>^1</td><td style="color:#d32f2f">●</td><td></td></tr>
+      <tr><td>身份证号</td><td>DHCSPCredNo</td><td>^2</td><td style="color:#d32f2f">●</td><td>索引字段，用于去重校验</td></tr>
+      <tr><td>患者类型代码</td><td>DHCSPTypeDR</td><td>^4</td><td style="color:#d32f2f">●</td><td>^DHCPatType Code（如 03=院内职工）</td></tr>
+      <tr><td>备注</td><td>DHCSPNote</td><td>^3</td><td>—</td><td>自由文本</td></tr>
+      <tr><td>有效开始日期</td><td>DHCSPStDate</td><td>^5</td><td>—</td><td>yyyy-MM-dd，默认当天</td></tr>
+      <tr><td>有效截止日期</td><td>DHCSPEndDate</td><td>^6</td><td>—</td><td>yyyy-MM-dd，空=长期有效</td></tr>
+      <tr><td>所属科室代码</td><td>DHCSPLocDR</td><td>^13</td><td>—</td><td>CTLOC Code，空=登录科室</td></tr>
+    </table>
+    <p style="margin-top:12px;font-size:12px;color:#666;">模板为 .xlsx 格式，首行为列名。用户用 Excel/WPS 填写，每行一条患者记录。</p>
+  </div>
+</div>
+
+<!-- 3. Architecture -->
+<div class="card">
+  <div class="card-title">解析架构：前端 SheetJS + 后端数据接收</div>
+  <div class="card-body">
+    <div class="flow" style="justify-content:flex-start;font-size:13px">
+      <div class="flow-step" style="text-align:left">
+        <strong>浏览器端</strong><br>
+        1. FileReader 读取 .xlsx<br>
+        2. SheetJS (xlsx.js) 解析为数组<br>
+        3. 转为 TSV 字符串<br>
+        4. $.cm() 加密发送
+      </div>
+      <span class="flow-arrow" style="font-size:24px">→</span>
+      <div class="flow-step" style="text-align:left">
+        <strong>服务端</strong><br>
+        1. ImportPatList 接收 TSV<br>
+        2. $p 逐列解析<br>
+        3. 代码→RowId 转换<br>
+        4. InsertPatList 入库
+      </div>
+    </div>
+    <div class="callout info">
+      <strong>数据格式：</strong>SheetJS 将 Excel 转为 TSV（Tab 分隔），首行表头跳过，后续行用 Tab 分隔列值。这样避免了 CSV 逗号与内容冲突的问题。
+    </div>
+  </div>
+</div>
+
+<!-- 4. File Changes -->
+<div class="card">
+  <div class="card-title">文件变更清单</div>
+  <div class="card-body">
+    <div class="file-tree">
+      <div><span class="m">M</span> <span class="badge badge-m">修改</span> web.DHCSpecPat.cls — 新增 ImportPatList() 方法（接收 TSV）</div>
+      <div><span class="m">M</span> <span class="badge badge-m">修改</span> scripts/DHCSpecPat.hui.js — 导入按钮 + SheetJS 解析 + 上传对话框</div>
+      <div><span class="a">A</span> <span class="badge badge-a">新增</span> scripts/xlsx.full.min.js — SheetJS 社区版（~800KB）</div>
+      <div><span class="m">M</span> <span class="badge badge-m">修改</span> csp/dhcspecpat.hui.csp — 引入 SheetJS + 导入组件</div>
+      <div><span class="a">A</span> <span class="badge badge-a">新增</span> csp/dhcspecpat.show.hui.csp — 导入对话框片段</div>
+      <div><span class="a">A</span> <span class="badge badge-a">新增</span> scripts/dhcspecpat/template.xlsx — Excel 模板文件</div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Backend -->
+<div class="card">
+  <div class="card-title">后端：ImportPatList 方法</div>
+  <div class="card-body">
+    <p style="margin-bottom:12px;font-size:13px;">新增 <code>web.DHCSpecPat.ImportPatList(TSVContent, UserID, LocID)</code>，接收前端 SheetJS 转换后的 TSV 字符串。</p>
+    <div class="code-block">
+<span class="cm">/// 批量导入特殊患者（前端已用 SheetJS 解析 .xlsx → TSV）</span>
+<span class="kw">ClassMethod</span> <span class="fn">ImportPatList</span>(tsvContent <span class="kw">As</span> %String, UserID <span class="kw">As</span> %String, LocID <span class="kw">As</span> %String = "") <span class="kw">As</span> %String
+{
+    <span class="kw">s</span> result = {}
+    <span class="kw">s</span> result.total = 0, result.success = 0, result.skip = 0
+    <span class="kw">s</span> result.errors = []
+
+    <span class="kw">s</span> rows = <span class="fn">$lfs</span>(tsvContent, <span class="fn">$c</span>(10))
+    <span class="kw">for</span> i = 2:1:<span class="fn">$ll</span>(rows) {
+        <span class="kw">s</span> line = <span class="fn">$lg</span>(rows, i)
+        <span class="kw">continue</span>:(line = "")
+
+        <span class="kw">s</span> name    = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 1)
+        <span class="kw">s</span> credNo  = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 2)
+        <span class="kw">s</span> typeCode = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 3)
+        <span class="kw">s</span> note    = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 4)
+        <span class="kw">s</span> stDate  = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 5)
+        <span class="kw">s</span> endDate = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 6)
+        <span class="kw">s</span> locCode = <span class="fn">$p</span>(line, <span class="fn">$c</span>(9), 7)
+
+        <span class="cm">#; 校验必填</span>
+        <span class="kw">if</span> (name = "") || (credNo = "") || (typeCode = "") {
+            <span class="kw">d</span> result.errors.%Push({"row":(i),"reason":"必填字段缺失"})
+            <span class="kw">s</span> result.skip = result.skip + 1
+            <span class="kw">continue</span>
+        }
+
+        <span class="cm">#; 患者类型代码 → RowId</span>
+        <span class="kw">s</span> typeDr = <span class="fn">$o</span>(^DHCPatType(0,"Code",typeCode,""))
+        <span class="kw">if</span> (typeDr = "") {
+            <span class="kw">d</span> result.errors.%Push({"row":(i),"reason":"类型代码无效: "_typeCode})
+            <span class="kw">s</span> result.skip = result.skip + 1
+            <span class="kw">continue</span>
+        }
+
+        <span class="cm">#; 复用现有 InsertPatList 入库</span>
+        <span class="kw">s</span> rtn = ..InsertPatList(name,credNo,note,typeDr,stDate,endDate,UserID,"",locCode)
+        <span class="kw">if</span> (rtn = 0) {
+            <span class="kw">s</span> result.success = result.success + 1
+        } <span class="kw">else</span> {
+            <span class="kw">d</span> result.errors.%Push({"row":(i),"reason":(rtn)})
+            <span class="kw">s</span> result.skip = result.skip + 1
+        }
+    }
+    <span class="kw">q</span> result.%ToJSON()
+}
+    </div>
+    <div class="callout info">
+      <strong>变更点：</strong>分隔符从逗号改为 Tab (<code>$c(9)</code>)，避免 Excel 单元格内容含逗号导致的解析错误。首行表头跳过（i=2 起始）。
+    </div>
+  </div>
+</div>
+
+<!-- 6. Frontend -->
+<div class="card">
+  <div class="card-title">前端：SheetJS 解析 + 导入 UI</div>
+  <div class="card-body">
+    <div class="section-label">1. CSP 引入 SheetJS 库</div>
+    <div class="code-block">
+<span class="cm">&lt;!-- dhcspecpat.hui.csp 新增 --&gt;</span>
+&lt;<span class="kw">script</span> <span class="fn">type</span>=<span class="str">"text/javascript"</span> <span class="fn">src</span>=<span class="str">"../scripts/xlsx.full.min.js"</span>&gt;&lt;/<span class="kw">script</span>&gt;
+    </div>
+
+    <div class="section-label">2. 工具栏增加按钮</div>
+    <div class="code-block">
+<span class="kw">var</span> toobar = [{
+    text: <span class="str">'新增'</span>, iconCls: <span class="str">'icon-add'</span>, handler: ...
+}, {
+    text: <span class="str">'置为无效'</span>, iconCls: <span class="str">'icon-update'</span>, handler: ...
+}, <span class="str">'-'</span>, {
+    text: <span class="str">'下载模板'</span>,
+    iconCls: <span class="str">'icon-w-download'</span>,
+    handler: <span class="kw">function</span>() { <span class="fn">DownloadTemplate</span>(); }
+}, {
+    text: <span class="str">'导入'</span>,
+    iconCls: <span class="str">'icon-w-import'</span>,
+    handler: <span class="kw">function</span>() { <span class="fn">ImportPatListClick</span>(); }
+}];
+    </div>
+
+    <div class="section-label">3. SheetJS 解析核心逻辑</div>
+    <div class="code-block">
+<span class="cm">// IE11 兼容：FileReader + SheetJS</span>
+<span class="kw">function</span> <span class="fn">ImportPatListClick</span>() {
+    <span class="kw">var</span> input = document.createElement(<span class="str">'input'</span>);
+    input.type = <span class="str">'file'</span>;
+    input.accept = <span class="str">'.xlsx,.xls'</span>;
+
+    input.onchange = <span class="kw">function</span>(e) {
+        <span class="kw">var</span> file = e.target.files[<span class="num">0</span>];
+        <span class="kw">if</span> (!file) <span class="kw">return</span>;
+
+        <span class="kw">var</span> reader = <span class="kw">new</span> FileReader();
+        reader.onload = <span class="kw">function</span>(evt) {          <span class="cm">// 非 Promise，IE11 兼容</span>
+            <span class="kw">var</span> data = <span class="kw">new</span> Uint8Array(evt.target.result);
+            <span class="kw">var</span> wb = <span class="fn">XLSX</span>.read(data, {type: <span class="str">'array'</span>});
+            <span class="kw">var</span> sheet = wb.Sheets[wb.SheetNames[<span class="num">0</span>]];
+
+            <span class="cm">// 转为 TSV 字符串（Tab 分隔）</span>
+            <span class="kw">var</span> tsv = <span class="fn">XLSX</span>.utils.sheet_to_csv(sheet, {
+                FS: <span class="str">'\t'</span>,   <span class="cm">// 字段分隔符: Tab</span>
+                RS: <span class="str">'\n'</span>,   <span class="cm">// 行分隔符: 换行</span>
+                strip: <span class="kw">true</span>  <span class="cm">// 去除首尾空格</span>
+            });
+
+            <span class="cm">// 预览前 3 行 → 确认 → $.cm() 加密发送</span>
+            <span class="fn">ShowImportPreview</span>(tsv);
+        };
+        reader.<span class="fn">readAsArrayBuffer</span>(file);
+    };
+    input.click();
+}
+    </div>
+
+    <div class="section-label">4. 导入对话框流程</div>
+    <div class="flow">
+      <div class="flow-step">选择<br>.xlsx 文件</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">SheetJS<br>解析预览</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">确认<br>导入</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">$.cm()<br>加密发送</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">结果报告<br>成功/跳过/错误</div>
+    </div>
+
+    <div class="section-label">5. 模板下载</div>
+    <p style="font-size:13px;">静态 .xlsx 文件 <code>scripts/dhcspecpat/template.xlsx</code>，通过 <code>window.open</code> 下载。</p>
+
+    <div class="callout warn">
+      <strong>IE11 兼容约束：</strong>
+      SheetJS xlsx.full.min.js 支持 IE10+。<br>
+      使用 <code>FileReader.readAsArrayBuffer</code>（IE11 支持）+ <code>XLSX.read({type:'array'})</code>。<br>
+      无箭头函数、无 Promise、无 async/await。
+    </div>
+  </div>
+</div>
+
+<!-- 7. Open Questions -->
+<div class="card">
+  <div class="card-title">待确认事项</div>
+  <div class="card-body">
+    <div class="qa">
+      <div class="q">1. 身份证号重复时如何处理？</div>
+      <div class="opts">
+        <span class="opt rec">跳过并报告（推荐）— 不修改现有记录，结果中列出重复行</span>
+        <span class="opt">更新现有记录 — 覆盖姓名、类型、日期</span>
+      </div>
+    </div>
+    <div class="qa">
+      <div class="q">2. Excel 模板还需要增加其他字段吗？（目前 7 列：姓名/身份证号/类型代码/备注/开始日期/截止日期/科室代码）</div>
+      <p style="font-size:13px;color:#666;">如有其他需要批量导入的字段请在确认时说明。</p>
+    </div>
+    <div class="qa">
+      <div class="q">3. 导入结果展示方式？</div>
+      <div class="opts">
+        <span class="opt rec">弹框汇总（推荐）— 显示"成功 N 条，跳过 M 条" + 可展开错误列表</span>
+        <span class="opt">弹框 + 自动刷新表格 — 导入完成后自动重新加载 DataGrid</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. Checklist -->
+<div class="card">
+  <div class="card-title">实现检查清单</div>
+  <div class="card-body">
+    <ul class="checklist">
+      <li>下载 SheetJS (xlsx.full.min.js) 放入 scripts/ 目录</li>
+      <li>CSP 页面引入 SheetJS 脚本</li>
+      <li>后端新增 web.DHCSpecPat.ImportPatList() 方法（TSV 解析 + 逐行校验 + 入库）</li>
+      <li>创建 Excel 模板文件 template.xlsx（7 列 + 示例行）</li>
+      <li>DataGrid toolbar 增加「下载模板」+「导入」按钮</li>
+      <li>实现 ImportPatListClick() + SheetJS 解析 + 预览逻辑</li>
+      <li>实现导入结果弹框（成功/跳过/错误列表）</li>
+      <li>模板下载（静态文件链接）</li>
+      <li>测试：空文件、格式错误、重复身份证、正常导入、200+ 行</li>
+      <li>IE11 兼容性验证（FileReader + SheetJS + easyUI dialog）</li>
+    </ul>
+  </div>
+</div>
+
+<p style="text-align:center;color:#999;font-size:12px;margin-top:24px;">Plan v2 — Excel (.xlsx) + SheetJS &nbsp;|&nbsp; 特殊患者管理批量导入 &nbsp;|&nbsp; 2026-06-27</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+{
+  "_description": "接口文档 → 包路径映射配置",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-06-02",
+
+  "mappings": {
+    "智慧病房管理系统接口.docx": {
+      "packagePath": "web.DHCENS.BLL.SmartWard",
+      "description": "智慧病房管理系统",
+      "views": {
+        "BKS": "BKS",
+        "PatientInfo": "PatientInfo",
+        "HZYZXX": "Order",
+        "HZSSXX": "Surgery",
+        "HZJCXX": "Exam",
+        "HZJYXX": "Lab",
+        "HZJYMX": "LabItem"
+      }
+    },
+    "药品基本信息测试.docx": {
+      "packagePath": "web.DHCENS.BLL.DrugDict",
+      "description": "药品基本信息字典",
+      "views": {
+        "Pharmacy": "Pharmacy"
+      }
+    },
+    "手麻系统-麻醉方式.docx": {
+      "packagePath": "web.DHCENS.BLL.AnestMethod",
+      "description": "手麻系统-麻醉方式",
+      "views": {
+        "AnestMethod": "AnestMethod"
+      }
+    },
+    "单病种上报管理分析平台_接口文档(视图版）.pdf": {
+      "packagePath": "web.DHCENS.BLL.DBZ",
+      "description": "单病种上报管理分析平台",
+      "views": {
+        "DBZ_ZYJL": "IP.AdmissionRecord",
+        "DBZ_JBXX": "IP.PatientInfo",
+        "DBZ_ZYFY": "IP.Fee",
+        "DBZ_ZDXX": "IP.Diagnosis",
+        "DBZ_MZJL": "OP.VisitRecord",
+        "DBZ_SSXX": "IP.Surgery",
+        "DBZ_SMJL": "IP.Anesthesia",
+        "DBZ_SQFSXX": "IP.PreSurgery",
+        "DBZ_JYBG": "Lab.Report",
+        "DBZ_JYBGMX": "Lab.ReportItem",
+        "DBZ_BLBG": "Pathology.Report",
+        "DBZ_ZYYZJL": "IP.Order",
+        "DBZ_SXJL": "IP.BloodTransfusion",
+        "DBZ_SCBC": "IP.FirstCourse",
+        "DBZ_SSJL": "IP.SurgeryRecord",
+        "DBZ_HLPG": "Nur.Assessment",
+        "DBZ_FMJLD": "IP.DeliveryRecord",
+        "DBZ_HLTZ": "Nur.VitalSign"
+      }
+    },
+    "四川省智慧健康数据采集API接口规范（试行）-20260331版.docx": {
+      "packagePath": "web.DHCENS.BLL.SmartHealthSC",
+      "description": "四川省智慧健康数据采集接口",
+      "views": {
+        "ext_emr_activity_info": "EMR.ActivityInfo",
+        "ext_emr_activity_info_item": "EMR.ActivityItem",
+        "ext_emr_activity_info_cd": "EMR.ChronicDisease",
+        "ext_out_register_info": "OP.Register",
+        "ext_emr_outpatient_record": "OP.Diagnosis",
+        "ext_out_nonmedication_orders_record": "OP.NonDrugOrder",
+        "ext_out_expense_record": "OP.Fee",
+        "ext_out_payment_method_info": "OP.Payment",
+        "ext_out_expense_record_info": "OP.FeeDetail",
+        "ext_emr_admission_info": "IP.Admission",
+        "ext_emr_discharge_info": "IP.Discharge",
+        "ext_inpatient_drugorder_non_info": "IP.NonDrugOrder",
+        "ext_out_eme_dia_tre_expense_records": "IP.Fee",
+        "ext_inpatient_payment_method_info": "IP.Payment",
+        "ext_det_out_eme_dia_tre_expenses": "IP.FeeDetail",
+        "ext_inpatient_expense_settlement": "IP.Settlement",
+        "ext_out_eme_drugorder_records": "IP.DrugOrder",
+        "ext_drugorder_info": "IP.DrugOrderDetail",
+        "ext_emr_out_eme_sur_oper_records": "IP.SurgeryRecord",
+        "ext_emr_ss_ssmxb": "IP.SurgeryDetail",
+        "ext_emr_ex_clinical": "Exam.Report",
+        "ext_emr_ex_clinical_item": "Exam.ReportItem",
+        "ext_emr_rpt_path_info": "Exam.Pathology",
+        "ext_emr_rpt_image": "Exam.Image",
+        "ext_emr_ris_pacs": "Exam.Relation",
+        "ext_emr_image_info": "Exam.ImageInfo",
+        "ext_emr_series_info": "Exam.Series",
+        "ext_emr_pacs_host_info": "Exam.Host",
+        "ext_emr_ris_host_info": "Exam.RISHost",
+        "ext_emr_ex_lab": "Lab.Report",
+        "ext_emr_ex_lab_item": "Lab.ReportItem",
+        "ext_emr_test_cultureresult_record": "Lab.Culture",
+        "ext_emr_test_antitimestamplresult_record": "Lab.Sensitivity",
+        "ext_emr_test_priceitem": "Lab.PriceItem",
+        "ext_emr_test_file_record": "Lab.FileRecord",
+        "ext_emr_test_host_info": "Lab.Host",
+        "ext_emr_test_qc_result": "Lab.QC",
+        "ext_base_org": "Base.Org"
+      }
+    },
+    "自助机费用查询、项目价格查询接口文档.pdf": {
+      "packagePath": "web.DHCENS.BLL.SelfService",
+      "description": "自助机费用查询、项目价格查询",
+      "views": {
+        "Output_D41D": "Fee.Query"
+      }
+    },
+    "绩效接口HIS系统.xlsx": {
+      "packagePath": "web.DHCENS.BLL.Performance",
+      "description": "绩效接口HIS系统",
+      "views": {
+        "HIS": "DeptDict",
+        "HIS_DICT_ITEM_INFO": "DictItemInfo",
+        "HIS_BUSI_PATIENT_INFO": "PatientInfo",
+        "HIS_BUSI_OUTPATIENT_REG": "OutpatientReg",
+        "HIS_BUSI_INPATIENT_REG": "InpatientReg",
+        "HIS_BUSI_PATIENT_TRANS": "PatientTrans",
+        "HIS_BUSI_MEDICAL_RECORD": "MedicalRecord",
+        "HIS_BUSI_LIS": "LIS",
+        "HIS_BUSI_PACS": "PACS"
+      }
+    },
+    "1-+信息科+—医院端数据格式v3.3.xlsx": {
+      "packagePath": "web.DHCENS.BLL.MedicalInsurance",
+      "description": "信息科医院端数据格式（医保接口）",
+      "views": {
+        "JS": "Settlement",
+        "JSMX": "SettlementDetail",
+        "ZXX": "Diagnosis",
+        "SSXX": "Surgery",
+        "M": "MaterialMapping",
+        "Output_AEC5": "MaterialInventory",
+        "MX": "InboundDetail",
+        "CMX": "OutboundDetail",
+        "Z": "PackageConversion"
+      }
+    },
+    "附件2：广东省智慧健康核心数据集采集目录V1.2.docx": {
+      "packagePath": "web.DHCENS.BLL.Guangdong",
+      "description": "广东省智慧健康核心数据集采集目录V1.2",
+      "views": {
+        "表名：ods_outpatient_info": "OP.OutpatientInfo",
+        "表名：ods_outpatient_medical_records": "OP.MedicalRecords",
+        "表名：ods_outpatient_judge_infolist": "OP.Diagnosis",
+        "表名：ods_outpatient_non_drug_orders": "OP.NonDrugOrders",
+        "表名：ods_outpatient_drug_orders": "OP.DrugOrders",
+        "表名：ods_outpatient_surgery_records": "OP.SurgeryRecords",
+        "表名：ods_outpatient_fee_records": "OP.FeeRecords",
+        "表名：ods_outpatient_fee_details": "OP.FeeDetails",
+        "表名：ods_inpatient_admission": "IP.Admission",
+        "表名：ods_inpatient_admission_judge_infolist": "IP.AdmissionDiagnosis",
+        "表名：ods_inpatient_non_drug_orders": "IP.NonDrugOrders",
+        "表名：ods_inpatient_drug_orders": "IP.DrugOrders",
+        "表名：ods_inpatient_surgery_records": "IP.SurgeryRecords",
+        "表名：ods_inpatient_fee_records": "IP.FeeRecords",
+        "表名：ods_inpatient_fee_details": "IP.FeeDetails",
+        "表名：ods_patient_discharge_records": "IP.DischargeRecords",
+        "表名：ods_inpatient_discharge_judge_infolist": "IP.DischargeDiagnosis",
+        "表名：t_medical_service_indicators": "Common.MedicalServiceIndicators",
+        "表名：t_resource_allocation_indicators": "Common.ResourceAllocationIndicators",
+        "表名：t_key_specialties_indicators": "Common.KeySpecialtiesIndicators"
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+<h2>患者信息悬浮面板 — 设计方案选择</h2>
+<p class="subtitle">目标页面：dhcbill.opbill.invQuery.csp（门诊收据查询）右下角</p>
+
+<div class="section">
+  <h3>需求回顾</h3>
+  <p>页面右下角始终显示一个图标（📊），点击展开患者信息面板，再点击收回。需遵循 HISUI 配色规范。</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>抽屉式侧面板 (Slide-out Drawer)</h3>
+      <p>图标点击后，面板从右侧边缘滑入，宽度约 380px，覆盖页面内容上方。<br>
+      <strong>优点：</strong>信息量大，可容纳完整患者档案，交互流畅<br>
+      <strong>缺点：</strong>遮挡部分页面内容，需要关闭才能操作底层表格</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>悬浮弹出卡片 (Floating Popover Card)</h3>
+      <p>图标上方向弹出 320×400px 卡片，带箭头指向触发按钮，模糊背景遮罩。<br>
+      <strong>优点：</strong>不占用布局空间，点击外部自动关闭，轻量<br>
+      <strong>缺点：</strong>空间有限，内容较多时需滚动</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="label" style="font-size:10px;background:#017bce;color:#fff;padding:2px 6px;border-radius:3px;float:right;margin-top:4px">Recommended</div>
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>底部滑出半屏面板 (Bottom Sheet)</h3>
+      <p>图标点击后，面板从底部滑出，高度约 50% 视口，保留顶部查询区域可见。<br>
+      <strong>优点：</strong>移动端友好，保留上下文可见，HIS 常用模式<br>
+      <strong>缺点：</strong>桌面端体验一般，与 datagrid 底部分页栏可能冲突</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p style="color:#666;font-size:13px">打开浏览器 <strong>http://localhost:60289</strong> 查看完整布局。点击选项进行选择。</p>
+</div>

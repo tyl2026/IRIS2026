@@ -1,0 +1,64 @@
+<h2>面板信息布局方案 — 5 类患者信息如何排布？</h2>
+<p class="subtitle">悬浮卡片尺寸约 340×420px，需容纳：基础信息 + 就诊信息 + 费用汇总 + 联系方式 + 诊断信息</p>
+
+<div class="options">
+  <div class="option" data-choice="tabs" onclick="toggleSelect(this)">
+    <div class="label" style="font-size:10px;background:#017bce;color:#fff;padding:2px 6px;border-radius:3px;float:right;margin-top:4px">Recommended</div>
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Tab 切换</h3>
+      <p>顶部 Tab 栏切换：基础 | 就诊 | 费用 | 联系 | 诊断<br>
+      <strong>优点：</strong>每页信息完整不拥挤，HIS 常见模式<br>
+      <strong>缺点：</strong>需点击切换，不能同时查看不同类别</p>
+    </div>
+  </div>
+  <div class="option" data-choice="accordion" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>手风琴折叠</h3>
+      <p>纵向折叠面板，点击标题展开/收起对应区块，默认展开基础信息<br>
+      <strong>优点：</strong>可同时展开多组，灵活控制信息密度<br>
+      <strong>缺点：</strong>全展开时需要滚动，交互步骤多</p>
+    </div>
+  </div>
+  <div class="option" data-choice="scroll" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>纵向滚动 + 分区标题</h3>
+      <p>所有信息纵向排列，分区标题 + 分隔线，整体滚动查看<br>
+      <strong>优点：</strong>最简单直观，无需额外交互即可浏览全部<br>
+      <strong>缺点：</strong>卡片内需滚动，底部信息可能被忽略</p>
+    </div>
+  </div>
+</div>
+
+<div class="mockup" style="margin-top:24px">
+  <div class="mockup-header">Preview: Tab 切换布局（方案 A 推荐）</div>
+  <div class="mockup-body" style="background:#F9FBFF;border:1px solid #95B8E7;border-radius:6px;padding:0;max-width:340px;margin:0 auto;font-family:Microsoft Yahei;font-size:13px;overflow:hidden">
+    <div style="background:#E4F0FF;padding:8px 12px;border-bottom:1px solid #95B8E7;display:flex;align-items:center;gap:8px">
+      <span style="font-weight:bold;color:#15428b;font-size:14px">📋 患者信息</span>
+      <span style="color:#666;font-size:11px;margin-left:auto">张三 · 男 · 35岁</span>
+    </div>
+    <div style="display:flex;background:#FAFAFA;border-bottom:1px solid #ddd">
+      <div style="padding:6px 0;flex:1;text-align:center;color:#017bce;border-bottom:2px solid #017bce;font-weight:bold;font-size:12px">基础</div>
+      <div style="padding:6px 0;flex:1;text-align:center;color:#666;font-size:12px">就诊</div>
+      <div style="padding:6px 0;flex:1;text-align:center;color:#666;font-size:12px">费用</div>
+      <div style="padding:6px 0;flex:1;text-align:center;color:#666;font-size:12px">联系</div>
+      <div style="padding:6px 0;flex:1;text-align:center;color:#666;font-size:12px">诊断</div>
+    </div>
+    <div style="padding:10px 12px">
+      <table style="width:100%;font-size:12px;line-height:1.8">
+        <tr><td style="color:#666;width:55px">登记号</td><td>0000001234</td></tr>
+        <tr><td style="color:#666">卡号</td><td>6234567890</td></tr>
+        <tr><td style="color:#666">姓名</td><td>张三</td></tr>
+        <tr><td style="color:#666">性别</td><td>男</td></tr>
+        <tr><td style="color:#666">年龄</td><td>35岁</td></tr>
+        <tr><td style="color:#666">身份证</td><td>4301**********1234</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <p style="color:#666;font-size:13px">打开 <strong>http://localhost:60289</strong> 查看完整对比。点击选项进行选择。</p>
+</div>

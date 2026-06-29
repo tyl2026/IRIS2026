@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<!-- dhcemrcompletenessstat.csp 电子病历书写完整率统计 -->
+<HTML lang="zh-CN">
+<HEAD>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>电子病历书写完整率统计</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI></HISUI>
+<style>
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7;flex-wrap:wrap}
+.filter-bar label{font-size:13px;color:#333;white-space:nowrap}
+.date-preset{cursor:pointer;padding:3px 10px;border:1px solid #95B8E7;border-radius:4px;background:#fff;font-size:12px;color:#017bce}
+.date-preset:hover{background:#eaf2ff}
+.date-preset.active{background:#017bce;color:#fff;border-color:#017bce}
+.mode-switch{display:flex;gap:4px;margin-right:8px}
+.mode-btn{padding:3px 12px;border:1px solid #95B8E7;border-radius:4px;background:#fff;font-size:12px;cursor:pointer}
+.mode-btn.active{background:#017bce;color:#fff;border-color:#017bce}
+.stat-cards{display:flex;gap:8px;padding:10px 14px;flex-wrap:wrap;justify-content:flex-start}
+.stat-card{flex:0 1 auto;width:130px;min-width:110px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 12px;text-align:center;cursor:pointer;box-sizing:border-box}
+.stat-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.stat-card .label{font-size:11px;color:#666;margin-bottom:2px}
+.stat-card .pct{font-size:20px;font-weight:bold;margin-bottom:2px}
+.stat-card .bar{height:8px;border-radius:4px;background:#eee;overflow:hidden}
+.stat-card .bar-fill{height:100%;border-radius:4px}
+.stat-card .detail{font-size:11px;color:#999;margin-top:4px}
+.stat-card .label.all{color:#15428b;font-weight:bold}
+.stat-card.filtered{box-shadow:0 0 0 2px #fd7201}
+#mainLayout{width:100%;height:100vh}
+</style>
+</HEAD>
+<body>
+<div id="mainLayout" class="hisui-layout" data-options="fit:true">
+	<div data-options="region:'north',border:false" style="height:165px;overflow-y:auto">
+		<!-- filter bar -->
+		<div class="filter-bar">
+			<div class="mode-switch">
+				<span class="mode-btn active" id="modeDate" onclick="switchMode('date')">日期范围</span>
+				<span class="mode-btn" id="modeReg" onclick="switchMode('reg')">登记号</span>
+			</div>
+			<span id="datePresets" style="display:inline">
+				<a class="date-preset" onclick="setDatePreset('today')">今天</a>
+				<a class="date-preset" onclick="setDatePreset('week')">近7天</a>
+				<a class="date-preset" onclick="setDatePreset('month')">本月</a>
+				<a class="date-preset" onclick="setDatePreset('last')">上月</a>
+			</span>
+			<span id="dateFields">开始:<input id="stDate" class="hisui-datebox" style="width:130px">
+			结束:<input id="endDate" class="hisui-datebox" style="width:130px"></span>
+			<label>科室:</label><input id="ctloc" class="hisui-combobox" style="width:160px">
+			<label>医生:</label><input id="doctor" class="hisui-combobox" style="width:120px">
+			<span id="regNoFields" style="display:none">登记号:<input id="regNo" class="textbox" style="width:130px"></span>
+			<label>主诉:</label><input id="txtChief" class="textbox" style="width:100px" oninput="textFilterChange()">
+			<label>现病史:</label><input id="txtHistory" class="textbox" style="width:100px" oninput="textFilterChange()">
+			<label>治疗:</label><input id="txtTreatment" class="textbox" style="width:100px" oninput="textFilterChange()">
+			<label>诊断:</label><input id="txtDiag" class="textbox" style="width:100px" oninput="textFilterChange()">
+			<a class="hisui-linkbutton" onclick="doQuery()" data-options="iconCls:'icon-search'">查询</a>
+			<a class="hisui-linkbutton" onclick="doExport()" data-options="iconCls:'icon-w-export'">导出</a>
+			<a class="hisui-linkbutton" onclick="doClear()" data-options="iconCls:'icon-clear'">清空</a>
+		</div>
+		<!-- stat cards -->
+		<div class="stat-cards" id="statCards"></div>
+	</div>
+	<div data-options="region:'center'" style="overflow:hidden">
+		<table id="dg" class="hisui-datagrid"></table>
+	</div>
+</div>
+<script type="text/javascript" src="../scripts/dhcdoc/tools/tools.hui.js"></script>
+<script type="text/javascript" src="../scripts/dhcemrcompletenessstat.js"></script>
+</body>
+</html>

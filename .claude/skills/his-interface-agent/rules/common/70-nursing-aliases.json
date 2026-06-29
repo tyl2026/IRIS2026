@@ -1,0 +1,524 @@
+{
+  "_description": "70-nursing 护理文书域字段别名映射",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-05-21 11:45",
+  "aliases": {
+    "SCATTER_DATA_ID": {
+      "keywords": [
+        "SCATTER_DATA_ID",
+        "scatterDataId",
+        "ScatterDataId",
+        "散装数据ID",
+        "护理记录ID",
+        "BLSD_RowId"
+      ],
+      "ruleStandardName": "SCATTER_DATA_ID",
+      "valueExpression": "scatterId",
+      "global": "^BLScatterData(scatterId)",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ADM_DR": {
+      "keywords": [
+        "SCATTER_ADM_DR",
+        "scatterAdmDr",
+        "AdmDr",
+        "就诊DR",
+        "就诊ID",
+        "BLSD_Adm_DR"
+      ],
+      "ruleStandardName": "SCATTER_ADM_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",1)",
+      "global": "^BLScatterData(scatterId)^1",
+      "domain": "70-nursing"
+    },
+    "SCATTER_EPR_DR": {
+      "keywords": [
+        "SCATTER_EPR_DR",
+        "scatterEprDr",
+        "EprDr",
+        "电子病历DR",
+        "病历ID",
+        "BLSD_EPR_DR"
+      ],
+      "ruleStandardName": "SCATTER_EPR_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",2)",
+      "global": "^BLScatterData(scatterId)^2",
+      "domain": "70-nursing"
+    },
+    "SCATTER_TEMPLATE_DR": {
+      "keywords": [
+        "SCATTER_TEMPLATE_DR",
+        "scatterTemplateDr",
+        "TemplateDr",
+        "模板DR",
+        "模板ID",
+        "BLSD_Template_DR"
+      ],
+      "ruleStandardName": "SCATTER_TEMPLATE_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",3)",
+      "global": "^BLScatterData(scatterId)^3",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ITEM_DR": {
+      "keywords": [
+        "SCATTER_ITEM_DR",
+        "scatterItemDr",
+        "ItemDr",
+        "项目DR",
+        "项目ID",
+        "BLSD_Item_DR"
+      ],
+      "ruleStandardName": "SCATTER_ITEM_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",4)",
+      "global": "^BLScatterData(scatterId)^4",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ITEM_CODE": {
+      "keywords": [
+        "SCATTER_ITEM_CODE",
+        "scatterItemCode",
+        "ItemCode",
+        "项目编码",
+        "项目代码",
+        "BLSD_ItemCode"
+      ],
+      "ruleStandardName": "SCATTER_ITEM_CODE",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",5)",
+      "global": "^BLScatterData(scatterId)^5",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ITEM_NAME": {
+      "keywords": [
+        "SCATTER_ITEM_NAME",
+        "scatterItemName",
+        "ItemName",
+        "项目名称",
+        "项目描述",
+        "BLSD_ItemName"
+      ],
+      "ruleStandardName": "SCATTER_ITEM_NAME",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",6)",
+      "global": "^BLScatterData(scatterId)^6",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ITEM_VALUE": {
+      "keywords": [
+        "SCATTER_ITEM_VALUE",
+        "scatterItemValue",
+        "ItemValue",
+        "项目值",
+        "数据值",
+        "BLSD_ItemValue"
+      ],
+      "ruleStandardName": "SCATTER_ITEM_VALUE",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",7)",
+      "global": "^BLScatterData(scatterId)^7",
+      "domain": "70-nursing"
+    },
+    "SCATTER_ITEM_UNIT": {
+      "keywords": [
+        "SCATTER_ITEM_UNIT",
+        "scatterItemUnit",
+        "ItemUnit",
+        "项目单位",
+        "单位",
+        "BLSD_ItemUnit"
+      ],
+      "ruleStandardName": "SCATTER_ITEM_UNIT",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",8)",
+      "global": "^BLScatterData(scatterId)^8",
+      "domain": "70-nursing"
+    },
+    "SCATTER_RECORDDATE": {
+      "keywords": [
+        "SCATTER_RECORDDATE",
+        "scatterRecordDate",
+        "RecordDate",
+        "记录日期",
+        "BLSD_RecordDate"
+      ],
+      "ruleStandardName": "SCATTER_RECORDDATE",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",9)",
+      "global": "^BLScatterData(scatterId)^9",
+      "domain": "70-nursing"
+    },
+    "SCATTER_RECORDTIME": {
+      "keywords": [
+        "SCATTER_RECORDTIME",
+        "scatterRecordTime",
+        "RecordTime",
+        "记录时间",
+        "BLSD_RecordTime"
+      ],
+      "ruleStandardName": "SCATTER_RECORDTIME",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",10)",
+      "global": "^BLScatterData(scatterId)^10",
+      "domain": "70-nursing"
+    },
+    "SCATTER_RECORDUSER_DR": {
+      "keywords": [
+        "SCATTER_RECORDUSER_DR",
+        "scatterRecordUserDr",
+        "RecordUserDr",
+        "记录人DR",
+        "记录人ID",
+        "BLSD_RecordUser_DR"
+      ],
+      "ruleStandardName": "SCATTER_RECORDUSER_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",11)",
+      "global": "^BLScatterData(scatterId)^11",
+      "domain": "70-nursing"
+    },
+    "SCATTER_RECORDUSER_NAME": {
+      "keywords": [
+        "SCATTER_RECORDUSER_NAME",
+        "scatterRecordUserName",
+        "RecordUserName",
+        "记录人姓名",
+        "记录人名称"
+      ],
+      "ruleStandardName": "SCATTER_RECORDUSER_NAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",recordUserDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\",recordUserDr)^2",
+      "domain": "70-nursing"
+    },
+    "SCATTER_UPDATEUSER_DR": {
+      "keywords": [
+        "SCATTER_UPDATEUSER_DR",
+        "scatterUpdateUserDr",
+        "UpdateUserDr",
+        "更新人DR",
+        "更新人ID",
+        "BLSD_UpdateUser_DR"
+      ],
+      "ruleStandardName": "SCATTER_UPDATEUSER_DR",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",12)",
+      "global": "^BLScatterData(scatterId)^12",
+      "domain": "70-nursing"
+    },
+    "SCATTER_UPDATEUSER_NAME": {
+      "keywords": [
+        "SCATTER_UPDATEUSER_NAME",
+        "scatterUpdateUserName",
+        "UpdateUserName",
+        "更新人姓名",
+        "更新人名称"
+      ],
+      "ruleStandardName": "SCATTER_UPDATEUSER_NAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",updateUserDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\",updateUserDr)^2",
+      "domain": "70-nursing"
+    },
+    "SCATTER_UPDATEDATE": {
+      "keywords": [
+        "SCATTER_UPDATEDATE",
+        "scatterUpdateDate",
+        "UpdateDate",
+        "更新日期",
+        "BLSD_UpdateDate"
+      ],
+      "ruleStandardName": "SCATTER_UPDATEDATE",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",13)",
+      "global": "^BLScatterData(scatterId)^13",
+      "domain": "70-nursing"
+    },
+    "SCATTER_UPDATETIME": {
+      "keywords": [
+        "SCATTER_UPDATETIME",
+        "scatterUpdateTime",
+        "UpdateTime",
+        "更新时间",
+        "BLSD_UpdateTime"
+      ],
+      "ruleStandardName": "SCATTER_UPDATETIME",
+      "valueExpression": "$p($g(^BLScatterData(scatterId)),\"^\",14)",
+      "global": "^BLScatterData(scatterId)^14",
+      "domain": "70-nursing"
+    },
+    "NURSE_RECORD_DATE": {
+      "keywords": [
+        "NURSE_RECORD_DATE",
+        "nurseRecordDate",
+        "NurseRecordDate",
+        "护理记录日期",
+        "记录日期"
+      ],
+      "ruleStandardName": "NURSE_RECORD_DATE",
+      "valueExpression": "$zd(recordDate,3)",
+      "domain": "70-nursing"
+    },
+    "NURSE_RECORD_TIME": {
+      "keywords": [
+        "NURSE_RECORD_TIME",
+        "nurseRecordTime",
+        "NurseRecordTime",
+        "护理记录时间",
+        "记录时间"
+      ],
+      "ruleStandardName": "NURSE_RECORD_TIME",
+      "valueExpression": "$zt(recordTime,1)",
+      "domain": "70-nursing"
+    },
+    "NURSE_NAME": {
+      "keywords": [
+        "NURSE_NAME",
+        "nurseName",
+        "NurseName",
+        "护士姓名",
+        "护士名称",
+        "记录护士"
+      ],
+      "ruleStandardName": "NURSE_NAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",recordUserDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\",recordUserDr)^2",
+      "domain": "70-nursing"
+    },
+    "NURSE_CODE": {
+      "keywords": [
+        "NURSE_CODE",
+        "nurseCode",
+        "NurseCode",
+        "护士编码",
+        "护士工号"
+      ],
+      "ruleStandardName": "NURSE_CODE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",recordUserDr)),\"^\",1)",
+      "global": "^SSU(\"SSUSR\",recordUserDr)^1",
+      "domain": "70-nursing"
+    },
+    "VITAL_SIGN_TEMP": {
+      "keywords": [
+        "VITAL_SIGN_TEMP",
+        "vitalSignTemp",
+        "Temp",
+        "体温",
+        "温度",
+        "T"
+      ],
+      "ruleStandardName": "VITAL_SIGN_TEMP",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "体温（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_PULSE": {
+      "keywords": [
+        "VITAL_SIGN_PULSE",
+        "vitalSignPulse",
+        "Pulse",
+        "脉搏",
+        "P"
+      ],
+      "ruleStandardName": "VITAL_SIGN_PULSE",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "脉搏（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_RESP": {
+      "keywords": [
+        "VITAL_SIGN_RESP",
+        "vitalSignResp",
+        "Resp",
+        "呼吸",
+        "R"
+      ],
+      "ruleStandardName": "VITAL_SIGN_RESP",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "呼吸（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_BP_SYS": {
+      "keywords": [
+        "VITAL_SIGN_BP_SYS",
+        "vitalSignBpSys",
+        "BpSys",
+        "收缩压",
+        "高压",
+        "BP_S"
+      ],
+      "ruleStandardName": "VITAL_SIGN_BP_SYS",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "收缩压（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_BP_DIA": {
+      "keywords": [
+        "VITAL_SIGN_BP_DIA",
+        "vitalSignBpDia",
+        "BpDia",
+        "舒张压",
+        "低压",
+        "BP_D"
+      ],
+      "ruleStandardName": "VITAL_SIGN_BP_DIA",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "舒张压（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_SPO2": {
+      "keywords": [
+        "VITAL_SIGN_SPO2",
+        "vitalSignSpo2",
+        "Spo2",
+        "血氧饱和度",
+        "血氧",
+        "SPO2"
+      ],
+      "ruleStandardName": "VITAL_SIGN_SPO2",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "血氧饱和度（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_HEIGHT": {
+      "keywords": [
+        "VITAL_SIGN_HEIGHT",
+        "vitalSignHeight",
+        "Height",
+        "身高",
+        "HT"
+      ],
+      "ruleStandardName": "VITAL_SIGN_HEIGHT",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "身高（需从散装数据中按项目编码查找）"
+    },
+    "VITAL_SIGN_WEIGHT": {
+      "keywords": [
+        "VITAL_SIGN_WEIGHT",
+        "vitalSignWeight",
+        "Weight",
+        "体重",
+        "WT"
+      ],
+      "ruleStandardName": "VITAL_SIGN_WEIGHT",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "体重（需从散装数据中按项目编码查找）"
+    },
+    "INTAKE_OUTPUT_INTAKE_TOTAL": {
+      "keywords": [
+        "INTAKE_OUTPUT_INTAKE_TOTAL",
+        "intakeTotal",
+        "IntakeTotal",
+        "入量总计",
+        "总入量",
+        "入量"
+      ],
+      "ruleStandardName": "INTAKE_OUTPUT_INTAKE_TOTAL",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "入量总计（需从散装数据中按项目编码查找）"
+    },
+    "INTAKE_OUTPUT_OUTPUT_TOTAL": {
+      "keywords": [
+        "INTAKE_OUTPUT_OUTPUT_TOTAL",
+        "outputTotal",
+        "OutputTotal",
+        "出量总计",
+        "总出量",
+        "出量"
+      ],
+      "ruleStandardName": "INTAKE_OUTPUT_OUTPUT_TOTAL",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "出量总计（需从散装数据中按项目编码查找）"
+    },
+    "NURSING_ASSESS_SCORE": {
+      "keywords": [
+        "NURSING_ASSESS_SCORE",
+        "nursingAssessScore",
+        "AssessScore",
+        "护理评估分数",
+        "评估分数",
+        "评分"
+      ],
+      "ruleStandardName": "NURSING_ASSESS_SCORE",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "护理评估分数（需从散装数据中按项目编码查找）"
+    },
+    "NURSING_ASSESS_TYPE": {
+      "keywords": [
+        "NURSING_ASSESS_TYPE",
+        "nursingAssessType",
+        "AssessType",
+        "护理评估类型",
+        "评估类型"
+      ],
+      "ruleStandardName": "NURSING_ASSESS_TYPE",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "护理评估类型（如压疮评估、跌倒评估等）"
+    },
+    "NURSING_RECORD_CONTENT": {
+      "keywords": [
+        "NURSING_RECORD_CONTENT",
+        "nursingRecordContent",
+        "RecordContent",
+        "护理记录内容",
+        "记录内容",
+        "护理内容"
+      ],
+      "ruleStandardName": "NURSING_RECORD_CONTENT",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "护理记录内容（需从散装数据中按项目编码查找）"
+    },
+    "NURSING_RECORD_TYPE": {
+      "keywords": [
+        "NURSING_RECORD_TYPE",
+        "nursingRecordType",
+        "RecordType",
+        "护理记录类型",
+        "记录类型"
+      ],
+      "ruleStandardName": "NURSING_RECORD_TYPE",
+      "valueExpression": "",
+      "domain": "70-nursing",
+      "description": "护理记录类型（如一般护理记录、危重护理记录等）"
+    },
+    "KFCSZD": {
+      "keywords": [
+        "kfcszd",
+        "康复措施指导"
+      ],
+      "ruleStandardName": "REHAB_GUIDANCE",
+      "valueExpression": "$p($g(^NUR(\"REHAB\",adm,idx)),\"^\",3)",
+      "global": "^NUR",
+      "domain": "70-nursing",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "SSY": {
+      "keywords": [
+        "ssy",
+        "收缩压"
+      ],
+      "ruleStandardName": "VITAL_SIGN_SYSTOLIC",
+      "valueExpression": "..getFirstItemValue(adm, \"systolicBloodPressure\")",
+      "global": "DHC_EMR",
+      "domain": "70-nursing",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "SZY": {
+      "keywords": [
+        "szy",
+        "舒张压"
+      ],
+      "ruleStandardName": "VITAL_SIGN_DIASTOLIC",
+      "valueExpression": "..getFirstItemValue(adm, \"diastolicBloodPressure\")",
+      "global": "DHC_EMR",
+      "domain": "70-nursing",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "TW": {
+      "keywords": [
+        "tw",
+        "体温"
+      ],
+      "ruleStandardName": "VITAL_SIGN_TEMP",
+      "valueExpression": "..getFirstItemValue(adm, \"temperature\")",
+      "global": "DHC_EMR",
+      "domain": "70-nursing",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    }
+  }
+}

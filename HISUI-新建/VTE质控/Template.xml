@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 336_0_21736U)" ts="2026-06-12 10:00:03">
+<Class name="NurMp.Template">
+<Super>%Persistent</Super>
+<TimeChanged>66072,57868.436525</TimeChanged>
+<TimeCreated>64939,56895.259288</TimeCreated>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 保存类型（无或者单次或者多次）
+
+]]></Content>
+</UDLText>
+
+<Property name="SaveType">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 唯一标识
+
+]]></Content>
+</UDLText>
+
+<Property name="Indentity">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 模板的xml
+
+]]></Content>
+</UDLText>
+
+<Property name="Content">
+<Type>%GlobalBinaryStream</Type>
+<Parameter name="LOCATION" value="^NurMp.TemplateS"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 模板栏目guid
+
+]]></Content>
+</UDLText>
+
+<Property name="TCIndentity">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="UpdateVerify">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="HospitalID">
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 医院ID
+
+]]></Content>
+</UDLText>
+
+<Index name="Indentity">
+<Properties>Indentity</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="TCIndentity">
+<Properties>TCIndentity</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="HospType">
+<Properties>HospitalID,TCIndentity</Properties>
+</Index>
+
+<Method name="save">
+<Description>
+creator:nw
+createdate:20181115
+input:"argFile:文件，Indentity:模板juid，TCIndentity：目录juid"
+output:-1 失败 0 成功
+description: 模板存表
+other:w ##class(NurMp.Template).save()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>argFile:%String,Indentity,TCIndentity,HospitalID</FormalSpec>
+<Implementation><![CDATA[
+	s $zt="errorsave"
+	s Msg="",Status="0" //定义初始值
+	s StramStatus=""
+	ts
+	set TCIndent=$ZConvert(TCIndentity,"U")
+
+	s rowid=""
+	s rowid=$o(^NurMp.TemplateI("TCIndentity"," "_TCIndent,rowid),-1)
+	    
+	if rowid=""  set b=##class(NurMp.Template).%New()
+	else  set b=##class(NurMp.Template).%OpenId(rowid)
+	s b.Indentity=Indentity
+	s b.TCIndentity=TCIndentity
+	s b.HospitalID=HospitalID
+	s Stream=##class(%FileBinaryStream).%New()
+	s Stream.Filename=argFile
+	s StramStatus = b.Content.CopyFrom(Stream)
+   
+	i ($$$ISERR(StramStatus)) tro  q ##class(NurMp.ErrorMsg).ReturnMsgJson("流数据保存失败","-1")
+    else  d b.%Save()
+
+    s Stream=""
+    s json=##class(%ArrayOfDataTypes).%New()
+	d json.SetAt($g(Msg),"msg")
+	
+	d json.SetAt($g(Status),"status")
+	d json.SetAt(b.%Id(),"data")
+	tc
+	q ##class(NurMp.ErrorMsg).Encode(json)
+errorsave
+    s Msg=$ze
+    q ##class(NurMp.ErrorMsg).ReturnMsgJson(Msg,"-1")
+]]></Implementation>
+</Method>
+
+<Method name="getValByTcIndentity">
+<Description>
+creator:nw
+createdate:20181115
+input:"TCIndentity:模板栏目juid"
+output:base64str
+description: 获取模板数据
+other:w ##class(NurMp.Template).getValByTcIndentity()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>TCIndentity</FormalSpec>
+<Implementation><![CDATA[
+	s id=""
+	s TCIndent=$ZConvert(TCIndentity,"U")
+	s id=$o(^NurMp.TemplateI("TCIndentity"," "_TCIndent,id),-1)
+	s a=##class(NurMp.Template).%OpenId(id)
+	q:id="" ""
+	s data=a.Content
+	
+	s base64str=""
+	Set newstream=##class(%GlobalCharacterStream).%New()
+	if (data.IsNull())
+	{
+		d newstream.Write("")
+	}
+	else
+	{
+		
+   		Do data.Rewind() Set len=12000
+    	While 'data.AtEnd {
+      	;s base64str = $system.Encryption.Base64Encode(data.Read(.len),1)
+      	s base64str=##class(%SYSTEM.Encryption).Base64Encode(data.Read(.len))
+      	d newstream.Write(base64str)
+    	}
+	}
+	q newstream
+]]></Implementation>
+</Method>
+
+<Method name="GetPhysicalPath">
+<Description>
+creator:nw
+createdate:20181115
+input:"AppPath，AddPath"
+output:dir：文件路径
+description: 解析文件路径
+other:w ##class(NurMp.Template).GetPhysicalPath()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>AppPath,AddPath=""</FormalSpec>
+<Implementation><![CDATA[
+	//q "D:\DTHealth\app\dthis\web\scripts\bdp\Framework\Doc\"
+	
+	if AppPath = ""{
+		
+		Set App="/dthealth/web"
+	}Else{
+		Set App = AppPath
+	}
+	
+	Set dir=""
+	Set CurNS=$namespace
+	zn "%sys"
+	if $d(^SYS("Security","ApplicationsD",App),g){
+		Set dir = $lg(g,17)
+	}else{
+		Set App1 = $p(App,"/",1,$l(App,"/")-1)
+		
+		if $d(^SYS("Security","ApplicationsD","/dthealth/web"),g){
+			Set dir = $lg(g,17)_"/"_$p(App,"/",$l(App,"/"))
+		}else{
+			Set App2 = $p(App,"/",1,$l(App,"/")-2)
+			if $d(^SYS("Security","ApplicationsD",App2),g){
+				Set dir = $lg(g,17)_"/"_$p(App,"/",$l(App,"/")-1,$l(App,"/"))
+			}
+		}
+	}
+	zn CurNS
+	Set dir = ##class(%File).NormalizeDirectory(dir_"/"_AddPath)
+	set ifExistsPath = ##Class(%Library.File).DirectoryExists(dir)
+	if ('ifExistsPath) {
+		set retPath = ##Class(%Library.File).CreateDirectoryChain(dir) 
+	}
+	Quit dir
+]]></Implementation>
+</Method>
+
+<Method name="GetTCIndentity">
+<Description>
+creator:nw
+createdate:20181115
+input:"Indentity:模板EmrCode"
+output:TCIndentity：栏目guid
+description: 获取模板guid
+other:w ##class(NurMp.Template).GetTCIndentity()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Indentity</FormalSpec>
+<Implementation><![CDATA[
+	s Indent=$ZConvert(Indentity,"U")
+	s id=""
+	s id=$o(^NurMp.TemplateI("Indentity"," "_Indent,id),-1)
+	if id=""
+	{
+		q ""
+	}
+	else
+	{		
+		;s a=##class(NurMp.Template).%OpenId(id)
+		s TCIndentity=$list(^NurMp.TemplateD(id),4)
+		q TCIndentity
+	}
+]]></Implementation>
+</Method>
+
+<Method name="GetIndentity">
+<Description>
+creator:nw
+createdate:20181115
+input:"TCIndentity：栏目guid"
+output:Indentity:模板EmrCode
+description: 获取模板EmrCode
+other:w ##class(NurMp.Template).GetIndentity()</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>TCIndentity</FormalSpec>
+<Implementation><![CDATA[
+	s TCIndent=$ZConvert(TCIndentity,"U")
+	s id=""
+	s id=$o(^NurMp.TemplateI("TCIndentity"," "_TCIndent,id),-1)
+	if id=""
+	{
+		q ""
+	}
+	else
+	{		
+		;s a=##class(NurMp.Template).%OpenId(id)
+		s Indentity=$list(^NurMp.TemplateD(id),2)
+		q Indentity
+	}
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// 备份
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+// w ##class(NurMp.Template).BackUp("D:\DtHealth\app\dthis\web\scripts\nurse\backup\","b54080d2d903442f9c0a3618b806b9b5")
+
+]]></Content>
+</UDLText>
+
+<Method name="BackUp">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>filepath,TCIndentity</FormalSpec>
+<Implementation><![CDATA[
+	s $zt="errorBackUp"
+	s version = ##class(NurMp.Config).GetVersion()
+	s fullFilePath = filepath_version_"\InterFace\"
+	
+	if (##class(%File).DirectoryExists(fullFilePath) = 0)
+	{
+		d ##class(%File).CreateDirectoryChain(fullFilePath)
+	}
+		
+	s fullFilePath = fullFilePath_TCIndentity_".xml"
+	
+	s TCIndent=$ZConvert(TCIndentity,"U")
+	s id=""
+	s id=$o(^NurMp.TemplateI("TCIndentity"," "_TCIndent,id),-1)
+	
+	
+	s textxml=##class(NurMp.Template).%OpenId(id)
+    s fileStream = textxml.Content
+    
+    		
+	s file = ##class(%FileBinaryStream).%New()
+	s file.Filename = fullFilePath
+	 
+	Do fileStream.Rewind()
+    While('fileStream.AtEnd){
+		s bytes = fileStream.Read(1024)
+        Do file.Write(bytes)
+    }
+    Do file.Flush()
+    s sc= file.%Save()
+    s file = ""
+    If $$$ISERR(sc) 
+    {
+	    Do $System.Status.DisplayError(sc) 
+	    Quit -1
+	}
+	q 0
+errorBackUp	
+	q -1
+]]></Implementation>
+</Method>
+
+<Method name="Lock">
+<Description>
+-99 表示加锁失败</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>indentity,ip,hander</FormalSpec>
+<Implementation><![CDATA[
+	s $zt="errorLock"
+	s Msg="",Status="0" //定义初始值
+	s ^TMPNW(88)=$lb(indentity, ip, hander)
+	s code=$zcvt(indentity,"U")
+	s id=""
+	set id=$o(^NurMp.TemplateCategoryI("Indentity"," "_code,id))
+	if ($listget(^NurMp.TemplateCategoryD(id),8) = "true")
+	{
+		s Status = "1"
+		s Msg = "当前模板已经被删除"
+	}
+	elseif $d(^NurMP.NurEmrSubLock("Mp",code)) || $d(^NurMP.NurEmrSubDeleteLock("Mp",code))
+	{
+		s Status = "1"
+		s Msg = "当前模板正在被别的客户端使用,"_^NurMP.NurEmrSubLock("Mp",code)
+	}
+	else
+	{
+		s nowtime=$h
+		
+		s ^NurMP.NurEmrSubLock("Mp",code)=ip_"^"_hander_"^"_nowtime_"^"_nowtime
+	}
+	s json=##class(%ArrayOfDataTypes).%New()
+	d json.SetAt($g(Msg),"msg")
+	d json.SetAt($g(Status),"status")
+	d json.SetAt("","data")
+	q ##class(NurMp.ErrorMsg).Encode(json)
+errorLock
+	s Msg=$ze
+    q ##class(NurMp.ErrorMsg).ReturnMsgJson(Msg,"-1")
+]]></Implementation>
+</Method>
+
+<Method name="UnLock">
+<Description>
+-99 表示解锁失败</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>indentity</FormalSpec>
+<Implementation><![CDATA[
+	s code=$zcvt(indentity,"U")
+	q:code="" -99
+	i $d(^NurMP.NurEmrSubLock("Mp",code))
+	{
+		k ^NurMP.NurEmrSubLock("Mp",code)
+	}
+	q 0
+]]></Implementation>
+</Method>
+
+<Method name="HeartBeat">
+<Description>
+-99 表示心跳失败</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>indentity</FormalSpec>
+<Implementation><![CDATA[
+	s code=$zcvt(indentity,"U")
+	q:code="" -99
+	i $d(^NurMP.NurEmrSubLock("Mp",code))
+	{
+		s nowtime=$h
+		s ^NurMP.NurEmrSubLock("Mp",code) = $p(^NurMP.NurEmrSubLock("Mp",code),"^",1)_"^"_$p(^NurMP.NurEmrSubLock("Mp",code),"^",2)_"^"_nowtime_"^"_$p(^NurMP.NurEmrSubLock("Mp",code),"^",4)
+	}
+	
+	//遍历^NurEmr.NurEmrSubLock，把35分钟内没有心跳的节点kill
+	
+	s code = ""
+	s nowtime=$p($h,",",1)+$p($h,",",2)
+	
+	for{
+		s code = $o(^NurMP.NurEmrSubLock("Mp",code))
+		q:code=""
+		s hearttime = $p(^NurMP.NurEmrSubLock("Mp",code),"^",3)
+		//s ^yucz(code_nowtime) = code_"--"_nowtime
+		if ((hearttime[",")&&($ZABS(nowtime - $p(hearttime,",",1)-$p(hearttime,",",2)) > (35*60)))
+		{
+			k ^NurMP.NurEmrSubLock("Mp",code)
+		}
+		elseif (hearttime'[",")&&(($ZABS($p($h,",",2) - hearttime) > (35*60)))
+		{
+             k ^NurMP.NurEmrSubLock("Mp",code)
+		}	
+		
+	}
+
+	q 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// w ##class(NurMp.Template).getFilePath2("\scripts\nurse\new\")
+
+]]></Content>
+</UDLText>
+
+<Method name="getFilePath">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>AppPath,AddPath=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	;s ^tmpNW(34)=AppPath_","_AddPath
+	quit:AppPath="" "-1"
+	if (AppPath = "") {
+		set App="/imedical/web"
+	}else{
+		set App = AppPath
+	}
+	set dir=""
+
+	if $d(^["%sys"]SYS("Security","ApplicationsD",App),g){
+		set dir = $lg(g,17)
+	}else{
+		set App1 = $p(App,"/",1,$l(App,"/")-1)
+		if $d(^["%sys"]SYS("Security","ApplicationsD","/imedical/web"),g){
+			set dir = $lg(g,17)_"/"_$p(App,"/",$l(App,"/"))
+		}elseif $d(^["%sys"]SYS("Security","ApplicationsD","/dthealth/web"),g){
+			set dir = $lg(g,17)_"/"_$p(App,"/",$l(App,"/"))
+			}
+		else{
+			set App2 = $p(App,"/",1,$l(App,"/")-2)
+			if $d(^["%sys"]SYS("Security","ApplicationsD",App2),g){
+				set dir = $lg(g,17)_"/"_$p(App,"/",$l(App,"/")-1,$l(App,"/"))
+			}
+		}
+	}
+	
+	set dir = ##class(%File).NormalizeDirectory(dir_"/"_AddPath)
+	set ifExistsPath = ##Class(%Library.File).DirectoryExists(dir)
+	if ('ifExistsPath) {
+		set retPath = ##Class(%Library.File).CreateDirectoryChain(dir) 
+	}
+	quit dir
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// w ##class(NurMp.Template).getWebPath()
+
+]]></Content>
+</UDLText>
+
+<Method name="getWebPath">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	set dir=""
+    set app=""
+	for  set app=$o(^["%sys"]SYS("Security","ApplicationsD",app)) q:app=""  d
+	.q:app'["/web"
+	.if app["dthealth/web" set dir="/dthealth/web"
+	.if app["imedical/web" set dir="/imedical/web"
+		
+	if dir="" set dir="/imedical/web"
+    
+	quit dir
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Storage.Persistent</Type>
+<DataLocation>^NurMp.TemplateD</DataLocation>
+<DefaultData>TemplateDefaultData</DefaultData>
+<IdLocation>^NurMp.TemplateD</IdLocation>
+<IndexLocation>^NurMp.TemplateI</IndexLocation>
+<StreamLocation>^NurMp.TemplateS</StreamLocation>
+<Data name="TemplateDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Indentity</Value>
+</Value>
+<Value name="3">
+<Value>Content</Value>
+</Value>
+<Value name="4">
+<Value>TCIndentity</Value>
+</Value>
+<Value name="5">
+<Value>SaveType</Value>
+</Value>
+<Value name="6">
+<Value>JpdateVerify</Value>
+</Value>
+<Value name="7">
+<Value>UpdateVerify</Value>
+</Value>
+<Value name="8">
+<Value>HospitalID</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

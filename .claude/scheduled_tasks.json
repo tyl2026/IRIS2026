@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "217a89b3",
+      "cron": "57 9 1-10 * *",
+      "prompt": "📋 周报补交提醒：现在是每月1-10号，需要补交上月周报。请打开协同网并运行 `python \"d:\\claude code\\IRIS\\HISUI-新建\\日报提交\\weekly_backfill.py\"` 补交上月所有周的周报。需要我帮忙吗？说\"补交周报\"即可。",
+      "createdAt": 1781844601982,
+      "recurring": true,
+      "createdBySessionId": "d79a00cb-d7d3-4b59-8519-89a0af2425db",
+      "createdByPid": 4940,
+      "createdByProcStart": "639174840627567090"
+    },
+    {
+      "id": "f124fabf",
+      "cron": "57 9 1-6 * *",
+      "prompt": "📋 项目周报补交提醒：每月1-6号截止补交上月项目周报！请在协同网确认上月项目周报是否已提交。如需补交，说\"帮我补交上月项目周报\"。",
+      "createdAt": 1781863599264,
+      "recurring": true,
+      "createdBySessionId": "2fd1c631-3f27-4966-bb69-063879fb4924",
+      "createdByPid": 24292,
+      "createdByProcStart": "639174893362615680"
+    }
+  ]
+}

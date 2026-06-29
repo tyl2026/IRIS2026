@@ -1,0 +1,223 @@
+<RichText id="summary"><![CDATA[
+
+## Summary
+
+为特殊患者管理页面 (`dhcspecpat.hui.csp`) 增加**批量导入**功能。用户下载 CSV 模板 → 填写患者数据 → 上传导入，系统校验后逐行写入 `^DHCSP` Global。
+
+复用现有 `web.DHCSpecPat.InsertPatList` 的校验逻辑（身份证号去重、日期校验），新增 `ImportPatList` 方法处理批量导入和结果汇总。
+
+]]></RichText>
+
+<Diagram id="import-flow">
+  <data html={'<div class="diagram-panel" data-rough style="display:flex;flex-direction:column;gap:16px;padding:12px"><div style="display:flex;gap:12px;align-items:center"><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">📥 下载模板</div><span style="color:var(--wf-muted)">→</span><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">📝 填写CSV</div><span style="color:var(--wf-muted)">→</span><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">📤 上传导入</div></div><div style="display:flex;gap:12px;align-items:center;padding-left:40px"><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">🔍 逐行校验</div><span style="color:var(--wf-muted)">→</span><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">✅ 插入/跳过</div><span style="color:var(--wf-muted)">→</span><div class="diagram-node" style="background:var(--wf-surface);border:1px solid var(--wf-border);border-radius:8px;padding:12px 18px;font-size:13px">📊 结果报告</div></div></div>'} css={'.diagram-panel { font-family: system-ui; }'} caption="导入流程：模板下载 → 填写 → 上传 → 校验 → 入库 → 报告" />
+</Diagram>
+
+<RichText id="data-model-title"><![CDATA[
+
+### 数据模型
+
+导入 CSV 模板列与 `User.DHCSpecPat` 持久化类（Global `^DHCSP`）字段对应关系：
+
+]]></RichText>
+
+<Table id="template-columns" columns={["CSV列", "字段", "Global位", "必填", "说明"]} rows={[
+  ["患者姓名", "DHCSPName", "^1", "是", "与身份证号联合去重"],
+  ["身份证号", "DHCSPCredNo", "^2", "是", "索引字段，用于去重校验"],
+  ["患者类型代码", "DHCSPTypeDR", "^4", "是", "对应 ^DHCPatType 的 Code（如 03=院内职工）"],
+  ["备注", "DHCSPNote", "^3", "否", "自由文本"],
+  ["有效开始日期", "DHCSPStDate", "^5", "否", "格式 yyyy-MM-dd，默认当天"],
+  ["有效截止日期", "DHCSPEndDate", "^6", "否", "格式 yyyy-MM-dd，空=长期有效"],
+  ["所属科室代码", "DHCSPLocDR", "^13", "否", "CTLOC 的 RowId，空=登录科室"],
+]} />
+
+<RichText id="file-tree-title"><![CDATA
+
+### 文件变更清单
+
+]]></RichText>
+
+<FileTree id="files-changed" title="涉及文件" entries={[
+  { path: "web.DHCSpecPat.cls", change: "modified", note: "新增 ImportPatList 方法 + GetImportTemplate 方法" },
+  { path: "scripts/DHCSpecPat.hui.js", change: "modified", note: "新增导入按钮、上传对话框、模板下载逻辑" },
+  { path: "csp/dhcspecpat.hui.csp", change: "modified", note: "工具栏增加导入按钮（已有 toolbar）" },
+  { path: "csp/dhcspecpat.show.hui.csp", change: "modified", note: "引入导入对话框 CSP Include + 文件上传处理" },
+  { path: "scripts/dhcspecpat/template.csv", change: "added", note: "静态 CSV 模板文件" },
+]} />
+
+<RichText id="backend-section"><![CDATA[
+
+### 后端变更
+
+#### ImportPatList 方法
+
+新增 `web.DHCSpecPat.ImportPatList(CSVContent, UserID, LocID)` 方法：
+
+1. 解析 CSV 内容（逗号分隔，首行为列头，跳过）
+2. 逐行校验必填字段（姓名、身份证号、患者类型）
+3. 患者类型代码 → RowId 转换（查 `^DHCPatType`）
+4. 科室代码 → RowId 转换（查 `^CTLOC`）
+5. 调用现有 `InsertPatList` 逐行插入
+6. 返回 JSON 结果：`{ total, success, skip, errors: [{row, reason}] }`
+
+]]></RichText>
+
+<Callout id="reuse-note" tone="info">
+
+ImportPatList 复用 InsertPatList 的身份证号去重 + 日期校验逻辑，不重复实现。
+
+</Callout>
+
+<AnnotatedCode id="import-method" filename="web.DHCSpecPat.cls" language="objectscript" code={'ClassMethod ImportPatList(csvContent As %String, UserID As %String, LocID As %String = "") As %String
+{
+    s result = {}
+    s result.total = 0, result.success = 0
+    s result.skip = 0, result.errors = []
+
+    s rows = $lfs(csvContent, $c(10))
+    for i = 2:1:$ll(rows) {
+        s line = $lg(rows, i)
+        continue:(line = "")
+        s result.total = result.total + 1
+
+        s name = $p(line, ",", 1)
+        s credNo = $p(line, ",", 2)
+        s typeCode = $p(line, ",", 3)
+        s note = $p(line, ",", 4)
+        s stDate = $p(line, ",", 5)
+        s endDate = $p(line, ",", 6)
+        s locCode = $p(line, ",", 7)
+
+        // 校验必填
+        if (name = "") || (credNo = "") || (typeCode = "") {
+            d result.errors.%Push({ "row": (i), "reason": "必填字段缺失" })
+            s result.skip = result.skip + 1
+            continue
+        }
+
+        // 患者类型代码→RowId
+        s typeDr = $o(^DHCPatType(0, "Code", typeCode, ""))
+        if (typeDr = "") {
+            d result.errors.%Push({ "row": (i), "reason": "患者类型代码无效: "_typeCode })
+            s result.skip = result.skip + 1
+            continue
+        }
+
+        // 科室代码→RowId
+        s locDr = ""
+        if (locCode '= "") {
+            s locDr = $o(^CTLOC(0, "Code", locCode, ""))
+        }
+
+        // 调用现有 InsertPatList
+        s rtn = ..InsertPatList(name, credNo, note, typeDr, stDate, endDate, UserID, "", locDr)
+        if (rtn = 0) {
+            s result.success = result.success + 1
+        } else {
+            d result.errors.%Push({ "row": (i), "reason": (rtn) })
+            s result.skip = result.skip + 1
+        }
+    }
+    q result.%ToJSON()
+}'} annotations={[
+  { lines: "3-4", label: "返回结构", note: "JSON 格式，方便前端展示导入结果" },
+  { lines: "7", label: "跳过表头", note: "i=2 起始，首行为列名" },
+  { lines: "21-23", label: "类型代码转换", note: "通过 Code 索引查 RowId" },
+  { lines: "34-38", label: "复用 InsertPatList", note: "已含身份证去重+日期校验" },
+]} />
+
+<RichText id="frontend-section"><![CDATA[
+
+### 前端变更
+
+#### 1. 工具栏增加"导入"按钮
+
+在现有 DataGrid toolbar 中新增：
+
+]]></RichText>
+
+<Diff id="toolbar-diff" filename="scripts/DHCSpecPat.hui.js" language="js" mode="unified" before={'var toobar = [{
+    text: \'新增\',
+    ...
+}, {
+    text: \'置为无效\',
+    ...
+}];'} after={'var toobar = [{
+    text: \'新增\',
+    ...
+}, {
+    text: \'置为无效\',
+    ...
+}, \'-\', {
+    text: \'下载模板\',
+    iconCls: \'icon-w-download\',
+    handler: DownloadTemplate
+}, {
+    text: \'导入\',
+    iconCls: \'icon-w-import\',
+    handler: ImportPatListClick
+}];'} />
+
+<RichText id="import-dialog"><![CDATA[
+
+#### 2. 导入流程
+
+点击"导入"→ 弹出 easyUI dialog，内含：
+
+- **文件选择器** (`<input type="file" accept=".csv">`)
+- **预览表格** (文件选中后解析 CSV 展示前3行)
+- **确认按钮** → AJAX 发送到后端 → 显示结果（成功 N 条、跳过 M 条、错误详情）
+
+]]></RichText>
+
+<Callout id="ie11-note" tone="warning">
+
+IE11 兼容：使用 `FileReader.readAsText()` 解析 CSV（非 ES6+ File API），不依赖 `Promise` / `async`。
+
+</Callout>
+
+<RichText id="open-questions-title"><![CDATA[
+
+### Open Questions
+
+]]></RichText>
+
+<QuestionForm id="open-questions" submitLabel="提交反馈" questions={[
+  {
+    id: "template-format",
+    title: "模板格式偏好？",
+    subtitle: "CSV 最简单但用户可能习惯 Excel",
+    mode: "single",
+    options: [
+      { id: "csv", label: "CSV（推荐）", detail: "无需依赖，IE11 原生兼容，记事本可编辑", recommended: true },
+      { id: "xlsx", label: "Excel .xlsx", detail: "用户更熟悉，但需引入 SheetJS 库（~400KB）" }
+    ],
+    required: true
+  },
+  {
+    id: "dup-strategy",
+    title: "身份证号重复时如何处理？",
+    mode: "single",
+    options: [
+      { id: "skip", label: "跳过并报告（推荐）", detail: "不修改现有记录，仅在结果中提示", recommended: true },
+      { id: "update", label: "更新现有记录", detail: "覆盖姓名、类型、日期等字段" }
+    ],
+    required: true
+  },
+  {
+    id: "template-fields",
+    title: "模板还需要增加其他字段吗？",
+    mode: "freeform",
+    placeholder: "如有其他需要批量导入的字段请在此列出..."
+  }
+]} />
+
+<Checklist id="impl-checklist" items={[
+  { id: "backend-import", label: "新增 web.DHCSpecPat.ImportPatList() 方法", checked: false },
+  { id: "backend-template", label: "新增 GetImportTemplate() 或静态 CSV 文件", checked: false },
+  { id: "frontend-toolbar", label: "DataGrid toolbar 增加「下载模板」+「导入」按钮", checked: false },
+  { id: "frontend-dialog", label: "实现导入 dialog（文件选择 + 预览 + 确认 + 结果展示）", checked: false },
+  { id: "frontend-csv-parse", label: "前端 CSV 解析（IE11 兼容 FileReader）", checked: false },
+  { id: "frontend-template-dl", label: "模板下载（静态 CSV 文件链接）", checked: false },
+  { id: "test-import", label: "测试：空文件、格式错误、重复身份证、正常导入", checked: false },
+  { id: "ie11-test", label: "IE11 兼容性测试", checked: false },
+]} />

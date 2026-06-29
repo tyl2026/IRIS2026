@@ -1,0 +1,1308 @@
+{
+  "_description": "通用短语映射表：中文拼音缩写 → 标准英文名。覆盖所有业务域的公共字段组件。",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-05-21 13:04",
+  "_usage": "这些是字段名中的通用组件，通常作为前缀或后缀出现。L1引擎会自动拆分匹配。",
+  "aliases": {
+    "HZJZH": {
+      "keywords": [
+        "HZJZH",
+        "hzjzh",
+        "患者就诊号",
+        "就诊号",
+        "就诊ID",
+        "VisitID",
+        "Visit_Id",
+        "JYBG_HZJZH",
+        "JYBGMX_HZJZH",
+        "JCBG_HZJZH"
+      ],
+      "ruleStandardName": "VISIT_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common",
+      "description": "患者就诊号/住院流水号(就是就诊ID)"
+    },
+    "LSH": {
+      "keywords": [
+        "LSH",
+        "lsh",
+        "流水号",
+        "SerialNo",
+        "Serial_No",
+        "SeqNo"
+      ],
+      "ruleStandardName": "SEQUENCE_NO",
+      "valueExpression": "",
+      "domain": "common",
+      "description": "流水号/序列号（通常由接口程序生成）"
+    },
+    "SQDH": {
+      "keywords": [
+        "SQDH",
+        "sqdh",
+        "申请单号",
+        "申请单",
+        "ApplyNo",
+        "Apply_No",
+        "RequestNo"
+      ],
+      "ruleStandardName": "APPLICATION_NO",
+      "valueExpression": "",
+      "domain": "common",
+      "description": "申请单号（医嘱/检验/检查申请）"
+    },
+    "SQKS": {
+      "keywords": [
+        "SQKS",
+        "sqks",
+        "申请科室",
+        "申请科室编码",
+        "申请科室代码",
+        "ApplyDeptCode"
+      ],
+      "ruleStandardName": "APPLICATION_DEPT_CODE",
+      "valueExpression": "$p($g(^OEORD(+ordItm)),\"^\",1)",
+      "global": "^OEORD",
+      "domain": "40-order",
+      "description": "申请科室编码"
+    },
+    "SQKSMC": {
+      "keywords": [
+        "SQKSMC",
+        "sqksmc",
+        "申请科室名称",
+        "申请科室描述",
+        "ApplyDeptName"
+      ],
+      "ruleStandardName": "APPLICATION_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^OEORD(+ordItm)),\"^\",1))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "40-order",
+      "description": "申请科室名称"
+    },
+    "SQSJ": {
+      "keywords": [
+        "SQSJ",
+        "sqsj",
+        "申请时间",
+        "ApplyTime",
+        "Apply_Date",
+        "RequestTime"
+      ],
+      "ruleStandardName": "APPLICATION_TIME",
+      "valueExpression": "",
+      "domain": "common",
+      "description": "申请时间"
+    },
+    "BGDH": {
+      "keywords": [
+        "BGDH",
+        "bgdh",
+        "报告单号",
+        "报告号",
+        "ReportNo",
+        "Report_No"
+      ],
+      "ruleStandardName": "REPORT_NO",
+      "valueExpression": "",
+      "domain": "common",
+      "description": "报告单号（检验/检查报告）"
+    },
+    "BGSJ": {
+      "keywords": [
+        "BGSJ",
+        "bgsj",
+        "报告时间",
+        "报告日期",
+        "ReportTime",
+        "Report_Date"
+      ],
+      "ruleStandardName": "REPORT_TIME",
+      "valueExpression": "",
+      "domain": "common",
+      "description": "报告时间"
+    },
+    "CYSJ": {
+      "keywords": [
+        "CYSJ",
+        "cysj",
+        "采样时间",
+        "采样日期",
+        "采集时间",
+        "CollectTime",
+        "Collect_Date"
+      ],
+      "ruleStandardName": "COLLECT_TIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "标本采集时间"
+    },
+    "SJSJ": {
+      "keywords": [
+        "SJSJ",
+        "sjsj",
+        "送检时间",
+        "送检日期",
+        "ReceiveTime",
+        "Receive_Date"
+      ],
+      "ruleStandardName": "RECEIVE_TIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "标本接收/送检时间"
+    },
+    "JYSJ": {
+      "keywords": [
+        "JYSJ",
+        "jysj",
+        "检验时间",
+        "检验日期",
+        "LabTime",
+        "Lab_Date"
+      ],
+      "ruleStandardName": "LAB_TIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验执行时间"
+    },
+    "JYXMBM": {
+      "keywords": [
+        "JYXMBM",
+        "jyxmbm",
+        "检验项目编码",
+        "检验项目代码",
+        "检验编码",
+        "LabItemCode"
+      ],
+      "ruleStandardName": "LAB_ITEM_CODE",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验项目编码"
+    },
+    "JYXMMC": {
+      "keywords": [
+        "JYXMMC",
+        "jyxmmc",
+        "检验项目名称",
+        "检验项目描述",
+        "检验名称",
+        "LabItemName"
+      ],
+      "ruleStandardName": "LAB_ITEM_NAME",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验项目名称"
+    },
+    "JYXXBM": {
+      "keywords": [
+        "JYXXBM",
+        "jyxxbm",
+        "检验细项编码",
+        "检验细项代码",
+        "LabDetailCode"
+      ],
+      "ruleStandardName": "LAB_DETAIL_CODE",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验细项/子项编码"
+    },
+    "JYXXMC": {
+      "keywords": [
+        "JYXXMC",
+        "jyxxmc",
+        "检验细项名称",
+        "检验细项描述",
+        "LabDetailName"
+      ],
+      "ruleStandardName": "LAB_DETAIL_NAME",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验细项/子项名称"
+    },
+    "JYDLJG": {
+      "keywords": [
+        "JYDLJG",
+        "jydljg",
+        "检验大类结果",
+        "检验结果",
+        "LabResult"
+      ],
+      "ruleStandardName": "LAB_RESULT",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验结果值"
+    },
+    "JYDLJGDW": {
+      "keywords": [
+        "JYDLJGDW",
+        "jydljgdw",
+        "检验大类结果单位",
+        "检验结果单位",
+        "结果单位",
+        "LabResultUnit"
+      ],
+      "ruleStandardName": "LAB_RESULT_UNIT",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验结果单位"
+    },
+    "JYDXJG": {
+      "keywords": [
+        "JYDXJG",
+        "jydxjg",
+        "检验单项结果",
+        "LabSingleResult"
+      ],
+      "ruleStandardName": "LAB_SINGLE_RESULT",
+      "valueExpression": "",
+      "domain": "50-lab-exam",
+      "description": "检验单项结果"
+    },
+    "JCXMMC": {
+      "keywords": [
+        "JCXMMC",
+        "jcxmmc",
+        "检查项目名称",
+        "检查项目描述",
+        "检查名称",
+        "ExamItemName"
+      ],
+      "ruleStandardName": "EXAM_ITEM_NAME",
+      "valueExpression": "",
+      "domain": "55-exam-report",
+      "description": "检查项目名称"
+    },
+    "JCBWMC": {
+      "keywords": [
+        "JCBWMC",
+        "jcbwmc",
+        "检查部位名称",
+        "检查部位",
+        "部位名称",
+        "ExamBodyPart"
+      ],
+      "ruleStandardName": "EXAM_BODY_PART",
+      "valueExpression": "",
+      "domain": "55-exam-report",
+      "description": "检查部位名称"
+    },
+    "JCFSMC": {
+      "keywords": [
+        "JCFSMC",
+        "jcfsmc",
+        "检查方式名称",
+        "检查方式",
+        "检查方法",
+        "ExamMethod"
+      ],
+      "ruleStandardName": "EXAM_METHOD",
+      "valueExpression": "",
+      "domain": "55-exam-report",
+      "description": "检查方式/方法名称"
+    },
+    "JCJG": {
+      "keywords": [
+        "JCJG",
+        "jcjg",
+        "检查结果",
+        "ExamResult"
+      ],
+      "ruleStandardName": "EXAM_RESULT",
+      "valueExpression": "",
+      "domain": "55-exam-report",
+      "description": "检查结果"
+    },
+    "JCMS": {
+      "keywords": [
+        "JCMS",
+        "jcms",
+        "检查描述",
+        "检查所见",
+        "ExamDescription"
+      ],
+      "ruleStandardName": "EXAM_DESCRIPTION",
+      "valueExpression": "",
+      "domain": "55-exam-report",
+      "description": "检查描述/所见"
+    },
+    "ZDSM": {
+      "keywords": [
+        "ZDSM",
+        "zdsm",
+        "诊断说明",
+        "诊断描述",
+        "DiagDescription"
+      ],
+      "ruleStandardName": "DIAGNOSIS_DESCRIPTION",
+      "valueExpression": "",
+      "domain": "30-diagnosis",
+      "description": "诊断说明/描述"
+    },
+    "HZXM": {
+      "keywords": [
+        "HZXM",
+        "hzxm",
+        "患者姓名",
+        "病人姓名",
+        "姓名",
+        "Name",
+        "PatientName"
+      ],
+      "ruleStandardName": "NAME",
+      "valueExpression": "$p($g(^PAPER(patDR,\"ALL\")),\"^\",1)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "患者姓名"
+    },
+    "BRID": {
+      "keywords": [
+        "BRID",
+        "brid",
+        "病人ID",
+        "患者ID",
+        "登记号",
+        "Patient_Id",
+        "PatientId",
+        "PAPMI"
+      ],
+      "ruleStandardName": "ROW_ID",
+      "valueExpression": "patDR",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "患者登记号/ID"
+    },
+    "XB": {
+      "keywords": [
+        "XB",
+        "xb",
+        "性别",
+        "病人性别",
+        "患者性别",
+        "Sex",
+        "Gender"
+      ],
+      "ruleStandardName": "SEX_CODE",
+      "valueExpression": "$p($g(^CT(\"SEX\",$p($g(^PAPER(patDR,\"ALL\")),\"^\",7))),\"^\",1)",
+      "global": "^CT(\"SEX\")",
+      "domain": "10-patient",
+      "description": "性别编码"
+    },
+    "NL": {
+      "keywords": [
+        "NL",
+        "nl",
+        "年龄",
+        "病人年龄",
+        "患者年龄",
+        "Age"
+      ],
+      "ruleStandardName": "PATIENT_AGE",
+      "valueExpression": "",
+      "domain": "10-patient",
+      "description": "年龄（需计算）"
+    },
+    "CSRQ": {
+      "keywords": [
+        "CSRQ",
+        "csrq",
+        "出生日期",
+        "生日",
+        "Birth_Date",
+        "BirthDate",
+        "Birthday"
+      ],
+      "ruleStandardName": "BIRTHDAY",
+      "valueExpression": "..FormatDT($p($g(^PAPER(patDR,\"ALL\")),\"^\",6))",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "出生日期"
+    },
+    "SFZH": {
+      "keywords": [
+        "SFZH",
+        "sfzh",
+        "身份证",
+        "身份证号",
+        "身份证号码",
+        "证件号",
+        "IdCard",
+        "IDCard"
+      ],
+      "ruleStandardName": "ID_CARD",
+      "valueExpression": "$p($g(^PAPER(patDR,\"ALL\")),\"^\",9)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "身份证号码"
+    },
+    "DH": {
+      "keywords": [
+        "DH",
+        "dh",
+        "电话",
+        "联系电话",
+        "手机",
+        "Tel",
+        "Phone",
+        "Mobile"
+      ],
+      "ruleStandardName": "PHONE",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",1)),\"^\",11)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "联系电话"
+    },
+    "ZZ": {
+      "keywords": [
+        "ZZ",
+        "zz",
+        "地址",
+        "常住地址",
+        "家庭住址",
+        "Addr",
+        "Address"
+      ],
+      "ruleStandardName": "ADDRESS",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",1)),\"^\",1)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "家庭住址"
+    },
+    "RYSJ": {
+      "keywords": [
+        "RYSJ",
+        "rysj",
+        "入院日期",
+        "入院时间",
+        "In_Date",
+        "InDate",
+        "AdmDate"
+      ],
+      "ruleStandardName": "ADMISSION_DATE",
+      "valueExpression": "..FormatDT($p($g(^PAADM(AdmNo)),\"^\",6))",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "入院日期"
+    },
+    "CYSJ_DATE": {
+      "keywords": [
+        "CYSJ",
+        "cysj",
+        "出院日期",
+        "出院时间",
+        "Out_Date",
+        "OutDate",
+        "DischDate"
+      ],
+      "ruleStandardName": "DISCHARGE_DATE",
+      "valueExpression": "..FormatDT($p($g(^PAADM(AdmNo)),\"^\",17))",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "出院日期",
+      "note": "与采样时间CYSJ冲突，需结合上下文判断"
+    },
+    "RYKSDM": {
+      "keywords": [
+        "RYKSDM",
+        "ryksdm",
+        "入院科室编码",
+        "入院科室代码",
+        "Dept_Code_In",
+        "DeptCodeIn"
+      ],
+      "ruleStandardName": "ADMISSION_DEPT_CODE",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",4)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "入院科室编码"
+    },
+    "RYKSMC": {
+      "keywords": [
+        "RYKSMC",
+        "ryksmc",
+        "入院科室名称",
+        "入院科室描述",
+        "Dept_Name_In",
+        "DeptNameIn"
+      ],
+      "ruleStandardName": "ADMISSION_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^PAADM(AdmNo)),\"^\",4))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "20-visit",
+      "description": "入院科室名称"
+    },
+    "CYKSDM": {
+      "keywords": [
+        "CYKSDM",
+        "cyksdm",
+        "出院科室编码",
+        "出院科室代码",
+        "Dept_Code_Out",
+        "DeptCodeOut"
+      ],
+      "ruleStandardName": "DISCHARGE_DEPT_CODE",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",4)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "出院科室编码"
+    },
+    "CYKSMC": {
+      "keywords": [
+        "CYKSMC",
+        "cyksmc",
+        "出院科室名称",
+        "出院科室描述",
+        "Dept_Name_Out",
+        "DeptNameOut"
+      ],
+      "ruleStandardName": "DISCHARGE_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^PAADM(AdmNo)),\"^\",4))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "20-visit",
+      "description": "出院科室名称"
+    },
+    "DQKSDM": {
+      "keywords": [
+        "DQKSDM",
+        "dqksdm",
+        "当前科室编码",
+        "当前科室代码",
+        "Dept_Code",
+        "DeptCode"
+      ],
+      "ruleStandardName": "CURRENT_DEPT_CODE",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",4)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "当前科室编码"
+    },
+    "DQKSMC": {
+      "keywords": [
+        "DQKSMC",
+        "dqksmc",
+        "当前科室名称",
+        "当前科室描述",
+        "Dept_Name"
+      ],
+      "ruleStandardName": "CURRENT_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^PAADM(AdmNo)),\"^\",4))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "20-visit",
+      "description": "当前科室名称"
+    },
+    "CH": {
+      "keywords": [
+        "CH",
+        "ch",
+        "床号",
+        "当前床号",
+        "Bed_No",
+        "BedNo",
+        "BedCode"
+      ],
+      "ruleStandardName": "BED_NO",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",73)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "床号"
+    },
+    "ZZYSDM": {
+      "keywords": [
+        "ZZYSDM",
+        "zzySDM",
+        "主治医生编码",
+        "主治医师编码",
+        "Doctor_Code",
+        "DoctorCode"
+      ],
+      "ruleStandardName": "ATTENDING_DOCTOR_CODE",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",9)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "主治医生编码"
+    },
+    "ZZYSMC": {
+      "keywords": [
+        "ZZYSMC",
+        "zzysmc",
+        "主治医生姓名",
+        "主治医师姓名",
+        "Doctor_Name",
+        "DoctorName"
+      ],
+      "ruleStandardName": "DOC_NAME",
+      "valueExpression": "$p($g(^CTPCP($p($g(^PAADM(AdmNo)),\"^\",9),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "20-visit",
+      "description": "主治医生姓名"
+    },
+    "RYZDDM": {
+      "keywords": [
+        "RYZDDM",
+        "ryzddm",
+        "入院诊断编码",
+        "诊断编码",
+        "Diagnosis_No",
+        "DiagCode"
+      ],
+      "ruleStandardName": "DIAGNOSIS_CODE",
+      "valueExpression": "",
+      "domain": "30-diagnosis",
+      "description": "诊断编码（需遍历MRDiagnos）"
+    },
+    "RYZDMC": {
+      "keywords": [
+        "RYZDMC",
+        "ryzdmc",
+        "入院诊断描述",
+        "诊断描述",
+        "诊断名称",
+        "Diagnosis_Name",
+        "DiagName"
+      ],
+      "ruleStandardName": "DIAGNOSIS_NAME",
+      "valueExpression": "",
+      "domain": "30-diagnosis",
+      "description": "诊断名称（需遍历MRDiagnos）"
+    },
+    "CYZD": {
+      "keywords": [
+        "CYZD",
+        "cyzd",
+        "出院诊断",
+        "出院诊断名称",
+        "Diagnosis_Name_Out",
+        "DiagnosisNameOut"
+      ],
+      "ruleStandardName": "DISCHARGE_DIAGNOSIS",
+      "valueExpression": "",
+      "domain": "30-diagnosis",
+      "description": "出院诊断名称"
+    },
+    "ZFY": {
+      "keywords": [
+        "ZFY",
+        "zfy",
+        "住院总费用",
+        "总费用",
+        "Cost",
+        "TotalCost",
+        "Total_Fee"
+      ],
+      "ruleStandardName": "TOTAL_COST",
+      "valueExpression": "",
+      "domain": "a0-fee-settlement",
+      "description": "住院总费用"
+    },
+    "ZYTS": {
+      "keywords": [
+        "ZYTS",
+        "zyts",
+        "住院天数",
+        "In_Days",
+        "InDays",
+        "ResidentDays"
+      ],
+      "ruleStandardName": "RESIDENT_DAYS",
+      "valueExpression": "DisDate - AdmDate + 1",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "住院天数"
+    },
+    "LYFS": {
+      "keywords": [
+        "LYFS",
+        "lyfs",
+        "离院方式",
+        "Out_Status",
+        "OutStatus",
+        "DischStatus"
+      ],
+      "ruleStandardName": "DISCHARGE_STATUS",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",20)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "离院方式"
+    },
+    "ZG": {
+      "keywords": [
+        "ZG",
+        "zg",
+        "出院转归",
+        "转归",
+        "Patient_Status",
+        "PatientStatus"
+      ],
+      "ruleStandardName": "PATIENT_STATUS",
+      "valueExpression": "",
+      "domain": "20-visit",
+      "description": "出院转归"
+    },
+    "FBRQ": {
+      "keywords": [
+        "FBRQ",
+        "fbrq",
+        "发病日期",
+        "发病时间",
+        "Fb_Date",
+        "FbDate",
+        "OnsetDate"
+      ],
+      "ruleStandardName": "ONSET_DATE",
+      "valueExpression": "..FormatDT($p($g(^PAPER(patDR,\"ALL\")),\"^\",47))",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "发病日期"
+    },
+    "JG": {
+      "keywords": [
+        "JG",
+        "jg",
+        "籍贯",
+        "出生地",
+        "Nationality",
+        "国籍"
+      ],
+      "ruleStandardName": "NATIONALITY",
+      "valueExpression": "$p($g(^CT(\"COU\",$p($g(^PAPER(patDR,\"PER\",1)),\"^\",8))),\"^\",2)",
+      "global": "^CT(\"COU\")",
+      "domain": "10-patient",
+      "description": "国籍"
+    },
+    "HYZK": {
+      "keywords": [
+        "HYZK",
+        "hyzk",
+        "婚姻",
+        "婚姻状况",
+        "Marital_Status",
+        "MaritalStatus",
+        "Marriage"
+      ],
+      "ruleStandardName": "MARRIAGE",
+      "valueExpression": "$p($g(^CT(\"MAR\",$p($g(^PAPER(patDR,\"PER\",2)),\"^\",3))),\"^\",2)",
+      "global": "^CT(\"MAR\")",
+      "domain": "10-patient",
+      "description": "婚姻状况"
+    },
+    "LXR": {
+      "keywords": [
+        "LXR",
+        "lxr",
+        "联系人",
+        "Contacts",
+        "Contact"
+      ],
+      "ruleStandardName": "CONTACTS",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",1)),\"^\",13)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "联系人"
+    },
+    "LXRDH": {
+      "keywords": [
+        "LXRDH",
+        "lxrdh",
+        "联系人电话",
+        "Contacts_Tel",
+        "ContactsTel",
+        "ContactPhone"
+      ],
+      "ruleStandardName": "CONTACTS_PHONE",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",1)),\"^\",9)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "联系人电话"
+    },
+    "GX": {
+      "keywords": [
+        "GX",
+        "gx",
+        "与患者关系",
+        "联系人关系",
+        "RelationShip",
+        "Relationship"
+      ],
+      "ruleStandardName": "RELATIONSHIP",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",1)),\"^\",10)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "与患者关系"
+    },
+    "GZDW": {
+      "keywords": [
+        "GZDW",
+        "gzdw",
+        "工作单位",
+        "病人单位",
+        "WorkUnit",
+        "Work_Unit"
+      ],
+      "ruleStandardName": "WORK_UNIT",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",4)),\"^\",18)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "工作单位"
+    },
+    "ZY": {
+      "keywords": [
+        "ZY",
+        "zy",
+        "职业",
+        "病人职业",
+        "Vocation",
+        "Occupation"
+      ],
+      "ruleStandardName": "VOCATION",
+      "valueExpression": "$p($g(^CT(\"OCC\",$p($g(^PAPER(patDR,\"PER\",2)),\"^\",6))),\"^\",2)",
+      "global": "^CT(\"OCC\")",
+      "domain": "10-patient",
+      "description": "职业"
+    },
+    "MZ": {
+      "keywords": [
+        "MZ",
+        "mz",
+        "民族",
+        "病人民族",
+        "Nationals",
+        "Nation"
+      ],
+      "ruleStandardName": "NATION",
+      "valueExpression": "$p($g(^CT(\"NAT\",$p($g(^PAPER(patDR,\"PER\",2)),\"^\",1))),\"^\",2)",
+      "global": "^CT(\"NAT\")",
+      "domain": "10-patient",
+      "description": "民族"
+    },
+    "HJDZ": {
+      "keywords": [
+        "HJDZ",
+        "hjdz",
+        "户籍地址",
+        "户口地址",
+        "Nationality_Addr",
+        "NationalityAddr"
+      ],
+      "ruleStandardName": "NATIONALITY_ADDR",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",2)),\"^\",2)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "户籍地址"
+    },
+    "JZXM": {
+      "keywords": [
+        "JZXM",
+        "jzxm",
+        "家长姓名",
+        "监护人姓名",
+        "ParentName",
+        "Parent_Name"
+      ],
+      "ruleStandardName": "PARENT_NAME",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",2)),\"^\",13)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "家长/监护人姓名"
+    },
+    "FINPNO": {
+      "keywords": [
+        "FINPNO",
+        "FInpNo",
+        "finpno",
+        "住院流水号",
+        "住院号",
+        "住院ID",
+        "InpatientNo",
+        "InpNo"
+      ],
+      "ruleStandardName": "VISIT_NUM",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",29)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "住院流水号/住院号"
+    },
+    "ZYID": {
+      "keywords": [
+        "ZYID",
+        "zyid",
+        "住院ID",
+        "住院号",
+        "住院流水号",
+        "InpatientId"
+      ],
+      "ruleStandardName": "VISIT_NUM",
+      "valueExpression": "$p($g(^PAADM(AdmNo)),\"^\",29)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "住院ID/住院流水号"
+    },
+    "DIAG_AUTHORED_TIME": {
+      "keywords": [
+        "DIAG_AUTHORED_TIME",
+        "diag_authored_time",
+        "DiagAuthoredTime",
+        "诊断时间",
+        "诊断日期时间",
+        "DiagDateTime"
+      ],
+      "ruleStandardName": "DIAGNOSIS_TIME",
+      "valueExpression": "..FormatDT($p($g(^MR(mradm,\"DIA\",sub)),\"^\",7),$p($g(^MR(mradm,\"DIA\",sub)),\"^\",8))",
+      "global": "^MR(mradm,\"DIA\",sub)^7,8",
+      "domain": "30-diagnosis",
+      "description": "诊断日期时间"
+    },
+    "JZZDSM": {
+      "keywords": [
+        "jzzdsm",
+        "就诊诊断说明"
+      ],
+      "ruleStandardName": "DIAGNOSIS_DESC",
+      "valueExpression": "$p($g(^MR(\"ADM\",adm,\"DIA\",diagIdx)),\"^\",2)",
+      "global": "^MR(\"ADM\")",
+      "domain": "30-diagnosis",
+      "description": "用户反馈回流 2026-05-21 11:23"
+    },
+    "ZDLBBM": {
+      "keywords": [
+        "zdlbbm",
+        "诊断类别编码"
+      ],
+      "ruleStandardName": "DIAG_TYPE_CODE",
+      "valueExpression": "$p($g(^MRC(\"DTYP\",diagTypeDrTyp)),\"^\",1)",
+      "global": "^MRC(\"DTYP\")",
+      "domain": "30-diagnosis",
+      "description": "用户反馈回流 2026-05-21 11:23 (修正: 使用正确的 ^MRC(\"DTYP\") 字典)"
+    },
+    "ZDZCBM": {
+      "keywords": [
+        "zdzcbm",
+        "诊断主次编码"
+      ],
+      "ruleStandardName": "DIAG_PRIMARY_FLAG",
+      "valueExpression": "$p($g(^MR(\"ADM\",adm,\"DIA\",diagIdx)),\"^\",4)",
+      "global": "^MR(\"ADM\")",
+      "domain": "30-diagnosis",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "BGLCZD": {
+      "keywords": [
+        "bglczd",
+        "报告临床诊断"
+      ],
+      "ruleStandardName": "REPORT_DIAGNOSIS",
+      "valueExpression": "$lg(data,14)",
+      "global": "DHC_EMR",
+      "domain": "30-diagnosis",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "HZLYSX": {
+      "keywords": [
+        "hzlysx",
+        "患者来源属性"
+      ],
+      "ruleStandardName": "ADM_TYPE_CODE",
+      "valueExpression": "$p($g(^PAADM(adm)),\"^\",2)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "ZYYYSJ": {
+      "keywords": [
+        "zyyysj",
+        "住院预约时间"
+      ],
+      "ruleStandardName": "ADM_BOOKING_TIME",
+      "valueExpression": "$p($g(^PAADM(adm)),\"^\",6)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "SERIAL_NUMBER": {
+      "keywords": [
+        "serial_number",
+        "就诊流水号"
+      ],
+      "ruleStandardName": "VISIT_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common",
+      "description": "就诊流水号(就是就诊ID) 用户反馈回流 2026-05-31"
+    },
+    "HZSX": {
+      "keywords": [
+        "hzsx",
+        "患者属性"
+      ],
+      "ruleStandardName": "PATIENT_TYPE",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PAT\",1)),\"^\",8)",
+      "global": "^PAPER",
+      "domain": "10-patient",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "JZXZ": {
+      "keywords": [
+        "jzxz",
+        "就诊性质"
+      ],
+      "ruleStandardName": "VISIT_TYPE",
+      "valueExpression": "$p($g(^PAADM(adm)),\"^\",2)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "HZLXDM": {
+      "keywords": [
+        "hzlxdm",
+        "患者类型代码"
+      ],
+      "ruleStandardName": "PATIENT_TYPE_CODE",
+      "valueExpression": "$p($g(^PAADM(adm)),\"^\",2)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "ORGANIZ_CODE": {
+      "keywords": [
+        "ORGANIZ_CODE",
+        "机构代码",
+        "organiz_code",
+        "organizCode",
+        "医疗机构代码",
+        "机构编码"
+      ],
+      "ruleStandardName": "HOSPITAL_CODE",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "医疗机构代码，需手动配置"
+    },
+    "INSU_TYPE_DESC": {
+      "keywords": [
+        "INSU_TYPE_DESC",
+        "医保类型名称",
+        "医疗保险类别名称"
+      ],
+      "ruleStandardName": "INSU_TYPE_DESC",
+      "valueExpression": "$p($g(^PAC(\"ADMREA\",$p($g(^PAADM(adm)),\"^\",20))),\"^\",2)",
+      "global": "^PAC(\"ADMREA\")",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 13:03"
+    },
+    "INSU_TYPE_CODE": {
+      "keywords": [
+        "insu_type_code",
+        "医疗保险类别代码"
+      ],
+      "ruleStandardName": "INSU_TYPE_CODE",
+      "valueExpression": "$p($g(^PAC(\"ADMREA\",$p($g(^PAADM(adm)),\"^\",20))),\"^\",1)",
+      "global": "^PAC(\"ADMREA\")",
+      "domain": "20-visit",
+      "description": "医疗保险类别代码"
+    },
+    "DX_FLAG": {
+      "keywords": [
+        "dx_flag",
+        "删除标志"
+      ],
+      "ruleStandardName": "DELETE_FLAG",
+      "valueExpression": "$p($g(^PAADM(adm)),\"^\",20)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 13:03"
+    },
+    "ORG_CODE": {
+      "keywords": [
+        "org_code",
+        "医疗机构代码"
+      ],
+      "ruleStandardName": "HOSPITAL_CODE",
+      "valueExpression": "$p($g(^CT(\"HOSP\",hospDr)),\"^\",1)",
+      "global": "^CT(\"HOSP\")",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 13:04"
+    },
+    "INSU_TYPE_NAME": {
+      "keywords": [
+        "insu_type_name",
+        "医保类型名称"
+      ],
+      "ruleStandardName": "INSU_TYPE_DESC",
+      "valueExpression": "$p($g(^PAC(\"ADMREA\",$p($g(^PAADM(adm)),\"^\",20))),\"^\",2)",
+      "global": "^PAC(\"ADMREA\")",
+      "domain": "20-visit",
+      "description": "用户反馈回流 2026-05-21 13:04"
+    },
+    "ZDBZBM": {
+      "keywords": [
+        "zdbzbm",
+        "诊断备注编码"
+      ],
+      "ruleStandardName": "DIAG_REMARK_CODE",
+      "valueExpression": "$p($g(^MR(\"ADM\",adm,\"DIA\",diagIdx)),\"^\",3)",
+      "global": "^MR(\"ADM\")",
+      "domain": "30-diagnosis",
+      "description": "用户反馈回流 2026-05-21 13:04"
+    },
+    "ORGANIZ_NAME": {
+      "keywords": [
+        "organiz_name",
+        "organizName",
+        "机构名称",
+        "医疗机构名称"
+      ],
+      "ruleStandardName": "ORGANIZ_NAME",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构名称，需手动配置"
+    },
+    "ORGANIZ_REGION": {
+      "keywords": [
+        "organiz_region",
+        "organizRegion",
+        "机构属地",
+        "行政区划"
+      ],
+      "ruleStandardName": "ORGANIZ_REGION",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构属地行政区划代码，需手动配置"
+    },
+    "ORGANIZ_TYPE": {
+      "keywords": [
+        "organiz_type",
+        "organizType",
+        "机构类型"
+      ],
+      "ruleStandardName": "ORGANIZ_TYPE",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构类型代码，需手动配置"
+    },
+    "ORGANIZ_ECO_TYPE": {
+      "keywords": [
+        "organiz_eco_type",
+        "organizEcoType",
+        "机构经济类型"
+      ],
+      "ruleStandardName": "ORGANIZ_ECO_TYPE",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构经济类型代码，需手动配置"
+    },
+    "ORGANIZ_LEVEL": {
+      "keywords": [
+        "organiz_level",
+        "organizLevel",
+        "机构级别"
+      ],
+      "ruleStandardName": "ORGANIZ_LEVEL",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构级别代码，需手动配置"
+    },
+    "ORGANIZ_GRADE": {
+      "keywords": [
+        "organiz_grade",
+        "organizGrade",
+        "等级",
+        "机构等级"
+      ],
+      "ruleStandardName": "ORGANIZ_GRADE",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "机构等级代码，需手动配置"
+    },
+    "REGISTRATION_NUMBER": {
+      "keywords": [
+        "registration_number",
+        "registrationNumber",
+        "执业许可证登记号",
+        "医疗机构执业许可证登记号"
+      ],
+      "ruleStandardName": "REGISTRATION_NUMBER",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "医疗机构执业许可证登记号，需手动配置"
+    },
+    "IS_BMIDO": {
+      "keywords": [
+        "is_bmido",
+        "isBmido",
+        "是否对接省级平台"
+      ],
+      "ruleStandardName": "IS_BMIDO",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "1",
+      "description": "是否对接省级平台：1=是 0=否"
+    },
+    "CAMPUS_CODE": {
+      "keywords": [
+        "campus_code",
+        "campusCode",
+        "院区代码",
+        "院区编码"
+      ],
+      "ruleStandardName": "CAMPUS_CODE",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "院区代码，需手动配置"
+    },
+    "CAMPUS_NAME": {
+      "keywords": [
+        "campus_name",
+        "campusName",
+        "院区名称"
+      ],
+      "ruleStandardName": "CAMPUS_NAME",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "院区名称，需手动配置"
+    },
+    "UNIFIED_SOCIAL_CREDIT_ID": {
+      "keywords": [
+        "unified_social_credit_identifier",
+        "unifiedSocialCreditIdentifier",
+        "统一社会信用代码"
+      ],
+      "ruleStandardName": "UNIFIED_SOCIAL_CREDIT_ID",
+      "valueExpression": "",
+      "global": "",
+      "domain": "z0-common",
+      "fieldType": "parameter",
+      "defaultValue": "",
+      "description": "统一社会信用代码，需手动配置"
+    }
+  }
+}

@@ -1,0 +1,1698 @@
+Class web.YZSY.LFTest Extends %RegisteredObject
+{
+
+/// 一般护理记录单（填写日期查询）
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","ybhljl","2023-01-29","2023-01-29")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_ybhljl("2023-01-29","2023-01-29")
+Query ybhljl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,HLDJDM,TZ,TW,HXPL,ML,SSY,SZY,XYBHD,ZBDMBDBZ,YSQKDM,DGHLMS,QGHLDM,TWHL,PFHL,YYHL,YSZDDM,XLHLDM,AQHLDM,JYBQ,HLGCXMMC,HLGCJG,HLCZMC,HLCZXMLMMC,HLCZJG,HSQM,QMRQSJ,SFYYC,SFDD,HEALTHFALL,DRUGFALL,ENVFALL,OTHERFALL,HURT,AGAINFALL,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod ybhljlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURYBHLJLDLR"
+	s (YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,HLDJDM,TZ,TW,HXPL,ML,SSY,SZY,XYBHD,ZBDMBDBZ,YSQKDM,DGHLMS,QGHLDM,TWHL,PFHL,YYHL,YSZDDM,XLHLDM,AQHLDM,JYBQ,HLGCXMMC,HLGCJG,HLCZMC,HLCZXMLMMC,HLCZJG,HSQM,QMRQSJ,SFYYC,SFDD,HEALTHFALL,DRUGFALL,ENVFALL,OTHERFALL,HURT,AGAINFALL,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f EmrDate=SDate:1:EDate d
+	.s Len=$l(EmrCodeStr,"^")
+	.f i=1:1:Len  d	 
+	..s EmrCode=$p(EmrCodeStr,"^",i)
+	..s EmrCode=$ZConvert(EmrCode,"U")
+	..s TemplateId=""
+	..s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	..q:TemplateId="" 
+	..s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	..s TCIndent=a.TCIndentity
+	..s Typ=$ZConvert(TCIndent,"U")
+	..s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_Typ,PGDID)) q:PGDID=""  d
+	...s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ...s RecUser=arr.RecCancelUser //作废
+    ...q:RecUser'=""
+    ...s adm=arr.EpisodeId
+    ...s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ...s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ...q:PAADMType'="I"
+	...s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	...s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	...s JZLSH= adm // 就诊流水号
+	...s JLH=PGDID  //记录号
+	...s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	...I HZSFZJHM="" S HZSFZJHM=PatNo
+	...s SFZJLBDM="01"
+	...s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	...s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	...s KLX=$p(patInfo,"^",6)
+	...s HZLX="1"
+	...i KLX="" s KLX=6   //卡类型
+	...s ZYH=$p(patInfo,"^",3) //住院号 必填
+	...s BAH=$p(patInfo,"^",3) //病案号 必填
+	...s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	...i PatCardType'="" d
+	....if PatCardType="21" s ZJLX="01"
+	....else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	...s XB=$p(patInfo,"^",4)
+	...s HZXM=$p(patInfo,"^",1)
+	...s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	...i HYZK'="" d
+	....s HYData=$g(^CT("MAR",HYZK))
+	....s HYZK=$p($g(HYData),"^",1)
+	....s HYZKMC=$p($g(HYData),"^",2)
+	....s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	...s NLSS= $p(patInfo,"^",5) //必填 年龄
+	...s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	...s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	...s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	...s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	...s:HLDJDM="" HLDJDM="一级护理"
+	...s RecWard=arr.RecWard
+	...s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	...s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	...s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	...s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	...s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	...s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	...s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+    ...s TW=$ZOBJPROPERTY(arr,"Item4")   //体温
+    ...s HXPL=$ZOBJPROPERTY(arr,"Item6")   //呼吸
+    ...s ML=$ZOBJPROPERTY(arr,"Item5")   //脉搏
+    ...s SSY=$ZOBJPROPERTY(arr,"Item7")   //收缩
+    ...s SZY=$ZOBJPROPERTY(arr,"Item26")   //舒张
+    ...s XYBHD=$ZOBJPROPERTY(arr,"Item8")   //血氧饱和度
+    ...s ZBDMBDBZ=""
+    ...s YSQKDM=""
+    ...s GD=$ZOBJPROPERTY(arr,"Item18")		//管道
+    ...s DGHLMS=##class(web.LFTest).formatValueNew(GD)
+    ...s QGHLDM=""
+    ...s TWHL=$ZOBJPROPERTY(arr,"Item30")   //体位
+    ...s PF=$ZOBJPROPERTY(arr,"Item21")		//皮肤
+    ...s PFHL=##class(web.LFTest).formatValueNew(PF)
+    ...s YYHL=""
+    ...s YSZDDM=""
+    ...s XLHLDM=""
+    ...s AQHLDM=""
+    ...s JYBQ=$ZOBJPROPERTY(arr,"Item3")  //病情
+    ...s HLGCXMMC=""
+    ...s HLGCJG=""
+    ...s HLCZMC=""
+    ...s HLCZXMLMMC=""
+    ...s HLCZJG=""
+    ...s HSQM=$ZOBJPROPERTY(arr,"Item23")   //签名
+    ...s EmrDate=arr.EmrDate  //签名日期
+    ...s EmrTime=arr.EmrTime  //签名时间
+    ...s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ...s SFYYC=""
+    ...s SFDD=""
+    ...s HEALTHFALL=""
+    ...s DRUGFALL=""
+    ...s ENVFALL=""
+    ...s OTHERFALL=""
+    ...s HURT=""
+    ...s AGAINFALL=""
+    ...s MJ=""
+    ...s TBRQ=$zd(+$h,3)
+    ...s XGBZ=""
+    ...s SCZT=""
+
+    ...d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBMC,NLSS,NLY,JBZDDM,JBZDMC,HLDJDM,TZ,TW,HXPL,ML,SSY,SZY,XYBHD,ZBDMBDBZ,YSQKDM,DGHLMS,QGHLDM,TWHL,PFHL,YYHL,YSZDDM,XLHLDM,AQHLDM,JYBQ,HLGCXMMC,HLGCJG,HLCZMC,HLCZXMLMMC,HLCZJG,HSQM,QMRQSJ,SFYYC,SFDD,HEALTHFALL,DRUGFALL,ENVFALL,OTHERFALL,HURT,AGAINFALL,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod ybhljlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = ybhljlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod ybhljlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = ybhljlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 生命体征测量记录
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","smtzcljl","2023-01-29","2023-01-29")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_smtzcljl("2023-01-29","2023-01-29")
+Query smtzcljl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,RYRQSJ,SJZYTS,SSHFMHTS,JLRQSJ,HXPL,SYHXJBZ,ML,QBQXL,TW,SSY,SZY,TZ,FW,HLGCXMMC,HLGCJG,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod smtzcljlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+	s (YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,RYRQSJ,SJZYTS,SSHFMHTS,JLRQSJ,HXPL,SYHXJBZ,ML,QBQXL,TW,SSY,SZY,TZ,FW,HLGCXMMC,HLGCJG,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	 k ^||tempdata("LF")
+     s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	 s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	 s WardID="0"
+	 f  s WardID=$o(^PAWARD(WardID)) q:((WardID="")||(+WardID=0))  d 
+	 .;q:WardID'=30
+     .f admdata=SDate:1:EDate d
+     ..s MRIProwid=""
+     ..f  s MRIProwid=$o(^MRIPdaily("MRIPWARD",WardID,"MRIPDATE",admdata,MRIProwid)) q:MRIProwid=""  d
+     ...s IPDERowid="0"
+     ...f  s IPDERowid=$o(^DHCMRIPDetail(0,"IPDay",MRIProwid,IPDERowid)) q:IPDERowid=""  d
+     ....s IPDEType=$p(^DHCMRIPDetail(IPDERowid) ,"^",2)
+     ....q:IPDEType'="BEDRS"
+     ....s EpisodeID=$p(^DHCMRIPDetail(IPDERowid) ,"^",1)
+     ....s ^||tempdata("LF",WardID,EpisodeID) =""
+     
+
+      S WardID=""
+      f   s WardID=$o(^||tempdata("LF",WardID)) q:(WardID="")||(+WardID=0)  d
+     .;q:WardID'=30
+     .s wardDesc=$p(^PAWARD(WardID),"^",2)
+	 .s count=0
+     .s EpisodeID=""
+     .f  s EpisodeID=$o(^||tempdata("LF",WardID,EpisodeID))  q:EpisodeID=""  d
+     ..s VisitStatus=$P(^PAADM(EpisodeID),"^",20)
+     ..s adm=EpisodeID
+     ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+	 ..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	 ..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	 ..s JZLSH= adm // 就诊流水号
+	 ..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	 ..I HZSFZJHM="" S HZSFZJHM=PatNo
+	 ..s SFZJLBDM="01"
+	 ..s KH=$p(patInfo,"^",7)
+	 ..i KH="" s KH=PatNo  //卡号
+	 ..s KLX=$p(patInfo,"^",6)
+	 ..s HZLX="1"
+	 ..i KLX="" s KLX=6   //卡类型
+	 ..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	 ..s BAH=$p(patInfo,"^",3) //病案号 必填
+	 ..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	 ..i PatCardType'="" d
+	 ...if PatCardType="21" s ZJLX="01"
+	 ...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	 ..s XB=$p(patInfo,"^",4)
+	 ..s:XB="1" XBMC="男"
+	 ..s:XB="2" XBMC="女" 
+	 ..s:XB="3" XB="0",XBMC="未知性别"
+	 ..s:XB="4" XB="9",XBMC="未说明性别"
+	 ..s HZXM=$p(patInfo,"^",1)
+	 ..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	 ..i HYZK'="" d
+	 ...s HYData=$g(^CT("MAR",HYZK))
+	 ...s HYZK=$p($g(HYData),"^",1)
+	 ...s HYZKMC=$p($g(HYData),"^",2)
+	 ...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	 ..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	 ..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	 ..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	 ..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	 ..s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	 ..s RecWard=$P(^PAADM(adm),"^",70)
+	 ..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	 ..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	 ..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	 ..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	 ..s JBZDBM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	 ..s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	 ..s RYRQSJ=##class(Nur.NIS.Service.Base.Patient).GetInHospDateTime(adm)
+	 ..s SJZYTS=##class(Nur.NIS.Service.Base.Patient).PatInDays(adm)
+	 
+	 ..s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+
+     ..S mradm=$P(^PAADM(EpisodeID),"^",61)
+     ..f OBSDat=SDate:1:EDate d
+     ...s OBSDatNEW=$zd(OBSDat,3)
+     ...s SSHFMHTS=##class(Nur.NIS.Service.Chart.DAO.Expression).getOperDay("133",adm,OBSDatNEW)
+     ...s OBSTime=0 f  s OBSTime=$o(^MR(mradm,"OBS",0,"DateTime",OBSDat,OBSTime)) q:OBSTime=""  d
+     ....s (Value,HXPL,ML,QBQXL,TW,SSY,SZY,TZ,UserDR,User,QMRQSJ)=""
+     ....s JLRQSJ=OBSDatNEW_" "_$zt(OBSTime)
+     ....s OBSChildsub=0 f  s OBSChildsub=$o(^MR(mradm,"OBS",0,"DateTime",OBSDat,OBSTime,OBSChildsub)) q:OBSChildsub=""  d
+     .....s JLH=mradm_"||"_OBSChildsub  //记录号
+     .....s QMRQSJ=$zd($p(^MR(mradm,"OBS",OBSChildsub),"^",11),3)_" "_$zt($p(^MR(mradm,"OBS",OBSChildsub),"^",12))
+     .....s Item=$p(^MR(mradm,"OBS",OBSChildsub),"^",1)
+     .....s Value=$p(^MR(mradm,"OBS",OBSChildsub),"^",2)
+     .....s UserDR=$p(^MR(mradm,"OBS",OBSChildsub),"^",5)
+     .....s HSQM=$p(^SSU("SSUSR",UserDR),"^",2)
+	 .....s ITMDesc=$p(^MRC("OBITM",Item),"^",2)
+	 .....s:ITMDesc["呼吸" HXPL=Value
+	 .....s:ITMDesc["脉搏" ML=Value
+	 .....s:ITMDesc["心率" QBQXL=Value
+	 .....s:ITMDesc["腋温" TW=Value
+	 .....s:ITMDesc["收缩" SSY=Value
+	 .....s:ITMDesc["舒张" SZY=Value
+	 .....s:ITMDesc["体重" TZ=Value
+     ....d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBMC,NLSS,NLY,JBZDBM,JBZDMC,RYRQSJ,SJZYTS,SSHFMHTS,JLRQSJ,HXPL,SYHXJBZ,ML,QBQXL,TW,SSY,SZY,TZ,FW,HLGCXMMC,HLGCJG,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod SMTZCLJLClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = SMTZCLJLExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod smtzcljlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = smtzcljlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 危（重）护理记录（填写日期查询）
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","bwhljl","2023-01-29","2023-01-29")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_bwhljl("2023-01-29","2023-01-29")
+Query bwhljl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLS,NLY,HLDJDM,JBZDBM,TZ,TW,XL,HXPL,SSY,SZY,XTJCZ,XYBHD,SZ,TKDXZ,TKDXY,TKFSZ,TKFSY,XT,WH,XYFS,XYLL,SKSC,JMZGMC,JMZGHL,GDMC,ZLB,RLYY,RLYL,RLQT,QTRL,CLN,CLQT,QTCL,BQBHJHLCS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod bwhljlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURZZHZHLJL"
+	s (YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLS,NLY,HLDJDM,JBZDBM,TZ,TW,XL,HXPL,SSY,SZY,XTJCZ,XYBHD,SZ,TKDXZ,TKDXY,TKFSZ,TKFSY,XT,WH,XYFS,XYLL,SKSC,JMZGMC,JMZGHL,GDMC,ZLB,RLYY,RLYL,RLQT,QTRL,CLN,CLQT,QTCL,BQBHJHLCS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	f EmrDate=SDate:1:EDate d
+	.s Len=$l(EmrCodeStr,"^")
+	.f i=1:1:Len  d	 
+	..s EmrCode=$p(EmrCodeStr,"^",i)
+	..s EmrCode=$ZConvert(EmrCode,"U")
+	..s TemplateId=""
+	..s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	..q:TemplateId="" 
+	..s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	..s TCIndent=a.TCIndentity
+	..s Typ=$ZConvert(TCIndent,"U")
+	..s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_Typ,PGDID)) q:PGDID=""  d
+	...s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ...s RecUser=arr.RecCancelUser //作废
+    ...q:RecUser'=""
+    ...s adm=arr.EpisodeId
+    ...s PatRowID=$p($g(^PAADM(adm)),"^",1)
+	...s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	...s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	...s JZLSH= adm // 就诊流水号
+	...s JLH=PGDID  //记录号
+	...s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	...I HZSFZJHM="" S HZSFZJHM=PatNo
+	...s SFZJLBDM="01"
+	...s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	...s KLX=$p(patInfo,"^",6)
+	...s HZLX="1"
+	...i KLX="" s KLX=6   //卡类型
+	...s ZYH=$p(patInfo,"^",3) //住院号 必填
+	...s BAH=$p(patInfo,"^",3) //病案号 必填
+	...s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	...i PatCardType'="" d
+	....if PatCardType="21" s ZJLX="01"
+	....else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	...s XB=$p(patInfo,"^",4)
+	...s:XB="1" XBMC="男"
+	...s:XB="2" XBMC="女" 
+	...s:XB="3" XB="0",XBMC="未知性别"
+	...s:XB="4" XB="9",XBMC="未说明性别"
+	...s HZXM=$p(patInfo,"^",1)
+	...s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	...i HYZK'="" d
+	....s HYData=$g(^CT("MAR",HYZK))
+	....s HYZK=$p($g(HYData),"^",1)
+	....s HYZKMC=$p($g(HYData),"^",2)
+	....s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	...s NLSS= $p(patInfo,"^",5) //必填 年龄
+	...s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	...s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	...s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	...s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	...s RecWard=arr.RecWard
+	...s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	...s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	...s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	...s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	...s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	...s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	...s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+    ...s TW=$ZOBJPROPERTY(arr,"Item23")   //体温
+    ...s XL=$ZOBJPROPERTY(arr,"Item24")   //心率
+    ...s HXPL=$ZOBJPROPERTY(arr,"Item25")   //呼吸
+    ...s xueya=$ZOBJPROPERTY(arr,"Item54")   //血压
+    ...s:xueya'="" SSY=$p(xueya,"/",1)  //收缩
+    ...s:xueya'="" SZY=$p(xueya,"/",2)   //舒张
+    ...s XYBHD=$ZOBJPROPERTY(arr,"Item33")   //血氧饱和度
+    ...s SZValue=$ZOBJPROPERTY(arr,"Item28")   //神志
+    ...s SZ=##class(web.LFTest).formatValueNew(SZValue)
+    ...s TKDXZ=$ZOBJPROPERTY(arr,"Item29")   //瞳孔大小(左)
+    ...s TKDXY=$ZOBJPROPERTY(arr,"Item30")   //瞳孔大小(右)
+    ...s TKFSZValue=$ZOBJPROPERTY(arr,"Item31")
+    ...s TKFSZ=##class(web.LFTest).formatValueNew(TKFSZValue)  //瞳孔反射(左)
+    ...s TKFSYValue=$ZOBJPROPERTY(arr,"Item32") 
+    ...s TKFSY=##class(web.LFTest).formatValueNew(TKFSYValue)  //瞳孔反射(右)
+    ...s XT=0
+    ...s:$ZOBJPROPERTY(arr,"Item11")'="" XT=1   //吸痰
+    ...s WH=0
+    ...s:$ZOBJPROPERTY(arr,"Item16")'="" WH=1   //雾化
+    ...s RLValueStr=$ZOBJPROPERTY(arr,"Item55") 
+    ...s RLValueStryl=$ZOBJPROPERTY(arr,"Item36")
+    ...s RLValue=##class(web.LFTest).formatValueNew(RLValueStr)
+    ...s:RLValue'=RLValueStr RLYY=RLValue,RLYL=RLValueStryl
+    ...S:RLValue=RLValueStr RLQT=RLValue,QTRL=RLValueStryl   //入量
+    ...s CLValueStr=$ZOBJPROPERTY(arr,"Item56") 
+    ...s CLValueStryl=$ZOBJPROPERTY(arr,"Item38")
+    ...s CLValue=##class(web.LFTest).formatValueNew(CLValueStr)
+    ...i (CLValue["小便")||(CLValue["尿") d
+    ....s CLN=CLValueStryl
+    ...else  d 
+    ....s CLQT=CLValue,QTCL=CLValueStryl  //出量 
+    ...s BQBHJHLCS=$ZOBJPROPERTY(arr,"Item20")
+    ...s HSQM=$ZOBJPROPERTY(arr,"Item21")
+    ...s EmrDate=arr.EmrDate  //签名日期
+    ...s EmrTime=arr.EmrTime  //签名时间
+    ...s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ...s SFYYC=""
+    ...s SFDD=""
+    ...s HEALTHFALL=""
+    ...s DRUGFALL=""
+    ...s ENVFALL=""
+    ...s OTHERFALL=""
+    ...s HURT=""
+    ...s AGAINFALL=""
+    ...s MJ=""
+    ...s TBRQ=$zd(+$h,3)
+    ...s XGBZ=""
+    ...s SCZT=""
+
+    
+    ...d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLS,NLY,HLDJDM,JBZDBM,TZ,TW,XL,HXPL,SSY,SZY,XTJCZ,XYBHD,SZ,TKDXZ,TKDXY,TKFSZ,TKFSY,XT,WH,XYFS,XYLL,SKSC,JMZGMC,JMZGHL,GDMC,ZLB,RLYY,RLYL,RLQT,QTRL,CLN,CLQT,QTCL,BQBHJHLCS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod bwhljlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = bwhljlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod bwhljlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = bwhljlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 阴道分娩记录
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","ydfmjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_ydfmjl("2023-01-29","2023-01-29")
+Query ydfmjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSMC,BQMC,BFH,BCH,YC,CC,MCYJRQ,YCQ,LCRQSJ,TMPLRQSJ,QYSXZ,QYSL,D1CCSC,GKKQRQSJ,D2CCSC,TEMCRQSJ,D3CCSC,ZCCSC,TFWDM,YDZCBZ,YDZCFS,YSXZ,YSL,TPMCRQSJ,TPMCQK,TMWZQKBZ,RJS,QDCD,QDYCQKBZ,CSYY,YFCS,CFHYQKBZ,HYQKWZ,CFHYFHZS,HYLSCDDM,HYXZBZ,MZFFDM,MZYWMC,YDLSBZ,YDXZBZ,YDXZDX,YDXZCL,GJLSBZ,GJFHQK,GC,CHYY,FMGCTSQKMS,GSQK,ZGQK,ELZK,XBSSGC,CQDXQKBZ,CHZD,CHGCRQSJ,CHJCSJ,CHSSY,CHSZY,CHMB,CHXL,CHCXL,CHGS,CHGDGD,CHBZCYBZ,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,JSRYQM,SSYSQM,EKYSQM,HYZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod ydfmjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+	s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s ckrypgCode="DHCNURCKRYHUPG"  //入院评估
+	s ckrypgCode=$ZConvert(ckrypgCode,"U")
+	s ckrypgTemplateId=""
+	s ckrypgTemplateId=$o(^NurMp.TemplateI("Indentity"," "_ckrypgCode,ckrypgTemplateId))
+	s a=##class(NurMp.Template).%OpenId(ckrypgTemplateId) 
+	s ryTCIndent=a.TCIndentity
+	s ryTyp=$ZConvert(ryTCIndent,"U")
+	
+	
+
+	s fmjlCode="DHCNURFMJLD"	 //分娩记录
+	s fmjlCode=$ZConvert(fmjlCode,"U")
+	s fmjlTemplateId=""
+	s fmjlTemplateId=$o(^NurMp.TemplateI("Indentity"," "_fmjlCode,fmjlTemplateId))
+	s b=##class(NurMp.Template).%OpenId(fmjlTemplateId) 
+	s fmTCIndent=b.TCIndentity
+	s fmTyp=$ZConvert(fmTCIndent,"U")
+	s (YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSMC,BQMC,BFH,BCH,YC,CC,MCYJRQ,YCQ,LCRQSJ,TMPLRQSJ,QYSXZ,QYSL,D1CCSC,GKKQRQSJ,D2CCSC,TEMCRQSJ,D3CCSC,ZCCSC,TFWDM,YDZCBZ,YDZCFS,YSXZ,YSL,TPMCRQSJ,TPMCQK,TMWZQKBZ,RJS,QDCD,QDYCQKBZ,CSYY,YFCS,CFHYQKBZ,HYQKWZ,CFHYFHZS,HYLSCDDM,HYXZBZ,MZFFDM,MZYWMC,YDLSBZ,YDXZBZ,YDXZDX,YDXZCL,GJLSBZ,GJFHQK,GC,CHYY,FMGCTSQKMS,GSQK,ZGQK,ELZK,XBSSGC,CQDXQKBZ,CHZD,CHGCRQSJ,CHJCSJ,CHSSY,CHSZY,CHMB,CHXL,CHCXL,CHGS,CHGDGD,CHBZCYBZ,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,JSRYQM,SSYSQM,EKYSQM,HYZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	f EmrDate=SDate:1:EDate d
+	.s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_fmTyp,PGDID)) q:PGDID=""  d
+	..s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ..s RecUser=arr.RecCancelUser //作废
+    ..q:RecUser'=""
+    ..s adm=arr.EpisodeId
+    ..s rypgid=$o(^NurMp.DHCTempMultDataI("EmrCode"," "_ryTyp," "_adm,0))
+    ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+	..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	..s JZLSH= adm // 就诊流水号
+	..s JLH=PGDID  //记录号
+	..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	..I HZSFZJHM="" S HZSFZJHM=PatNo
+	..s SFZJLBDM="01"
+	..s KH=$p(patInfo,"^",7)
+	..i KH="" s KH=PatNo  //卡号
+	..s KLX=$p(patInfo,"^",6)
+	..s HZLX="1"
+	..i KLX="" s KLX=6   //卡类型
+	..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	..s BAH=$p(patInfo,"^",3) //病案号 必填
+	..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	..i PatCardType'="" d
+	...if PatCardType="21" s ZJLX="01"
+	...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	..s XB=$p(patInfo,"^",4)
+	..s:XB="1" XBMC="男"
+	..s:XB="2" XBMC="女" 
+	..s:XB="3" XB="0",XBMC="未知性别"
+	..s:XB="4" XB="9",XBMC="未说明性别"
+	..s CFXM=$p(patInfo,"^",1)
+	..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	..i HYZK'="" d
+	...s HYData=$g(^CT("MAR",HYZK))
+	...s HYZK=$p($g(HYData),"^",1)
+	...s HYZKMC=$p($g(HYData),"^",2)
+	...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	..s RecWard=arr.RecWard
+	..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	..s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	..s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	..s DCRQSJ=##class(Nur.NIS.Service.Base.Patient).GetInHospDateTime(adm) 
+	..s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+	..i rypgid'="" d
+	...s ryarr=##class(NurMp.DHCTempMultData).%OpenId(rypgid)
+    ...s ryRecUser=ryarr.RecCancelUser //作废
+    ...q:ryRecUser'="" 
+    ...s YC=$ZOBJPROPERTY(ryarr,"Item52")   //孕次
+	...s CC=$ZOBJPROPERTY(ryarr,"Item53")   //产次
+	
+	
+	
+	..s SYXSDM= $ZOBJPROPERTY(arr,"Item6")
+	..s SYXSDM=##class(web.LFTest).formatValueNew(SYXSDM)
+	..s YCQ=""
+	
+	..s TMPLRQSJ=$ZOBJPROPERTY(arr,"Item68")_" "_$ZOBJPROPERTY(arr,"Item56")   ///胎膜破裂日期时间
+	..s QYSXZ=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item54"))  //羊水性状
+	..s QYSL=$ZOBJPROPERTY(arr,"Item8")    //羊水量
+	..s D1CCSC=$ZOBJPROPERTY(arr,"Item12")   //第一产程
+	..s GKKQRQSJ=""
+	..s D2CCSC=$ZOBJPROPERTY(arr,"Item13")   //第二产程
+	..s TEMCRQSJ=$ZOBJPROPERTY(arr,"Item65")_" "_$ZOBJPROPERTY(arr,"Item57")  //胎儿娩出日期时间
+	..s D3CCSC=$ZOBJPROPERTY(arr,"Item14")   //第三产程
+	..s ZCCSC=$ZOBJPROPERTY(arr,"Item64")  //总产程
+	..s TFWDM=$ZOBJPROPERTY(arr,"Item17")   //胎方位
+	..s YDZCBZValue=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item15"))  //助产
+	..s:(YDZCBZValue'="")&&(YDZCBZValue'="平产" ) YDZCBZ=1,YDZCFS=YDZCBZValue
+	..s TPMCRQSJ=$ZOBJPROPERTY(arr,"Item66")_" "_$ZOBJPROPERTY(arr,"Item59")  //胎盘娩出日期时间
+    ..S TPMCQK=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item26"))
+    ..s TMWZQKBZValue=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item29"))
+    ..s:TMWZQKBZValue="无" TMWZQKBZ=1  //胎膜完整情况标志
+    ..s QDCD=$ZOBJPROPERTY(arr,"Item30")  //脐带长度
+    ..s CFHYQKBZVaule=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item32"))
+    ..s:CFHYQKBZVaule["切" CFHYQKBZ=1
+    ..s CFHYFHZS=$ZOBJPROPERTY(arr,"Item36")+$ZOBJPROPERTY(arr,"Item37") 
+    ..s HYLSCDDM=CFHYQKBZVaule
+    ..s GJFHQK=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item38"))
+    ..s CHYY=$ZOBJPROPERTY(arr,"Item41")
+    ..s FMGCTSQKMS=$ZOBJPROPERTY(arr,"Item31")
+    ..s CHZD=$ZOBJPROPERTY(arr,"Item49")
+    ..s chxy=$ZOBJPROPERTY(arr,"Item44")
+    ..s:chxy'="" CHSSY=$p(chxy,"/",1),CHSZY=$p(chxy,"/",1)
+    ..s CHCXL=$ZOBJPROPERTY(arr,"Item39")
+    ..s CHGDGD=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item53"))
+    ..s XSEXBDM=$ZOBJPROPERTY(arr,"Item19") 
+    ..s XSECSTZ=$ZOBJPROPERTY(arr,"Item20")
+    ..s XSECSSC=$ZOBJPROPERTY(arr,"Item21")
+    ..s APGARPFJGSJDM="5分钟"
+    ..s APGARPFZ=$ZOBJPROPERTY(arr,"Item22")_"/"_$ZOBJPROPERTY(arr,"Item23")_"/"_$ZOBJPROPERTY(arr,"Item24")
+    ..s JSRYQM=$ZOBJPROPERTY(arr,"Item50")
+    
+    
+    
+    ..s EmrDate=arr.EmrDate  //签名日期
+    ..s EmrTime=arr.EmrTime  //签名时间
+    ..s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ..s SFYYC=""
+    ..s SFDD=""
+    ..s HEALTHFALL=""
+    ..s DRUGFALL=""
+    ..s ENVFALL=""
+    ..s OTHERFALL=""
+    ..s HURT=""
+    ..s AGAINFALL=""
+    ..s MJ=""
+    ..s TBRQ=$zd(+$h,3)
+    ..s XGBZ=""
+    ..s SCZT=""
+
+    
+    ..d OutputRowDictDept
+     ....d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSMC,BQMC,BFH,BCH,YC,CC,MCYJRQ,YCQ,LCRQSJ,TMPLRQSJ,QYSXZ,QYSL,D1CCSC,GKKQRQSJ,D2CCSC,TEMCRQSJ,D3CCSC,ZCCSC,TFWDM,YDZCBZ,YDZCFS,YSXZ,YSL,TPMCRQSJ,TPMCQK,TMWZQKBZ,RJS,QDCD,QDYCQKBZ,CSYY,YFCS,CFHYQKBZ,HYQKWZ,CFHYFHZS,HYLSCDDM,HYXZBZ,MZFFDM,MZYWMC,YDLSBZ,YDXZBZ,YDXZDX,YDXZCL,GJLSBZ,GJFHQK,GC,CHYY,FMGCTSQKMS,GSQK,ZGQK,ELZK,XBSSGC,CQDXQKBZ,CHZD,CHGCRQSJ,CHJCSJ,CHSSY,CHSZY,CHMB,CHXL,CHCXL,CHGS,CHGDGD,CHBZCYBZ,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,JSRYQM,SSYSQM,EKYSQM,HYZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod ydfmjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = ydfmjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod ydfmjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = ydfmjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 待产记录(分娩进行记录)
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","dcjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_dcjl("2023-01-29","2023-01-29")
+Query dcjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,YC,CC,MCYJRQ,SYXSDM,YCQ,CQJCBZ,CQJCYCQK,YQTZ,SG,FMQTZ,CCRSTSQK,JWS,SSS,JWYCS,SSY,SZY,TW,ML,HXPL,GDGD,FW,TXL,TFWDM,GJTETZ,TWNCQKDPG,ZCWJ,ZGJJJJ,GSQK,GJQK,GKQK,TMQKDM,PMFSDM,XLWZ,YSQK,BZCYBZ,CZQBZ,JCFSDM,CZJH,JHXQDFMFS,CCJLRQSJ,CCJG,CCJCZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod dcjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURYSFMJXJL"
+	s (YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,YC,CC,MCYJRQ,SYXSDM,YCQ,CQJCBZ,CQJCYCQK,YQTZ,SG,FMQTZ,CCRSTSQK,JWS,SSS,JWYCS,SSY,SZY,TW,ML,HXPL,GDGD,FW,TXL,TFWDM,GJTETZ,TWNCQKDPG,ZCWJ,ZGJJJJ,GSQK,GJQK,GKQK,TMQKDM,PMFSDM,XLWZ,YSQK,BZCYBZ,CZQBZ,JCFSDM,CZJH,JHXQDFMFS,CCJLRQSJ,CCJG,CCJCZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f EmrDate=SDate:1:EDate d
+	.s Len=$l(EmrCodeStr,"^")
+	.f i=1:1:Len  d	 
+	..s EmrCode=$p(EmrCodeStr,"^",i)
+	..s EmrCode=$ZConvert(EmrCode,"U")
+	..s TemplateId=""
+	..s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	..q:TemplateId="" 
+	..s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	..s TCIndent=a.TCIndentity
+	..s Typ=$ZConvert(TCIndent,"U")
+	..s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_Typ,PGDID)) q:PGDID=""  d
+	...s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ...s RecUser=arr.RecCancelUser //作废
+    ...q:RecUser'=""
+    ...s adm=arr.EpisodeId
+    ...s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ...s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ...q:PAADMType'="I"
+	...s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	...s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	...s JZLSH= adm // 就诊流水号
+	...s JLH=PGDID  //记录号
+	...s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	...I HZSFZJHM="" S HZSFZJHM=PatNo
+	...s SFZJLBDM="01"
+	...s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	...s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	...s KLX=$p(patInfo,"^",6)
+	...s HZLX="1"
+	...i KLX="" s KLX=6   //卡类型
+	...s ZYH=$p(patInfo,"^",3) //住院号 必填
+	...s BAH=$p(patInfo,"^",3) //病案号 必填
+	...s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	...i PatCardType'="" d
+	....if PatCardType="21" s ZJLX="01"
+	....else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	...s XB=$p(patInfo,"^",4)
+	...s CFXM=$p(patInfo,"^",1)  //姓名
+	...s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	...i HYZK'="" d
+	....s HYData=$g(^CT("MAR",HYZK))
+	....s HYZK=$p($g(HYData),"^",1)
+	....s HYZKMC=$p($g(HYData),"^",2)
+	....s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	...s NLSS= $p(patInfo,"^",5) //必填 年龄
+	...s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	...s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	...s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	...s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	...s:HLDJDM="" HLDJDM="一级护理"
+	...s RecWard=arr.RecWard
+	...s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	...s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	...s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	...s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	...s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	...s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	...s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+    ...s Xueya=$ZOBJPROPERTY(arr,"Item9")   //血压
+    ...s:Xueya'="" SSY=$p(Xueya,"/",1),SZY=$P(Xueya,"/",2)
+    ...s ML=$ZOBJPROPERTY(arr,"Item10")   //脉搏
+    ...S TXL=$ZOBJPROPERTY(arr,"Item2")  //胎心
+    ...s GSQK=$ZOBJPROPERTY(arr,"Item3")  //宫缩
+    ...s GJQK=$ZOBJPROPERTY(arr,"Item4")  //宫颈
+    ...s GKQK=$ZOBJPROPERTY(arr,"Item19")  //宫口
+    ...s TMQKDM=$ZOBJPROPERTY(arr,"Item18")  //胎膜
+    ...s XLWZ=$ZOBJPROPERTY(arr,"Item17")  //先露
+    ...s YSQK=$ZOBJPROPERTY(arr,"Item15")  //羊水
+    ...s CZJH=$ZOBJPROPERTY(arr,"Item13")  //处置计划
+    ...s CCJCZQM=$ZOBJPROPERTY(arr,"Item14")  //检查者
+    ...s JLRQM=CCJCZQM
+    ...s EmrDate=arr.EmrDate  //签名日期
+    ...s EmrTime=arr.EmrTime  //签名时间
+    ...s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ...s SFYYC=""
+    ...s SFDD=""
+    ...s HEALTHFALL=""
+    ...s DRUGFALL=""
+    ...s ENVFALL=""
+    ...s OTHERFALL=""
+    ...s HURT=""
+    ...s AGAINFALL=""
+    ...s MJ=""
+    ...s TBRQ=$zd(+$h,3)
+    ...s XGBZ=""
+    ...s SCZT=""
+
+    ...d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,YC,CC,MCYJRQ,SYXSDM,YCQ,CQJCBZ,CQJCYCQK,YQTZ,SG,FMQTZ,CCRSTSQK,JWS,SSS,JWYCS,SSY,SZY,TW,ML,HXPL,GDGD,FW,TXL,TFWDM,GJTETZ,TWNCQKDPG,ZCWJ,ZGJJJJ,GSQK,GJQK,GKQK,TMQKDM,PMFSDM,XLWZ,YSQK,BZCYBZ,CZQBZ,JCFSDM,CZJH,JHXQDFMFS,CCJLRQSJ,CCJG,CCJCZQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod dcjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = dcjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod dcjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = dcjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 入院评估
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","rypgjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_rypgjl("2023-01-29","2023-01-29")
+Query rypgjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,GJDM,MZ,HYZKDM,ZYLBDM,XLDM,HZDHHM,GZDWDHHM,HZDZYJDZ,LXRGXDM,LXRXM,LXRDHHM,RBFFS,RYZDBM,RYZDMC,RYRQSJ,ZYZZ,TZ,TW,HXPL,ML,SSY,SZY,RYYY,RYTJDM,APFZ,YSQKDM,FYCDDM,JSZTZCBZ,SMZK,TSQK,XLZTDM,YYZTDM,ZLNLDM,GMS,YBJKZKBZ,JBSHWS,HZCRXBZ,CRBS,YFJZS,SSS,SXS,JZS,HLGCXMMC,HLGCJG,XYBZ,TZXYTS,XYZKDM,RXYL,YJBZ,YJPLDM,RYJL,TZYSBZ,TZYSRQSJ,PGRQSJ,ZRHSQM,JZHSQM,QMRQSJ,FLAG_SORE,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod rypgjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURZYBRPGD"
+	s (YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,GJDM,MZ,HYZKDM,ZYLBDM,XLDM,HZDHHM,GZDWDHHM,HZDZYJDZ,LXRGXDM,LXRXM,LXRDHHM,RBFFS,RYZDBM,RYZDMC,RYRQSJ,ZYZZ,TZ,TW,HXPL,ML,SSY,SZY,RYYY,RYTJDM,APFZ,YSQKDM,FYCDDM,JSZTZCBZ,SMZK,TSQK,XLZTDM,YYZTDM,ZLNLDM,GMS,YBJKZKBZ,JBSHWS,HZCRXBZ,CRBS,YFJZS,SSS,SXS,JZS,HLGCXMMC,HLGCJG,XYBZ,TZXYTS,XYZKDM,RXYL,YJBZ,YJPLDM,RYJL,TZYSBZ,TZYSRQSJ,PGRQSJ,ZRHSQM,JZHSQM,QMRQSJ,FLAGSORE,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f EmrDate=SDate:1:EDate d
+	.s Len=$l(EmrCodeStr,"^")
+	.f i=1:1:Len  d	 
+	..s EmrCode=$p(EmrCodeStr,"^",i)
+	..s EmrCode=$ZConvert(EmrCode,"U")
+	..s TemplateId=""
+	..s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	..q:TemplateId="" 
+	..s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	..s TCIndent=a.TCIndentity
+	..s Typ=$ZConvert(TCIndent,"U")
+	..s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_Typ,PGDID)) q:PGDID=""  d
+	...s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ...s RecUser=arr.RecCancelUser //作废
+    ...q:RecUser'=""
+    ...s adm=arr.EpisodeId
+    ...s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ...s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ...q:PAADMType'="I"
+	...s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	...s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	...s JZLSH= adm // 就诊流水号
+	...s JLH=PGDID  //记录号
+	...s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	...I HZSFZJHM="" S HZSFZJHM=PatNo
+	...s SFZJLBDM="01"
+	...s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	...s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	...s KLX=$p(patInfo,"^",6)
+	...s HZLX="1"
+	...i KLX="" s KLX=6   //卡类型
+	...s ZYH=$p(patInfo,"^",3) //住院号 必填
+	...s BAH=$p(patInfo,"^",3) //病案号 必填
+	...s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	...i PatCardType'="" d
+	....if PatCardType="21" s ZJLX="01"
+	....else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	...s XB=$p(patInfo,"^",4)
+	...s CFXM=$p(patInfo,"^",1)  //姓名
+	...s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	...i HYZK'="" d
+	....s HYData=$g(^CT("MAR",HYZK))
+	....s HYZK=$p($g(HYData),"^",1)
+	....s HYZKMC=$p($g(HYData),"^",2)
+	....s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	...s NLSS= $p(patInfo,"^",5) //必填 年龄
+	...s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	...s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	...s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	...s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	...s:HLDJDM="" HLDJDM="一级护理"
+	...s RecWard=arr.RecWard
+	...s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	...s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	...s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	...s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	...s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	...s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	...s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+	...s TW= ##class(web.LFTest).firstTZ(adm,69)
+	...S HXPL=##class(web.LFTest).firstTZ(adm,68)
+	...S ML=##class(web.LFTest).firstTZ(adm,67)
+	...S SSY=##class(web.LFTest).firstTZ(adm,70)
+	...S SZY=##class(web.LFTest).firstTZ(adm,71)
+	
+    ...s RYYY=$ZOBJPROPERTY(arr,"Item17")   //入院原因--门急诊诊断
+    ...s YSQKDM=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item23"))_$ZOBJPROPERTY(arr,"Item48")   //饮食
+    ...S JSZTZCBZ=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item18"))   //精神--意识
+    ...s ZLNLDM=$ZOBJPROPERTY(arr,"Item55")  //自理能力代码
+    ...s GMS=##class(Nur.NIS.Service.Base.Patient).GetAllergys(adm)  //过敏史
+    ...s XYBZ=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item34"))  //吸烟
+    ...s YJBZValue=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item35"))  //饮酒
+    ...s:(YJBZValue'="")&&(YJBZValue'="无") YJBZ=1,YJPLDM=YJBZValue
+    ...s PGRQSJ=$ZOBJPROPERTY(arr,"Item43")
+    ...s ZRHSQM=$ZOBJPROPERTY(arr,"Item42")
+    ...s FLAGSOREValue=##class(web.LFTest).NurEmrValue("DHCNURYCPGBLR",adm,"Item9",1)
+    ...s:FLAGSOREValue<19 FLAGSORE=1
+    ...s EmrDate=arr.EmrDate  //签名日期
+    ...s EmrTime=arr.EmrTime  //签名时间
+    ...s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ...s SFYYC=""
+    ...s SFDD=""
+    ...s HEALTHFALL=""
+    ...s DRUGFALL=""
+    ...s ENVFALL=""
+    ...s OTHERFALL=""
+    ...s HURT=""
+    ...s AGAINFALL=""
+    ...s MJ=""
+    ...s TBRQ=$zd(+$h,3)
+    ...s XGBZ=""
+    ...s SCZT=""
+
+    ...d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,GJDM,MZ,HYZKDM,ZYLBDM,XLDM,HZDHHM,GZDWDHHM,HZDZYJDZ,LXRGXDM,LXRXM,LXRDHHM,RBFFS,RYZDBM,RYZDMC,RYRQSJ,ZYZZ,TZ,TW,HXPL,ML,SSY,SZY,RYYY,RYTJDM,APFZ,YSQKDM,FYCDDM,JSZTZCBZ,SMZK,TSQK,XLZTDM,YYZTDM,ZLNLDM,GMS,YBJKZKBZ,JBSHWS,HZCRXBZ,CRBS,YFJZS,SSS,SXS,JZS,HLGCXMMC,HLGCJG,XYBZ,TZXYTS,XYZKDM,RXYL,YJBZ,YJPLDM,RYJL,TZYSBZ,TZYSRQSJ,PGRQSJ,ZRHSQM,JZHSQM,QMRQSJ,FLAGSORE,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod rypgjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = rypgjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod rypgjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = rypgjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 护理计划
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","hljhjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_hljhjl("2023-01-29","2023-01-29")
+Query hljhjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLWT,HLCZXMLMMC,HLCZMC,HLCZJG,DGHLMS,TWHL,PFHL,QGHLDM,AQHLDM,YSZDDM,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod hljhjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURBILR^DHCNURDDPGBLR^DHCNURGDPGBLR^DHCNURYCPGBLR"  //生活能力^跌倒^管道^压疮
+	s (YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLWT,HLCZXMLMMC,HLCZMC,HLCZJG,DGHLMS,TWHL,PFHL,QGHLDM,AQHLDM,YSZDDM,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f EmrDate=SDate:1:EDate d
+	.s Len=$l(EmrCodeStr,"^")
+	.f i=1:1:Len  d	 
+	..s EmrCode=$p(EmrCodeStr,"^",i)
+	..s EmrCode=$ZConvert(EmrCode,"U")
+	..s TemplateId=""
+	..s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	..q:TemplateId="" 
+	..s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	..s TCIndent=a.TCIndentity
+	..s Typ=$ZConvert(TCIndent,"U")
+	..s PGDID=0  f  s PGDID=$o(^NurMp.DHCTempMultDataI("emdate",EmrDate," "_Typ,PGDID)) q:PGDID=""  d
+	...s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ...s RecUser=arr.RecCancelUser //作废
+    ...q:RecUser'=""
+    ...s adm=arr.EpisodeId
+    ...s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ...s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ...q:PAADMType'="I"
+	...s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	...s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	...s JZLSH= adm // 就诊流水号
+	...s JLH=PGDID  //记录号
+	...s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	...I HZSFZJHM="" S HZSFZJHM=PatNo
+	...s SFZJLBDM="01"
+	...s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	...s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	...s KLX=$p(patInfo,"^",6)
+	...s HZLX="1"
+	...i KLX="" s KLX=6   //卡类型
+	...s ZYH=$p(patInfo,"^",3) //住院号 必填
+	...s BAH=$p(patInfo,"^",3) //病案号 必填
+	...s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	...i PatCardType'="" d
+	....if PatCardType="21" s ZJLX="01"
+	....else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	...s XB=$p(patInfo,"^",4)
+	...s CFXM=$p(patInfo,"^",1)  //姓名
+	...s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	...i HYZK'="" d
+	....s HYData=$g(^CT("MAR",HYZK))
+	....s HYZK=$p($g(HYData),"^",1)
+	....s HYZKMC=$p($g(HYData),"^",2)
+	....s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	...s NLSS= $p(patInfo,"^",5) //必填 年龄
+	...s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	...s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	...s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	...s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	...s:HLDJDM="" HLDJDM="一级护理"
+	...s RecWard=arr.RecWard
+	...s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	...s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	...s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	...s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	...s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	...s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	...s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+	
+	
+	...i (EmrCode="DHCNURBILR") d
+	....s HLCZJG=$ZOBJPROPERTY(arr,"Item11")  //结果
+	....s HLCZMC="自理能力等级评分"
+	....s HLCZXMLMMC="进食，洗澡，修饰，穿衣，控制大便，控制小便，如厕，床椅转移，平地行走，上下楼行走"
+	....s HLWT=HLCZMC_HLCZJG_"分"
+	....s:HLCZJG<60 HLWT=HLWT_",需要人照顾。"
+	....s HSQM=$ZOBJPROPERTY(arr,"Item12") 
+	
+	...i (EmrCode="DHCNURDDPGBLR") d
+	....s HLCZJG=$ZOBJPROPERTY(arr,"Item15")  //结果
+	....s HLCZMC="跌倒坠床评估"
+	....s HLCZXMLMMC="跌倒史，有超过1项医学诊断，使用助行器具，有无静脉注射治疗或留置套管针，步态认知/意识状态"
+	....s HLWT=HLCZMC_HLCZJG_"分"
+	....s:HLCZJG>25 HLWT=HLWT_"中高危险。"
+	....s HSQM=$ZOBJPROPERTY(arr,"Item16") 
+	
+	...i (EmrCode="DHCNURGDPGBLR") d
+	....s HLCZJG=$ZOBJPROPERTY(arr,"Item32")  //结果
+	....s HLCZMC="管道滑脱风险评估"
+	....s HLCZXMLMMC="意识，身体状况，沟通，疼痛"
+	....s HLWT=HLCZMC_HLCZJG_"分"
+	....s:HLCZJG>7 HLWT=HLWT_"中高危险。"
+	....s HSQM=$ZOBJPROPERTY(arr,"Item37") 
+	
+	...i (EmrCode="DHCNURYCPGBLR") d
+	....s HLCZJG=$ZOBJPROPERTY(arr,"Item9")  //结果
+	....s HLCZMC="压力性损伤风险评估"
+	....s HLCZXMLMMC="感觉，潮湿，活动度，可动性，营养，摩擦力和剪切力"
+	....s HLWT=HLCZMC_HLCZJG_"分"
+	....s:HLCZJG<15 HLWT=HLWT_"中高危险。"
+	....s HSQM=$ZOBJPROPERTY(arr,"Item10")
+	
+    ...s FLAGSOREValue=##class(web.LFTest).NurEmrValue("DHCNURYCPGBLR",adm,"Item9",1)
+    ...s:FLAGSOREValue<19 FLAGSORE=1
+    ...s EmrDate=arr.EmrDate  //签名日期
+    ...s EmrTime=arr.EmrTime  //签名时间
+    ...s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ...s SFYYC=""
+    ...s SFDD=""
+    ...s HEALTHFALL=""
+    ...s DRUGFALL=""
+    ...s ENVFALL=""
+    ...s OTHERFALL=""
+    ...s HURT=""
+    ...s AGAINFALL=""
+    ...s MJ=""
+    ...s TBRQ=$zd(+$h,3)
+    ...s XGBZ=""
+    ...s SCZT=""
+
+    ...d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,JLH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLWT,HLCZXMLMMC,HLCZMC,HLCZJG,DGHLMS,TWHL,PFHL,QGHLDM,AQHLDM,YSZDDM,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod hljhjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = hljhjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod hljhjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = hljhjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 出院评估
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","cypgyzdjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_cypgyzdjl("2023-01-29","2023-01-29")
+Query cypgyzdjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,CYZDBM,CYZDMC,CYRQSJ,YSQKDM,ZLNLDM,CYQK,LYFSDM,YYZD,YSZDDM,SHFSZD,XJNR,FZZD,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod cypgyzdjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURBILR^DHCNURDDPGBLR^DHCNURGDPGBLR^DHCNURYCPGBLR"  //生活能力^跌倒^管道^压疮
+	s (YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,CYZDBM,CYZDMC,CYRQSJ,YSQKDM,ZLNLDM,CYQK,LYFSDM,YYZD,YSZDDM,SHFSZD,XJNR,FZZD,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f DischgDate=SDate:1:EDate d
+    .s admID=""
+    .f  s admID=$o(^PAADMi("DischDate",DischgDate,admID)) q:admID=""  d
+    ..s adm=admID
+    ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ..s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ..q:PAADMType'="I"
+	..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	..s JZLSH= adm // 就诊流水号
+	..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	..I HZSFZJHM="" S HZSFZJHM=PatNo
+	..s SFZJLBDM="01"
+	..s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	..s KH=$p(patInfo,"^",7)
+	...i KH="" s KH=PatNo  //卡号
+	..s KLX=$p(patInfo,"^",6)
+	..s HZLX="1"
+	..i KLX="" s KLX=6   //卡类型
+	..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	..s BAH=$p(patInfo,"^",3) //病案号 必填
+	..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	..i PatCardType'="" d
+	...if PatCardType="21" s ZJLX="01"
+	...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	..s XB=$p(patInfo,"^",4)
+	..s CFXM=$p(patInfo,"^",1)  //姓名
+	..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	..i HYZK'="" d
+	...s HYData=$g(^CT("MAR",HYZK))
+	...s HYZK=$p($g(HYData),"^",1)
+	...s HYZKMC=$p($g(HYData),"^",2)
+	...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	..s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	..s:HLDJDM="" HLDJDM="一级护理"
+	..s RecWard=$p($g(^PAADM(adm)),"^",70)
+	..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	..s CYZDBM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	..s CYZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	..s CYRQSJ=$zd(DischgDate,3)_" "_$Zt($P(^PAADM(adm),"^",18))  //出院时间
+	..s LYFSDM=##Class(EPRservice.Quality.EmrCheckRule.Template).GetElementValue(adm,10117,"")   //离院方式
+	..s YSQKDM= ##class(web.DHCLCNUREXCUTE).GetItemCatOrd(adm,"嘱托饮食")  //饮食
+	..s HLCZJG=##class(web.LFTest).NurEmrValue("DHCNURBILR",adm,"Item11","-1")
+	..s:HLCZJG<60 ZLNLDM=",需要人照顾。"
+	..s arr = ##Class(EMRservice.BL.BLScatterData).GetNewStdDataByGlossaryCategory(adm,"HDSD00.16")
+	..s CYQK=arr.GetAt("HDSD00.16.004")     //出院情况
+	..s XJNR=##class(web.LFTest).NurEmrValue("DHCNURYBHLJLDLR",adm,"Item22","-1")
+	..s HSQM=##class(Nur.NIS.Service.Base.Patient).GetMainNurse(adm)
+	..s QMRQSJ=CYRQSJ
+    ..s SFYYC=""
+    ..s SFDD=""
+    ..s HEALTHFALL=""
+    ..s DRUGFALL=""
+    ..s ENVFALL=""
+    ..s OTHERFALL=""
+    ..s HURT=""
+    ..s AGAINFALL=""
+    ..s MJ=""
+    ..s TBRQ=$zd(+$h,3)
+    ..s XGBZ=""
+    ..s SCZT=""
+
+    ..d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,CYZDBM,CYZDMC,CYRQSJ,YSQKDM,ZLNLDM,CYQK,LYFSDM,YYZD,YSZDDM,SHFSZD,XJNR,FZZD,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod cypgyzdjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = cypgyzdjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod cypgyzdjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = cypgyzdjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 出入量记录
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","crljl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_crljl("2023-01-29","2023-01-29")
+Query crljl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,JLH,ZYH,HZSFZJHM,SFZJLBDM,KLX,KH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,TZ,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLGCJG,HLCZXMLMMC,HLCZMC,HLCZJG,JLRQSJ,YWYF,ZYSYLBDM,YWSYPL,YWSYJLDW,YWSYCJL,YWSYZJL,YYTJDM,YWMC,OTBZ,PNKNBZ,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod crljlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURYBHLJLDLR^DHCNURZZHZHLJL^DHCNURZZHZHLJL"  
+	s (YLJGDM,JZLSH,JLH,ZYH,HZSFZJHM,SFZJLBDM,KLX,KH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,TZ,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLGCJG,HLCZXMLMMC,HLCZMC,HLCZJG,JLRQSJ,YWYF,ZYSYLBDM,YWSYPL,YWSYJLDW,YWSYCJL,YWSYZJL,YYTJDM,YWMC,OTBZ,PNKNBZ,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f DischgDate=SDate:1:EDate d
+    .s admID=""
+    .f  s admID=$o(^PAADMi("DischDate",DischgDate,admID)) q:admID=""  d
+    ..s adm=admID
+    ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ..s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ..q:PAADMType'="I"
+	..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	..s JZLSH= adm // 就诊流水号
+	
+	..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	..I HZSFZJHM="" S HZSFZJHM=PatNo
+	..s SFZJLBDM="01"
+	..s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	..s KH=$p(patInfo,"^",7)
+	..i KH="" s KH=PatNo  //卡号
+	..s KLX=$p(patInfo,"^",6)
+	..s HZLX="1"
+	..i KLX="" s KLX=6   //卡类型
+	..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	..s BAH=$p(patInfo,"^",3) //病案号 必填
+	..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	..i PatCardType'="" d
+	...if PatCardType="21" s ZJLX="01"
+	...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	..s XB=$p(patInfo,"^",4)
+	..s CFXM=$p(patInfo,"^",1)  //姓名
+	..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	..i HYZK'="" d
+	...s HYData=$g(^CT("MAR",HYZK))
+	...s HYZK=$p($g(HYData),"^",1)
+	...s HYZKMC=$p($g(HYData),"^",2)
+	...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	..s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	..s:HLDJDM="" HLDJDM="一级护理"
+	..s RecWard=$p($g(^PAADM(adm)),"^",70)
+	..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	..s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	..s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	..s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+    ..s Len=$l(EmrCodeStr,"^")
+	..f i=1:1:Len  d	 
+	...s EmrCode=$p(EmrCodeStr,"^",i)
+	...s EmrCode=$ZConvert(EmrCode,"U")
+	...s TemplateId=""
+	...s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	...q:TemplateId="" 
+	...s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	...s TCIndent=a.TCIndentity
+	...s Typ=$ZConvert(TCIndent,"U")
+    ...s PGDID=""  f  s PGDID=$o(^NurMp.DHCTempMultDataI("EmrCode"," "_Typ," "_adm,PGDID)) q:(PGDID="")  d
+	....s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ....s RecUser=arr.RecCancelUser //作废
+    ....q:RecUser'=""
+    ....s JLH=PGDID  //记录号
+	
+	
+	....i (EmrCode="DHCNURYBHLJLDLR") d   //一般护理
+	.....s HLLXDM="一般护理出入量"
+	.....s rlxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item14"))
+	.....s:rlxm'="" HLGCJG="入量："_rlxm_$ZOBJPROPERTY(arr,"Item15")_"ml"
+	.....s clxm=$ZOBJPROPERTY(arr,"Item27")
+	.....s:clxm'="" HLGCJG=HLGCJG_"出量："_clxm_$ZOBJPROPERTY(arr,"Item17")_"ml"
+    .....s HSQM=$ZOBJPROPERTY(arr,"Item23")
+	
+	....i (EmrCode="DHCNURZZHZHLJL") d   //重症护理
+	.....s HLLXDM="重症护理出入量"
+	.....s rlxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item55"))
+	.....s:rlxm'="" HLGCJG="入量："_rlxm_$ZOBJPROPERTY(arr,"Item36")
+	.....s clxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item56"))
+	.....s:clxm'="" HLGCJG=HLGCJG_"出量："_clxm_$ZOBJPROPERTY(arr,"Item38")_"ml"
+	.....s HSQM=$ZOBJPROPERTY(arr,"Item21")
+	
+	
+	....i (EmrCode="DHCNURZZHZHLJL") d   //新生儿护理
+	.....s HLLXDM="新生儿护理出入量"
+	.....s rlxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item7"))
+	.....s:rlxm'="" HLGCJG="入量："_rlxm_$ZOBJPROPERTY(arr,"Item8")_"ml"
+	.....s clxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item12"))
+	.....s:clxm'="" HLGCJG=HLGCJG_"小便："_clxm_$ZOBJPROPERTY(arr,"Item13")
+	.....s dbclxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item14"))
+	.....s:dbclxm'="" HLGCJG=HLGCJG_"大便："_dbclxm_$ZOBJPROPERTY(arr,"Item15")
+	.....s qtclxm=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item16"))
+	.....s:qtclxm'="" HLGCJG=HLGCJG_"其他出量："_qtclxm
+	.....s HSQM=$ZOBJPROPERTY(arr,"Item29")
+	
+    ....s EmrDate=arr.EmrDate  //签名日期
+    ....s EmrTime=arr.EmrTime  //签名时间
+    ....s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ....s SFYYC=""
+    ....s SFDD=""
+    ....s HEALTHFALL=""
+    ....s DRUGFALL=""
+    ....s ENVFALL=""
+    ....s OTHERFALL=""
+    ....s HURT=""
+    ....s AGAINFALL=""
+    ....s MJ=""
+    ....s TBRQ=$zd(+$h,3)
+    ....s XGBZ=""
+    ....s SCZT=""
+
+    ....d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,JLH,ZYH,HZSFZJHM,SFZJLBDM,KLX,KH,KSBM,KSMC,BQMC,BFH,BCH,HZXM,XBDM,NLSS,NLY,TZ,JBZDBM,JBZDMC,HLDJDM,HLLXDM,HLGCJG,HLCZXMLMMC,HLCZMC,HLCZJG,JLRQSJ,YWYF,ZYSYLBDM,YWSYPL,YWSYJLDW,YWSYCJL,YWSYZJL,YYTJDM,YWMC,OTBZ,PNKNBZ,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod crljlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = crljlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod crljlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = crljlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 高值使用记录表
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","syjlb","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_syjlb("2023-01-29","2023-01-29")
+Query syjlb(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,HCSYLSH,KLX,KH,ZJLX,ZJHM,XM,XB,CSRQ,MJZZYBZ,JZLSH,ZXYZDBZ,JBZDBM,JBZDMC,ZRXHCBZ,CLBM,CLMC,SL,CLDW,CLDJ,CLJE,SYTJ,YSGH,YSXM,SYSJ,KSMC,BQMC,BFH,BCH,NLSS,NLY,CPSCCJ,CPGYS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod syjlbExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURYBHLJLDLR^DHCNURZZHZHLJL^DHCNURZZHZHLJL"  
+	s (YLJGDM,HCSYLSH,KLX,KH,ZJLX,ZJHM,XM,XB,CSRQ,MJZZYBZ,JZLSH,ZXYZDBZ,JBZDBM,JBZDMC,ZRXHCBZ,CLBM,CLMC,SL,CLDW,CLDJ,CLJE,SYTJ,YSGH,YSXM,SYSJ,KSMC,BQMC,BFH,BCH,NLSS,NLY,CPSCCJ,CPGYS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f DischgDate=SDate:1:EDate d
+    .s admID=""
+    .f  s admID=$o(^PAADMi("DischDate",DischgDate,admID)) q:admID=""  d
+    ..s adm=admID
+    ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ..s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ..s MJZZYBZ=3
+    ..s:PAADMType'="I" MJZZYBZ=2
+	..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	..s JZLSH= adm // 就诊流水号
+	
+	..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	..I HZSFZJHM="" S HZSFZJHM=PatNo
+	..s SFZJLBDM="01"
+	..s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	..s KH=$p(patInfo,"^",7)
+	..i KH="" s KH=PatNo  //卡号
+	..s KLX=$p(patInfo,"^",6)
+	..s HZLX="1"
+	..i KLX="" s KLX=6   //卡类型
+	..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	..s BAH=$p(patInfo,"^",3) //病案号 必填
+	..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	..i PatCardType'="" d
+	...if PatCardType="21" s ZJLX="01"
+	...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	..s XB=$p(patInfo,"^",4)
+	..s CFXM=$p(patInfo,"^",1)  //姓名
+	..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	..i HYZK'="" d
+	...s HYData=$g(^CT("MAR",HYZK))
+	...s HYZK=$p($g(HYData),"^",1)
+	...s HYZKMC=$p($g(HYData),"^",2)
+	...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	..s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	..s:HLDJDM="" HLDJDM="一级护理"
+	..s RecWard=$p($g(^PAADM(adm)),"^",70)
+	..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	..s ZXYZDBZ="西医"
+	..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	..s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	..s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	..s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+	..s oeordId=$o(^OEORD(0,"Adm",adm,""))
+	..q:oeordId=""
+	..s OEORIsub=0  f  s OEORIsub=$o(^OEORD(oeordId,"I",OEORIsub)) q:OEORIsub=""  d
+	...s MaterialGZorDZFlag=$p($g(^OEORD(oeordId,"I",OEORIsub,"Local")),"^",2)
+	...q:MaterialGZorDZFlag'="1"
+	...s PBRowId=""  f  s PBRowId=$o(^DHCPBi(0,"OEORI",oeordId_"||"_OEORIsub,PBRowId)) q:PBRowId=""  d
+	....s PBOSub=""  f  s PBOSub=$O(^DHCPBi(0,"OEORI",oeordId_"||"_OEORIsub,PBRowId,PBOSub)) q:PBOSub=""  d
+	.....s arcimId=$p($g(^OEORD(oeordId,"I",OEORIsub,1)),"^",2)
+	.....q:arcimId=""
+	.....s CLBM=$p(^ARCIM(+arcimId,$p(arcimId,"||",2),1),"^",1)
+	.....s CLMC=$p(^ARCIM(+arcimId,$p(arcimId,"||",2),1),"^",2)
+	.....s arcicId=$p(^ARCIM(+arcimId,$p(arcimId,"||",2),1),"^",10)
+	.....s ZRXHCBZ=0
+	.....s:arcicId=142 ZRXHCBZ=1
+	.....s SL=$p(^DHCPB(PBRowId,"O",PBOSub),"^",5)
+	.....s CLDWId=$p(^OEORD(oeordId,"I",OEORIsub,2),"^",3)
+	.....S:CLDWId'="" CLDW=$P(^CT("UOM",CLDWId),"^",2)
+	.....S CLDJ=$p(^DHCPB(PBRowId,"O",PBOSub),"^",7)
+    .....S CLJE=$p(^DHCPB(PBRowId,"O",PBOSub),"^",8)
+    .....s doctorDr=$p($g(^OEORD(oeordId,"I",OEORIsub,7)),"^",1)
+	.....i doctorDr'="" S YSGH=$P(^SSU("SSUSR",doctorDr),"^",1),YSXM=$P(^SSU("SSUSR",doctorDr),"^",2)
+	.....s SYSJ= ##class(Nur.NIS.Service.OrderExcute.OrderInfo).GetOrdsttDateTime(oeordId_"||"_OEORIsub)
+    .....s QMRQSJ=SYSJ
+    .....s HCSYLSH=PBRowId
+    .....s HSQM=##class(Nur.NIS.Service.Base.Patient).GetMainNurse(adm)
+	
+    .....s SFYYC=""
+    .....s SFDD=""
+    .....s HEALTHFALL=""
+    .....s DRUGFALL=""
+    .....s ENVFALL=""
+    .....s OTHERFALL=""
+    .....s HURT=""
+    .....s AGAINFALL=""
+    .....s MJ=""
+    .....s TBRQ=$zd(+$h,3)
+    .....s XGBZ=""
+    .....s SCZT=""
+
+    .....d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,HCSYLSH,KLX,KH,ZJLX,ZJHM,XM,XB,CSRQ,MJZZYBZ,JZLSH,ZXYZDBZ,JBZDBM,JBZDMC,ZRXHCBZ,CLBM,CLMC,SL,CLDW,CLDJ,CLJE,SYTJ,YSGH,YSXM,SYSJ,KSMC,BQMC,BFH,BCH,NLSS,NLY,CPSCCJ,CPGYS,HSQM,QMRQSJ,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod syjlbClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = syjlbExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod syjlbFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = syjlbExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+/// 剖宫产
+/// d ##class(%ResultSet).RunQuery("web.YZSY.LFTest","pgcssjl","2024-01-16","2024-01-17")
+/// 在kettle中调用方式为：call web_YZSY.LFTest_pgcssjl("2023-01-29","2023-01-29")
+Query pgcssjl(SDate As %String, EDate As %String) As %Query(ROWSPEC = "YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,CQZD,CQZDMC,SSZZ,SSJCZBM,SSKSRQSJ,MZFFDM,MZTW,MZXG,PGCSSGC,ZGQK,TEMCFS,YSXZ,YSL,TPMCQK,TMWZQKBZ,QDCD,RJS,QDYCQKMS,CQDXQKBZ,ZGBFHQK,GSJMC,GSJSYFF,SSYY,SSYYL,FQTCZG,FQTCFJ,GQTCYCQKMS,GQTCJLBZ,GQTCCLQK,SSSCFQK,CXL,SXCF,SXL,SYL,GYSJ,QTYY,QTQK,SSJSRQSJ,SSQCSJ,SHZD,SHGCRQSJ,SHJCSJ,SHSSY,SHSZY,SHMB,SHXL,SHCXL,SHGS,SHGDGD,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,SSYSQM,MZYSQM,QXHSQM,SSZSQM,EKYSQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH") [ SqlProc ]
+{
+}
+
+ClassMethod pgcssjlExecute(ByRef qHandle As %Binary, SDate, EDate) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    Set qHandle=$lb(0,repid,0)
+    Set ind=1
+ 
+    s SDate=##class(websys.Conversions).DateHtmlToLogical(SDate)
+	s EDate=##class(websys.Conversions).DateHtmlToLogical(EDate)
+	s EmrCodeStr="DHCNURXSECSLJL0715"  
+	s (YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,CQZD,CQZDMC,SSZZ,SSJCZBM,SSKSRQSJ,MZFFDM,MZTW,MZXG,PGCSSGC,ZGQK,TEMCFS,YSXZ,YSL,TPMCQK,TMWZQKBZ,QDCD,RJS,QDYCQKMS,CQDXQKBZ,ZGBFHQK,GSJMC,GSJSYFF,SSYY,SSYYL,FQTCZG,FQTCFJ,GQTCYCQKMS,GQTCJLBZ,GQTCCLQK,SSSCFQK,CXL,SXCF,SXL,SYL,GYSJ,QTYY,QTQK,SSJSRQSJ,SSQCSJ,SHZD,SHGCRQSJ,SHJCSJ,SHSSY,SHSZY,SHMB,SHXL,SHCXL,SHGS,SHGDGD,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,SSYSQM,MZYSQM,QXHSQM,SSZSQM,EKYSQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)=""
+	s NLY=0
+	s YLJGDM=$p(##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Hospital(),"^",1)
+	f DischgDate=SDate:1:EDate d
+    .s admID=""
+    .f  s admID=$o(^PAADMi("DischDate",DischgDate,admID)) q:admID=""  d
+    ..s adm=admID
+    ..s PatRowID=$p($g(^PAADM(adm)),"^",1)
+    ..s PAADMType=$p($g(^PAADM(adm)),"^",2)
+    ..q:PAADMType'="I"
+	..s patInfo=##Class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).Patinfo(PatRowID)
+	..s PatNo=$p(^PAPER(PatRowID,"PAT",1),"^",2) ;登记号
+	..s JZLSH= adm // 就诊流水号
+	
+	..s HZSFZJHM=$p($g(^PAPER(PatRowID,"PAT",3)),"^",6)  //证件号码 必填 身份证号
+	..I HZSFZJHM="" S HZSFZJHM=PatNo
+	..s SFZJLBDM="01"
+	..s:$l(HZSFZJHM)'=18 SFZJLBDM="99"
+	..s KH=$p(patInfo,"^",7)
+	..i KH="" s KH=PatNo  //卡号
+	..s KLX=$p(patInfo,"^",6)
+	..s HZLX="1"
+	..i KLX="" s KLX=6   //卡类型
+	..s ZYH=$p(patInfo,"^",3) //住院号 必填
+	..s BAH=$p(patInfo,"^",3) //病案号 必填
+	..s PatCardType=$p($g(^PAPER(PatRowID,"PAT",3)),"^",7)
+	..i PatCardType'="" d
+	...if PatCardType="21" s ZJLX="01"
+	...else  s ZJLX=$p($g(^PAC("CARD",PatCardType)),"^",1)
+	..s XB=$p(patInfo,"^",4)
+	..s CFXM=$p(patInfo,"^",1)  //姓名
+	..s HYZK=$p($g(^PAPER(PatRowID,"PER",2)),"^",3) 
+	..i HYZK'="" d
+	...s HYData=$g(^CT("MAR",HYZK))
+	...s HYZK=$p($g(HYData),"^",1)
+	...s HYZKMC=$p($g(HYData),"^",2)
+	...s:HYZK="" HYZK="90",HYZKMC="未说明的婚姻状况"
+	..s NLSS= $p(patInfo,"^",5) //必填 年龄
+	..s admdepdr=$p($g(^PAADM(adm)),"^",4)
+	..s KSBM=$p(^CTLOC(admdepdr),"^",1) //必填 入院科室代码
+	..s KSMC= $p(^CTLOC(admdepdr),"^",2) //必填 入院科室名称
+	..s HLDJDM=##class(Nur.NIS.Service.Base.Patient).GetCareLevel(adm)
+	..s:HLDJDM="" HLDJDM="一级护理"
+	..s RecWard=$p($g(^PAADM(adm)),"^",70)
+	..s:RecWard'="" BQMC=$p(^PAWARD(RecWard),"^",2)
+	..s BCH=##class(Nur.NIS.Service.Base.Patient).GetBedCode(adm)
+	..s JZSJ= $ZD($P(^PAADM(adm),"^",6),3) //必填 诊断时间
+	..s cbdiagstr=##class(web.DHCENS.BLL.WSJ.Tool.AdmInfo).GetDiagnoses(adm)
+	..s JBZDDM= $P(cbdiagstr,"^",4) //必填 疾病诊断代码（初步诊断)
+	..s JBZDMC= $P(cbdiagstr,"^",5) //必填 疾病诊断名称（初步诊断)
+	..s TZ=##class(web.DHCDoc.OP.AjaxInterface).GetPatWeight(adm)
+    ..s Len=$l(EmrCodeStr,"^")
+	..f i=1:1:Len  d	 
+	...s EmrCode=$p(EmrCodeStr,"^",i)
+	...s EmrCode=$ZConvert(EmrCode,"U")
+	...s TemplateId=""
+	...s TemplateId=$o(^NurMp.TemplateI("Indentity"," "_EmrCode,TemplateId))
+	...q:TemplateId="" 
+	...s a=##class(NurMp.Template).%OpenId(TemplateId) 
+	...s TCIndent=a.TCIndentity
+	...s Typ=$ZConvert(TCIndent,"U")
+    ...s PGDID=""  f  s PGDID=$o(^NurMp.DHCTempMultDataI("EmrCode"," "_Typ," "_adm,PGDID)) q:(PGDID="")  d
+	....s arr=##class(NurMp.DHCTempMultData).%OpenId(PGDID)
+    ....s RecUser=arr.RecCancelUser //作废
+    ....q:RecUser'=""
+    ....s JLH=PGDID  //记录号
+	....s TEMCFS=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item23"))
+	....q:TEMCFS'="剖宫产"
+	....s DCRQSJ=$ZD($ZOBJPROPERTY(arr,"Item42"),3)
+	....s CQZD=arr.DiagnosDr //产前诊断
+	....s CQZDMC=CQZD
+	....s YSXZ=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item15"))
+	....s QDCD=$ZOBJPROPERTY(arr,"Item28")
+	....s GQTCJL=$ZOBJPROPERTY(arr,"Item24")
+	....s:GQTCJL["瘤" GQTCJLBZ=1
+	....s XSEXBDM=##class(web.LFTest).formatValueNew($ZOBJPROPERTY(arr,"Item38"))
+	....s XSECSTZ=$ZOBJPROPERTY(arr,"Item19")
+	....s CLDX=$ZOBJPROPERTY(arr,"Item25")
+	....s CLBW=$ZOBJPROPERTY(arr,"Item25")
+	....s APGARPFJGSJDM="5分钟"
+	....s APGARPFZ=$ZOBJPROPERTY(arr,"Item20")
+	....s OpsIdList= ##class(CIS.AN.BL.OperScheduleList).GetOpsIdListByAdm(adm)
+	....s OpsId=+OpsIdList
+	....i OpsId'="" d
+	.....s Input=##class(CIS.AN.BL.OperScheduleList).GetPlanOperList(OpsId)
+	.....s InputObj=##class(DHCDoc.Util.FromJSON).%FromJSON($ZCVT(Input,"I","UTF8"))
+    .....s SSJCZBM=InputObj.GetAt("OperationDesc")
+    .....s MZFFDM=##class(CIS.AN.BL.OperScheduleList).GetAnaestMethod(OpsId)
+    .....s MZYSQM=InputObj.GetAt("AssistantDesc")
+    .....s SSYSQM=InputObj.GetAt("SurgeonDesc")
+    .....b ;12
+    ....s EmrDate=arr.EmrDate  //签名日期
+    ....s EmrTime=arr.EmrTime  //签名时间
+    ....s QMRQSJ=$zd(EmrDate,3)_" "_$zt(EmrTime)
+    ....s SFYYC=""
+    ....s SFDD=""
+    ....s HEALTHFALL=""
+    ....s DRUGFALL=""
+    ....s ENVFALL=""
+    ....s OTHERFALL=""
+    ....s HURT=""
+    ....s AGAINFALL=""
+    ....s MJ=""
+    ....s TBRQ=$zd(+$h,3)
+    ....s XGBZ=""
+    ....s SCZT=""
+
+    ....d OutputRowDictDept
+ 	 Set qHandle=$lb(0,repid,0)
+ 	 Quit $$$OK
+OutputRowDictDept
+    set Data=$lb(YLJGDM,JZLSH,HZSFZJHM,SFZJLBDM,KLX,KH,ZYH,CFXM,NLSS,KSBM,KSMC,BQMC,BFH,BCH,DCRQSJ,CQZD,CQZDMC,SSZZ,SSJCZBM,SSKSRQSJ,MZFFDM,MZTW,MZXG,PGCSSGC,ZGQK,TEMCFS,YSXZ,YSL,TPMCQK,TMWZQKBZ,QDCD,RJS,QDYCQKMS,CQDXQKBZ,ZGBFHQK,GSJMC,GSJSYFF,SSYY,SSYYL,FQTCZG,FQTCFJ,GQTCYCQKMS,GQTCJLBZ,GQTCCLQK,SSSCFQK,CXL,SXCF,SXL,SYL,GYSJ,QTYY,QTQK,SSJSRQSJ,SSQCSJ,SHZD,SHGCRQSJ,SHJCSJ,SHSSY,SHSZY,SHMB,SHXL,SHCXL,SHGS,SHGDGD,XSEXBDM,XSECSTZ,XSECSSC,CLDX,CLBW,APGARPFJGSJDM,APGARPFZ,FMJJDM,XSEYCQKDM,SSYSQM,MZYSQM,QXHSQM,SSZSQM,EKYSQM,JLRQM,MJ,TBRQ,XGBZ,SCZT,SJBZ,JYZT,PCH)
+    Set ^CacheTemp(repid,ind)=Data
+    Set ind=ind+1
+    quit
+}
+
+ClassMethod pgcssjlClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = pgcssjlExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod pgcssjlFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = pgcssjlExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	;b
+	Quit $$$OK
+}
+
+}

@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 336_0_21736U)" ts="2026-06-27 17:06:27">
+<CSP name="scripts/DHCSpecPat.hui.js" application="/imedical/web/" default="1"><![CDATA[
+var PageLogicObj={
+	m_DHCPatListDataGrid:"",
+	m_DHCPatListTypeDataGrid:"",
+	m_PatListTypeDataGrid:""
+};
+$(function(){
+	Init();
+	InitEvent();
+	DHCPatListDataGridLoad();
+});
+function Init(){
+	InitDate();
+	PageLogicObj.m_DHCPatListDataGrid=InitDHCPatListDataGrid();
+	$(document.body).bind("keydown",BodykeydownHandler)
+	InitPatListType();
+	LoadDept();
+	InitCache();
+}
+function InitEvent(){
+	$('#BFind').click(DHCPatListDataGridLoad)
+	$('#BClear').click(ClearData)
+	$("#BType").click(BTypeClickHandler);
+}
+function InitDate(){
+	$('#StartDate').datebox('setValue', ServerObj.MCurrDate);
+    $('#EndDate').datebox('setValue', ServerObj.CurrDate);
+}
+function InitCache(){
+	var hasCache = $.DHCDoc.ConfigHasCache();
+	if (hasCache!=1) {
+		$.DHCDoc.CacheConfigPage();
+		$.DHCDoc.storageConfigPageCache();
+	}
+}
+function BodykeydownHandler(e){
+	if (window.event){
+		var keyCode=window.event.keyCode;
+		var type=window.event.type;
+		var SrcObj=window.event.srcElement;
+	}else{
+		var keyCode=e.which;
+		var type=e.type;
+		var SrcObj=e.target;
+	}
+   //浏览器中Backspace不可用  
+   var keyEvent;   
+   if(e.keyCode==8){   
+       var d=e.srcElement||e.target;
+        if(d.tagName.toUpperCase()=='INPUT'||d.tagName.toUpperCase()=='TEXTAREA'){   
+            keyEvent=d.readOnly||d.disabled;   
+        }else{   
+            keyEvent=true;   
+        }   
+    }else{   
+        keyEvent=false;   
+    }   
+    if(keyEvent){   
+        //e.preventDefault(); 
+        return false;  
+    }  
+}
+
+function InitPatListType(){
+	var cbox = $HUI.combobox("#PatListType", {
+		url:$URL+"?ClassName=web.DHCSpecPat&QueryName=FindPatListType&ResultSetType=array",
+		valueField:'RowId',
+		textField:'Desc',
+		mode: "local",
+		filter: function(q, row){
+			var ops = $(this).combobox('options');  
+			var mCode = false;
+			if (row.ContactName) {
+				mCode = row.ContactName.toUpperCase().indexOf(q.toUpperCase()) >= 0
+			}
+			var mValue = row[ops.textField].indexOf(q) >= 0;
+			return mCode||mValue;
+		},
+		onSelect: function (record) {
+			// console.log(record);
+		},
+		onLoadSuccess:function(data){
+			if (data.length>=1){
+				// var sbox = $HUI.combobox("#PatListType");
+				// sbox.setValue(data[0].RowId);
+				DHCPatListDataGridLoad();
+			}
+		}
+	});
+}
+
+function LoadDept(){
+	$.cm({
+		ClassName:"web.DHCExamPatList",
+		QueryName:"ctloclookupNew",
+	   	desc:"",hospid:session['LOGON.HOSPID'],
+		rows:99999
+	},function(GridData){
+		var cbox = $HUI.combobox("#CTLoc", {
+				valueField: 'ctlocid',
+				textField: 'ctloc', 
+				editable:true,
+				data: GridData["rows"],
+				filter: function(q, row){
+					return (row["ctloc"].toUpperCase().indexOf(q.toUpperCase()) >= 0) ||(row["Alias"].toUpperCase().indexOf(q.toUpperCase()) >= 0);
+				},
+				onSelect: function(rec){  
+				},
+				onChange:function(newValue,oldValue){
+				},onLoadSuccess:function() {
+					$.each(GridData['rows'],function(index,sel){
+						if (sel.ctlocid == session['LOGON.CTLOCID']) {
+							$("#CTLoc").combobox("setValue",session['LOGON.CTLOCID']);
+						}
+					});
+				}
+		 });
+	});
+}
+
+function InitDHCPatListDataGrid(){
+	var toobar=[{
+        text: '新增',
+        iconCls: 'icon-add',
+        handler: function() { AddClickHandle("");}
+    },{
+        text: '修改',
+        iconCls: 'icon-save',
+        handler: function() { AddClickHandle("U");}
+    },{
+        text: '删除',
+        iconCls: 'icon-remove',
+        handler: function() { DeleteClickHandle();}
+    },{
+        text: '置为无效',
+        iconCls: 'icon-update',
+        handler: function() { UpdateClickHandle();}
+    },'-',{
+        text: '下载模板',
+        iconCls: 'icon-w-download',
+        handler: function() { DownloadTemplate();}
+    },{
+        text: '导入',
+        iconCls: 'icon-w-import',
+        handler: function() { ImportPatListClick();}
+    }];
+	var Columns=[[
+		{field:'TSPRowId',hidden:true,title:''},
+		{field:'TPatName',title:'患者姓名',width:130},
+		{field:'TPatIDCard',title:'身份证号',width:300},
+		{field:'TPatNote',title:'备注',width:300},
+		{field:'TPatListType',title:'患者类型',width:300},
+		{field:'TLocDesc',title:'所属科室',width:300},
+		{field:'TStDate',title:'有效开始日期',width:300},
+		{field:'TEndDate',title:'有效截止日期',width:300},
+		{field:'TCreateUser',title:'添加人',width:300},
+		{field:'TUpdateUser',title:'更新人',width:300}
+    ]]
+	var DHCPatListDataGrid=$("#DHCPatListTab").datagrid({
+		fit : true,
+		border : false,
+		striped : false,
+		singleSelect : true,
+		fitColumns : true,
+		autoRowHeight : false,
+		rownumbers:true,
+		pagination : true,  
+		rownumbers : true,  
+		pageSize: 50,
+		pageList : [50,100,200],
+		idField:'TSPRowId',
+		columns :Columns,
+		toolbar:toobar,
+		onClickCell:function(index, field,value){
+			if(field=="ApptPatName"){
+				//ShowPatAppInfo(index);
+			}
+		},
+		onSelect: function (index, row){
+			$("#PatName").val(row.TPatName);
+			$("#PatIDCard").val(row.TPatIDCard);
+			$("#PatNote").val(row.TPatNote);
+			$('#StartDate').datebox('setValue', row.TStDate);	
+    		$('#EndDate').datebox('setValue', row.TEndDate);
+    		$HUI.combobox("#PatListType").setValue(row.TPatListTypeId);
+    		$HUI.combobox("#CTLoc").setValue(row.TLocDesc);
+		},
+		onUnselect:function(index, row){
+			ClearData();
+		},
+		onBeforeSelect:function(index, row){
+			var selrow=PageLogicObj.m_DHCPatListDataGrid.datagrid('getSelected');
+			if (selrow){
+				var oldIndex=PageLogicObj.m_DHCPatListDataGrid.datagrid('getRowIndex',selrow);
+				if (oldIndex==index){
+					//PageLogicObj.m_DHCPatListDataGrid.datagrid('unselectRow',index);
+					//return false;
+				}
+			}
+		}
+	}); 
+	return DHCPatListDataGrid;
+}
+
+function DHCPatListDataGridLoad(){
+	var PatName=$("#PatName").val();
+	var PatIDCard=$("#PatIDCard").val();
+	var PatListType=$HUI.datebox("#PatListType").getValue();
+	var CTLoc=$HUI.combobox("#CTLoc").getValue();
+	var SttDate=$HUI.datebox("#StartDate").getValue();
+	var EndDate=$HUI.datebox("#EndDate").getValue();
+	$.q({
+	    ClassName : "web.DHCSpecPat",
+	    QueryName : "FindPatList",
+	    SttDate:SttDate,
+	    EndDate:EndDate,
+		PatName:PatName,
+	    PatIDCard:PatIDCard,
+	    PatListType:PatListType,
+		LocID:CTLoc,
+	    Pagerows:PageLogicObj.m_DHCPatListDataGrid.datagrid("options").pageSize,rows:99999
+	},function(GridData){
+		PageLogicObj.m_DHCPatListDataGrid.datagrid({loadFilter:DocToolsHUI.lib.pagerFilter}).datagrid('loadData',GridData);
+		PageLogicObj.m_DHCPatListDataGrid.datagrid('clearSelections'); 
+		PageLogicObj.m_DHCPatListDataGrid.datagrid('clearChecked'); 
+	}); 
+}
+
+function AddClickHandle(type){
+	if (!CheckDataValid()) return false;
+	var row=PageLogicObj.m_DHCPatListDataGrid.datagrid("getSelected");
+	var InSPRowId = "";
+	var sucMsg = "";
+	var errMsg = "";
+	if (type=="U") {
+		if ((!row)||(row.length==0)){
+			$.messager.alert("提示","请选择一条需要更新的记录!","info");
+			return false;
+		} else {
+			InSPRowId = row.TSPRowId
+			sucMsg = "更新记录成功!";
+			errMsg = "更新记录失败!";
+		}
+	} else {
+		sucMsg = "新增记录成功!";
+		errMsg = "新增记录失败!";
+	}
+	var PatName=$("#PatName").val();
+	var PatIDCard=$("#PatIDCard").val();
+	var PatNote=$("#PatNote").val();
+	var PatListType=$HUI.combobox("#PatListType").getValue();
+	var CTLoc=$HUI.combobox("#CTLoc").getValue();
+	var SttDate=$HUI.datebox("#StartDate").getValue();
+	var EndDate=$HUI.datebox("#EndDate").getValue();
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"InsertPatList",
+		PatName:PatName,
+		PatIDCard:PatIDCard,
+		PatNote:PatNote,
+		PatListType:PatListType,
+		LocID:CTLoc,
+		SttDate:SttDate,
+		EndDate:EndDate,
+		UserID:session['LOGON.USERID'],
+		InSPRowId:InSPRowId,
+		dataType:"text"
+	},function(rtn){
+		if (rtn=="0"){
+			$.messager.show({title:"提示",msg: sucMsg});
+			PageLogicObj.m_DHCPatListDataGrid.datagrid('uncheckAll');
+			ClearData();
+			DHCPatListDataGridLoad();
+		}else{
+			$.messager.alert("提示",errMsg + rtn,"error");
+			return false;
+		}
+	});
+}
+
+function DeleteClickHandle(){
+	var row=PageLogicObj.m_DHCPatListDataGrid.datagrid("getSelected");
+	if ((!row)||(row.length==0)){
+		$.messager.alert("提示","请选择需要删除的记录!","info");
+		return false;
+	}
+	var SPRowId=row.TSPRowId;
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"DeletePatList",
+		SPRowId:SPRowId
+	},function(ret){
+		if(ret==0) {
+			$.messager.show({title:"提示",msg:"删除成功"});
+			ClearData();
+	 		DHCPatListDataGridLoad();
+ 		}else{
+	   		$.messager.alert("提示","删除失败,错误信息:"+ret,"error");
+	   		return false;
+   		}
+	})
+}
+
+function UpdateClickHandle(){
+	var row=PageLogicObj.m_DHCPatListDataGrid.datagrid("getSelected");
+	if ((!row)||(row.length==0)){
+		$.messager.alert("提示","请选择需要更新的记录!","info");
+		return false;
+	}
+	var SPRowId=row.TSPRowId;
+	var TEndDate=row.TEndDate;
+	/*if (TEndDate!="") {
+		$.messager.alert("提示","该记录已经是无效记录!","info")
+		return false	
+	}*/
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"UpdatePatList",
+		SPRowId:SPRowId,
+		UserID:session['LOGON.USERID'],
+		dataType:"text"
+	},function(ret){
+		if(ret==0) {
+			$.messager.show({title:"提示",msg:"修改成功"});
+	 		DHCPatListDataGridLoad();
+ 		}else{
+	   		$.messager.alert("提示","修改失败,错误信息:"+ret,"error");
+	   		return false;
+   		}
+	})
+}
+
+function CheckDataValid(){
+	var PatName=$("#PatName").val();
+	if (!PatName) {
+		$.messager.alert("提示","姓名不能为空!","info",function(){
+			$("#PatName").focus()
+		});
+		return false;
+	}
+	var PatIDCard=$("#PatIDCard").val();
+	if (PatIDCard!=""){
+		var myIsID=DHCWeb_IsIdCardNo(PatIDCard);
+		if (!myIsID){
+			websys_setfocus("PatIDCard");
+			return false;
+		}
+	}else{
+		$.messager.alert("提示","身份证号不能为空!","info",function(){
+			$("#PatIDCard").focus()
+		});
+		return false;
+	}
+	var PatListType=$HUI.combobox("#PatListType").getValue();
+	if (!PatListType){
+		$.messager.alert("提示","请选择患者类型!");
+		return false;
+	}
+	return true;
+}
+
+function ClearData(){
+	$("#PatName,#PatIDCard,#PatNote").val("");
+	$('#StartDate').datebox('setValue', ServerObj.MCurrDate);	
+    $('#EndDate').datebox('setValue', ServerObj.CurrDate);
+    $HUI.combobox("#PatListType").setValue("");
+    $HUI.combobox("#CTLoc").setValue("");
+}
+
+function BTypeClickHandler(){
+	$("#PatListTypeCode,#PatListTypeName,#PatListTypeExecuteCode").val("");
+	$("#PatListType-dialog").dialog("open");
+	if (PageLogicObj.m_PatListTypeDataGrid=="") {
+		PageLogicObj.m_PatListTypeDataGrid=PatListTypeTabDataGrid();
+	}
+	PatListTypeDataGridLoad()
+}
+
+function PatListTypeTabDataGrid(){
+	var AppinfoColumns=[[ 
+		{field:'RowId',hidden:true,title:''},
+		{field:'Code',title:'代码',width:100},
+		{field:'Desc',title:'类型',width:150},
+		{field:'ExecCode',title:'管控执行代码',width:300}
+    ]]
+    var toobar=[{
+        text: '新增',
+        iconCls: 'icon-add',
+        handler: function() { AddTypeClickHandle();}
+    },{
+        text: '删除',
+        iconCls: 'icon-cancel',
+        handler: function() { DeleteTypeClickHandle();}
+    },{
+        text: '更新',
+        iconCls: 'icon-cancel',
+        handler: function() { UpdateTypeClickHandle();}
+    }];
+	var PatListTypeDataGrid=$("#PatListTypeTab").datagrid({
+		fit : true,
+		border : false,
+		striped : false,
+		singleSelect : true,
+		fitColumns : true,
+		autoRowHeight : false,
+		rownumbers:true,
+		pagination : true,  
+		rownumbers : true,  
+		pageSize: 15,
+		pageList : [15,50],
+		idField:'RowId',
+		toolbar:toobar,
+		columns :AppinfoColumns,
+		onSelect:function(index, row){
+			$("#PatListTypeCode").val(row["Code"]);
+			$("#PatListTypeName").val(row["Desc"]);
+			$("#PatListTypeExecuteCode").val(row["ExecCode"]);
+		}
+	}); 
+	return PatListTypeDataGrid;	
+}
+function PatListTypeDataGridLoad(){
+	$.q({
+	    ClassName : "web.DHCSpecPat",
+	    QueryName : "FindPatListType",
+	    Pagerows:PageLogicObj.m_PatListTypeDataGrid.datagrid("options").pageSize,rows:99999
+	},function(GridData){
+		PageLogicObj.m_PatListTypeDataGrid.datagrid({loadFilter:DocToolsHUI.lib.pagerFilter}).datagrid('loadData',GridData);
+		PageLogicObj.m_PatListTypeDataGrid.datagrid('clearSelections'); 
+		PageLogicObj.m_PatListTypeDataGrid.datagrid('clearChecked'); 
+	}); 	
+}
+function UpdateTypeClickHandle(){
+	var rows=PageLogicObj.m_PatListTypeDataGrid.datagrid("getSelected");
+	if (!rows) {
+		$.messager.alert("提示","请选择行","error");
+		return false;
+	}
+	var PatListTypeCode=$("#PatListTypeCode").val();
+	var PatListTypeName=$("#PatListTypeName").val();
+	var PatListTypeExecuteCode=$("#PatListTypeExecuteCode").val();
+	if (PatListTypeCode==""){
+		$.messager.alert("提示","代码不能为空","error");
+		return false;
+	}
+	if (PatListTypeName==""){
+		$.messager.alert("提示","描述不能为空","error");
+		return false;
+	}
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"InsertPatListType",
+		RowID:rows["RowId"],
+		Code:PatListTypeCode,
+		Desc:PatListTypeName,
+		ExecuteCode:PatListTypeExecuteCode,
+		dataType:"text"		
+	},function(ret){
+		if(ret==0) {
+			$.messager.alert("提示","更新成功","info");
+	 		PatListTypeDataGridLoad();
+	 		$("#PatListTypeCode,#PatListTypeName,#PatListTypeExecuteCode").val("");
+	 		InitPatListType();
+ 		}else{
+	   		$.messager.alert("提示","修改失败,错误信息:"+ret);
+	   		return false;
+   		}
+	})
+}
+function AddTypeClickHandle(){
+	var PatListTypeCode=$("#PatListTypeCode").val();
+	var PatListTypeName=$("#PatListTypeName").val();
+	var PatListTypeExecuteCode=$("#PatListTypeExecuteCode").val();
+	if (PatListTypeCode==""){
+		$.messager.alert("提示","代码不能为空","error");
+		return false
+	}
+	if (PatListTypeName==""){
+		$.messager.alert("提示","描述不能为空","error");
+		return false
+	}
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"InsertPatListType",
+		RowID:"",
+		Code:PatListTypeCode,
+		Desc:PatListTypeName,
+		ExecuteCode:PatListTypeExecuteCode,
+		dataType:"text"		
+	},function(ret){
+		if(ret==0) {
+			$.messager.alert("提示","新增成功","info");
+	 		PatListTypeDataGridLoad();
+	 		$("#PatListTypeCode,#PatListTypeName,#PatListTypeExecuteCode").val("");
+	 		InitPatListType();
+ 		}else{
+	   		$.messager.alert("提示","修改失败,错误信息:"+ret);
+	   		return false;
+   		}
+	})
+}
+function DeleteTypeClickHandle(){
+	var selrow=PageLogicObj.m_PatListTypeDataGrid.datagrid('getSelected');
+	var rows=PageLogicObj.m_PatListTypeDataGrid.datagrid('getData');
+	if (selrow==null){
+		$.messager.alert("提示","请选择一行","error");
+	   	return false;
+	}
+	var RowID=selrow.RowId
+	$.cm({
+		ClassName:"web.DHCSpecPat",
+		MethodName:"DeletePatListType",
+		RowID:RowID,
+		dataType:"text"		
+	},function(ret){
+		if(ret==0) {
+			$.messager.alert("提示","删除成功","info");
+			$("#PatListTypeCode,#PatListTypeName,#PatListTypeExecuteCode").val("");
+	 		PatListTypeDataGridLoad();
+	 		InitPatListType();
+ 		}else{
+	   		$.messager.alert("提示","删除失败,错误信息:"+ret,"error");
+	   		return false;
+   		}
+	})
+}
+// === 批量导入 Excel ===
+
+function DownloadTemplate() {
+    window.open("../../med/Results/Template/dhcspecpat.xlsx");
+}
+
+function ImportPatListClick() {
+    // Reset state
+    document.getElementById('importFileInput').value = '';
+    document.getElementById('importFileName').innerHTML = '未选择文件';
+    document.getElementById('importTSVData').value = '';
+    document.getElementById('importResult').style.display = 'none';
+    // Open dialog first
+    $('#importDialog').dialog('open');
+    // Init preview table after dialog is visible
+    var cols = [[
+        {field:'col1',title:'患者姓名',width:100},
+        {field:'col2',title:'身份证号',width:200},
+        {field:'col3',title:'患者类型代码',width:100},
+        {field:'col4',title:'备注',width:200},
+        {field:'col5',title:'有效开始日期',width:110},
+        {field:'col6',title:'有效截止日期',width:110},
+        {field:'col7',title:'所属科室代码',width:100}
+    ]];
+    if (window._previewGridInited) {
+        $('#importPreviewTable').datagrid({columns: cols});
+    } else {
+        $('#importPreviewTable').datagrid({
+            columns: cols,
+            fitColumns: true,
+            singleSelect: true,
+            rownumbers: true,
+            width: 840,
+            height: 200
+        });
+        window._previewGridInited = true;
+    }
+    $('#importPreviewTable').datagrid('loadData',[]);
+    $('#importPreviewTable').datagrid('resize');
+}
+
+function HandleFileSelect(event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    document.getElementById('importFileName').innerHTML = file.name;
+    document.getElementById('importResult').style.display = 'none';
+
+    var reader = new FileReader();
+    reader.onload = function(evt) {
+        try {
+            var data = new Uint8Array(evt.target.result);
+            var wb = XLSX.read(data, {type: 'array'});
+            var sheet = wb.Sheets[wb.SheetNames[0]];
+
+            // Convert to TSV
+            var tsv = XLSX.utils.sheet_to_csv(sheet, {
+                FS: '\t',
+                RS: '\n',
+                strip: true
+            });
+
+            // Store parsed TSV
+            document.getElementById('importTSVData').value = tsv;
+
+            // Preview: parse TSV to rows, show first 3
+            var lines = tsv.split('\n');
+            var previewRows = [];
+            var maxRows = lines.length < 4 ? lines.length - 1 : 3;
+            for (var i = 1; i <= maxRows; i++) {
+                if (lines[i] && lines[i].trim() !== '') {
+                    var cols = lines[i].split('	');
+                    previewRows.push({
+                        col1: cols[0] || '',
+                        col2: cols[1] || '',
+                        col3: cols[2] || '',
+                        col4: cols[3] || '',
+                        col5: cols[4] || '',
+                        col6: cols[5] || '',
+                        col7: cols[6] || ''
+                    });
+                }
+            }
+            $('#importPreviewTable').datagrid('loadData', previewRows);
+
+            // Show total row count
+            var totalRows = 0;
+            for (var j = 1; j < lines.length; j++) {
+                if (lines[j] && lines[j].trim() !== '') totalRows++;
+            }
+            $.messager.show({title:'提示',msg:'解析成功，共 ' + totalRows + ' 条数据（预览前 ' + previewRows.length + ' 行）'});
+
+        } catch(err) {
+            $.messager.alert('错误','文件解析失败: ' + (err.message || err),'error');
+            document.getElementById('importTSVData').value = '';
+        }
+    };
+    reader.onerror = function() {
+        $.messager.alert('错误','文件读取失败','error');
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function DoImport() {
+    var tsv = document.getElementById('importTSVData').value;
+    if (!tsv) {
+        $.messager.alert('提示','请先选择 Excel 文件','info');
+        return;
+    }
+
+    $.messager.progress({title:'请稍等',msg:'正在导入...'});
+
+    $.cm({
+        ClassName: 'web.DHCSpecPat',
+        MethodName: 'ImportPatList',
+        TSVContent: tsv,
+        UserID: session['LOGON.USERID'],
+        LocID: session['LOGON.CTLOCID'],
+        dataType: 'text'
+    }, function(resultText) {
+        $.messager.progress('close');
+        try {
+            var result = JSON.parse(resultText);
+
+            var summary = '导入完成：成功 ' + result.success + ' 条，跳过 ' + result.skip + ' 条，共 ' + result.total + ' 条';
+            document.getElementById('importResultSummary').innerHTML = summary;
+            document.getElementById('importResult').style.display = 'block';
+
+            // Show errors if any
+            var errorDiv = document.getElementById('importResultErrors');
+            if (result.errors && result.errors.length > 0) {
+                var errHtml = '<table class="tblList" style="width:100%;font-size:12px"><tr><th style="width:80px">行号</th><th>原因</th></tr>';
+                for (var k = 0; k < result.errors.length; k++) {
+                    errHtml += '<tr><td>' + result.errors[k].row + '</td><td>' + result.errors[k].reason + '</td></tr>';
+                }
+                errHtml += '</table>';
+                errorDiv.innerHTML = errHtml;
+            } else {
+                errorDiv.innerHTML = '<span style="color:#4CAF50">全部导入成功，无错误</span>';
+            }
+
+            // Refresh grid
+            DHCPatListDataGridLoad();
+
+        } catch(e) {
+            $.messager.alert('错误','导入结果解析失败','error');
+        }
+    });
+}
+]]></CSP>
+</Export>

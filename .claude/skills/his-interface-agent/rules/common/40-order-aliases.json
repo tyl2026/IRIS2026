@@ -1,0 +1,1293 @@
+{
+  "_description": "40-order 医嘱域字段别名映射",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-05-21 11:45",
+  "aliases": {
+    "ORD_ROWID": {
+      "keywords": [
+        "ORD_ROWID",
+        "ordRowId",
+        "OrdRowId",
+        "医嘱ID",
+        "医嘱RowID",
+        "OrderId",
+        "OEORD_RowId"
+      ],
+      "ruleStandardName": "ORD_ROWID",
+      "valueExpression": "ordItm",
+      "global": "^OEORD(ordItm)",
+      "domain": "40-order"
+    },
+    "ARCIM_ID": {
+      "keywords": [
+        "ARCIM_ID",
+        "arcimId",
+        "ArcimId",
+        "医嘱项ID",
+        "医嘱项RowID",
+        "ARCIM_RowId"
+      ],
+      "ruleStandardName": "ARCIM_ID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",2)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^2",
+      "domain": "40-order"
+    },
+    "ARCIM_SUB": {
+      "keywords": [
+        "ARCIM_SUB",
+        "arcimSub",
+        "ArcimSub",
+        "医嘱项子表ID"
+      ],
+      "ruleStandardName": "ARCIM_SUB",
+      "valueExpression": "+arcimId",
+      "domain": "40-order"
+    },
+    "ARCIM_VER": {
+      "keywords": [
+        "ARCIM_VER",
+        "arcimVer",
+        "ArcimVer",
+        "医嘱项版本"
+      ],
+      "ruleStandardName": "ARCIM_VER",
+      "valueExpression": "$p(arcimId,\"||\",2)",
+      "domain": "40-order"
+    },
+    "ARCIM_CODE": {
+      "keywords": [
+        "ARCIM_CODE",
+        "arcimCode",
+        "ArcimCode",
+        "医嘱项编码",
+        "医嘱代码",
+        "医嘱编码"
+      ],
+      "ruleStandardName": "ARCIM_CODE",
+      "valueExpression": "$p($g(^ARCIM(arcimSub,arcimVer,1)),\"^\",1)",
+      "global": "^ARCIM(arcimSub,arcimVer,1)^1",
+      "domain": "40-order"
+    },
+    "ARCIM_NAME": {
+      "keywords": [
+        "ARCIM_NAME",
+        "arcimName",
+        "ArcimName",
+        "医嘱项名称",
+        "医嘱名称",
+        "医嘱描述"
+      ],
+      "ruleStandardName": "ARCIM_NAME",
+      "valueExpression": "$p($g(^ARCIM(arcimSub,arcimVer,1)),\"^\",2)",
+      "global": "^ARCIM(arcimSub,arcimVer,1)^2",
+      "domain": "40-order"
+    },
+    "ITM_MAST_SERVICE": {
+      "keywords": [
+        "ITM_MAST_SERVICE",
+        "itmMastService",
+        "Service",
+        "服务项目",
+        "收费项目"
+      ],
+      "ruleStandardName": "ITM_MAST_SERVICE",
+      "valueExpression": "$p($g(^ARCIM(arcimSub,arcimVer,1)),\"^\",3)",
+      "global": "^ARCIM(arcimSub,arcimVer,1)^3",
+      "domain": "40-order"
+    },
+    "ORD_SUB_CAT_ROWID": {
+      "keywords": [
+        "ORD_SUB_CAT_ROWID",
+        "ordSubCatRowId",
+        "SubCatRowId",
+        "医嘱子类ID",
+        "医嘱子类RowID"
+      ],
+      "ruleStandardName": "ORD_SUB_CAT_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",13)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^13",
+      "domain": "40-order"
+    },
+    "ORD_SUB_CAT_CODE": {
+      "keywords": [
+        "ORD_SUB_CAT_CODE",
+        "ordSubCatCode",
+        "SubCatCode",
+        "医嘱子类编码",
+        "医嘱子类代码"
+      ],
+      "ruleStandardName": "ORD_SUB_CAT_CODE",
+      "valueExpression": "$p($g(^ARCIC(subCatDr)),\"^\",1)",
+      "global": "^ARCIC(subCatDr)^1",
+      "domain": "40-order"
+    },
+    "ORD_SUB_CAT_DESC": {
+      "keywords": [
+        "ORD_SUB_CAT_DESC",
+        "ordSubCatDesc",
+        "SubCatDesc",
+        "医嘱子类名称",
+        "医嘱子类描述"
+      ],
+      "ruleStandardName": "ORD_SUB_CAT_DESC",
+      "valueExpression": "$p($g(^ARCIC(subCatDr)),\"^\",2)",
+      "global": "^ARCIC(subCatDr)^2",
+      "domain": "40-order"
+    },
+    "ORD_CAT_ROWID": {
+      "keywords": [
+        "ORD_CAT_ROWID",
+        "ordCatRowId",
+        "CatRowId",
+        "医嘱大类ID",
+        "医嘱大类RowID"
+      ],
+      "ruleStandardName": "ORD_CAT_ROWID",
+      "valueExpression": "$p($g(^ARCIC(subCatDr)),\"^\",8)",
+      "global": "^ARCIC(subCatDr)^8",
+      "domain": "40-order"
+    },
+    "ORD_CAT_CODE": {
+      "keywords": [
+        "ORD_CAT_CODE",
+        "ordCatCode",
+        "CatCode",
+        "医嘱大类编码",
+        "医嘱大类代码"
+      ],
+      "ruleStandardName": "ORD_CAT_CODE",
+      "valueExpression": "$p($g(^OECOR(catDr)),\"^\",1)",
+      "global": "^OECOR(catDr)^1",
+      "domain": "40-order"
+    },
+    "ORD_CAT_DESC": {
+      "keywords": [
+        "ORD_CAT_DESC",
+        "ordCatDesc",
+        "CatDesc",
+        "医嘱大类名称",
+        "医嘱大类描述"
+      ],
+      "ruleStandardName": "ORD_CAT_DESC",
+      "valueExpression": "$p($g(^OECOR(catDr)),\"^\",2)",
+      "global": "^OECOR(catDr)^2",
+      "domain": "40-order"
+    },
+    "ORD_TYPE_ROWID": {
+      "keywords": [
+        "ORD_TYPE_ROWID",
+        "ordTypeRowId",
+        "TypeRowId",
+        "医嘱类型ID",
+        "医嘱类型RowID"
+      ],
+      "ruleStandardName": "ORD_TYPE_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",18)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^18",
+      "domain": "40-order"
+    },
+    "ORD_TYPE_CODE": {
+      "keywords": [
+        "ORD_TYPE_CODE",
+        "ordTypeCode",
+        "TypeCode",
+        "医嘱类型编码",
+        "医嘱类型代码"
+      ],
+      "ruleStandardName": "ORD_TYPE_CODE",
+      "valueExpression": "$p($g(^OECOR(typeDr)),\"^\",1)",
+      "global": "^OECOR(typeDr)^1",
+      "domain": "40-order"
+    },
+    "ORD_TYPE_DESC": {
+      "keywords": [
+        "ORD_TYPE_DESC",
+        "ordTypeDesc",
+        "TypeDesc",
+        "医嘱类型名称",
+        "医嘱类型描述"
+      ],
+      "ruleStandardName": "ORD_TYPE_DESC",
+      "valueExpression": "$p($g(^OECOR(typeDr)),\"^\",2)",
+      "global": "^OECOR(typeDr)^2",
+      "domain": "40-order"
+    },
+    "PRIORITY_ROWID": {
+      "keywords": [
+        "PRIORITY_ROWID",
+        "priorityRowId",
+        "PriorityRowId",
+        "医嘱优先级ID",
+        "优先级RowID"
+      ],
+      "ruleStandardName": "PRIORITY_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",8)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^8",
+      "domain": "40-order"
+    },
+    "PRIORITY_CODE": {
+      "keywords": [
+        "PRIORITY_CODE",
+        "priorityCode",
+        "PriorityCode",
+        "医嘱优先级编码",
+        "优先级代码"
+      ],
+      "ruleStandardName": "PRIORITY_CODE",
+      "valueExpression": "$p($g(^OECPR(priorityDr)),\"^\",1)",
+      "global": "^OECPR(priorityDr)^1",
+      "domain": "40-order"
+    },
+    "PRIORITY_DESC": {
+      "keywords": [
+        "PRIORITY_DESC",
+        "priorityDesc",
+        "PriorityDesc",
+        "医嘱优先级名称",
+        "优先级描述"
+      ],
+      "ruleStandardName": "PRIORITY_DESC",
+      "valueExpression": "$p($g(^OECPR(priorityDr)),\"^\",2)",
+      "global": "^OECPR(priorityDr)^2",
+      "domain": "40-order"
+    },
+    "STATUS_ROWID": {
+      "keywords": [
+        "STATUS_ROWID",
+        "statusRowId",
+        "StatusRowId",
+        "医嘱状态ID",
+        "状态RowID"
+      ],
+      "ruleStandardName": "STATUS_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",13)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^13",
+      "domain": "40-order"
+    },
+    "STATUS_CODE": {
+      "keywords": [
+        "STATUS_CODE",
+        "statusCode",
+        "StatusCode",
+        "医嘱状态编码",
+        "状态代码"
+      ],
+      "ruleStandardName": "STATUS_CODE",
+      "valueExpression": "$p($g(^OEC(statusDr)),\"^\",1)",
+      "global": "^OEC(statusDr)^1",
+      "domain": "40-order"
+    },
+    "STATUS_DESC": {
+      "keywords": [
+        "STATUS_DESC",
+        "statusDesc",
+        "StatusDesc",
+        "医嘱状态名称",
+        "状态描述"
+      ],
+      "ruleStandardName": "STATUS_DESC",
+      "valueExpression": "$p($g(^OEC(statusDr)),\"^\",2)",
+      "global": "^OEC(statusDr)^2",
+      "domain": "40-order"
+    },
+    "DOSAGE_QTY": {
+      "keywords": [
+        "DOSAGE_QTY",
+        "dosageQty",
+        "DosageQty",
+        "剂量",
+        "剂量数量",
+        "用量"
+      ],
+      "ruleStandardName": "DOSAGE_QTY",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",1)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^1",
+      "domain": "40-order"
+    },
+    "QTY": {
+      "keywords": [
+        "QTY",
+        "qty",
+        "Qty",
+        "数量",
+        "开药数量",
+        "发药数量"
+      ],
+      "ruleStandardName": "QTY",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",12)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^12",
+      "domain": "40-order"
+    },
+    "DOSAGE_UNIT_ROWID": {
+      "keywords": [
+        "DOSAGE_UNIT_ROWID",
+        "dosageUnitRowId",
+        "DosageUnitRowId",
+        "剂量单位ID",
+        "剂量单位RowID"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",3)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^3",
+      "domain": "40-order"
+    },
+    "DOSAGE_UNIT_CODE": {
+      "keywords": [
+        "DOSAGE_UNIT_CODE",
+        "dosageUnitCode",
+        "DosageUnitCode",
+        "剂量单位编码"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_CODE",
+      "valueExpression": "$p($g(^CTUOM(dosageUnitDr)),\"^\",1)",
+      "global": "^CTUOM(dosageUnitDr)^1",
+      "domain": "40-order"
+    },
+    "DOSAGE_UNIT_DESC": {
+      "keywords": [
+        "DOSAGE_UNIT_DESC",
+        "dosageUnitDesc",
+        "DosageUnitDesc",
+        "剂量单位名称",
+        "剂量单位描述"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_DESC",
+      "valueExpression": "$p($g(^CTUOM(dosageUnitDr)),\"^\",2)",
+      "global": "^CTUOM(dosageUnitDr)^2",
+      "domain": "40-order"
+    },
+    "FREQ_ROWID": {
+      "keywords": [
+        "FREQ_ROWID",
+        "freqRowId",
+        "FreqRowId",
+        "频次ID",
+        "频次RowID"
+      ],
+      "ruleStandardName": "FREQ_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",4)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^4",
+      "domain": "40-order"
+    },
+    "FREQ_CODE": {
+      "keywords": [
+        "FREQ_CODE",
+        "freqCode",
+        "FreqCode",
+        "频次编码",
+        "频次代码"
+      ],
+      "ruleStandardName": "FREQ_CODE",
+      "valueExpression": "$p($g(^PHCFR(freqDr)),\"^\",1)",
+      "global": "^PHCFR(freqDr)^1",
+      "domain": "40-order"
+    },
+    "FREQ_DESC": {
+      "keywords": [
+        "FREQ_DESC",
+        "freqDesc",
+        "FreqDesc",
+        "频次名称",
+        "频次描述"
+      ],
+      "ruleStandardName": "FREQ_DESC",
+      "valueExpression": "$p($g(^PHCFR(freqDr)),\"^\",3)",
+      "global": "^PHCFR(freqDr)^3",
+      "domain": "40-order"
+    },
+    "OCC_TIME": {
+      "keywords": [
+        "OCC_TIME",
+        "occTime",
+        "OccTime",
+        "执行时间",
+        "用药时间"
+      ],
+      "ruleStandardName": "OCC_TIME",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",6)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^6",
+      "domain": "40-order"
+    },
+    "USAGE_ROWID": {
+      "keywords": [
+        "USAGE_ROWID",
+        "usageRowId",
+        "UsageRowId",
+        "用法ID",
+        "用法RowID"
+      ],
+      "ruleStandardName": "USAGE_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",7)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^7",
+      "domain": "40-order"
+    },
+    "USAGE_CODE": {
+      "keywords": [
+        "USAGE_CODE",
+        "usageCode",
+        "UsageCode",
+        "用法编码",
+        "用法代码"
+      ],
+      "ruleStandardName": "USAGE_CODE",
+      "valueExpression": "$p($g(^PHCIN(usageDr)),\"^\",1)",
+      "global": "^PHCIN(usageDr)^1",
+      "domain": "40-order"
+    },
+    "USAGE_DESC": {
+      "keywords": [
+        "USAGE_DESC",
+        "usageDesc",
+        "UsageDesc",
+        "用法名称",
+        "用法描述"
+      ],
+      "ruleStandardName": "USAGE_DESC",
+      "valueExpression": "$p($g(^PHCIN(usageDr)),\"^\",2)",
+      "global": "^PHCIN(usageDr)^2",
+      "domain": "40-order"
+    },
+    "USE_DAYS_ROWID": {
+      "keywords": [
+        "USE_DAYS_ROWID",
+        "useDaysRowId",
+        "UseDaysRowId",
+        "疗程ID",
+        "疗程RowID"
+      ],
+      "ruleStandardName": "USE_DAYS_ROWID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",8)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^8",
+      "domain": "40-order"
+    },
+    "USE_DAYS_CODE": {
+      "keywords": [
+        "USE_DAYS_CODE",
+        "useDaysCode",
+        "UseDaysCode",
+        "疗程编码",
+        "疗程代码"
+      ],
+      "ruleStandardName": "USE_DAYS_CODE",
+      "valueExpression": "$p($g(^PHCDU(useDaysDr)),\"^\",1)",
+      "global": "^PHCDU(useDaysDr)^1",
+      "domain": "40-order"
+    },
+    "USE_DAYS_DESC": {
+      "keywords": [
+        "USE_DAYS_DESC",
+        "useDaysDesc",
+        "UseDaysDesc",
+        "疗程名称",
+        "疗程描述"
+      ],
+      "ruleStandardName": "USE_DAYS_DESC",
+      "valueExpression": "$p($g(^PHCDU(useDaysDr)),\"^\",2)",
+      "global": "^PHCDU(useDaysDr)^2",
+      "domain": "40-order"
+    },
+    "BILL_CODE": {
+      "keywords": [
+        "BILL_CODE",
+        "billCode",
+        "BillCode",
+        "计费编码",
+        "收费编码"
+      ],
+      "ruleStandardName": "BILL_CODE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",14)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^14",
+      "domain": "40-order"
+    },
+    "OEORD_ADM_DR": {
+      "keywords": [
+        "OEORD_ADM_DR",
+        "oeordAdmDr",
+        "AdmDr",
+        "就诊DR",
+        "就诊ID",
+        "PAADM_DR"
+      ],
+      "ruleStandardName": "OEORD_ADM_DR",
+      "valueExpression": "$p($g(^OEORD(ordItm)),\"^\",1)",
+      "global": "^OEORD(ordItm)^1",
+      "domain": "40-order"
+    },
+    "ORD_ST_DATE": {
+      "keywords": [
+        "ORD_ST_DATE",
+        "ordStDate",
+        "StDate",
+        "医嘱开始日期",
+        "医嘱开始时间",
+        "OrderStartDate"
+      ],
+      "ruleStandardName": "ORD_ST_DATE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",9)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^9",
+      "domain": "40-order"
+    },
+    "ORD_ST_TIME": {
+      "keywords": [
+        "ORD_ST_TIME",
+        "ordStTime",
+        "StTime",
+        "医嘱开始时间"
+      ],
+      "ruleStandardName": "ORD_ST_TIME",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",10)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^10",
+      "domain": "40-order"
+    },
+    "ORD_END_DATE": {
+      "keywords": [
+        "ORD_END_DATE",
+        "ordEndDate",
+        "EndDate",
+        "医嘱结束日期",
+        "医嘱停止日期",
+        "OrderEndDate"
+      ],
+      "ruleStandardName": "ORD_END_DATE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),3)),\"^\",34)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),3)^34",
+      "domain": "40-order"
+    },
+    "ORD_END_TIME": {
+      "keywords": [
+        "ORD_END_TIME",
+        "ordEndTime",
+        "EndTime",
+        "医嘱结束时间",
+        "医嘱停止时间"
+      ],
+      "ruleStandardName": "ORD_END_TIME",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)),\"^\",15)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),2)^15",
+      "domain": "40-order"
+    },
+    "ORD_DOCTOR_DR": {
+      "keywords": [
+        "ORD_DOCTOR_DR",
+        "ordDoctorDr",
+        "DoctorDr",
+        "开医嘱医生DR",
+        "开医嘱医生ID"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",11)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)^11",
+      "domain": "40-order"
+    },
+    "ORD_DOCTOR_NAME": {
+      "keywords": [
+        "ORD_DOCTOR_NAME",
+        "ordDoctorName",
+        "DoctorName",
+        "开医嘱医生姓名",
+        "开医嘱医生名称"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_NAME",
+      "valueExpression": "$p($g(^CTPCP(doctorDr,1)),\"^\",2)",
+      "global": "^CTPCP(doctorDr,1)^2",
+      "domain": "40-order"
+    },
+    "ORD_DEPT_DR": {
+      "keywords": [
+        "ORD_DEPT_DR",
+        "ordDeptDr",
+        "DeptDr",
+        "开医嘱科室DR",
+        "开医嘱科室ID"
+      ],
+      "ruleStandardName": "ORD_DEPT_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),7)),\"^\",2)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),7)^2",
+      "domain": "40-order"
+    },
+    "ORD_DEPT_NAME": {
+      "keywords": [
+        "ORD_DEPT_NAME",
+        "ordDeptName",
+        "开医嘱科室名称",
+        "开医嘱科室描述"
+      ],
+      "ruleStandardName": "ORD_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",2)",
+      "global": "^CTLOC(deptDr)^2",
+      "domain": "40-order"
+    },
+    "OEORE_EX_ST_DATE": {
+      "keywords": [
+        "OEORE_EX_ST_DATE",
+        "oeoreExStDate",
+        "ExStDate",
+        "执行开始日期",
+        "执行日期"
+      ],
+      "ruleStandardName": "OEORE_EX_ST_DATE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)),\"^\",1)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)^1",
+      "domain": "40-order"
+    },
+    "OEORE_EX_ST_TIME": {
+      "keywords": [
+        "OEORE_EX_ST_TIME",
+        "oeoreExStTime",
+        "ExStTime",
+        "执行开始时间"
+      ],
+      "ruleStandardName": "OEORE_EX_ST_TIME",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)),\"^\",2)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)^2",
+      "domain": "40-order"
+    },
+    "OEORE_STATUS_DR": {
+      "keywords": [
+        "OEORE_STATUS_DR",
+        "oeoreStatusDr",
+        "ExStatusDr",
+        "执行状态DR",
+        "执行状态ID"
+      ],
+      "ruleStandardName": "OEORE_STATUS_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)),\"^\",16)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)^16",
+      "domain": "40-order"
+    },
+    "OEORE_STATUS_CODE": {
+      "keywords": [
+        "OEORE_STATUS_CODE",
+        "oeoreStatusCode",
+        "ExStatusCode",
+        "执行状态编码"
+      ],
+      "ruleStandardName": "OEORE_STATUS_CODE",
+      "valueExpression": "$p($g(^OEC(exStatusDr)),\"^\",1)",
+      "global": "^OEC(exStatusDr)^1",
+      "domain": "40-order"
+    },
+    "OEORE_STATUS_DESC": {
+      "keywords": [
+        "OEORE_STATUS_DESC",
+        "oeoreStatusDesc",
+        "ExStatusDesc",
+        "执行状态名称",
+        "执行状态描述"
+      ],
+      "ruleStandardName": "OEORE_STATUS_DESC",
+      "valueExpression": "$p($g(^OEC(exStatusDr)),\"^\",2)",
+      "global": "^OEC(exStatusDr)^2",
+      "domain": "40-order"
+    },
+    "OEORE_CTPCP_DR": {
+      "keywords": [
+        "OEORE_CTPCP_DR",
+        "oeoreCtpcpDr",
+        "ExCtpcpDr",
+        "执行人DR",
+        "执行人ID"
+      ],
+      "ruleStandardName": "OEORE_CTPCP_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)),\"^\",15)",
+      "global": "^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",exSeq)^15",
+      "domain": "40-order"
+    },
+    "OEORE_CTPCP_NAME": {
+      "keywords": [
+        "OEORE_CTPCP_NAME",
+        "oeoreCtpcpName",
+        "ExCtpcpName",
+        "执行人姓名",
+        "执行人名称"
+      ],
+      "ruleStandardName": "OEORE_CTPCP_NAME",
+      "valueExpression": "$p($g(^CTPCP(exCtpcpDr,1)),\"^\",2)",
+      "global": "^CTPCP(exCtpcpDr,1)^2",
+      "domain": "40-order"
+    },
+    "ZYYZJL_HZJZH": {
+      "keywords": [
+        "ZYYZJL_HZJZH",
+        "患者就诊号"
+      ],
+      "ruleStandardName": "ADM_SERIAL_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common"
+    },
+    "ZYYZJL_LSH": {
+      "keywords": [
+        "ZYYZJL_LSH",
+        "流水号",
+        "唯一"
+      ],
+      "ruleStandardName": "ADM_SERIAL_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common"
+    },
+    "ZYYZJL_RYSJ": {
+      "keywords": [
+        "ZYYZJL_RYSJ",
+        "入院时间"
+      ],
+      "ruleStandardName": "ADM_DATE",
+      "valueExpression": "$zd($p($g(^PAADM(admRowId)),\"^\",6),3)",
+      "global": "^PAADM",
+      "domain": "20-visit"
+    },
+    "ZYYZJL_YZDH": {
+      "keywords": [
+        "ZYYZJL_YZDH",
+        "医嘱单号",
+        "医嘱内部唯一编号"
+      ],
+      "ruleStandardName": "ORD_ROWID",
+      "valueExpression": "$p(ordstr1,\"^\",1)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YZZH": {
+      "keywords": [
+        "ZYYZJL_YZZH",
+        "医嘱组号"
+      ],
+      "ruleStandardName": "ORD_ROWID",
+      "valueExpression": "$p(ordstr1,\"^\",1)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_ZYXMBM": {
+      "keywords": [
+        "ZYYZJL_ZYXMBM",
+        "医嘱字典码"
+      ],
+      "ruleStandardName": "ARCIM_CODE",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",1)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "ZYYZJL_ZYXMMC": {
+      "keywords": [
+        "ZYYZJL_ZYXMMC",
+        "医嘱字典"
+      ],
+      "ruleStandardName": "ARCIM_NAME",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",2)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YZLBMC": {
+      "keywords": [
+        "ZYYZJL_YZLBMC",
+        "医嘱类别名称",
+        "医嘱类别"
+      ],
+      "ruleStandardName": "ORD_CAT_DESC",
+      "valueExpression": "$p($g(^OEC(\"ORCAT\",OrdCatRowID)),\"^\",2)",
+      "global": "^OEC",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPLBMC": {
+      "keywords": [
+        "ZYYZJL_YPLBMC",
+        "药品类别名称"
+      ],
+      "ruleStandardName": "ORD_SUB_CAT_DESC",
+      "valueExpression": "$p($g(^ARC(\"IC\",OrdSubCatRowID)),\"^\",2)",
+      "global": "^ARC",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YZXZ": {
+      "keywords": [
+        "ZYYZJL_YZXZ",
+        "医嘱性质",
+        "YZXZ"
+      ],
+      "ruleStandardName": "PRIORITY_DESC",
+      "valueExpression": "$p($g(^OECPR($p(ordstr1,\"^\",8))),\"^\",2)",
+      "global": "^OECPR",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YZKSSJ": {
+      "keywords": [
+        "ZYYZJL_YZKSSJ",
+        "医嘱开始时间",
+        "YZKSSJ"
+      ],
+      "ruleStandardName": "ORDER_START_DATE",
+      "valueExpression": "$zd($p(ordstr1,\"^\",4),3)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YZJSSJ": {
+      "keywords": [
+        "ZYYZJL_YZJSSJ",
+        "医嘱结束时间",
+        "YZJSSJ"
+      ],
+      "ruleStandardName": "ORDER_END_DATE",
+      "valueExpression": "$zd($p(ordstr1,\"^\",5),3)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPJXMC": {
+      "keywords": [
+        "ZYYZJL_YPJXMC",
+        "药品剂型名称",
+        "YPJXMC",
+        "药物剂型",
+        "剂型名称"
+      ],
+      "ruleStandardName": "DRUG_FORM_DESC",
+      "valueExpression": "$p($g(^PHCF(drugFormDr)),\"^\",2)",
+      "global": "^PHCF",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPSYCJL": {
+      "keywords": [
+        "ZYYZJL_YPSYCJL",
+        "药品使用剂量",
+        "单次剂量"
+      ],
+      "ruleStandardName": "DOSAGE_QTY",
+      "valueExpression": "$p($g(^OEORD(ordId,\"I\",ordItm,2)),\"^\",1)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPSYCJLDW": {
+      "keywords": [
+        "ZYYZJL_YPSYCJLDW",
+        "药品使用次剂量单位",
+        "剂量单位",
+        "单次剂量单位"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_DESC",
+      "valueExpression": "$p($g(^CT(\"UOM\",dosageUnitRowID)),\"^\",2)",
+      "global": "^CT(\"UOM\")",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPSLDW": {
+      "keywords": [
+        "ZYYZJL_YPSLDW",
+        "药品数量单位",
+        "数量单位"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_DESC",
+      "valueExpression": "$p($g(^CT(\"UOM\",dosageUnitRowID)),\"^\",2)",
+      "global": "^CT(\"UOM\")",
+      "domain": "40-order"
+    },
+    "ZYYZJL_BZGG": {
+      "keywords": [
+        "ZYYZJL_BZGG",
+        "包装规格"
+      ],
+      "ruleStandardName": "PACKAGE_SPEC",
+      "valueExpression": "$p($g(^OEORD(ordId,\"I\",ordItm,\"X\",1)),\"^\",16)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YPSL": {
+      "keywords": [
+        "ZYYZJL_YPSL",
+        "药品数量"
+      ],
+      "ruleStandardName": "ORDER_QTY",
+      "valueExpression": "$p(ordstr1,\"^\",6)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_GYTJBM": {
+      "keywords": [
+        "ZYYZJL_GYTJBM",
+        "给药途径编码",
+        "用法编码"
+      ],
+      "ruleStandardName": "USAGE_CODE",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",1)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "ZYYZJL_GYTJMC": {
+      "keywords": [
+        "ZYYZJL_GYTJMC",
+        "给药途径名称",
+        "用法名称"
+      ],
+      "ruleStandardName": "USAGE_DESC",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",2)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "ZYYZJL_CQLSBZ": {
+      "keywords": [
+        "ZYYZJL_CQLSBZ",
+        "长期临时标志"
+      ],
+      "ruleStandardName": "LONG_TERM_FLAG",
+      "valueExpression": "$case($P($g(^OECPR(OrdTypeRowID)),\"^\",1),\"R\":\"长期\",\"S\":\"临时\",:\"\")",
+      "global": "^OECPR",
+      "domain": "40-order"
+    },
+    "ZYYZJL_KJYW": {
+      "keywords": [
+        "ZYYZJL_KJYW",
+        "抗菌药物"
+      ],
+      "ruleStandardName": "ANTIBIOTIC_FLAG",
+      "valueExpression": "$case($p($g(^OEORD(ordId,\"I\",ordItm,\"X\",1)),\"^\",14),\"Y\":\"1\",:\"0\")",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "YYS": {
+      "keywords": [
+        "yys",
+        "用药时间"
+      ],
+      "ruleStandardName": "MED_START_TIME",
+      "valueExpression": "$p($g(^OEORD(+oeori,\"I\",+itm,1)),\"^\",9)",
+      "global": "^OEORD",
+      "domain": "40-order",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "ZYYZJL_ZJLDW": {
+      "keywords": [
+        "ZYYZJL_ZJLDW",
+        "嘱托单位"
+      ],
+      "ruleStandardName": "USAGE_DESC",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",2)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "ZYYZJL_ZJLZ": {
+      "keywords": [
+        "ZYYZJL_ZJLZ",
+        "嘱托量值"
+      ],
+      "ruleStandardName": "TOTAL_DOSE",
+      "valueExpression": "$p($g(^OEORD(ordId,\"I\",ordItm,9)),\"^\",4)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "ZYYZJL_YFYY": {
+      "keywords": [
+        "ZYYZJL_YFYY",
+        "用法用量"
+      ],
+      "ruleStandardName": "USAGE_DESC",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",2)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "OEORI_ORDER_SOURCE": {
+      "keywords": [
+        "OEORIOrderSourceDesc",
+        "OrderSourceDesc",
+        "医嘱来源代码说明",
+        "医嘱来源"
+      ],
+      "ruleStandardName": "OEORI_ORDER_SOURCE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",18)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ORDER_STATUS": {
+      "keywords": [
+        "OEORIOrderStatus",
+        "OrderStatus",
+        "医嘱使用状态",
+        "医嘱状态"
+      ],
+      "ruleStandardName": "STATUS_DESC",
+      "valueExpression": "$p($g(^OEC(\"OSTAT\",$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",13))),\"^\",2)",
+      "global": "^OEC(\"OSTAT\")",
+      "domain": "40-order"
+    },
+    "OEORI_ORDER_ITEM_ID": {
+      "keywords": [
+        "OEORIOrderItemID",
+        "OrderItemID",
+        "医嘱明细ID"
+      ],
+      "ruleStandardName": "ORD_ROWID",
+      "valueExpression": "ordItm",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ARCITM_MAST_CODE": {
+      "keywords": [
+        "OEORIARCItmMastCode",
+        "ARCItmMastCode",
+        "医嘱项目代码",
+        "医嘱项目编码"
+      ],
+      "ruleStandardName": "ARCIM_CODE",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",1)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "OEORI_ARCITM_MAST_DESC": {
+      "keywords": [
+        "OEORIARCItmMastDesc",
+        "ARCItmMastDesc",
+        "医嘱项目描述",
+        "医嘱项目名称"
+      ],
+      "ruleStandardName": "ARCIM_NAME",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",2)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "OEORI_ARCITM_MAST_CONTENT": {
+      "keywords": [
+        "OEORIARCItmMastContent",
+        "ARCItmMastContent",
+        "医嘱项目内容"
+      ],
+      "ruleStandardName": "ARCIM_NAME",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",2)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "OEORI_CLASS": {
+      "keywords": [
+        "OEORIClass",
+        "Class",
+        "医嘱类别代码"
+      ],
+      "ruleStandardName": "ORD_CAT_CODE",
+      "valueExpression": "$p($g(^OEC(\"ORCAT\",OrdCatRowID)),\"^\",1)",
+      "global": "^OEC(\"ORCAT\")",
+      "domain": "40-order"
+    },
+    "OEORI_CLASS_DESC": {
+      "keywords": [
+        "OEORIClassDesc",
+        "ClassDesc",
+        "医嘱类别描述"
+      ],
+      "ruleStandardName": "ORD_CAT_DESC",
+      "valueExpression": "$p($g(^OEC(\"ORCAT\",OrdCatRowID)),\"^\",2)",
+      "global": "^OEC(\"ORCAT\")",
+      "domain": "40-order"
+    },
+    "OEORI_DOSE_UNIT_CODE": {
+      "keywords": [
+        "OEORIDoseUnitCode",
+        "DoseUnitCode",
+        "单次剂量单位代码",
+        "剂量单位代码"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_CODE",
+      "valueExpression": "$p($g(^CT(\"UOM\",dosageUnitRowID)),\"^\",1)",
+      "global": "^CT(\"UOM\")",
+      "domain": "40-order"
+    },
+    "OEORI_DOSE_UNIT_DESC": {
+      "keywords": [
+        "OEORIDoseUnitDesc",
+        "DoseUnitDesc",
+        "单次剂量单位描述",
+        "剂量单位描述"
+      ],
+      "ruleStandardName": "DOSAGE_UNIT_DESC",
+      "valueExpression": "$p($g(^CT(\"UOM\",dosageUnitRowID)),\"^\",2)",
+      "global": "^CT(\"UOM\")",
+      "domain": "40-order"
+    },
+    "OEORI_INSTR_CODE": {
+      "keywords": [
+        "OEORIInstrCode",
+        "InstrCode",
+        "用药途径代码",
+        "用药途径编码"
+      ],
+      "ruleStandardName": "USAGE_CODE",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",1)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "OEORI_INSTR_DESC": {
+      "keywords": [
+        "OEORIInstrDesc",
+        "InstrDesc",
+        "用药途径描述"
+      ],
+      "ruleStandardName": "USAGE_DESC",
+      "valueExpression": "$p($g(^PHCIN(usageRowID)),\"^\",2)",
+      "global": "^PHCIN",
+      "domain": "40-order"
+    },
+    "OEORI_ORDER_QTY": {
+      "keywords": [
+        "OEORIOrderQty",
+        "OrderQty",
+        "医嘱数量"
+      ],
+      "ruleStandardName": "QTY",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",12)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_RESULT_STATUS_CODE": {
+      "keywords": [
+        "OEORIResultStatusCode",
+        "ResultStatusCode",
+        "医嘱结果状态代码"
+      ],
+      "ruleStandardName": "OEORE_STATUS_CODE",
+      "valueExpression": "$p($g(^OEC(\"OSTAT\",$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",16))),\"^\",1)",
+      "global": "^OEC(\"OSTAT\")",
+      "domain": "40-order"
+    },
+    "OEORI_RESULT_STATUS_DESC": {
+      "keywords": [
+        "OEORIResultStatusDesc",
+        "ResultStatusDesc",
+        "医嘱结果状态描述"
+      ],
+      "ruleStandardName": "OEORE_STATUS_DESC",
+      "valueExpression": "$p($g(^OEC(\"OSTAT\",$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",16))),\"^\",2)",
+      "global": "^OEC(\"OSTAT\")",
+      "domain": "40-order"
+    },
+    "OEORI_REMARKS": {
+      "keywords": [
+        "OEORIRemarks",
+        "Remarks",
+        "医嘱备注信息",
+        "医嘱备注"
+      ],
+      "ruleStandardName": "OEORI_REMARKS",
+      "valueExpression": "$g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"DEP\",1))",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ENTER_DOC_CODE": {
+      "keywords": [
+        "OEORIEnterDocCode",
+        "EnterDocCode",
+        "医嘱开立者代码"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",11)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ENTER_DOC_DESC": {
+      "keywords": [
+        "OEORIEnterDocDesc",
+        "EnterDocDesc",
+        "医嘱开立者描述"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_NAME",
+      "valueExpression": "$p($g(^CTPCP($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",11),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "40-order"
+    },
+    "OEORI_ENTER_DATE": {
+      "keywords": [
+        "OEORIEnterDate",
+        "EnterDate",
+        "医嘱开立日期"
+      ],
+      "ruleStandardName": "ORD_ST_DATE",
+      "valueExpression": "$zd($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",9),3)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ENTER_DEPT_CODE": {
+      "keywords": [
+        "OEORIEnterDeptCode",
+        "EnterDeptCode",
+        "医嘱开立科室代码"
+      ],
+      "ruleStandardName": "ORD_DEPT_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),7)),\"^\",2)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_ENTER_DEPT_DESC": {
+      "keywords": [
+        "OEORIEnterDeptDesc",
+        "EnterDeptDesc",
+        "医嘱开立科室描述"
+      ],
+      "ruleStandardName": "ORD_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),7)),\"^\",2))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "40-order"
+    },
+    "OEORI_EXEC_DEPT_CODE": {
+      "keywords": [
+        "OEORIExecDeptCode",
+        "ExecDeptCode",
+        "医嘱执行科室代码"
+      ],
+      "ruleStandardName": "OEORE_DEPT_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",11)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_EXEC_DEPT_DESC": {
+      "keywords": [
+        "OEORIExecDeptDesc",
+        "ExecDeptDesc",
+        "医嘱执行科室描述"
+      ],
+      "ruleStandardName": "OEORE_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",11))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "40-order"
+    },
+    "OEORI_IS_SKIN_TEST": {
+      "keywords": [
+        "OEORIIsSkinTest",
+        "IsSkinTest",
+        "是否皮试"
+      ],
+      "ruleStandardName": "OEORI_IS_SKIN_TEST",
+      "valueExpression": "$case($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",14),\"Y\":\"1\",:\"0\")",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "OEORI_PARENT_ORDER_ID": {
+      "keywords": [
+        "OEORIParentOrderID",
+        "ParentOrderID",
+        "父医嘱ID"
+      ],
+      "ruleStandardName": "OEORI_PARENT_ORDER_ID",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",15)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "MATERIAL_BARCODE": {
+      "keywords": [
+        "MaterialBarcode",
+        "物资条码",
+        "材料条码"
+      ],
+      "ruleStandardName": "MATERIAL_BARCODE",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "物资条码（无直接Global存储）"
+    },
+    "REAL_AMOUNT": {
+      "keywords": [
+        "RealAmount",
+        "实际金额",
+        "实付金额"
+      ],
+      "ruleStandardName": "REAL_AMOUNT",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "a0-fee-settlement",
+      "description": "实际金额（需查询计费表）"
+    }
+  }
+}

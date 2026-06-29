@@ -1,0 +1,886 @@
+{
+  "_description": "从v4.21 50-lab-exam.json提取的检验域字段别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "LAB_REPORT_NO": {
+      "keywords": [
+        "LAB_REPORT_NO",
+        "报告号",
+        "检验单号",
+        "repNo",
+        "barCode",
+        "LabNo",
+        "HDSD0005016",
+        "HDSD0005027",
+        "检验编号",
+        "LAB_NO"
+      ],
+      "ruleStandardName": "检验报告号/单号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SAMPLE_NO": {
+      "keywords": [
+        "SAMPLE_NO",
+        "样本编号",
+        "sampleNo",
+        "Epis",
+        "HDSD0005021",
+        "检测序号",
+        "标本号"
+      ],
+      "ruleStandardName": "样本编号/检测序号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "DIAGNOSE": {
+      "keywords": [
+        "DIAGNOSE",
+        "临床诊断",
+        "诊断",
+        "Diagnose",
+        "HDSD0005075",
+        "CLINICAL_DIAG"
+      ],
+      "ruleStandardName": "临床诊断",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "MAJOR_CONCLUSION": {
+      "keywords": [
+        "MAJOR_CONCLUSION",
+        "检验结论",
+        "主要结论",
+        "MajorConclusion",
+        "HDSD0005024",
+        "HDSD0005020",
+        "主观提示"
+      ],
+      "ruleStandardName": "检验结论/主观提示",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "COLLECT_DATETIME": {
+      "keywords": [
+        "COLLECT_DATETIME",
+        "采集日期时间",
+        "ColDT",
+        "HDSD0005002",
+        "sampleTime",
+        "采集时间",
+        "COLLECT_DATE_TIME"
+      ],
+      "ruleStandardName": "标本采集日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "RECEIVE_DATETIME": {
+      "keywords": [
+        "RECEIVE_DATETIME",
+        "接收日期时间",
+        "RecDT",
+        "HDSD0005057",
+        "receiveTime",
+        "签收时间",
+        "接收时间"
+      ],
+      "ruleStandardName": "接收日期时间(标本签收)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "TEST_DATETIME": {
+      "keywords": [
+        "TEST_DATETIME",
+        "检验日期时间",
+        "审核日期",
+        "AuthDT",
+        "HDSD0005044",
+        "审核日期时间",
+        "报告日期",
+        "REPORT_DATE"
+      ],
+      "ruleStandardName": "检验日期时间(审核/报告)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SPECIMEN_NAME": {
+      "keywords": [
+        "SPECIMEN_NAME",
+        "标本名称",
+        "标本类型",
+        "SpecimenName",
+        "sampleName",
+        "HDSD0005004",
+        "SPECIMEN"
+      ],
+      "ruleStandardName": "标本名称/类型",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SPECIMEN_CODE": {
+      "keywords": [
+        "SPECIMEN_CODE",
+        "标本代码",
+        "标本编码",
+        "SpecimenCode"
+      ],
+      "ruleStandardName": "标本代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SPECIMEN_QUALITY": {
+      "keywords": [
+        "SPECIMEN_QUALITY",
+        "标本质量",
+        "标本状态",
+        "SpecimenQuality",
+        "HDSD0005005"
+      ],
+      "ruleStandardName": "标本质量",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "LAB_DEPT_NAME": {
+      "keywords": [
+        "LAB_DEPT_NAME",
+        "检验科室",
+        "LocationName",
+        "HDSD0005036",
+        "HDSD0005054",
+        "执行科室名称",
+        "appDeptName",
+        "LAB_DEPT"
+      ],
+      "ruleStandardName": "检验科室名称",
+      "valueExpression": "$lg(data,21)",
+      "global": "^Busi.ENS.EnsLISReportResultD",
+      "domain": "50-lab-exam",
+      "description": "申请科室名称，从检验报告主表 lg(21)=LISRRDeptName 获取"
+    },
+    "LAB_DEPT_CODE": {
+      "keywords": [
+        "LAB_DEPT_CODE",
+        "实验室代码",
+        "LocationCode",
+        "HDSD00050541",
+        "执行科室代码",
+        "appDeptCode"
+      ],
+      "ruleStandardName": "检验科室代码",
+      "valueExpression": "$lg(data,20)",
+      "global": "^Busi.ENS.EnsLISReportResultD",
+      "domain": "50-lab-exam"
+    },
+    "WORK_GROUP_NAME": {
+      "keywords": [
+        "WORK_GROUP_NAME",
+        "专业组名称",
+        "工作组名称",
+        "WorkGroupName",
+        "HDSD0005025",
+        "HDSD0005043",
+        "HDSD0005051",
+        "LAB_GROUP"
+      ],
+      "ruleStandardName": "工作组/专业组名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "WORK_GROUP_CODE": {
+      "keywords": [
+        "WORK_GROUP_CODE",
+        "专业组代码",
+        "工作组代码",
+        "WorkGroupCode",
+        "HDSD00050431"
+      ],
+      "ruleStandardName": "工作组/专业组代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "AUDIT_USER_CODE": {
+      "keywords": [
+        "AUDIT_USER_CODE",
+        "审核人代码",
+        "审核人",
+        "AuthUserCode",
+        "HDSD0005067",
+        "二审人代码",
+        "secondAuditDrCode",
+        "审核医生"
+      ],
+      "ruleStandardName": "审核人代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "AUDIT_USER_NAME": {
+      "keywords": [
+        "AUDIT_USER_NAME",
+        "审核人姓名",
+        "AuthUserName",
+        "HDSD00050671",
+        "二审人姓名",
+        "secondAuditDrName",
+        "审核人名称"
+      ],
+      "ruleStandardName": "审核人姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ENTRY_USER_CODE": {
+      "keywords": [
+        "ENTRY_USER_CODE",
+        "录入人代码",
+        "检查技师代码",
+        "EntryUserCode",
+        "HDSD0005031",
+        "检查医师代码",
+        "HDSD0005038",
+        "一审人代码",
+        "firstAuditDrCode"
+      ],
+      "ruleStandardName": "录入人/检查技师代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ENTRY_USER_NAME": {
+      "keywords": [
+        "ENTRY_USER_NAME",
+        "录入人姓名",
+        "检查技师签名",
+        "EntryUserName",
+        "HDSD00050311",
+        "HDSD00050381",
+        "一审人姓名",
+        "firstAuditDrName"
+      ],
+      "ruleStandardName": "录入人/检查技师姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ACCEPT_USER_CODE": {
+      "keywords": [
+        "ACCEPT_USER_CODE",
+        "接收人代码",
+        "AcceptUserCode",
+        "HDSD0005001"
+      ],
+      "ruleStandardName": "接收人代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ACCEPT_USER_NAME": {
+      "keywords": [
+        "ACCEPT_USER_NAME",
+        "接收人姓名",
+        "AcceptUserName",
+        "HDSD00050011"
+      ],
+      "ruleStandardName": "接收人姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "APP_DOCTOR_CODE": {
+      "keywords": [
+        "APP_DOCTOR_CODE",
+        "申请医生代码",
+        "申请人代码",
+        "appDrCode"
+      ],
+      "ruleStandardName": "申请医生代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "APP_DOCTOR_NAME": {
+      "keywords": [
+        "APP_DOCTOR_NAME",
+        "申请医生",
+        "申请人姓名",
+        "appDrName"
+      ],
+      "ruleStandardName": "申请医生姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "APP_DEPT_CODE": {
+      "keywords": [
+        "APP_DEPT_CODE",
+        "申请科室代码",
+        "开单科室代码",
+        "appDeptCode"
+      ],
+      "ruleStandardName": "申请科室代码",
+      "valueExpression": "$lg(data,20)",
+      "global": "^Busi.ENS.EnsLISReportResultD",
+      "domain": "50-lab-exam"
+    },
+    "APP_DEPT_NAME": {
+      "keywords": [
+        "APP_DEPT_NAME",
+        "申请科室",
+        "开单科室",
+        "appDeptName"
+      ],
+      "ruleStandardName": "申请科室名称",
+      "valueExpression": "$lg(data,21)",
+      "global": "^Busi.ENS.EnsLISReportResultD",
+      "domain": "50-lab-exam"
+    },
+    "SAMPLE_OPER_NAME": {
+      "keywords": [
+        "SAMPLE_OPER_NAME",
+        "采集人",
+        "sampleOperName",
+        "采集护士"
+      ],
+      "ruleStandardName": "采集人姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "REPORT_NAME": {
+      "keywords": [
+        "REPORT_NAME",
+        "报告名称",
+        "repName",
+        "报告类型",
+        "repType",
+        "HDSD0005030",
+        "检查方法名称"
+      ],
+      "ruleStandardName": "报告名称/类型",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "DANGER_FLAG": {
+      "keywords": [
+        "DANGER_FLAG",
+        "危急值",
+        "dangerFlag",
+        "CRITICAL_VALUE",
+        "HDSD0005068",
+        "特殊检查标志"
+      ],
+      "ruleStandardName": "危急值标志",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "TEST_RESULT": {
+      "keywords": [
+        "TEST_RESULT",
+        "检验结果",
+        "结果",
+        "Result",
+        "HDSD0005042",
+        "检验结果值",
+        "ITEM_RESULT"
+      ],
+      "ruleStandardName": "检验结果(值)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ITEM_CNAME": {
+      "keywords": [
+        "ITEM_CNAME",
+        "项目中文名",
+        "检验项目",
+        "itemCname",
+        "项目名称",
+        "TEST_ITEM"
+      ],
+      "ruleStandardName": "检验项目中文名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ITEM_ENAME": {
+      "keywords": [
+        "ITEM_ENAME",
+        "项目英文名",
+        "itemEname",
+        "TEST_ITEM_EN"
+      ],
+      "ruleStandardName": "检验项目英文名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ITEM_ALIAS": {
+      "keywords": [
+        "ITEM_ALIAS",
+        "项目别名",
+        "itemAlias",
+        "TEST_ALIAS"
+      ],
+      "ruleStandardName": "检验项目别名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "REF_RANGE": {
+      "keywords": [
+        "REF_RANGE",
+        "参考范围",
+        "refRange",
+        "参考区间",
+        "NORMAL_RANGE"
+      ],
+      "ruleStandardName": "参考范围",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "UNIT": {
+      "keywords": [
+        "UNIT",
+        "单位",
+        "unit",
+        "检验单位",
+        "TEST_UNIT"
+      ],
+      "ruleStandardName": "单位",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "PROMPT": {
+      "keywords": [
+        "PROMPT",
+        "结果提示",
+        "prompt",
+        "标志",
+        "FLAG",
+        "异常标志"
+      ],
+      "ruleStandardName": "结果提示(↑/↓)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "TEST_METHOD": {
+      "keywords": [
+        "TEST_METHOD",
+        "检测方法",
+        "Method",
+        "HDSD0005048",
+        "检验方法",
+        "分析方法"
+      ],
+      "ruleStandardName": "检测方法",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SEND_OPER_NAME": {
+      "keywords": [
+        "SEND_OPER_NAME",
+        "运送人",
+        "sendOperName"
+      ],
+      "ruleStandardName": "运送人姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "ANT_ANTIBIOTIC": {
+      "keywords": [
+        "ANT_ANTIBIOTIC",
+        "抗生素",
+        "药敏",
+        "antCname",
+        "抗菌药物",
+        "SENSITIVITY"
+      ],
+      "ruleStandardName": "抗生素敏感性(药敏)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SEQ": {
+      "keywords": [
+        "SEQ",
+        "序号",
+        "seq",
+        "项目序号"
+      ],
+      "ruleStandardName": "检验项目序号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "APPTIME": {
+      "keywords": [
+        "APPTIME",
+        "申请日期",
+        "申请时间",
+        "appTime",
+        "ReqDate",
+        "ReqTime"
+      ],
+      "ruleStandardName": "申请日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "SEND_DATETIME": {
+      "keywords": [
+        "SEND_DATETIME",
+        "运送日期",
+        "运送时间",
+        "sendTime",
+        "CarryDate",
+        "CarryTime"
+      ],
+      "ruleStandardName": "运送日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_HZJZH": {
+      "keywords": [
+        "JYBG_HZJZH",
+        "HZJZH",
+        "患者就诊号",
+        "PatientVisitNo"
+      ],
+      "ruleStandardName": "ADM_SERIAL_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common"
+    },
+    "JYBG_LSH": {
+      "keywords": [
+        "JYBG_LSH",
+        "JYBGMX_LSH",
+        "JCBG_LSH",
+        "就诊流水号",
+        "LSH",
+        "VisitSerialNo"
+      ],
+      "ruleStandardName": "ADM_SERIAL_NUM",
+      "valueExpression": "adm",
+      "global": "",
+      "domain": "common"
+    },
+    "JYBG_SQDH": {
+      "keywords": [
+        "JYBG_SQDH",
+        "JYBGMX_SQDH",
+        "JCBG_SQDH",
+        "申请单号",
+        "SQDH",
+        "RequestNo",
+        "APP_NO"
+      ],
+      "ruleStandardName": "LAB_REPORT_NO",
+      "valueExpression": "$lg(data,3)",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_SQKS": {
+      "keywords": [
+        "JYBG_SQKS",
+        "JCBG_SQKS",
+        "申请科室",
+        "SQKS",
+        "AppDept",
+        "APP_DEPT_NAME"
+      ],
+      "ruleStandardName": "APP_DEPT_NAME",
+      "valueExpression": "$lg(data,21)",
+      "global": "^Busi.ENS.EnsLISReportResultD",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_BGDH": {
+      "keywords": [
+        "JYBG_BGDH",
+        "JYBGMX_BGDH",
+        "报告单号",
+        "BGDH",
+        "ReportNo"
+      ],
+      "ruleStandardName": "LAB_REPORT_NO",
+      "valueExpression": "$lg(data,2)",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_JYXMBM": {
+      "keywords": [
+        "JYBG_JYXMBM",
+        "JYBG_JYXMBM",
+        "检验项目编码",
+        "JYXMBM",
+        "TestItemCode",
+        "ITEM_CODE"
+      ],
+      "ruleStandardName": "LISRROrderItemDesc",
+      "valueExpression": "$lg(data,115)",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_JYXMMC": {
+      "keywords": [
+        "JYBG_JYXMMC",
+        "检验项目名称",
+        "JYXMMC",
+        "TestItemName",
+        "ITEM_NAME"
+      ],
+      "ruleStandardName": "LISRROrderItemDesc",
+      "valueExpression": "$lg(data,115)",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYXMBM": {
+      "keywords": [
+        "JYBGMX_JYXMBM",
+        "检验细项项目编码",
+        "明细项目编码"
+      ],
+      "ruleStandardName": "LISRROrderItemDesc",
+      "valueExpression": "$lg(data,115)",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYXMMC": {
+      "keywords": [
+        "JYBGMX_JYXMMC",
+        "检验细项项目名称",
+        "明细项目名称"
+      ],
+      "ruleStandardName": "LISRROrderItemDesc",
+      "valueExpression": "$lg(data,115)",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_CYSJ": {
+      "keywords": [
+        "JYBG_CYSJ",
+        "采样时间",
+        "CYSJ",
+        "CollectTime",
+        "COLLECT_DATETIME"
+      ],
+      "ruleStandardName": "COLLECT_DATETIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_SJSJ": {
+      "keywords": [
+        "JYBG_SJSJ",
+        "JCBG_SJSJ",
+        "送检时间",
+        "SJSJ",
+        "SendTime",
+        "SEND_DATETIME"
+      ],
+      "ruleStandardName": "SEND_DATETIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_JYSJ": {
+      "keywords": [
+        "JYBG_JYSJ",
+        "检验时间",
+        "JYSJ",
+        "TestTime",
+        "TEST_DATETIME"
+      ],
+      "ruleStandardName": "TEST_DATETIME",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_BGSJ": {
+      "keywords": [
+        "JYBG_BGSJ",
+        "JYBGMX_BGSJ",
+        "JCBG_BGSJ",
+        "报告时间",
+        "BGSJ",
+        "ReportTime",
+        "REPORT_DATETIME"
+      ],
+      "ruleStandardName": "TEST_DATETIME",
+      "valueExpression": "$zd($lg(data,10),3)_\" \"_$zt($lg(data,11))",
+      "domain": "50-lab-exam"
+    },
+    "JYBG_SQSJ": {
+      "keywords": [
+        "JYBG_SQSJ",
+        "JCBG_SQSJ",
+        "申请时间",
+        "SQSJ",
+        "RequestTime",
+        "APP_DATETIME"
+      ],
+      "ruleStandardName": "APP_DATETIME",
+      "valueExpression": "$zd($lg(data,22),3)_\" \"_$zt($lg(data,23))",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYXXBM": {
+      "keywords": [
+        "JYBGMX_JYXXBM",
+        "检验细项编码",
+        "JYXXBM",
+        "TestSubItemCode"
+      ],
+      "ruleStandardName": "LISIR_ITEM_CODE",
+      "valueExpression": "$lg(data,6)",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYXXMC": {
+      "keywords": [
+        "JYBGMX_JYXXMC",
+        "检验细项名称",
+        "JYXXMC",
+        "TestSubItemName"
+      ],
+      "ruleStandardName": "LISIR_ITEM_DESC",
+      "valueExpression": "$lg(data,7)",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYDLJG": {
+      "keywords": [
+        "JYBGMX_JYDLJG",
+        "检验定量结果",
+        "JYDLJG",
+        "QuantResult",
+        "TEST_RESULT"
+      ],
+      "ruleStandardName": "TEST_RESULT",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYDLJGDW": {
+      "keywords": [
+        "JYBGMX_JYDLJGDW",
+        "检验定量结果单位",
+        "JYDLJGDW",
+        "ResultUnit"
+      ],
+      "ruleStandardName": "TEST_RESULT",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JYBGMX_JYDXJG": {
+      "keywords": [
+        "JYBGMX_JYDXJG",
+        "检验定结果",
+        "JYDXJG",
+        "QualResult"
+      ],
+      "ruleStandardName": "TEST_RESULT",
+      "valueExpression": "",
+      "domain": "50-lab-exam"
+    },
+    "JCBG_JCXMMC": {
+      "keywords": [
+        "JCBG_JCXMMC",
+        "检查项目名称",
+        "JCXMMC",
+        "ExamItemName"
+      ],
+      "ruleStandardName": "ITEM_CNAME",
+      "valueExpression": "",
+      "domain": "55-exam-report"
+    },
+    "JCBG_JCSJ": {
+      "keywords": [
+        "JCBG_JCSJ",
+        "检查时间",
+        "JCSJ",
+        "ExamTime",
+        "TEST_DATETIME"
+      ],
+      "ruleStandardName": "TEST_DATETIME",
+      "valueExpression": "$zd($lg(data,92),3)_\" \"_$zt($lg(data,93))",
+      "domain": "55-exam-report"
+    },
+    "JCBG_JCBWMC": {
+      "keywords": [
+        "JCBG_JCBWMC",
+        "检查部位名称",
+        "JCBWMC",
+        "ExamBodyPart"
+      ],
+      "ruleStandardName": "REPORT_NAME",
+      "valueExpression": "$lg(data,22)",
+      "domain": "55-exam-report"
+    },
+    "JCBG_JCFSMC": {
+      "keywords": [
+        "JCBG_JCFSMC",
+        "检查方式名称",
+        "JCFSMC",
+        "ExamMethod"
+      ],
+      "ruleStandardName": "REPORT_NAME",
+      "valueExpression": "$lg(data,23)",
+      "domain": "55-exam-report"
+    },
+    "JCBG_JCMS": {
+      "keywords": [
+        "JCBG_JCMS",
+        "检查描述",
+        "JCMS",
+        "ExamDescription",
+        "MAJOR_CONCLUSION"
+      ],
+      "ruleStandardName": "MAJOR_CONCLUSION",
+      "valueExpression": "$lg(data,24)",
+      "domain": "55-exam-report"
+    },
+    "JCBG_JCJG": {
+      "keywords": [
+        "JCBG_JCJG",
+        "检查结果",
+        "JCJG",
+        "ExamResult",
+        "MAJOR_CONCLUSION"
+      ],
+      "ruleStandardName": "MAJOR_CONCLUSION",
+      "valueExpression": "$replace($lg(data,25),$c(10),\"\")",
+      "domain": "55-exam-report"
+    },
+    "JCBG_ZDSM": {
+      "keywords": [
+        "JCBG_ZDSM",
+        "诊断说明",
+        "ZDSM",
+        "DiagDescription",
+        "DIAGNOSE"
+      ],
+      "ruleStandardName": "DIAGNOSE",
+      "valueExpression": "",
+      "domain": "55-exam-report"
+    },
+    "JCBG_SQKS": {
+      "keywords": [
+        "JCBG_SQKS",
+        "申请科室名称",
+        "SQKS",
+        "APP_DEPT_NAME"
+      ],
+      "ruleStandardName": "APP_DEPT_NAME",
+      "valueExpression": "",
+      "domain": "55-exam-report"
+    }
+  }
+}

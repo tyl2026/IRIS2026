@@ -1,0 +1,51 @@
+{
+  "project": {
+    "packagePrefix": "web.DHCENS.BLL",
+    "author": "Claude",
+    "namespace": "DHC-APP",
+    "outputEncoding": "utf-8-bom"
+  },
+  "valueEngine": {
+    "l1": {
+      "enabled": true,
+      "confidenceThreshold": 0.8,
+      "confidenceThresholds": {
+        "alias": 0.80,
+        "exact": 0.85,
+        "pattern": 0.80,
+        "keyword": 0.55,
+        "fuzzy": 0.35
+      },
+      "fallbackThreshold": 0.50
+    },
+    "l2": {
+      "enabled": true,
+      "mcp模式": {
+        "enabled": true,
+        "mcpConfig": ".mcp.json"
+      },
+      "示例模式": {
+        "enabled": true,
+        "examplesDir": "examples",
+        "sourcesDir": "sources",
+        "提示用户": true
+      }
+    },
+    "l3": {
+      "enabled": true,
+      "confidenceThreshold": 0.6
+    },
+    "l4": {
+      "enabled": true,
+      "autoFeedback": true,
+      "sopReference": "references/rule-library-sop.md"
+    }
+  },
+  "pipeline": {
+    "enhanced": {
+      "review": true,
+      "test": false,
+      "package": false
+    }
+  }
+}

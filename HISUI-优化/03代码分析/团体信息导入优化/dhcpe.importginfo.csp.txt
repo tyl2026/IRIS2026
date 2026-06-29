@@ -1,0 +1,103 @@
+<!--
+ * Description: 团体导入
+ * FileName: dhcpe.importginfo.csp
+ * Anchor: wangguoying
+ * Date: 2020-04-27
+-->
+<csp:method name=OnPreHTTP arguments="" returntype=%Boolean>
+ i ##Class(websys.SessionEvents).SessionExpired() q 1
+ quit 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<TITLE><EXTHEALTH:TRANSLATE id=title>##(%session.Get("TITLE"))##</EXTHEALTH:TRANSLATE></TITLE>
+	<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+	<HISUI/>
+	<!-- 引入easyui拓展库 -->
+	<script src="../scripts/dhcpe/easyui-extensions/jquery.jdirk.js"></script>
+	<script src="../scripts/dhcpe/easyui-extensions/datagrid/jeasyui.extensions.datagrid.getDom.js"></script>
+    <script src="../scripts/dhcpe/easyui-extensions/datagrid/jeasyui.extensions.datagrid.getColumnInfo.js"></script>
+    <script src="../scripts/dhcpe/easyui-extensions/datagrid/jeasyui.extensions.datagrid.getRowData.js"></script>
+    <script src="../scripts/dhcpe/easyui-extensions/datagrid/jeasyui.extensions.datagrid.tooltip.js"></script>
+<style>
+.statFont{
+	color:white;
+}
+.statBg0{
+	background-color:#40A2DE;
+	border:1px solid #40A2DE;
+	border-radius:4px;
+}
+.statBg-1{
+	background-color:red;
+	border:1px solid red;
+	border-radius:4px;
+}
+.datagrid-row-selected{
+	background-image: linear-gradient(180deg, #ba9b9b , #d5d567);	
+}
+.datagrid-row-over{
+	background-image: linear-gradient(180deg, #cfd3db , #c3d7c4);	
+}
+
+
+</style>
+<SCRIPT language="Cache" RUNAT="SERVER"> 
+s GID=$g(%request.Data("GID",1))
+s GDesc=$g(%request.Data("GDesc",1))
+s AllowCF=$g(%request.Data("AllowCF",1))
+</SCRIPT> 
+</head>
+<body class="hisui-layout">
+	<div id='Loading' style="display:none;position:absolute;z-index:1000;top:0px;left:0px;width:100%;height:100%;background:#DDDDDB;text-align:center;padding-top: 20%;filter:alpha(opacity=85);opacity: 0.85;">
+		<!--<div style="margin:0 auto;padding:25px;border:1px solid #40A2DE;border-radius:4px;width:200px;background-color:#40A2DE;">-->
+		<h1>
+			<image src='../images/dhcpe/loading.gif'/><font><div id="LoadMsg">处理中···</div></font>
+		</h1>
+		<!--</div>-->
+	</div>
+	<input type="hidden" id="GID" value="#(GID)#">
+	<input type="hidden" id="GDesc" value="#(GDesc)#">
+	<input type="hidden" id="AllowCF" value="#(AllowCF)#">
+	<div data-options="region:'north',title:'',border:false, headerCls:'panel-header-gray'" 
+		style="padding:10px 10px 0 10px;background:#fff;height:66px">
+			<div style="padding:10px;border: solid 1px #ccc;border-bottom:dotted 1px #ccc; border-radius: 4px 4px 0 0;" >
+				<table  cellpadding="10">
+					<tr>
+						<td><input class="hisui-filebox" id="TemplateFile" data-options="width:300,buttonAlign:'left',buttonText:'选择模板',plain:true,prompt:'excel文件：*.xls,*.xlsx'"
+								accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" /></td>	
+						<td style="padding-left:10px;">
+							<a onclick="load_excel();" href="#" class="hisui-linkbutton" data-options="iconCls:'icon-w-copy'">加载</a>
+						</td>
+						<td style="padding-left:10px;">
+							<a onclick="operate_data('Check');" href="#" class="hisui-linkbutton" data-options="iconCls:'icon-w-book'">验证</a>
+						</td>
+						<td style="padding-left:10px;">
+							<a onclick="operate_data('Import');" href="#" class="hisui-linkbutton" data-options="iconCls:'icon-w-import'">导入</a>
+						</td>
+						<td style="padding-left:20px;">
+							<label id="DisplayMsg" style="padding:5px;border:1px solid #40A2DE;border-radius:4px;">无数据</label>
+						</td>
+					</tr>			
+				</table>
+			</div>
+	</div>
+	<div data-options="region:'center',border:false,headerCls:'panel-header-gray'" style="padding:0 10px 10px 10px;background:#fff;">
+		<table id="actionList" data-options="fit:true,singleSelect:true,bodyCls:'panel-header-gray'" >
+		</table><!-- datagrid end //-->
+	</div>
+	<script type="text/javascript" src="../scripts/xlsx.full.min.js"></script>
+	<script type="text/javascript" src="../scripts/websys.jquery.js"></script>
+  	<script type="text/javascript" src="../scripts/hisui/websys.hisui.js"></script>
+	<script type="text/javascript" src="../scripts/dhcpe.importginfo.js"></script>
+	<script type="text/javascript" src="../scripts/DHCPEExcelTool.js"></script>
+	
+	<div id="mm-toolbar" style="display:none;width:100px;">   
+		<div onclick="console.log('停止');">停止</div>   
+		<div onclick="console.log('作废');">作废</div>     
+	</div>
+	
+</body>
+</body>
+</html>

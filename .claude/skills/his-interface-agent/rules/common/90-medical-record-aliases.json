@@ -1,0 +1,296 @@
+{
+  "_description": "从v4.21 90-medical-record.json提取的规则别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "DIAG_CODE": {
+      "keywords": [
+        "HDSD0002049",
+        "出院诊断编码",
+        "主要诊断编码",
+        "DIAG_CODE",
+        "ICD_CODE",
+        "西医诊断编码"
+      ],
+      "ruleStandardName": "出院主要诊断编码(西医)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "DIAG_DESC": {
+      "keywords": [
+        "HDSD00020491",
+        "出院诊断名称",
+        "主要诊断名称",
+        "DIAG_DESC",
+        "ICD_DESC"
+      ],
+      "ruleStandardName": "出院主要诊断描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "ADM_CONDITION_CODE": {
+      "keywords": [
+        "HDSD0011025",
+        "入院病情代码",
+        "ADM_CONDITION_CODE",
+        "入院病情"
+      ],
+      "ruleStandardName": "入院病情代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "ADM_CONDITION_DESC": {
+      "keywords": [
+        "HDSD00110251",
+        "入院病情描述",
+        "ADM_CONDITION_DESC"
+      ],
+      "ruleStandardName": "入院病情描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TREAT_RESULT_CODE": {
+      "keywords": [
+        "HDSD0002061",
+        "治疗结果代码",
+        "TREAT_RESULT_CODE",
+        "治愈代码"
+      ],
+      "ruleStandardName": "治疗结果代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TREAT_RESULT_DESC": {
+      "keywords": [
+        "HDSD00020611",
+        "治疗结果描述",
+        "TREAT_RESULT_DESC",
+        "病情转归",
+        "治愈描述"
+      ],
+      "ruleStandardName": "治疗结果描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TCM_DISEASE_CODE": {
+      "keywords": [
+        "HDSD0002063",
+        "中医病名代码",
+        "TCM_DISEASE_CODE"
+      ],
+      "ruleStandardName": "中医病名代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TCM_DISEASE_DESC": {
+      "keywords": [
+        "HDSD00020631",
+        "中医病名描述",
+        "TCM_DISEASE_DESC"
+      ],
+      "ruleStandardName": "中医病名描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TCM_SYNDROME_CODE": {
+      "keywords": [
+        "HDSD0002064",
+        "中医证候代码",
+        "TCM_SYNDROME_CODE"
+      ],
+      "ruleStandardName": "中医证候代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "TCM_SYNDROME_DESC": {
+      "keywords": [
+        "HDSD00020641",
+        "中医证候描述",
+        "TCM_SYNDROME_DESC"
+      ],
+      "ruleStandardName": "中医证候描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "DIAG_DATE": {
+      "keywords": [
+        "HDSD0005072",
+        "诊断日期时间",
+        "DIAG_DATE",
+        "诊断时间"
+      ],
+      "ruleStandardName": "诊断日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "PATHOLOGY_NO": {
+      "keywords": [
+        "HDSD0011008",
+        "病理号",
+        "PATHOLOGY_NO"
+      ],
+      "ruleStandardName": "病理号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "PATH_DIAG_CODE": {
+      "keywords": [
+        "病理诊断编码",
+        "PATH_DIAG_CODE",
+        "HDSD00.11.009"
+      ],
+      "ruleStandardName": "病理诊断编码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "PATH_DIAG_DESC": {
+      "keywords": [
+        "病理诊断描述",
+        "PATH_DIAG_DESC",
+        "HDSD00.11.010"
+      ],
+      "ruleStandardName": "病理诊断描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "PATIENT_NAME": {
+      "keywords": [
+        "Name",
+        "姓名",
+        "PATIENT_NAME",
+        "HDSD00.11.110",
+        "HDSD00.12.125"
+      ],
+      "ruleStandardName": "患者姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "ID_CARD": {
+      "keywords": [
+        "IdentifyNumber",
+        "身份证号",
+        "ID_CARD",
+        "HDSD00.11.048",
+        "HDSD00.12.055"
+      ],
+      "ruleStandardName": "身份证号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "RULE_16": {
+      "keywords": [
+        "InpatientID",
+        "住院号",
+        "病案号",
+        "HDSD00.11.140",
+        "HDSD00.12.007"
+      ],
+      "ruleStandardName": "住院号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "ADMISSION_DT": {
+      "keywords": [
+        "InDateTime",
+        "入院日期",
+        "入院时间",
+        "就诊日期时间",
+        "ADMISSION_DT",
+        "HDSD00.11.085",
+        "HDSD00.12.096"
+      ],
+      "ruleStandardName": "入院日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "DISCHARGE_DT": {
+      "keywords": [
+        "DisDateTime",
+        "出院日期",
+        "出院时间",
+        "DISCHARGE_DT",
+        "HDSD00.11.019",
+        "HDSD00.12.020"
+      ],
+      "ruleStandardName": "出院日期时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "DISCHARGE_WAY": {
+      "keywords": [
+        "DisWay",
+        "出院方式",
+        "DISCHARGE_WAY",
+        "HDSD00.11.603"
+      ],
+      "ruleStandardName": "出院方式",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "SELF_PAY_AMOUNT": {
+      "keywords": [
+        "HDSD0002015",
+        "个人承担费用",
+        "SELF_PAY_AMOUNT"
+      ],
+      "ruleStandardName": "个人承担费用金额",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "HOSPITAL_FEE": {
+      "keywords": [
+        "HDSD0002065",
+        "住院费用",
+        "HOSPITAL_FEE",
+        "HDSD00.12.169"
+      ],
+      "ruleStandardName": "住院费用金额",
+      "valueExpression": "",
+      "global": "",
+      "domain": "90-medical-record"
+    },
+    "LEVEL": {
+      "keywords": [
+        "LEVEL",
+        "紧急级别"
+      ],
+      "ruleStandardName": "EMERGENCY_LEVEL",
+      "valueExpression": "$p($g(^MR(mradm,\"DIA\",sub,\"EPR\")),\"^\",1)",
+      "global": "^MR",
+      "domain": "90-medical-record",
+      "description": "用户反馈回流 2026-05-21 13:03"
+    },
+    "EMERGENCY_LEVEL": {
+      "keywords": [
+        "emergency_level",
+        "紧急级别"
+      ],
+      "ruleStandardName": "EMERGENCY_LEVEL",
+      "valueExpression": "$p($g(^MR(mradm,\"DIA\",sub,\"EPR\")),\"^\",1)",
+      "global": "^MR",
+      "domain": "90-medical-record",
+      "description": "用户反馈回流 2026-05-21 13:04"
+    }
+  },
+  "_lastUpdated": "2026-05-21 13:04"
+}

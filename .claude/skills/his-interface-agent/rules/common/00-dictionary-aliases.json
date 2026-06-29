@@ -1,0 +1,855 @@
+{
+  "_description": "00-dictionary域自动生成的别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "CTLOC_CODE": {
+      "keywords": [
+        "CTLOC_CODE",
+        "ctlocCode",
+        "ctloc_code",
+        "LOC_CODE",
+        "locCode",
+        "loc_code",
+        "DeptNo",
+        "deptNo",
+        "dept_no",
+        "科室代码",
+        "科室编码"
+      ],
+      "ruleStandardName": "CTLOC_CODE",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 1)",
+      "global": "^CTLOC(locDr)",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_DESC": {
+      "keywords": [
+        "CTLOC_DESC",
+        "ctlocDesc",
+        "ctloc_desc",
+        "LOC_DESC",
+        "locDesc",
+        "loc_desc",
+        "LOC_NAME",
+        "locName",
+        "loc_name",
+        "科室名称",
+        "科室描述"
+      ],
+      "ruleStandardName": "CTLOC_DESC",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 2)",
+      "global": "^CTLOC(locDr)^2",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_TYPE": {
+      "keywords": [
+        "CTLOC_TYPE",
+        "ctlocType",
+        "ctloc_type"
+      ],
+      "ruleStandardName": "CTLOC_TYPE",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 13)",
+      "global": "^CTLOC(locDr)^13",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_HOSPITAL_DR": {
+      "keywords": [
+        "CTLOC_HOSPITAL_DR",
+        "ctlocHospitalDr",
+        "ctloc_hospital_dr"
+      ],
+      "ruleStandardName": "CTLOC_HOSPITAL_DR",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 22)",
+      "global": "^CTLOC(locDr)^22",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_ACTIVE_FLAG": {
+      "keywords": [
+        "CTLOC_ACTIVE_FLAG",
+        "ctlocActiveFlag",
+        "ctloc_active_flag"
+      ],
+      "ruleStandardName": "CTLOC_ACTIVE_FLAG",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 14)",
+      "global": "^CTLOC(locDr)^14",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_FLOOR": {
+      "keywords": [
+        "CTLOC_FLOOR",
+        "ctlocFloor",
+        "ctloc_floor"
+      ],
+      "ruleStandardName": "CTLOC_FLOOR",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 16)",
+      "global": "^CTLOC(locDr)^16",
+      "domain": "00-dictionary"
+    },
+    "CTLOC_WARD_FLAG": {
+      "keywords": [
+        "CTLOC_WARD_FLAG",
+        "ctlocWardFlag",
+        "ctloc_ward_flag"
+      ],
+      "ruleStandardName": "CTLOC_WARD_FLAG",
+      "valueExpression": "$p($g(^CTLOC(locDr)), \"^\", 5)",
+      "global": "^CTLOC(locDr)^5",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_CODE": {
+      "keywords": [
+        "CTPCP_CODE",
+        "ctpcpCode",
+        "ctpcp_code"
+      ],
+      "ruleStandardName": "CTPCP_CODE",
+      "valueExpression": "$p($g(^CTPCP(cpDr)), \"^\", 1)",
+      "global": "^CTPCP(cpDr)` → **Node 1**",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_DESC": {
+      "keywords": [
+        "CTPCP_DESC",
+        "ctpcpDesc",
+        "ctpcp_desc"
+      ],
+      "ruleStandardName": "CTPCP_DESC",
+      "valueExpression": "$p($g(^CTPCP(cpDr)), \"^\", 2)",
+      "global": "^CTPCP(cpDr)^2` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_CarPrvTpDR": {
+      "keywords": [
+        "CTPCP_CarPrvTpDR",
+        "ctpcpCarprvtpdr",
+        "ctpcp_carprvtpdr"
+      ],
+      "ruleStandardName": "CTPCP_CarPrvTpDR",
+      "valueExpression": "$p($g(^CTPCP(cpDr)), \"^\", 4)` (Node1) / `$p($g(^CTPCP(cpDr)), \"^\", 12)` (Node3)",
+      "global": "^CTPCP(cpDr)^4` (同值存在两个位置)",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_CTLOCDR": {
+      "keywords": [
+        "CTPCP_CTLOCDR",
+        "ctpcpCtlocdr",
+        "ctpcp_ctlocdr"
+      ],
+      "ruleStandardName": "CTPCP_CTLOCDR",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 3)), \"^\", 3)",
+      "global": "^CTPCP(cpDr, 3)^3",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_SURGEON_FLAG": {
+      "keywords": [
+        "CTPCP_SURGEON_FLAG",
+        "ctpcpSurgeonFlag",
+        "ctpcp_surgeon_flag"
+      ],
+      "ruleStandardName": "CTPCP_SURGEON_FLAG",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 2)), \"^\", 18)",
+      "global": "^CTPCP(cpDr, 2)^18",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_ANAESTHETIST_FLAG": {
+      "keywords": [
+        "CTPCP_ANAESTHETIST_FLAG",
+        "ctpcpAnaesthetistFlag",
+        "ctpcp_anaesthetist_flag"
+      ],
+      "ruleStandardName": "CTPCP_ANAESTHETIST_FLAG",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 2)), \"^\", 19)",
+      "global": "^CTPCP(cpDr, 2)^19",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_RADIOLOGIST_FLAG": {
+      "keywords": [
+        "CTPCP_RADIOLOGIST_FLAG",
+        "ctpcpRadiologistFlag",
+        "ctpcp_radiologist_flag"
+      ],
+      "ruleStandardName": "CTPCP_RADIOLOGIST_FLAG",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 3)), \"^\", 14)",
+      "global": "^CTPCP(cpDr, 3)^14",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_MENTAL_FLAG": {
+      "keywords": [
+        "CTPCP_MENTAL_FLAG",
+        "ctpcpMentalFlag",
+        "ctpcp_mental_flag"
+      ],
+      "ruleStandardName": "CTPCP_MENTAL_FLAG",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 3)), \"^\", 33)",
+      "global": "^CTPCP(cpDr, 3)^33",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_PRESCRIBER_NO": {
+      "keywords": [
+        "CTPCP_PRESCRIBER_NO",
+        "ctpcpPrescriberNo",
+        "ctpcp_prescriber_no"
+      ],
+      "ruleStandardName": "CTPCP_PRESCRIBER_NO",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 2)), \"^\", 20)",
+      "global": "^CTPCP(cpDr, 2)^20",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_ACTIVE_FLAG": {
+      "keywords": [
+        "CTPCP_ACTIVE_FLAG",
+        "ctpcpActiveFlag",
+        "ctpcp_active_flag"
+      ],
+      "ruleStandardName": "CTPCP_ACTIVE_FLAG",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 1)), \"^\", 9)",
+      "global": "^CTPCP(cpDr, 1)^9",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_SPEC_DR": {
+      "keywords": [
+        "CTPCP_SPEC_DR",
+        "ctpcpSpecDr",
+        "ctpcp_spec_dr"
+      ],
+      "ruleStandardName": "CTPCP_SPEC_DR",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 1)), \"^\", 10)",
+      "global": "^CTPCP(cpDr, 1)^10",
+      "domain": "00-dictionary"
+    },
+    "CTPCP_SUBSPEC_DR": {
+      "keywords": [
+        "CTPCP_SUBSPEC_DR",
+        "ctpcpSubspecDr",
+        "ctpcp_subspec_dr"
+      ],
+      "ruleStandardName": "CTPCP_SUBSPEC_DR",
+      "valueExpression": "$p($g(^CTPCP(cpDr, 1)), \"^\", 11)",
+      "global": "^CTPCP(cpDr, 1)^11",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_NAME": {
+      "keywords": [
+        "SSUSR_NAME",
+        "ssusrName",
+        "ssusr_name"
+      ],
+      "ruleStandardName": "SSUSR_NAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 2)",
+      "global": "^SSU(\"SSUSR\", userDr)^2",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_LOGIN_ID": {
+      "keywords": [
+        "SSUSR_LOGIN_ID",
+        "ssusrLoginId",
+        "ssusr_login_id"
+      ],
+      "ruleStandardName": "SSUSR_LOGIN_ID",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 81)",
+      "global": "^SSU(\"SSUSR\", userDr)^81",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_CTPCP_DR": {
+      "keywords": [
+        "SSUSR_CTPCP_DR",
+        "ssusrCtpcpDr",
+        "ssusr_ctpcp_dr"
+      ],
+      "ruleStandardName": "SSUSR_CTPCP_DR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 9)",
+      "global": "^SSU(\"SSUSR\", userDr)^9",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_DEFAULT_DEPT_DR": {
+      "keywords": [
+        "SSUSR_DEFAULT_DEPT_DR",
+        "ssusrDefaultDeptDr",
+        "ssusr_default_dept_dr"
+      ],
+      "ruleStandardName": "SSUSR_DEFAULT_DEPT_DR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 4)",
+      "global": "^SSU(\"SSUSR\", userDr)^4",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_DOCTOR_FLAG": {
+      "keywords": [
+        "SSUSR_DOCTOR_FLAG",
+        "ssusrDoctorFlag",
+        "ssusr_doctor_flag"
+      ],
+      "ruleStandardName": "SSUSR_DOCTOR_FLAG",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 78)",
+      "global": "^SSU(\"SSUSR\", userDr)^78",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_NURSE_FLAG": {
+      "keywords": [
+        "SSUSR_NURSE_FLAG",
+        "ssusrNurseFlag",
+        "ssusr_nurse_flag"
+      ],
+      "ruleStandardName": "SSUSR_NURSE_FLAG",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 79)",
+      "global": "^SSU(\"SSUSR\", userDr)^79",
+      "domain": "00-dictionary"
+    },
+    "SSUSR_ACTIVE": {
+      "keywords": [
+        "SSUSR_ACTIVE",
+        "ssusrActive",
+        "ssusr_active"
+      ],
+      "ruleStandardName": "SSUSR_ACTIVE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\", userDr)), \"^\", 19)",
+      "global": "^SSU(\"SSUSR\", userDr)^19",
+      "domain": "00-dictionary"
+    },
+    "WARD_CODE": {
+      "keywords": [
+        "WARD_CODE",
+        "wardCode",
+        "ward_code",
+        "WardNo",
+        "wardNo",
+        "ward_no",
+        "病区代码",
+        "病区编码"
+      ],
+      "ruleStandardName": "WARD_CODE",
+      "valueExpression": "$p($g(^PAWARD(wardDr)), \"^\", 1)",
+      "global": "^PAWARD(wardDr)^1",
+      "domain": "00-dictionary"
+    },
+    "WARD_DESC": {
+      "keywords": [
+        "WARD_DESC",
+        "wardDesc",
+        "ward_desc",
+        "WARD_NAME",
+        "wardName",
+        "ward_name",
+        "病区名称",
+        "病区描述"
+      ],
+      "ruleStandardName": "WARD_DESC",
+      "valueExpression": "$p($g(^PAWARD(wardDr)), \"^\", 2)",
+      "global": "^PAWARD(wardDr)^2",
+      "domain": "00-dictionary"
+    },
+    "WARD_LOCATION_DR": {
+      "keywords": [
+        "WARD_LOCATION_DR",
+        "wardLocationDr",
+        "ward_location_dr"
+      ],
+      "ruleStandardName": "WARD_LOCATION_DR",
+      "valueExpression": "$p($g(^PAWARD(wardDr)), \"^\", 5)",
+      "global": "^PAWARD(wardDr)^5",
+      "domain": "00-dictionary"
+    },
+    "WARD_ACTIVE": {
+      "keywords": [
+        "WARD_ACTIVE",
+        "wardActive",
+        "ward_active"
+      ],
+      "ruleStandardName": "WARD_ACTIVE",
+      "valueExpression": "$p($g(^PAWARD(wardDr)), \"^\", 6)",
+      "global": "^PAWARD(wardDr)^6",
+      "domain": "00-dictionary"
+    },
+    "WARD_SINGLE_ROOM": {
+      "keywords": [
+        "WARD_SINGLE_ROOM",
+        "wardSingleRoom",
+        "ward_single_room"
+      ],
+      "ruleStandardName": "WARD_SINGLE_ROOM",
+      "valueExpression": "$p($g(^PAWARD(wardDr)), \"^\", 4)",
+      "global": "^PAWARD(wardDr)^4",
+      "domain": "00-dictionary"
+    },
+    "BED_CODE": {
+      "keywords": [
+        "BED_CODE",
+        "bedCode",
+        "bed_code"
+      ],
+      "ruleStandardName": "BED_CODE",
+      "valueExpression": "$p($g(^PAWARD(wardDr, \"BED\", bedSub)), \"^\", 1)",
+      "global": "^PAWARD(wardDr, \"BED\", bedSub)^1",
+      "domain": "00-dictionary"
+    },
+    "BED_STATUS_DR": {
+      "keywords": [
+        "BED_STATUS_DR",
+        "bedStatusDr",
+        "bed_status_dr"
+      ],
+      "ruleStandardName": "BED_STATUS_DR",
+      "valueExpression": "$p($g(^PAWARD(wardDr, \"BED\", bedSub)), \"^\", 5)",
+      "global": "^PAWARD(wardDr, \"BED\", bedSub)^5",
+      "domain": "00-dictionary"
+    },
+    "BED_BEDTYPE_DR": {
+      "keywords": [
+        "BED_BEDTYPE_DR",
+        "bedBedtypeDr",
+        "bed_bedtype_dr"
+      ],
+      "ruleStandardName": "BED_BEDTYPE_DR",
+      "valueExpression": "$p($g(^PAWARD(wardDr, \"BED\", bedSub)), \"^\", 2)",
+      "global": "^PAWARD(wardDr, \"BED\", bedSub)^2",
+      "domain": "00-dictionary"
+    },
+    "BED_ISOLATED": {
+      "keywords": [
+        "BED_ISOLATED",
+        "bedIsolated",
+        "bed_isolated"
+      ],
+      "ruleStandardName": "BED_ISOLATED",
+      "valueExpression": "$p($g(^PAWARD(wardDr, \"BED\", bedSub)), \"^\", 6)",
+      "global": "^PAWARD(wardDr, \"BED\", bedSub)^6",
+      "domain": "00-dictionary"
+    },
+    "BED_SEX": {
+      "keywords": [
+        "BED_SEX",
+        "bedSex",
+        "bed_sex"
+      ],
+      "ruleStandardName": "BED_SEX",
+      "valueExpression": "$p($g(^PAWARD(wardDr, \"BED\", bedSub)), \"^\", 23)",
+      "global": "^PAWARD(wardDr, \"BED\", bedSub)^23",
+      "domain": "00-dictionary"
+    },
+    "BED_AVAILABLE": {
+      "keywords": [
+        "BED_AVAILABLE",
+        "bedAvailable",
+        "bed_available"
+      ],
+      "ruleStandardName": "BED_AVAILABLE",
+      "valueExpression": "$$CO18^at153(bedRowId)` (SQL Computed, Transient)",
+      "global": "-` (计算得出)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_CODE": {
+      "keywords": [
+        "ARCIM_CODE",
+        "arcimCode",
+        "arcim_code"
+      ],
+      "ruleStandardName": "ARCIM_CODE",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 1)",
+      "global": "^ARCIM(imSub, imVer, 1)^1` (**Node 1**)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_DESC": {
+      "keywords": [
+        "ARCIM_DESC",
+        "arcimDesc",
+        "arcim_desc"
+      ],
+      "ruleStandardName": "ARCIM_DESC",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 2)",
+      "global": "^ARCIM(imSub, imVer, 1)^2` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_UOM_DR": {
+      "keywords": [
+        "ARCIM_UOM_DR",
+        "arcimUomDr",
+        "arcim_uom_dr"
+      ],
+      "ruleStandardName": "ARCIM_UOM_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 4)",
+      "global": "^ARCIM(..., 1)^4` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_ITEMCAT_DR": {
+      "keywords": [
+        "ARCIM_ITEMCAT_DR",
+        "arcimItemcatDr",
+        "arcim_itemcat_dr"
+      ],
+      "ruleStandardName": "ARCIM_ITEMCAT_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 10)",
+      "global": "^ARCIM(..., 1)^10` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_CHG_COST": {
+      "keywords": [
+        "ARCIM_CHG_COST",
+        "arcimChgCost",
+        "arcim_chg_cost"
+      ],
+      "ruleStandardName": "ARCIM_CHG_COST",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 2)), \"^\", 2)",
+      "global": "^ARCIM(imSub, imVer, 2)^2",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_PHCDF_DR": {
+      "keywords": [
+        "ARCIM_PHCDF_DR",
+        "arcimPhcdfDr",
+        "arcim_phcdf_dr"
+      ],
+      "ruleStandardName": "ARCIM_PHCDF_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 12)",
+      "global": "^ARCIM(..., 1)^12` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_BILL_SUB_DR": {
+      "keywords": [
+        "ARCIM_BILL_SUB_DR",
+        "arcimBillSubDr",
+        "arcim_bill_sub_dr"
+      ],
+      "ruleStandardName": "ARCIM_BILL_SUB_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 9)",
+      "global": "^ARCIM(..., 1)^9` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_DOSE_TYPE": {
+      "keywords": [
+        "ARCIM_DOSE_TYPE",
+        "arcimDoseType",
+        "arcim_dose_type"
+      ],
+      "ruleStandardName": "ARCIM_DOSE_TYPE",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 1)), \"^\", 5)",
+      "global": "^ARCIM(..., 1)^5` (Node 1)",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_SERV_MATERIAL": {
+      "keywords": [
+        "ARCIM_SERV_MATERIAL",
+        "arcimServMaterial",
+        "arcim_serv_material"
+      ],
+      "ruleStandardName": "ARCIM_SERV_MATERIAL",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 7)), \"^\", 6)",
+      "global": "^ARCIM(..., 7)^6",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_BILLING_UOM_DR": {
+      "keywords": [
+        "ARCIM_BILLING_UOM_DR",
+        "arcimBillingUomDr",
+        "arcim_billing_uom_dr"
+      ],
+      "ruleStandardName": "ARCIM_BILLING_UOM_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 14)",
+      "global": "^ARCIM(..., 8)^14",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_RM_FREQUENCY_DR": {
+      "keywords": [
+        "ARCIM_RM_FREQUENCY_DR",
+        "arcimRmFrequencyDr",
+        "arcim_rm_frequency_dr"
+      ],
+      "ruleStandardName": "ARCIM_RM_FREQUENCY_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 17)",
+      "global": "^ARCIM(..., 8)^17",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_RM_DURATION_DR": {
+      "keywords": [
+        "ARCIM_RM_DURATION_DR",
+        "arcimRmDurationDr",
+        "arcim_rm_duration_dr"
+      ],
+      "ruleStandardName": "ARCIM_RM_DURATION_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 16)",
+      "global": "^ARCIM(..., 8)^16",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_GENERIC_DR": {
+      "keywords": [
+        "ARCIM_GENERIC_DR",
+        "arcimGenericDr",
+        "arcim_generic_dr"
+      ],
+      "ruleStandardName": "ARCIM_GENERIC_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 20)",
+      "global": "^ARCIM(..., 8)^20",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_DEF_PRIORITY_DR": {
+      "keywords": [
+        "ARCIM_DEF_PRIORITY_DR",
+        "arcimDefPriorityDr",
+        "arcim_def_priority_dr"
+      ],
+      "ruleStandardName": "ARCIM_DEF_PRIORITY_DR",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 22)",
+      "global": "^ARCIM(..., 8)^22",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_OWN_PAY_FLAG": {
+      "keywords": [
+        "ARCIM_OWN_PAY_FLAG",
+        "arcimOwnPayFlag",
+        "arcim_own_pay_flag"
+      ],
+      "ruleStandardName": "ARCIM_OWN_PAY_FLAG",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 8)), \"^\", 23)",
+      "global": "^ARCIM(..., 8)^23",
+      "domain": "00-dictionary"
+    },
+    "ARCIM_ALLOW_INPUT_FREQ": {
+      "keywords": [
+        "ARCIM_ALLOW_INPUT_FREQ",
+        "arcimAllowInputFreq",
+        "arcim_allow_input_freq"
+      ],
+      "ruleStandardName": "ARCIM_ALLOW_INPUT_FREQ",
+      "valueExpression": "$p($g(^ARCIM(imSub, imVer, 9)), \"^\", 42)",
+      "global": "^ARCIM(..., 9)^42",
+      "domain": "00-dictionary"
+    },
+    "TARI_CODE": {
+      "keywords": [
+        "TARI_CODE",
+        "tariCode",
+        "tari_code",
+        "FEE_CODE",
+        "feeCode",
+        "fee_code",
+        "费用代码",
+        "费用编码"
+      ],
+      "ruleStandardName": "TARI_CODE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 1)",
+      "global": "^DHCTARI(tariRowId)^1",
+      "domain": "00-dictionary"
+    },
+    "TARI_DESC": {
+      "keywords": [
+        "TARI_DESC",
+        "tariDesc",
+        "tari_desc",
+        "FEE_NAME",
+        "feeName",
+        "fee_name",
+        "FEE_DESC",
+        "feeDesc",
+        "fee_desc",
+        "费用名称",
+        "费用描述"
+      ],
+      "ruleStandardName": "TARI_DESC",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 2)",
+      "global": "^DHCTARI(tariRowId)^2",
+      "domain": "00-dictionary"
+    },
+    "TARI_UOM_DR": {
+      "keywords": [
+        "TARI_UOM_DR",
+        "tariUomDr",
+        "tari_uom_dr"
+      ],
+      "ruleStandardName": "TARI_UOM_DR",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 3)",
+      "global": "^DHCTARI(...)^3` → User.CTUOM 字典",
+      "domain": "00-dictionary"
+    },
+    "TARI_PRICE": {
+      "keywords": [
+        "TARI_PRICE",
+        "tariPrice",
+        "tari_price"
+      ],
+      "ruleStandardName": "TARI_PRICE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 8)",
+      "global": "^DHCTARI(...)^8",
+      "domain": "00-dictionary"
+    },
+    "TARI_EXTERNAL_CODE": {
+      "keywords": [
+        "TARI_EXTERNAL_CODE",
+        "tariExternalCode",
+        "tari_external_code"
+      ],
+      "ruleStandardName": "TARI_EXTERNAL_CODE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 13)",
+      "global": "^DHCTARI(...)^13",
+      "domain": "00-dictionary"
+    },
+    "TARI_INSU_CODE": {
+      "keywords": [
+        "TARI_INSU_CODE",
+        "tariInsuCode",
+        "tari_insu_code"
+      ],
+      "ruleStandardName": "TARI_INSU_CODE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 59)",
+      "global": "^DHCTARI(...)^59",
+      "domain": "00-dictionary"
+    },
+    "TARI_INSU_IP_PROPORTION": {
+      "keywords": [
+        "TARI_INSU_IP_PROPORTION",
+        "tariInsuIpProportion",
+        "tari_insu_ip_proportion"
+      ],
+      "ruleStandardName": "TARI_INSU_IP_PROPORTION",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 47)",
+      "global": "^DHCTARI(...)^47",
+      "domain": "00-dictionary"
+    },
+    "TARI_PAY_TYPE": {
+      "keywords": [
+        "TARI_PAY_TYPE",
+        "tariPayType",
+        "tari_pay_type"
+      ],
+      "ruleStandardName": "TARI_PAY_TYPE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 82)",
+      "global": "^DHCTARI(...)^82",
+      "domain": "00-dictionary"
+    },
+    "TARI_PRICE_CODE": {
+      "keywords": [
+        "TARI_PRICE_CODE",
+        "tariPriceCode",
+        "tari_price_code"
+      ],
+      "ruleStandardName": "TARI_PRICE_CODE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 50)",
+      "global": "^DHCTARI(...)^50",
+      "domain": "00-dictionary"
+    },
+    "TARI_INPAT_CATE": {
+      "keywords": [
+        "TARI_INPAT_CATE",
+        "tariInpatCate",
+        "tari_inpat_cate",
+        "FEE_TYPE",
+        "feeType",
+        "fee_type",
+        "费用类型"
+      ],
+      "ruleStandardName": "TARI_INPAT_CATE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 18)",
+      "global": "^DHCTARI(...)^18",
+      "domain": "00-dictionary"
+    },
+    "TARI_OUTPAT_CATE": {
+      "keywords": [
+        "TARI_OUTPAT_CATE",
+        "tariOutpatCate",
+        "tari_outpat_cate"
+      ],
+      "ruleStandardName": "TARI_OUTPAT_CATE",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 15)",
+      "global": "^DHCTARI(...)^15",
+      "domain": "00-dictionary"
+    },
+    "TARI_ACTIVE_FLAG": {
+      "keywords": [
+        "TARI_ACTIVE_FLAG",
+        "tariActiveFlag",
+        "tari_active_flag"
+      ],
+      "ruleStandardName": "TARI_ACTIVE_FLAG",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 11)",
+      "global": "^DHCTARI(...)^11",
+      "domain": "00-dictionary"
+    },
+    "TARI_SPECIAL_FLAG": {
+      "keywords": [
+        "TARI_SPECIAL_FLAG",
+        "tariSpecialFlag",
+        "tari_special_flag"
+      ],
+      "ruleStandardName": "TARI_SPECIAL_FLAG",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 17)",
+      "global": "^DHCTARI(...)^17",
+      "domain": "00-dictionary"
+    },
+    "TARI_INSU_NAME": {
+      "keywords": [
+        "TARI_INSU_NAME",
+        "tariInsuName",
+        "tari_insu_name"
+      ],
+      "ruleStandardName": "TARI_INSU_NAME",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 19)",
+      "global": "^DHCTARI(...)^19",
+      "domain": "00-dictionary"
+    },
+    "TARI_CHARGE_BASIS": {
+      "keywords": [
+        "TARI_CHARGE_BASIS",
+        "tariChargeBasis",
+        "tari_charge_basis"
+      ],
+      "ruleStandardName": "TARI_CHARGE_BASIS",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 20)",
+      "global": "^DHCTARI(...)^20",
+      "domain": "00-dictionary"
+    },
+    "TARI_STATE_HVM_FLAG": {
+      "keywords": [
+        "TARI_STATE_HVM_FLAG",
+        "tariStateHvmFlag",
+        "tari_state_hvm_flag"
+      ],
+      "ruleStandardName": "TARI_STATE_HVM_FLAG",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 51)",
+      "global": "^DHCTARI(...)^51",
+      "domain": "00-dictionary"
+    },
+    "TARI_AT_OWN_EXPENSE_FLAG": {
+      "keywords": [
+        "TARI_AT_OWN_EXPENSE_FLAG",
+        "tariAtOwnExpenseFlag",
+        "tari_at_own_expense_flag"
+      ],
+      "ruleStandardName": "TARI_AT_OWN_EXPENSE_FLAG",
+      "valueExpression": "$p($g(^DHCTARI(tariRowId)), \"^\", 71)",
+      "global": "^DHCTARI(...)^71",
+      "domain": "00-dictionary"
+    },
+    "WARD_DEPT_NAME": {
+      "keywords": [
+        "病区科室名称",
+        "病区所属科室名称",
+        "wardDeptName"
+      ],
+      "ruleStandardName": "WARD_DEPT_NAME",
+      "valueExpression": "$p($g(^CTLOC($p($g(^PAWARD(wardDr)),\"^\",5))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "00-dictionary",
+      "description": "病区所属科室名称"
+    },
+    "WARD_DEPT_CODE": {
+      "keywords": [
+        "DeptCode",
+        "科室代码",
+        "病区科室代码"
+      ],
+      "ruleStandardName": "WARD_DEPT_CODE",
+      "valueExpression": "$p($g(^CTLOC($p($g(^PAWARD(wardDr)),\"^\",5))),\"^\",1)",
+      "global": "^CTLOC",
+      "domain": "00-dictionary",
+      "description": "病区所属科室代码"
+    },
+    "PARENT_CODE": {
+      "keywords": [
+        "ParentCode",
+        "上级编码",
+        "父级编码"
+      ],
+      "ruleStandardName": "PARENT_CODE",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "00-dictionary",
+      "description": "上级编码（无直接Global存储）"
+    }
+  }
+}

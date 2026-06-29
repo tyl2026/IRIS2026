@@ -1,0 +1,16 @@
+护理病历1：Padua静脉血栓栓塞症风险评估
+病例代码：DHCNURJMXSSSZPGLR
+VTE评分：Item122
+药物预防：Item19
+机器预防：Item124，Item125
+
+护理病历2：静脉血栓风险评估表
+病例代码：DHCNURJMXSLR
+VTE评分：Item98
+药物预防：Item19
+机器预防：Item100，Item101
+
+
+取数据规则：VTE存在多次评分取最大值；药物预防和机器预防存在勾选就算
+
+

@@ -1,0 +1,80 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>病案前十病种统计</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+<style>
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7;flex-wrap:wrap}
+.filter-bar label{font-size:13px;color:#333;white-space:nowrap}
+.date-presets{display:inline-flex;gap:4px;margin-right:4px}
+.date-preset{cursor:pointer;padding:3px 10px;border:1px solid #95B8E7;border-radius:4px;background:#fff;font-size:12px;color:#017bce}
+.date-preset:hover{background:#eaf2ff}
+.date-preset.active{background:#017bce;color:#fff;border-color:#017bce}
+.vt-sep{width:1px;height:20px;background:#d0dcee;margin:0 4px}
+.stat-cards{display:flex;gap:10px;padding:10px 14px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:150px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px 14px;text-align:center;box-sizing:border-box}
+.stat-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.stat-card .label{font-size:11px;color:#666;margin-bottom:4px}
+.stat-card .value{font-size:22px;font-weight:700;color:#15428b;margin-bottom:2px}
+.view-tabs{display:flex;padding:0 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7}
+.view-tab{cursor:pointer;padding:8px 16px;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px}
+.view-tab:hover{color:#017bce}
+.view-tab.active{color:#017bce;border-bottom-color:#017bce;font-weight:700}
+#mainLayout{width:100%;height:100vh}
+</style>
+</head>
+<body>
+<div id="mainLayout" class="hisui-layout" data-options="fit:true">
+    <div data-options="region:'north',border:false" style="height:165px">
+        <div class="filter-bar">
+            <label>日期</label>
+            <span class="date-presets">
+                <a class="date-preset" data-preset="month" onclick="setDatePreset('month')">本月</a>
+                <a class="date-preset" data-preset="quarter" onclick="setDatePreset('quarter')">本季</a>
+                <a class="date-preset" data-preset="year" onclick="setDatePreset('year')">本年</a>
+                <a class="date-preset" data-preset="lastyear" onclick="setDatePreset('lastyear')">去年</a>
+            </span>
+            <span class="vt-sep"></span>
+            开始:<input id="dtStt" class="hisui-datebox" style="width:120px">
+            结束:<input id="dtEnd" class="hisui-datebox" style="width:120px">
+            <span class="vt-sep"></span>
+            <label>科室</label><input id="selDept" class="hisui-combobox" style="width:160px">
+            <a class="hisui-linkbutton" onclick="doQuery()" data-options="iconCls:'icon-search'">查询</a>
+            <a class="hisui-linkbutton" onclick="doExport()" data-options="iconCls:'icon-w-export'">导出</a>
+            <a class="hisui-linkbutton" onclick="doClear()" data-options="iconCls:'icon-clear'">清空</a>
+        </div>
+        <div class="view-tabs">
+            <a class="view-tab active" id="tabTop10" onclick="switchView('top10')">前十病种分布</a>
+            <a class="view-tab" id="tabTrend" onclick="switchView('trend')">前十病种趋势</a>
+        </div>
+        <div class="stat-cards" id="statCards">
+            <div class="stat-card" style="cursor:pointer" onclick="drillDown('')"><div class="label">出院总人数</div><div class="value" id="cardTotal">--</div></div>
+            <div class="stat-card" style="cursor:pointer" onclick="drillDownTop10()"><div class="label">前十病种出院总人数</div><div class="value" id="cardTop10Total">--</div></div>
+            <div class="stat-card"><div class="label">前十病种占比</div><div class="value" id="cardTop10Pct">--</div></div>
+            <div class="stat-card"><div class="label">平均住院日</div><div class="value" id="cardAvgLOS">--</div></div>
+            <div class="stat-card"><div class="label">次均费用</div><div class="value" id="cardAvgCost">--</div></div>
+        </div>
+    </div>
+    <div data-options="region:'center',border:false" style="overflow:hidden">
+        <div id="wrapTop10" style="height:100%"><table id="dgTop10" class="hisui-datagrid"></table></div>
+        <div id="wrapTrend" style="height:100%;display:none">
+            <div id="chartTrend" style="width:100%;height:280px"></div>
+            <div style="height:calc(100% - 280px)"><table id="dgTrend" class="hisui-datagrid"></table></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="../scripts/dhcmrtop10disease.js"></script>
+</body>
+</html>
+</csp:content>

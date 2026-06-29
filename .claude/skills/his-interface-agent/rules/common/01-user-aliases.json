@@ -1,0 +1,572 @@
+{
+  "_description": "01-user 用户/员工域字段别名映射",
+  "_version": "1.0.0",
+  "_lastUpdated": "2026-05-21 13:03",
+  "aliases": {
+    "USER_ROWID": {
+      "keywords": [
+        "USER_ROWID",
+        "userRowId",
+        "UserRowId",
+        "用户ID",
+        "用户RowID",
+        "UserId"
+      ],
+      "ruleStandardName": "USER_ROWID",
+      "valueExpression": "userDr",
+      "global": "^SSU(\"SSUSR\",userDr)",
+      "domain": "01-user"
+    },
+    "USER_INITIALS": {
+      "keywords": [
+        "USER_INITIALS",
+        "userInitials",
+        "Initials",
+        "用户缩写",
+        "用户工号",
+        "UserCode"
+      ],
+      "ruleStandardName": "USER_INITIALS",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",1)",
+      "global": "^SSU(\"SSUSR\",userDr)^1",
+      "domain": "01-user"
+    },
+    "USER_LOGIN_ID": {
+      "keywords": [
+        "USER_LOGIN_ID",
+        "userLoginId",
+        "LoginId",
+        "登录ID",
+        "登录账号",
+        "SSUSR_LoginID"
+      ],
+      "ruleStandardName": "USER_LOGIN_ID",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",81)",
+      "global": "^SSU(\"SSUSR\",userDr)^81",
+      "domain": "01-user"
+    },
+    "USER_ACTIVE": {
+      "keywords": [
+        "USER_ACTIVE",
+        "userActive",
+        "Active",
+        "用户状态",
+        "是否激活",
+        "SSUSR_Active"
+      ],
+      "ruleStandardName": "USER_ACTIVE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",19)",
+      "global": "^SSU(\"SSUSR\",userDr)^19",
+      "domain": "01-user"
+    },
+    "USER_SURNAME": {
+      "keywords": [
+        "USER_SURNAME",
+        "userSurname",
+        "Surname",
+        "姓",
+        "用户姓",
+        "SSUSR_Name"
+      ],
+      "ruleStandardName": "USER_SURNAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\",userDr)^2",
+      "domain": "01-user"
+    },
+    "USER_GIVEN_NAME": {
+      "keywords": [
+        "USER_GIVEN_NAME",
+        "userGivenName",
+        "GivenName",
+        "名",
+        "用户名"
+      ],
+      "ruleStandardName": "USER_GIVEN_NAME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",3)",
+      "global": "^SSU(\"SSUSR\",userDr)^3",
+      "domain": "01-user"
+    },
+    "USER_EMAIL": {
+      "keywords": [
+        "USER_EMAIL",
+        "userEmail",
+        "Email",
+        "邮箱",
+        "电子邮件",
+        "SSUSR_Email"
+      ],
+      "ruleStandardName": "USER_EMAIL",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",90)",
+      "global": "^SSU(\"SSUSR\",userDr)^90",
+      "domain": "01-user"
+    },
+    "USER_MOBILE": {
+      "keywords": [
+        "USER_MOBILE",
+        "userMobile",
+        "Mobile",
+        "手机",
+        "手机号",
+        "SSUSR_Mobile"
+      ],
+      "ruleStandardName": "USER_MOBILE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",91)",
+      "global": "^SSU(\"SSUSR\",userDr)^91",
+      "domain": "01-user"
+    },
+    "USER_ID_CARD": {
+      "keywords": [
+        "USER_ID_CARD",
+        "userIdCard",
+        "IdCard",
+        "身份证",
+        "身份证号",
+        "SSUSR_IdCard"
+      ],
+      "ruleStandardName": "USER_ID_CARD",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",92)",
+      "global": "^SSU(\"SSUSR\",userDr)^92",
+      "domain": "01-user"
+    },
+    "USER_GENDER_CODE": {
+      "keywords": [
+        "USER_GENDER_CODE",
+        "userGenderCode",
+        "GenderCode",
+        "性别编码",
+        "性别",
+        "SSUSR_Gender"
+      ],
+      "ruleStandardName": "USER_GENDER_CODE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",93)",
+      "global": "^SSU(\"SSUSR\",userDr)^93",
+      "domain": "01-user"
+    },
+    "USER_IS_DOCTOR": {
+      "keywords": [
+        "USER_IS_DOCTOR",
+        "userIsDoctor",
+        "IsDoctor",
+        "是否医生",
+        "医生标志"
+      ],
+      "ruleStandardName": "USER_IS_DOCTOR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",78)",
+      "global": "^SSU(\"SSUSR\",userDr)^78",
+      "domain": "01-user"
+    },
+    "USER_DOCTOR_FLAG": {
+      "keywords": [
+        "USER_DOCTOR_FLAG",
+        "userDoctorFlag",
+        "DoctorFlag",
+        "医生标志",
+        "SSUSR_DoctorFlag"
+      ],
+      "ruleStandardName": "USER_DOCTOR_FLAG",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",78)",
+      "global": "^SSU(\"SSUSR\",userDr)^78",
+      "domain": "01-user"
+    },
+    "USER_NURSE_FLAG": {
+      "keywords": [
+        "USER_NURSE_FLAG",
+        "userNurseFlag",
+        "NurseFlag",
+        "护士标志",
+        "SSUSR_NurseFlag"
+      ],
+      "ruleStandardName": "USER_NURSE_FLAG",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",79)",
+      "global": "^SSU(\"SSUSR\",userDr)^79",
+      "domain": "01-user"
+    },
+    "CARE_PROV_DR": {
+      "keywords": [
+        "CARE_PROV_DR",
+        "careProvDr",
+        "CareProvDr",
+        "医护人员DR",
+        "医护人员ID",
+        "CTPCP_DR"
+      ],
+      "ruleStandardName": "CARE_PROV_DR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",9)",
+      "global": "^SSU(\"SSUSR\",userDr)^9",
+      "domain": "01-user"
+    },
+    "CARE_PROV_CODE": {
+      "keywords": [
+        "CARE_PROV_CODE",
+        "careProvCode",
+        "CareProvCode",
+        "医护人员编码",
+        "医护人员工号",
+        "CTPCP_Code"
+      ],
+      "ruleStandardName": "CARE_PROV_CODE",
+      "valueExpression": "$p($g(^CTPCP(careProvDr)),\"^\",1)",
+      "global": "^CTPCP(careProvDr)^1",
+      "domain": "01-user"
+    },
+    "CARE_PROV_NAME": {
+      "keywords": [
+        "CARE_PROV_NAME",
+        "careProvName",
+        "CareProvName",
+        "医护人员姓名",
+        "医护人员名称",
+        "CTPCP_Name"
+      ],
+      "ruleStandardName": "CARE_PROV_NAME",
+      "valueExpression": "$p($g(^CTPCP(careProvDr)),\"^\",2)",
+      "global": "^CTPCP(careProvDr)^2",
+      "domain": "01-user"
+    },
+    "CARE_PROV_TITLE": {
+      "keywords": [
+        "CARE_PROV_TITLE",
+        "careProvTitle",
+        "CareProvTitle",
+        "医护人员职称",
+        "职称",
+        "CTPCP_Title"
+      ],
+      "ruleStandardName": "CARE_PROV_TITLE",
+      "valueExpression": "$p($g(^CTPCP(careProvDr)),\"^\",3)",
+      "global": "^CTPCP(careProvDr)^3",
+      "domain": "01-user"
+    },
+    "CARE_PROV_ACTIVE": {
+      "keywords": [
+        "CARE_PROV_ACTIVE",
+        "careProvActive",
+        "CareProvActive",
+        "医护人员状态",
+        "是否激活"
+      ],
+      "ruleStandardName": "CARE_PROV_ACTIVE",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,1)),\"^\",9)",
+      "global": "^CTPCP(careProvDr,1)^9",
+      "domain": "01-user"
+    },
+    "CARE_PROV_MOBILE": {
+      "keywords": [
+        "CARE_PROV_MOBILE",
+        "careProvMobile",
+        "CareProvMobile",
+        "医护人员手机",
+        "医护人员电话"
+      ],
+      "ruleStandardName": "CARE_PROV_MOBILE",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,3)),\"^\",22)",
+      "global": "^CTPCP(careProvDr,3)^22",
+      "domain": "01-user"
+    },
+    "CARE_PROV_EMAIL": {
+      "keywords": [
+        "CARE_PROV_EMAIL",
+        "careProvEmail",
+        "CareProvEmail",
+        "医护人员邮箱"
+      ],
+      "ruleStandardName": "CARE_PROV_EMAIL",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,3)),\"^\",23)",
+      "global": "^CTPCP(careProvDr,3)^23",
+      "domain": "01-user"
+    },
+    "CARE_PROV_SURGEON": {
+      "keywords": [
+        "CARE_PROV_SURGEON",
+        "careProvSurgeon",
+        "SurgeonFlag",
+        "外科医生标志",
+        "手术医生标志"
+      ],
+      "ruleStandardName": "CARE_PROV_SURGEON",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,2)),\"^\",18)",
+      "global": "^CTPCP(careProvDr,2)^18",
+      "domain": "01-user"
+    },
+    "CARE_PROV_ANAEST": {
+      "keywords": [
+        "CARE_PROV_ANAEST",
+        "careProvAnaest",
+        "AnaesthetistFlag",
+        "麻醉医生标志"
+      ],
+      "ruleStandardName": "CARE_PROV_ANAEST",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,2)),\"^\",19)",
+      "global": "^CTPCP(careProvDr,2)^19",
+      "domain": "01-user"
+    },
+    "CARE_PROV_SPEC_DR": {
+      "keywords": [
+        "CARE_PROV_SPEC_DR",
+        "careProvSpecDr",
+        "SpecDr",
+        "专业DR",
+        "专科DR"
+      ],
+      "ruleStandardName": "CARE_PROV_SPEC_DR",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,1)),\"^\",10)",
+      "global": "^CTPCP(careProvDr,1)^10",
+      "domain": "01-user"
+    },
+    "CARE_PROV_PRESC_FLAG": {
+      "keywords": [
+        "CARE_PROV_PRESC_FLAG",
+        "careProvPrescFlag",
+        "PrescFlag",
+        "处方权标志",
+        "处方标志"
+      ],
+      "ruleStandardName": "CARE_PROV_PRESC_FLAG",
+      "valueExpression": "$p($g(^CTPCP(careProvDr,2)),\"^\",20)",
+      "global": "^CTPCP(careProvDr,2)^20",
+      "domain": "01-user"
+    },
+    "USER_DEFAULT_DEPT_DR": {
+      "keywords": [
+        "USER_DEFAULT_DEPT_DR",
+        "userDefaultDeptDr",
+        "DefaultDeptDr",
+        "默认科室DR",
+        "所属科室"
+      ],
+      "ruleStandardName": "USER_DEFAULT_DEPT_DR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",4)",
+      "global": "^SSU(\"SSUSR\",userDr)^4",
+      "domain": "01-user"
+    },
+    "DEPT_CODE": {
+      "keywords": [
+        "DEPT_CODE",
+        "deptCode",
+        "DeptCode",
+        "科室编码",
+        "科室代码",
+        "CTLOC_Code"
+      ],
+      "ruleStandardName": "DEPT_CODE",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",1)",
+      "global": "^CTLOC(deptDr)^1",
+      "domain": "01-user"
+    },
+    "DEPT_DESC": {
+      "keywords": [
+        "DEPT_DESC",
+        "deptDesc",
+        "DeptDesc",
+        "科室名称",
+        "科室描述",
+        "CTLOC_Desc"
+      ],
+      "ruleStandardName": "DEPT_DESC",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",2)",
+      "global": "^CTLOC(deptDr)^2",
+      "domain": "01-user"
+    },
+    "DEPT_ACTIVE": {
+      "keywords": [
+        "DEPT_ACTIVE",
+        "deptActive",
+        "DeptActive",
+        "科室状态",
+        "科室激活"
+      ],
+      "ruleStandardName": "DEPT_ACTIVE",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",14)",
+      "global": "^CTLOC(deptDr)^14",
+      "domain": "01-user"
+    },
+    "DEPT_TYPE": {
+      "keywords": [
+        "DEPT_TYPE",
+        "deptType",
+        "DeptType",
+        "科室类型",
+        "CTLOC_Type"
+      ],
+      "ruleStandardName": "DEPT_TYPE",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",13)",
+      "global": "^CTLOC(deptDr)^13",
+      "domain": "01-user"
+    },
+    "DEPT_WARD_FLAG": {
+      "keywords": [
+        "DEPT_WARD_FLAG",
+        "deptWardFlag",
+        "WardFlag",
+        "病区标志",
+        "是否病区"
+      ],
+      "ruleStandardName": "DEPT_WARD_FLAG",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",5)",
+      "global": "^CTLOC(deptDr)^5",
+      "domain": "01-user"
+    },
+    "DEPT_HOSPITAL_DR": {
+      "keywords": [
+        "DEPT_HOSPITAL_DR",
+        "deptHospitalDr",
+        "HospitalDr",
+        "医院DR",
+        "所属医院"
+      ],
+      "ruleStandardName": "DEPT_HOSPITAL_DR",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",22)",
+      "global": "^CTLOC(deptDr)^22",
+      "domain": "01-user"
+    },
+    "DEPT_TELEPHONE": {
+      "keywords": [
+        "DEPT_TELEPHONE",
+        "deptTelephone",
+        "Telephone",
+        "科室电话",
+        "联系电话"
+      ],
+      "ruleStandardName": "DEPT_TELEPHONE",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",40)",
+      "global": "^CTLOC(deptDr)^40",
+      "domain": "01-user"
+    },
+    "DEPT_SHORT_NAME": {
+      "keywords": [
+        "DEPT_SHORT_NAME",
+        "deptShortName",
+        "ShortName",
+        "科室简称",
+        "科室短名"
+      ],
+      "ruleStandardName": "DEPT_SHORT_NAME",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",42)",
+      "global": "^CTLOC(deptDr)^42",
+      "domain": "01-user"
+    },
+    "DEPT_DATE_ACTIVE_TO": {
+      "keywords": [
+        "DEPT_DATE_ACTIVE_TO",
+        "deptDateActiveTo",
+        "DateActiveTo",
+        "科室有效截止日期"
+      ],
+      "ruleStandardName": "DEPT_DATE_ACTIVE_TO",
+      "valueExpression": "$p($g(^CTLOC(deptDr)),\"^\",43)",
+      "global": "^CTLOC(deptDr)^43",
+      "domain": "01-user"
+    },
+    "USER_GROUP_DR": {
+      "keywords": [
+        "USER_GROUP_DR",
+        "userGroupDr",
+        "GroupDr",
+        "安全组DR",
+        "用户组DR",
+        "SSUSR_GroupDR"
+      ],
+      "ruleStandardName": "USER_GROUP_DR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",5)",
+      "global": "^SSU(\"SSUSR\",userDr)^5",
+      "domain": "01-user"
+    },
+    "GROUP_CODE": {
+      "keywords": [
+        "GROUP_CODE",
+        "groupCode",
+        "GroupCode",
+        "安全组编码",
+        "安全组代码",
+        "SSGRP_Code"
+      ],
+      "ruleStandardName": "GROUP_CODE",
+      "valueExpression": "$p($g(^SSU(\"SSGRP\",groupDr)),\"^\",1)",
+      "global": "^SSU(\"SSGRP\",groupDr)^1",
+      "domain": "01-user"
+    },
+    "GROUP_DESC": {
+      "keywords": [
+        "GROUP_DESC",
+        "groupDesc",
+        "GroupDesc",
+        "安全组名称",
+        "安全组描述",
+        "SSGRP_Desc"
+      ],
+      "ruleStandardName": "GROUP_DESC",
+      "valueExpression": "$p($g(^SSU(\"SSGRP\",groupDr)),\"^\",2)",
+      "global": "^SSU(\"SSGRP\",groupDr)^2",
+      "domain": "01-user"
+    },
+    "USER_LAST_LOGIN_DATE": {
+      "keywords": [
+        "USER_LAST_LOGIN_DATE",
+        "userLastLoginDate",
+        "LastLoginDate",
+        "最后登录日期"
+      ],
+      "ruleStandardName": "USER_LAST_LOGIN_DATE",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",23)",
+      "global": "^SSU(\"SSUSR\",userDr)^23",
+      "domain": "01-user"
+    },
+    "USER_LAST_LOGIN_TIME": {
+      "keywords": [
+        "USER_LAST_LOGIN_TIME",
+        "userLastLoginTime",
+        "LastLoginTime",
+        "最后登录时间"
+      ],
+      "ruleStandardName": "USER_LAST_LOGIN_TIME",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",24)",
+      "global": "^SSU(\"SSUSR\",userDr)^24",
+      "domain": "01-user"
+    },
+    "PHYSICIANNO": {
+      "keywords": [
+        "physicianno",
+        "医生编号"
+      ],
+      "ruleStandardName": "DOCTOR_CODE",
+      "valueExpression": "$p($g(^CTPCP(CTPCP_DR)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "01-user",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "REPORTWRITER": {
+      "keywords": [
+        "reportwriter",
+        "报告医生"
+      ],
+      "ruleStandardName": "REPORT_DOCTOR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\")",
+      "domain": "01-user",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "REPORTREVIEWER": {
+      "keywords": [
+        "reportreviewer",
+        "审核医生"
+      ],
+      "ruleStandardName": "REVIEW_DOCTOR",
+      "valueExpression": "$p($g(^SSU(\"SSUSR\",userDr)),\"^\",2)",
+      "global": "^SSU(\"SSUSR\")",
+      "domain": "01-user",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "PROFESSION": {
+      "keywords": [
+        "profession",
+        "职业",
+        "专业"
+      ],
+      "ruleStandardName": "VOCATION",
+      "valueExpression": "$p($g(^CT(\"OCC\",$p($g(^PAPER(patDR,\"PER\",2)),\"^\",6))),\"^\",2)",
+      "global": "^CT(\"OCC\")",
+      "domain": "10-patient",
+      "description": "患者职业"
+    }
+  }
+}

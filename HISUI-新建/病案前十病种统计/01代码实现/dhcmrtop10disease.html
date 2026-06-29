@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>病案前十病种统计</title>
+<link rel="stylesheet" type="text/css" href="https://www.jeasyui.com/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="https://www.jeasyui.com/easyui/themes/icon.css">
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="https://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+<style>
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0}
+.filter-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7;flex-wrap:wrap}
+.filter-bar label{font-size:13px;color:#333;white-space:nowrap}
+.date-presets{display:inline-flex;gap:4px;margin-right:4px}
+.date-preset{cursor:pointer;padding:3px 10px;border:1px solid #95B8E7;border-radius:4px;background:#fff;font-size:12px;color:#017bce}
+.date-preset:hover{background:#eaf2ff}
+.date-preset.active{background:#017bce;color:#fff;border-color:#017bce}
+.vt-sep{width:1px;height:20px;background:#d0dcee;margin:0 4px}
+.stat-cards{display:flex;gap:10px;padding:10px 14px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:150px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px 14px;text-align:center;box-sizing:border-box}
+.stat-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+.stat-card .label{font-size:11px;color:#666;margin-bottom:4px}
+.stat-card .value{font-size:22px;font-weight:700;color:#15428b;margin-bottom:2px}
+.view-tabs{display:flex;padding:0 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7}
+.view-tab{cursor:pointer;padding:8px 16px;font-size:13px;color:#666;border-bottom:2px solid transparent;margin-bottom:-2px}
+.view-tab:hover{color:#017bce}
+.view-tab.active{color:#017bce;border-bottom-color:#017bce;font-weight:700}
+#mainLayout{width:100%;height:100vh}
+</style>
+</head>
+<body>
+<div id="mainLayout" class="easyui-layout" data-options="fit:true">
+    <div data-options="region:'north',border:false" style="height:165px">
+        <div class="filter-bar">
+            <label>日期</label>
+            <span class="date-presets">
+                <a class="date-preset" data-preset="month" onclick="setDatePreset('month')">本月</a>
+                <a class="date-preset" data-preset="quarter" onclick="setDatePreset('quarter')">本季</a>
+                <a class="date-preset" data-preset="year" onclick="setDatePreset('year')">本年</a>
+                <a class="date-preset" data-preset="lastyear" onclick="setDatePreset('lastyear')">去年</a>
+            </span>
+            <span class="vt-sep"></span>
+            开始:<input id="dtStt" class="easyui-datebox" style="width:120px">
+            结束:<input id="dtEnd" class="easyui-datebox" style="width:120px">
+            <span class="vt-sep"></span>
+            <label>科室</label><input id="selDept" class="easyui-combobox" style="width:160px">
+            <a class="easyui-linkbutton" onclick="doQuery()" data-options="iconCls:'icon-search'">查询</a>
+            <a class="easyui-linkbutton" onclick="doExport()" data-options="iconCls:'icon-save'">导出</a>
+            <a class="easyui-linkbutton" onclick="doClear()" data-options="iconCls:'icon-clear'">清空</a>
+        </div>
+        <div class="view-tabs">
+            <a class="view-tab active" id="tabTop10" onclick="switchView('top10')">前十病种分布</a>
+            <a class="view-tab" id="tabTrend" onclick="switchView('trend')">前十病种趋势</a>
+        </div>
+        <div class="stat-cards" id="statCards">
+            <div class="stat-card" style="cursor:pointer" onclick="drillDown('')"><div class="label">出院总人数</div><div class="value" id="cardTotal">--</div></div>
+            <div class="stat-card" style="cursor:pointer" onclick="drillDownTop10()"><div class="label">前十病种出院总人数</div><div class="value" id="cardTop10Total">--</div></div>
+            <div class="stat-card"><div class="label">前十病种占比</div><div class="value" id="cardTop10Pct">--</div></div>
+            <div class="stat-card"><div class="label">平均住院日</div><div class="value" id="cardAvgLOS">--</div></div>
+            <div class="stat-card"><div class="label">次均费用</div><div class="value" id="cardAvgCost">--</div></div>
+        </div>
+    </div>
+    <div data-options="region:'center',border:false" style="overflow:hidden">
+        <div id="wrapTop10" style="height:100%"><table id="dgTop10"></table></div>
+        <div id="wrapTrend" style="height:100%;display:none">
+            <div id="chartTrend" style="width:100%;height:280px"></div>
+            <div style="height:calc(100% - 280px)"><table id="dgTrend"></table></div>
+        </div>
+    </div>
+</div>
+
+<!-- Mock $.q — remove in production -->
+<script>
+$.q = function (params, success, error) {
+    var m10=[{Rank:1,ICD4Code:'C50.9',DiseaseName:'乳腺恶性肿瘤',DisCount:426,DisPct:'11.1%',AvgLOS:'5.4',AvgCost:'8234',MortalityRate:'0.9%',CureRate:'96.2%',YoYChange:'+12.3%'},{Rank:2,ICD4Code:'J18.0',DiseaseName:'支气管肺炎',DisCount:385,DisPct:'10.0%',AvgLOS:'7.1',AvgCost:'4521',MortalityRate:'0.3%',CureRate:'98.1%',YoYChange:'+5.8%'},{Rank:3,ICD4Code:'I20.0',DiseaseName:'不稳定心绞痛',DisCount:298,DisPct:'7.7%',AvgLOS:'8.9',AvgCost:'18340',MortalityRate:'0.0%',CureRate:'99.3%',YoYChange:'+8.9%'},{Rank:4,ICD4Code:'K80.5',DiseaseName:'肝内胆管结石',DisCount:257,DisPct:'6.7%',AvgLOS:'6.2',AvgCost:'11920',MortalityRate:'0.0%',CureRate:'100%',YoYChange:'-2.1%'},{Rank:5,ICD4Code:'I10.x',DiseaseName:'原发性高血压',DisCount:214,DisPct:'5.6%',AvgLOS:'9.5',AvgCost:'9860',MortalityRate:'0.5%',CureRate:'97.2%',YoYChange:'+14.6%'},{Rank:6,ICD4Code:'B16.9',DiseaseName:'乙型病毒性肝炎',DisCount:189,DisPct:'4.9%',AvgLOS:'11.3',AvgCost:'15620',MortalityRate:'2.1%',CureRate:'93.1%',YoYChange:'+3.4%'},{Rank:7,ICD4Code:'Z51.1',DiseaseName:'恶性肿瘤化学治疗',DisCount:176,DisPct:'4.6%',AvgLOS:'2.1',AvgCost:'3450',MortalityRate:'0.0%',CureRate:'99.4%',YoYChange:'+21.7%'},{Rank:8,ICD4Code:'C25.9',DiseaseName:'胰腺恶性肿瘤',DisCount:142,DisPct:'3.7%',AvgLOS:'12.6',AvgCost:'21380',MortalityRate:'8.5%',CureRate:'85.9%',YoYChange:'-5.2%'},{Rank:9,ICD4Code:'I63.9',DiseaseName:'脑梗死',DisCount:128,DisPct:'3.3%',AvgLOS:'14.2',AvgCost:'28900',MortalityRate:'3.1%',CureRate:'91.4%',YoYChange:'+1.8%'},{Rank:10,ICD4Code:'Z43.4',DiseaseName:'胆道引流术后T管拔管',DisCount:112,DisPct:'2.9%',AvgLOS:'1.5',AvgCost:'1870',MortalityRate:'0.0%',CureRate:'100%',YoYChange:'+18.3%'}];
+    var mT=[{ICD4Code:'C50.9',DiseaseName:'乳腺恶性肿瘤',M1:68,M2:57,M3:82,M4:75,M5:71,M6:73,M7:70,M8:65,M9:78,M10:81,M11:69,M12:62,YearTotal:426,AvgMonth:'71.0',YoYChange:'+12.3%'},{ICD4Code:'J18.0',DiseaseName:'支气管肺炎',M1:74,M2:66,M3:58,M4:52,M5:63,M6:72,M7:81,M8:77,M9:65,M10:58,M11:49,M12:42,YearTotal:385,AvgMonth:'64.2',YoYChange:'+5.8%'},{ICD4Code:'I20.0',DiseaseName:'不稳定心绞痛',M1:45,M2:39,M3:55,M4:52,M5:49,M6:58,M7:44,M8:51,M9:46,M10:53,M11:41,M12:37,YearTotal:298,AvgMonth:'49.7',YoYChange:'+8.9%'},{ICD4Code:'K80.5',DiseaseName:'肝内胆管结石',M1:38,M2:42,M3:47,M4:44,M5:40,M6:46,M7:39,M8:43,M9:41,M10:35,M11:32,M12:28,YearTotal:257,AvgMonth:'42.8',YoYChange:'-2.1%'}];
+    var locs=[{ctlocid:'1',ctloc:'肿瘤科病区'},{ctlocid:'2',ctloc:'肝胆疝外科病区'},{ctlocid:'3',ctloc:'乳腺甲状腺胸外科病区'}];
+    var mDet=[{PatName:'唐丽枚',MedRecNo:'0321042',RegNo:'8109759',MainDiag:'乳腺恶性肿瘤',AdmDate:'2026-05-06',DisDate:'2026-05-06',DeptName:'乳腺甲状腺胸外科病区',LOS:1,TotalCost:'1191',DischCond:'好转'},{PatName:'张秀兰',MedRecNo:'0324587',RegNo:'8109387',MainDiag:'乳腺恶性肿瘤',AdmDate:'2026-03-12',DisDate:'2026-03-18',DeptName:'乳腺甲状腺胸外科病区',LOS:6,TotalCost:'8425',DischCond:'治愈'},{PatName:'李芳',MedRecNo:'0319876',RegNo:'8107641',MainDiag:'乳腺恶性肿瘤',AdmDate:'2026-02-08',DisDate:'2026-02-15',DeptName:'肿瘤科病区',LOS:7,TotalCost:'12340',DischCond:'好转'}];
+    var map = { QryTop10Disease: m10, QryTop10Trend: mT, QryDiseaseDetail: mDet, ctloclookupNew: locs };
+    setTimeout(function () {
+        var d = map[params.QueryName] || [];
+        if (success) success(d.length ? { rows: d } : d);
+    }, 200);
+};
+</script>
+
+<script src="dhcmrtop10disease.js"></script>
+</body>
+</html>

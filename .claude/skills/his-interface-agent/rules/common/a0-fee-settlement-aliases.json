@@ -1,0 +1,534 @@
+{
+  "_description": "从v4.21 a0-fee-settlement.json提取的规则别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "organiz_code": {
+      "keywords": [],
+      "ruleStandardName": "organiz_code",
+      "valueExpression": "invId",
+      "global": "^DHCPB",
+      "domain": "a0-fee-settlement"
+    },
+    "adm_no___inpatient_no": {
+      "keywords": [],
+      "ruleStandardName": "adm_no / inpatient_no",
+      "valueExpression": "同FEE-004 (完全相同的取值逻辑)",
+      "global": "^DHCINDIV",
+      "domain": "a0-fee-settlement"
+    },
+    "settlement_id": {
+      "keywords": [],
+      "ruleStandardName": "settlement_id",
+      "valueExpression": "+$p(^DHCPB(pbId), \\\"^\\\", 8)",
+      "global": "^ARCIM",
+      "domain": "a0-fee-settlement"
+    },
+    "charge_time___pay_time": {
+      "keywords": [],
+      "ruleStandardName": "charge_time / pay_time",
+      "valueExpression": "$s(inDivId'=\\\"\\\":+$p(^DHCINDIV(inDivId), \\\"^\\\", 31), 1:0)",
+      "global": "^OEORD",
+      "domain": "a0-fee-settlement"
+    },
+    "pay_time": {
+      "keywords": [],
+      "ruleStandardName": "pay_time",
+      "valueExpression": "$s(inDivId'=\\\"\\\":+$p(^DHCINDIV(inDivId), \\\"^\\\", 60), 1:invPatShareAmt)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "referenced_invoice_id": {
+      "keywords": [],
+      "ruleStandardName": "referenced_invoice_id",
+      "valueExpression": "$s(inDivId'=\\\"\\\":+$p(^DHCINDIV(inDivId), \\\"^\\\", 28), 1:0)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "total_fee": {
+      "keywords": [],
+      "ruleStandardName": "total_fee",
+      "valueExpression": "$s(inDivId'=\\\"\\\":+$p(^DHCINDIV(inDivId), \\\"^\\\", 15), 1:0)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "inv_total_amt": {
+      "keywords": [],
+      "ruleStandardName": "inv_total_amt",
+      "valueExpression": "$s(inDivId'=\\\"\\\":$p(^g(^DHCINDIV(inDivId)), \\\"^\\\", 8), 1:\\\"\\\")",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "base_fee": {
+      "keywords": [],
+      "ruleStandardName": "base_fee",
+      "valueExpression": "$s(invFlag=\\\"N\\\":\\\"2\\\", 1:\\\"1\\\")",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "self_fee": {
+      "keywords": [],
+      "ruleStandardName": "self_fee",
+      "valueExpression": "initInvId",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "account_fee": {
+      "keywords": [],
+      "ruleStandardName": "account_fee",
+      "valueExpression": "$zdt($h, 3, 1)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "own_fee": {
+      "keywords": [],
+      "ruleStandardName": "own_fee",
+      "valueExpression": "servicefee = servicefee + TOTAL",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "insurance_id": {
+      "keywords": [],
+      "ruleStandardName": "insurance_id",
+      "valueExpression": "operationfee = operationfee + TOTAL",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "init_inv_id": {
+      "keywords": [],
+      "ruleStandardName": "init_inv_id",
+      "valueExpression": "PBDRowId = pbId_\\\"||\\\"_PBOChild_\\\"||\\\"_PBDChild",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "in_div_id": {
+      "keywords": [],
+      "ruleStandardName": "in_div_id",
+      "valueExpression": "tarACCate = $p(^DHCTarC(\\\"TAC\\\", tarACCateId), \\\"^\\\", 2)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "is_reversed": {
+      "keywords": [],
+      "ruleStandardName": "is_reversed",
+      "valueExpression": "$p(^ARCIM(+arcimId, $p(arcimId, \\\"||\\\", 2), 1), \\\"^\\\", 1)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "referenced_settlement_id___referencedsettlement_id": {
+      "keywords": [],
+      "ruleStandardName": "referenced_settlement_id / referencedsettlement_id",
+      "valueExpression": "$p(^ARCIM(+arcimId, $p(arcimId, \\\"||\\\", 2), 1), \\\"^\\\", 2)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "report_datetime": {
+      "keywords": [],
+      "ruleStandardName": "report_datetime",
+      "valueExpression": "$p(^DHCTARI(tarItmId), \\\"^\\\", 1)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "service_fee": {
+      "keywords": [],
+      "ruleStandardName": "service_fee",
+      "valueExpression": "$p(^DHCTARI(tarItmId), \\\"^\\\", 2)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "operation_fee": {
+      "keywords": [],
+      "ruleStandardName": "operation_fee",
+      "valueExpression": "$p($$GetConInfo^DHCINSUTarContrast(tarItmId, \\\"00A\\\", $zd(+$h,3), \\\"\\\", 2), \\\"^\\\", 3)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "nursing_fee": {
+      "keywords": [],
+      "ruleStandardName": "nursing_fee",
+      "valueExpression": "$p($$GetConInfo^DHCINSUTarContrast(tarItmId, \\\"00A\\\", $zd(+$h,3), \\\"\\\", 2), \\\"^\\\", 4)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "serviceother_fee": {
+      "keywords": [],
+      "ruleStandardName": "serviceother_fee",
+      "valueExpression": "$s(billStatus'=\\\"B\\\":\\\"1\\\", 1:\\\"0\\\")",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "pathology_fee": {
+      "keywords": [],
+      "ruleStandardName": "pathology_fee",
+      "valueExpression": "$P(pbdData, \\\"^\\\", 28) (= ^DHCPB(pbId,'O',PBOChild,'D',PBDChild)^28)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "lab_fee": {
+      "keywords": [],
+      "ruleStandardName": "lab_fee",
+      "valueExpression": "+$P(pbdData, \\\"^\\\", 4)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "radio_fee": {
+      "keywords": [],
+      "ruleStandardName": "radio_fee",
+      "valueExpression": "+$P(pbdData, \\\"^\\\", 5)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "clinicaldia_fee": {
+      "keywords": [],
+      "ruleStandardName": "clinicaldia_fee",
+      "valueExpression": "+$P(pbdData, \\\"^\\\", 7)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "nonsurgical_fee": {
+      "keywords": [],
+      "ruleStandardName": "nonsurgical_fee",
+      "valueExpression": "$s(inDivSubId'=\\\"\\\":+$p(^DHCINDIS(inDivSubId), \\\"^\\\", 27), 1:0)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "clinicalphy_fee": {
+      "keywords": [],
+      "ruleStandardName": "clinicalphy_fee",
+      "valueExpression": "$s(inDivSubId'=\\\"\\\":+$p(^DHCINDIS(inDivSubId), \\\"^\\\", 28), 1:0)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "surgicaltreat_fee": {
+      "keywords": [],
+      "ruleStandardName": "surgicaltreat_fee",
+      "valueExpression": "isrefund (复用FEE-055结果)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "anesthetic_fee": {
+      "keywords": [],
+      "ruleStandardName": "anesthetic_fee",
+      "valueExpression": "PBDRowId",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "surgical_fee": {
+      "keywords": [],
+      "ruleStandardName": "surgical_fee",
+      "valueExpression": "\\\"\\\" (空串, OP/IP一致)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "rehabilitation_fee": {
+      "keywords": [],
+      "ruleStandardName": "rehabilitation_fee",
+      "valueExpression": "\\\"\\\" (空串, OP/IP一致)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "tcm_fee": {
+      "keywords": [],
+      "ruleStandardName": "tcm_fee",
+      "valueExpression": "ordPrescNo = $p($g(^OEORD(+ordItmId, \\\"I\\\", $p(ordItmId, \\\"||\\\", 2), 1)), \\\"^\\\", 14)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "westerndrug_fee": {
+      "keywords": [],
+      "ruleStandardName": "westerndrug_fee",
+      "valueExpression": "ordItmId (= ^DHCPB(pbId,'O',PBOChild)^4)",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "antibacterial_fee": {
+      "keywords": [],
+      "ruleStandardName": "antibacterial_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "chinesepatentmedicine_fee": {
+      "keywords": [],
+      "ruleStandardName": "chinesepatentmedicine_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "chineseherbalmedicine_fee": {
+      "keywords": [],
+      "ruleStandardName": "chineseherbalmedicine_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "blood_fee": {
+      "keywords": [],
+      "ruleStandardName": "blood_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "ricim_fee": {
+      "keywords": [],
+      "ruleStandardName": "ricim_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "globin_fee": {
+      "keywords": [],
+      "ruleStandardName": "globin_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "coagualationfactor_fee": {
+      "keywords": [],
+      "ruleStandardName": "coagualationfactor_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "cytokines_fee": {
+      "keywords": [],
+      "ruleStandardName": "cytokines_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "singleinspection_fee": {
+      "keywords": [],
+      "ruleStandardName": "singleinspection_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "singletreatment_fee": {
+      "keywords": [],
+      "ruleStandardName": "singletreatment_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "singlesurgical_fee": {
+      "keywords": [],
+      "ruleStandardName": "singlesurgical_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "other_fee": {
+      "keywords": [],
+      "ruleStandardName": "other_fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "charge_id": {
+      "keywords": [],
+      "ruleStandardName": "charge_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "charge_type": {
+      "keywords": [],
+      "ruleStandardName": "charge_type",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_no": {
+      "keywords": [],
+      "ruleStandardName": "item_no",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_name": {
+      "keywords": [],
+      "ruleStandardName": "item_name",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_sub_no": {
+      "keywords": [],
+      "ruleStandardName": "item_sub_no",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_sub_name": {
+      "keywords": [],
+      "ruleStandardName": "item_sub_name",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_code": {
+      "keywords": [],
+      "ruleStandardName": "item_code",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_name_insurance": {
+      "keywords": [],
+      "ruleStandardName": "item_name_insurance",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "is_refund": {
+      "keywords": [],
+      "ruleStandardName": "is_refund",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "refund_original_id": {
+      "keywords": [],
+      "ruleStandardName": "refund_original_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "unit_price_amt": {
+      "keywords": [],
+      "ruleStandardName": "unit_price_amt",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "item_num": {
+      "keywords": [],
+      "ruleStandardName": "item_num",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "fee": {
+      "keywords": [],
+      "ruleStandardName": "fee",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "fee_in": {
+      "keywords": [],
+      "ruleStandardName": "fee_in",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "fee_out": {
+      "keywords": [],
+      "ruleStandardName": "fee_out",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "is_refunded": {
+      "keywords": [],
+      "ruleStandardName": "is_refunded",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "refund_id": {
+      "keywords": [],
+      "ruleStandardName": "refund_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "mat_code": {
+      "keywords": [],
+      "ruleStandardName": "mat_code",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "mat_nhsa_standard_code": {
+      "keywords": [],
+      "ruleStandardName": "mat_nhsa_standard_code",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "is_hv": {
+      "keywords": [],
+      "ruleStandardName": "is_hv",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "hv_mat_id": {
+      "keywords": [],
+      "ruleStandardName": "hv_mat_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "recipe_id": {
+      "keywords": [],
+      "ruleStandardName": "recipe_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "order_id": {
+      "keywords": [],
+      "ruleStandardName": "order_id",
+      "valueExpression": "",
+      "global": "",
+      "domain": "a0-fee-settlement"
+    },
+    "SFCJBM": {
+      "keywords": [
+        "sfcjbm",
+        "收费场景编码"
+      ],
+      "ruleStandardName": "BILL_SCENE_CODE",
+      "valueExpression": "$p($g(^DHCTarC(\"BC\",billTypeDr)),\"^\",1)",
+      "global": "^DHCTarC",
+      "domain": "a0-fee-settlement",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "BGDLBBM": {
+      "keywords": [
+        "bgdlbbm",
+        "报告单类别编码"
+      ],
+      "ruleStandardName": "REPORT_TYPE_CODE",
+      "valueExpression": "$p($g(^DHCTarC(\"BC\",billDr)),\"^\",1)",
+      "global": "^DHCTarC",
+      "domain": "a0-fee-settlement",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "YBJSQSSJ": {
+      "keywords": [
+        "ybjsqssj",
+        "医保结算起始时间"
+      ],
+      "ruleStandardName": "INS_SETTLE_START",
+      "valueExpression": "$p($g(^DHCBill(\"ADM\",adm)),\"^\",10)",
+      "global": "^DHCBill",
+      "domain": "a0-fee-settlement",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "YBJSZZSJ": {
+      "keywords": [
+        "ybjszzsj",
+        "医保结算终止时间"
+      ],
+      "ruleStandardName": "INS_SETTLE_END",
+      "valueExpression": "$p($g(^DHCBill(\"ADM\",adm)),\"^\",11)",
+      "global": "^DHCBill",
+      "domain": "a0-fee-settlement",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    }
+  },
+  "_lastUpdated": "2026-05-21 11:24"
+}

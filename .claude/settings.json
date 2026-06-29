@@ -1,24 +1,100 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(python3 -c ' *)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \"LISTENING\")",
+      "Bash(findstr \"127.0.0.1\")"
+    ]
+  },
   "skills": [
-    { "name": "iris-code-formatter", "path": "skills/iris-code-formatter/SKILL.md" },
-    { "name": "skill-creator", "path": "skills/skill-creator/SKILL.md" },
-    { "name": "frontend-design", "path": "skills/frontend-design/SKILL.md" },
-    { "name": "karpathy-guidelines", "path": "skills/karpathy-guidelines/SKILL.md" },
-    { "name": "brainstorming", "path": "skills/superpowers-skills/brainstorming/SKILL.md" },
-    { "name": "dispatching-parallel-agents", "path": "skills/superpowers-skills/dispatching-parallel-agents/SKILL.md" },
-    { "name": "doc-reader-analyzer", "path": "skills/superpowers-skills/doc-reader-analyzer/SKILL.md" },
-    { "name": "executing-plans", "path": "skills/superpowers-skills/executing-plans/SKILL.md" },
-    { "name": "finishing-a-development-branch", "path": "skills/superpowers-skills/finishing-a-development-branch/SKILL.md" },
-    { "name": "iris-database-dev", "path": "skills/superpowers-skills/iris-database-dev/SKILL.md" },
-    { "name": "receiving-code-review", "path": "skills/superpowers-skills/receiving-code-review/SKILL.md" },
-    { "name": "requesting-code-review", "path": "skills/superpowers-skills/requesting-code-review/SKILL.md" },
-    { "name": "subagent-driven-development", "path": "skills/superpowers-skills/subagent-driven-development/SKILL.md" },
-    { "name": "systematic-debugging", "path": "skills/superpowers-skills/systematic-debugging/SKILL.md" },
-    { "name": "test-driven-development", "path": "skills/superpowers-skills/test-driven-development/SKILL.md" },
-    { "name": "using-git-worktrees", "path": "skills/superpowers-skills/using-git-worktrees/SKILL.md" },
-    { "name": "using-superpowers", "path": "skills/superpowers-skills/using-superpowers/SKILL.md" },
-    { "name": "verification-before-completion", "path": "skills/superpowers-skills/verification-before-completion/SKILL.md" },
-    { "name": "writing-plans", "path": "skills/superpowers-skills/writing-plans/SKILL.md" },
-    { "name": "writing-skills", "path": "skills/superpowers-skills/writing-skills/SKILL.md" }
+    {
+      "name": "iris-code-formatter",
+      "path": "skills/iris-code-formatter/SKILL.md"
+    },
+    {
+      "name": "skill-creator",
+      "path": "skills/skill-creator/SKILL.md"
+    },
+    {
+      "name": "frontend-design",
+      "path": "skills/frontend-design/SKILL.md"
+    },
+    {
+      "name": "karpathy-guidelines",
+      "path": "skills/karpathy-guidelines/SKILL.md"
+    },
+    {
+      "name": "brainstorming",
+      "path": "skills/superpowers-skills/brainstorming/SKILL.md"
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "path": "skills/superpowers-skills/dispatching-parallel-agents/SKILL.md"
+    },
+    {
+      "name": "doc-reader-analyzer",
+      "path": "skills/superpowers-skills/doc-reader-analyzer/SKILL.md"
+    },
+    {
+      "name": "executing-plans",
+      "path": "skills/superpowers-skills/executing-plans/SKILL.md"
+    },
+    {
+      "name": "finishing-a-development-branch",
+      "path": "skills/superpowers-skills/finishing-a-development-branch/SKILL.md"
+    },
+    {
+      "name": "iris-database-dev",
+      "path": "skills/superpowers-skills/iris-database-dev/SKILL.md"
+    },
+    {
+      "name": "receiving-code-review",
+      "path": "skills/superpowers-skills/receiving-code-review/SKILL.md"
+    },
+    {
+      "name": "requesting-code-review",
+      "path": "skills/superpowers-skills/requesting-code-review/SKILL.md"
+    },
+    {
+      "name": "subagent-driven-development",
+      "path": "skills/superpowers-skills/subagent-driven-development/SKILL.md"
+    },
+    {
+      "name": "systematic-debugging",
+      "path": "skills/superpowers-skills/systematic-debugging/SKILL.md"
+    },
+    {
+      "name": "test-driven-development",
+      "path": "skills/superpowers-skills/test-driven-development/SKILL.md"
+    },
+    {
+      "name": "using-git-worktrees",
+      "path": "skills/superpowers-skills/using-git-worktrees/SKILL.md"
+    },
+    {
+      "name": "using-superpowers",
+      "path": "skills/superpowers-skills/using-superpowers/SKILL.md"
+    },
+    {
+      "name": "verification-before-completion",
+      "path": "skills/superpowers-skills/verification-before-completion/SKILL.md"
+    },
+    {
+      "name": "writing-plans",
+      "path": "skills/superpowers-skills/writing-plans/SKILL.md"
+    },
+    {
+      "name": "writing-skills",
+      "path": "skills/superpowers-skills/writing-skills/SKILL.md"
+    },
+    {
+      "name": "imedical-dailyreport",
+      "path": "skills/imedical-dailyreport/SKILL.md"
+    },
+    {
+      "name": "imedical-weeklyreport",
+      "path": "skills/imedical-weeklyreport/SKILL.md"
+    }
   ]
 }

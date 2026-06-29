@@ -1,0 +1,375 @@
+{
+  "_description": "从v4.21 55-exam-report.json提取的规则别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "STUDY_NO": {
+      "keywords": [
+        "STUDY_NO",
+        "检查号",
+        "申请号",
+        "staccnum",
+        "HDSD0005021",
+        "检查报告单编号",
+        "StudyNo"
+      ],
+      "ruleStandardName": "检查号/申请号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_REPORT_NO": {
+      "keywords": [
+        "EXAM_REPORT_NO",
+        "报告号",
+        "检查报告号",
+        "repNo",
+        "DocumentID",
+        "HDSD0005016",
+        "电子申请单编号"
+      ],
+      "ruleStandardName": "报告号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_DATE": {
+      "keywords": [
+        "EXAM_DATE",
+        "检查报告日期",
+        "报告日期",
+        "HDSD0005026",
+        "HDSD0005034",
+        "检查日期",
+        "rptDate",
+        "checkDate",
+        "EXAM_DATETIME"
+      ],
+      "ruleStandardName": "检查报告日期(含时间)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "REPORT_DOCTOR_CODE": {
+      "keywords": [
+        "REPORT_DOCTOR_CODE",
+        "报告医师代码",
+        "HDSD0005001",
+        "rptDocDr"
+      ],
+      "ruleStandardName": "报告医师代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "REPORT_DOCTOR_NAME": {
+      "keywords": [
+        "REPORT_DOCTOR_NAME",
+        "报告医师",
+        "报告医师签名",
+        "HDSD00050011",
+        "rptDocName"
+      ],
+      "ruleStandardName": "报告医师姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "AUDIT_DOCTOR_CODE": {
+      "keywords": [
+        "AUDIT_DOCTOR_CODE",
+        "审核医师代码",
+        "HDSD0005067",
+        "verDocDr"
+      ],
+      "ruleStandardName": "审核医师代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "AUDIT_DOCTOR_NAME": {
+      "keywords": [
+        "AUDIT_DOCTOR_NAME",
+        "审核医师",
+        "审核医师签名",
+        "HDSD00050671",
+        "auditDrName"
+      ],
+      "ruleStandardName": "审核医师姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_DEPT": {
+      "keywords": [
+        "EXAM_DEPT",
+        "检查科室",
+        "执行科室名称",
+        "HDSD0005036",
+        "检查报告科室",
+        "HDSD0005025",
+        "检查科室名称",
+        "exeLocdr"
+      ],
+      "ruleStandardName": "检查科室名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_DEPT_CODE": {
+      "keywords": [
+        "EXAM_DEPT_CODE",
+        "检查科室代码",
+        "HDSD00050251",
+        "HDSD00050361",
+        "执行科室代码"
+      ],
+      "ruleStandardName": "检查科室代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_CATEGORY": {
+      "keywords": [
+        "EXAM_CATEGORY",
+        "检查类别",
+        "检查子类",
+        "HDSD0005033",
+        "checkType"
+      ],
+      "ruleStandardName": "检查类别/子类",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_DESC_OBJECTIVE": {
+      "keywords": [
+        "EXAM_DESC_OBJECTIVE",
+        "检查所见",
+        "客观所见",
+        "HDSD0005023",
+        "检查报告结果-客观所见",
+        "检查描述"
+      ],
+      "ruleStandardName": "检查所见(客观描述)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_DESC_IMPRESSION": {
+      "keywords": [
+        "EXAM_DESC_IMPRESSION",
+        "检查结论",
+        "诊断提示",
+        "主观提示",
+        "HDSD0005024",
+        "检查报告结果-主观提示",
+        "诊断印象",
+        "diag",
+        "IMPRESSION"
+      ],
+      "ruleStandardName": "检查结论(诊断提示)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_ITEM_NAME": {
+      "keywords": [
+        "EXAM_ITEM_NAME",
+        "检查项目名称",
+        "HDSD00014051",
+        "检查项目",
+        "项目名称",
+        "检查名称"
+      ],
+      "ruleStandardName": "检查项目名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_ITEM_CODE": {
+      "keywords": [
+        "EXAM_ITEM_CODE",
+        "检查项目代码",
+        "HDSD0005037",
+        "项目代码"
+      ],
+      "ruleStandardName": "检查项目代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_BODYPART": {
+      "keywords": [
+        "EXAM_BODYPART",
+        "检查部位",
+        "checkBodypart",
+        "检查部位名称",
+        "BODY_PART"
+      ],
+      "ruleStandardName": "检查部位",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_RESULT": {
+      "keywords": [
+        "EXAM_RESULT",
+        "检查结果",
+        "checkResult",
+        "HDSD0005028",
+        "检查定量结果",
+        "定量结果"
+      ],
+      "ruleStandardName": "检查(检验)定量结果",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_RESULT_UNIT": {
+      "keywords": [
+        "EXAM_RESULT_UNIT",
+        "计量单位",
+        "HDSD0005029",
+        "结果单位"
+      ],
+      "ruleStandardName": "检查定量结果计量单位",
+      "valueExpression": "\\\"-\\\"",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_APPLY_DEPT_CODE": {
+      "keywords": [
+        "EXAM_APPLY_DEPT_CODE",
+        "申请科室代码",
+        "HDSD00050361",
+        "开单科室代码"
+      ],
+      "ruleStandardName": "检查申请科室代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_APPLY_DEPT_NAME": {
+      "keywords": [
+        "EXAM_APPLY_DEPT_NAME",
+        "申请科室名称",
+        "开单科室",
+        "HDSD0005036"
+      ],
+      "ruleStandardName": "检查申请科室名称",
+      "valueExpression": "$p($g(^CTLOC($p($g(^OEORD($p($lg(data,4),\"||\",1),\"I\",$p($lg(data,4),\"||\",2),7)),\"^\",2))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "55-exam-report",
+      "description": "通过医嘱ID获取申请科室名称：data^4=医嘱ID→OEORD^7^2=科室DR→CTLOC^2=科室名称"
+    },
+    "DOCUMENT_ID": {
+      "keywords": [
+        "DOCUMENT_ID",
+        "文档唯一编号",
+        "DocumentID"
+      ],
+      "ruleStandardName": "文档唯一编号",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "REPORT_NAME": {
+      "keywords": [
+        "REPORT_NAME",
+        "报告名称",
+        "HDSD0005030",
+        "检查方法名称",
+        "报告类型",
+        "repName",
+        "repType"
+      ],
+      "ruleStandardName": "报告名称/类型",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "PIC_PATH": {
+      "keywords": [
+        "PIC_PATH",
+        "图片路径",
+        "影像路径",
+        "picPath",
+        "IMAGE_PATH"
+      ],
+      "ruleStandardName": "图片路径",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "OEORI_ROWID": {
+      "keywords": [
+        "OEORI_ROWID",
+        "医嘱ID",
+        "OEORIRowid",
+        "oeordItemId",
+        "oeorowid"
+      ],
+      "ruleStandardName": "医嘱RowID",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "EXAM_STATUS": {
+      "keywords": [
+        "EXAM_STATUS",
+        "报告状态",
+        "REPORT_STATUS",
+        "rptStatus"
+      ],
+      "ruleStandardName": "检查报告状态",
+      "valueExpression": "",
+      "global": "",
+      "domain": "55-exam-report"
+    },
+    "CJBB": {
+      "keywords": [
+        "cjbb",
+        "采样标本"
+      ],
+      "ruleStandardName": "SPECIMEN_TYPE",
+      "valueExpression": "$p($g(^TCLAB(\"SPEC\",specDr)),\"^\",2)",
+      "global": "^TCLAB",
+      "domain": "50-lab-exam",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "IMAGELINK": {
+      "keywords": [
+        "imagelink",
+        "图片链接"
+      ],
+      "ruleStandardName": "IMAGE_URL",
+      "valueExpression": "$lg(data,23)",
+      "global": "DHC_EMR",
+      "domain": "55-exam-report",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "REPORTLINK": {
+      "keywords": [
+        "reportlink",
+        "报告链接"
+      ],
+      "ruleStandardName": "REPORT_URL",
+      "valueExpression": "$lg(data,24)",
+      "global": "DHC_EMR",
+      "domain": "55-exam-report",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    },
+    "JCFFMC": {
+      "keywords": [
+        "jcffmc",
+        "检查方法名称"
+      ],
+      "ruleStandardName": "EXAM_METHOD_NAME",
+      "valueExpression": "$lg(data,15)",
+      "global": "DHC_EMR",
+      "domain": "55-exam-report",
+      "description": "用户反馈回流 2026-05-21 11:45"
+    }
+  },
+  "_lastUpdated": "2026-05-21 11:45"
+}

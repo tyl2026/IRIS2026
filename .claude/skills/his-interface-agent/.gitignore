@@ -1,0 +1,49 @@
+# 接口文档（用户提供的，不纳入版本管理）
+docs/input/
+
+# 生成的代码（用户生成的，不纳入版本管理）
+output/
+
+# 规则库源文件（参考文件，不纳入版本管理）
+rules/sources/
+
+# VS Code 工作区配置
+*.code-workspace
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 运行时数据
+data/
+
+# 备份文件
+*.bak
+
+# Python 打包产物
+*.egg-info/
+dist/
+build/
+
+# IDE 配置
+.idea/
+.vscode/
+
+# 临时文件
+temp_*
+*.tmp
+*.log
+
+# 诊断/测试产物
+*.csv
+
+# 进度文件（过程文件，不纳入版本管理）
+PROGRESS.md
+
+# Claude Code 配置（个人配置，不纳入版本管理）
+.claude/
+
+# MCP 配置（个人配置，不纳入版本管理）
+.mcp.json

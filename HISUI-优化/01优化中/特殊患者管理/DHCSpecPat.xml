@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 336_0_21736U)" ts="2026-06-27 17:06:34">
+<Class name="web.DHCSpecPat">
+<ClassType/>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>DHCDoc.Util.RegisteredObject</Super>
+<TimeChanged>66449,65066.85992</TimeChanged>
+<TimeCreated>65072,53021.090476</TimeCreated>
+
+<Query name="FindPatList">
+<Description>
+患者查询</Description>
+<Type>%Query</Type>
+<FormalSpec>SttDate:%String,EndDate:%String,PatName:%String,PatIDCard:%String,PatListType:%String="",LocID:%String=""</FormalSpec>
+<Parameter name="ROWSPEC" value="TSPRowId:%String,TPatName:%String,TPatIDCard:%String,TPatNote:%String,TPatListTypeId:%String,TPatListType:%String,TStDate:%String,TEndDate:%String,TCreateUser:%String,TUpdateUser:%String,TLocDesc:%String"/>
+</Query>
+
+<Method name="FindPatListExecute">
+<Description>
+d ##class(%ResultSet).RunQuery("web.DHCSpecPat","FindPatList","","","","","36","7")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,SttDate:%String,EndDate:%String,PatName:%String,PatIDCard:%String,PatListType:%String="",LocID:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s ^lj("FindPatList")=SttDate_","_EndDate_","_PatName_","_PatIDCard_","_PatListType_","_LocID
+	Set repid=$I(^CacheTemp)	
+	If $g(ind)="" Set ind=1
+	if SttDate'="" s SttDate=..%ZDH(SttDate)
+	if EndDate'="" s EndDate=..%ZDH(EndDate)
+	set PatName=$$ALPHAUP^SSUTIL4(PatName)
+	set PatIDCard=$$ALPHAUP^SSUTIL4(PatIDCard)
+	s LocIdStr=""
+	s:LocID'="" LocIdStr=##Class(web.DHCCLCom).GetLinkLocId(LocID)
+ 	s LocIdStr="^"_LocIdStr_"^"_LocID_"^"
+	s SPRowId=0 for {
+		s SPRowId=$o(^DHCSP(SPRowId))
+		q:SPRowId=""
+		s SPName=$p($g(^DHCSP(SPRowId)),"^",1)
+		s SPNamePY=""
+		i SPName'="" s SPNamePY=##class(web.DHCINSUPort).GetCNCODE(SPName,"4","")
+		continue:(PatName'="")&&((SPName'="")&&(SPName'[PatName))&&((SPNamePY'="")&&(SPNamePY'[PatName))
+		s SPCredNo=$p($g(^DHCSP(SPRowId)),"^",2)
+		continue:(PatIDCard'="")&&(PatIDCard'=SPCredNo)
+		s SPNote=$p($g(^DHCSP(SPRowId)),"^",3)
+		s SPTypeDr=$p($g(^DHCSP(SPRowId)),"^",4)
+		continue:(PatListType'="")&&(PatListType'=SPTypeDr)
+		s ctloc=$p($g(^DHCSP(SPRowId)),"^",13)
+		continue:(LocID'="")&&(LocIdStr'[("^"_ctloc_"^"))
+		s LocDesc=""
+		s:ctloc'="" LocDesc=$p($g(^CTLOC(ctloc)),"^",2)
+		s SPType=$p($g(^DHCPatType(SPTypeDr)),"^",2)
+		s SPStDate=$p($g(^DHCSP(SPRowId)),"^",5)
+		continue:(SttDate'="")&&(SttDate>SPStDate)
+		s SPStDate=..%ZD(SPStDate) //$zd(SPStDate,3)
+		s SPEndDate=$p($g(^DHCSP(SPRowId)),"^",6)
+		continue:(EndDate'="")&&(SPEndDate'="")&&(EndDate<SPEndDate)
+		i SPEndDate'="" s SPEndDate=..%ZD(SPEndDate) //$zd(SPEndDate,3)
+		s SPCreateUser=""
+		s SPCreateUserDR=$p($g(^DHCSP(SPRowId)),"^",7)
+		i SPCreateUserDR'="" s SPCreateUser=$p($g(^SSU("SSUSR",SPCreateUserDR)),"^",2)
+		s SPSPUpdateUser=""
+		s SPSPUpdateUserDR=$p($g(^DHCSP(SPRowId)),"^",10)
+		i SPSPUpdateUserDR'="" s SPSPUpdateUser=$p($g(^SSU("SSUSR",SPSPUpdateUserDR)),"^",2)
+		d OutputRow
+	}
+    Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+OutputRow
+	set Data=$lb(SPRowId,SPName,SPCredNo,SPNote,SPTypeDr,SPType,SPStDate,SPEndDate,SPCreateUser,SPSPUpdateUser,LocDesc)
+	Set ^CacheTemp(repid,ind)=Data
+	Set ind=ind+1
+]]></Implementation>
+</Method>
+
+<Method name="FindPatListFetch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
+<PlaceAfter>FindPatListExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	//
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				// if there are no more rows, finish fetching
+		Set AtEnd=1
+		Set Row=""
+	}Else      {				// fetch row
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	// Save QHandle
+ 	s qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindPatListClose">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
+<PlaceAfter>FindPatListExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="InsertPatList">
+<Description>
+w ##class(web.DHCSpecPat).InsertPatList("R","","642102198003200063","沙海燕")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>PatName:%String,PatIDCard:%String,PatNote:%String,PatListType:%String,SttDate:%String,EndDate:%String,UserID:%String,InSPRowId:%String,LocID:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s ExistSPRowId=""
+	if (InSPRowId = "") {
+		s SPRowId=0
+		for{
+			s SPRowId=$o(^DHCSP("0","CredNo",PatIDCard,SPRowId)) 
+			Q:SPRowId=""
+			s SPStDate=$p($g(^DHCSP(SPRowId)),"^",5)
+			continue:(SPStDate>(+$h))
+			s SPEndDate=$p($g(^DHCSP(SPRowId)),"^",6)
+			continue:(SPEndDate'="")&&(SPEndDate<=(+$h))
+			s SPTypeDr=$p($g(^DHCSP(SPRowId)),"^",4)
+			continue:SPTypeDr'=PatListType
+			s ExistSPRowId=SPRowId
+			Q
+		}
+	}
+	Q:ExistSPRowId'="" "身份证号："_PatIDCard_" 患者类型："_$p(^DHCPatType(PatListType),"^",2)_" 已存在有效记录！"
+	i SttDate'="" s SttDate=..%ZDH(SttDate)
+	e  s SttDate=..%SysDate()
+	i EndDate'="" s EndDate=..%ZDH(EndDate)
+	if (SttDate'="")&&(EndDate'="")&&(SttDate>EndDate) {
+		Q "有效开始日期不能大于有效截止日期！"
+	}
+	if (InSPRowId = "") {
+		s object=##class(User.DHCSpecPat).%New()
+	} else {
+		s object=##class(User.DHCSpecPat).%OpenId(InSPRowId)
+	}
+	s object.DHCSPName=PatName
+	s object.DHCSPCredNo=PatIDCard
+	s object.DHCSPNote=PatNote
+	d object.DHCSPTypeDRSetObjectId(PatListType)
+	d object.DHCSPLocDRSetObjectId(LocID)
+	s object.DHCSPStDate=SttDate
+	s object.DHCSPEndDate=EndDate
+	i UserID="" s UserID=%session.Get("LOGON.USERID")
+	i (InSPRowId'="") { 
+		d object.DHCSPUpdateUserDRSetObjectId(UserID)
+		s object.DHCSPUpdateDate =..%SysDate()
+		s object.DHCSPUpdateTime=..%SysTime()
+	} else {
+		d object.DHCSPCreateUserDRSetObjectId(UserID)
+		s object.DHCSPCreateDate=..%SysDate()
+		s object.DHCSPCreateTime=..%SysTime()
+	}
+	Set sc=object.%Save()
+	If $$$ISERR(sc) {
+		Do $System.Status.DisplayError()
+		Q 100
+	}
+	d object.%Close()
+	Q 0
+]]></Implementation>
+</Method>
+
+<Method name="UpdatePatList">
+<Description>
+w ##class(web.DHCSpecPat).UpdatePatList("","")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SPRowId:%String,UserID:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:SPRowId="" "-1"
+	Set object=##class(User.DHCSpecPat).%OpenId(SPRowId)
+	s EndDate=object.DHCSPEndDate
+	if ((EndDate'="")&&(object.DHCSPEndDate<=..%SysDate())){
+		d object.%Close()
+		q "该记录已经是无效记录!"
+		}
+	s object.DHCSPEndDate=..%SysDate()-1
+	d object.DHCSPUpdateUserDRSetObjectId(UserID)
+	s object.DHCSPUpdateDate=..%SysDate()
+	s object.DHCSPUpdateTime=..%SysTime()
+	Set sc=object.%Save()
+	If $$$ISERR(sc) {
+		Do $System.Status.DisplayError()
+		Q 100
+	}
+	d object.%Close()
+	Q 0
+]]></Implementation>
+</Method>
+
+<Method name="DeletePatList">
+<Description>
+w ##class(web.DHCSpecPat).DeletePatList("","")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SPRowId:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:SPRowId="" "-1"
+	&SQL(Delete From SQLUser.DHC_SpecPat Where DHCSP_RowID=:SPRowId)
+	Q SQLCODE
+]]></Implementation>
+</Method>
+
+
+<Method name="IsSpecPatType">
+<Description>
+判断患者是否属于指定特殊患者类型
+入参: PatientId(患者ID), TypeCode(患者类型代码,如"03")
+返回: 1=是该类型, 0=不是该类型, 空=参数无效
+w ##class(web.DHCSpecPat).IsSpecPatType("123","03")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>PatientId:%String,TypeCode:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:(PatientId="")||(TypeCode="") ""
+	s CredNo=$p(^PAPER(PatientId,"ALL"),"^",9)
+	q:(CredNo="") ""
+	s Name=$p(^PAPER(PatientId,"ALL"),"^",1)
+
+	#; 患者类型代码 → RowId
+	s typeDr=""
+	s tmpId=0
+	for {
+		s tmpId=$o(^DHCPatType(tmpId))
+		q:(tmpId="")||(typeDr'="")
+		s tmpCode=$p($g(^DHCPatType(tmpId)),"^",1)
+		if (tmpCode=TypeCode) {
+			s typeDr=tmpId
+		}
+	}
+	q:(typeDr="") 0
+
+	#; 遍历特殊患者记录，匹配身份证号+类型
+	s SPRowId=0
+	for {
+		s SPRowId=$o(^DHCSP("0","CredNo",CredNo,SPRowId))
+		q:SPRowId=""
+
+		#; 有效期检查
+		s SPStDate=$p($g(^DHCSP(SPRowId)),"^",5)
+		continue:(SPStDate>(+$h))
+		s SPEndDate=$p($g(^DHCSP(SPRowId)),"^",6)
+		continue:(SPEndDate'="")&&(SPEndDate<(+$h))
+
+		#; 姓名检查
+		s SPName=$p($g(^DHCSP(SPRowId)),"^",1)
+		continue:(Name'="")&&(SPName'="")&&(Name'=SPName)
+
+		#; 类型匹配
+		s SPTypeDr=$p($g(^DHCSP(SPRowId)),"^",4)
+		if (SPTypeDr=typeDr) {
+			q 1
+		}
+	}
+	q 0
+]]></Implementation>
+</Method>
+
+<Method name="GetSpecPatTypeByPat">
+<Description>
+根据患者ID查询患者所属特殊患者类型</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>PatientId:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Q:PatientId="" ""
+	s CredNo=$p(^PAPER(PatientId,"ALL"),"^",9) //身份证号
+	s Name=$p(^PAPER(PatientId,"ALL"),"^",1) 
+	Q ..GetSpecPatTypeByCredNo(CredNo,Name,PatientId)
+]]></Implementation>
+</Method>
+
+<Method name="GetSpecPatTypeByCredNo">
+<Description>
+根据身份证号查询患者所属类型
+w ##class(web.DHCSpecPat).GetSpecPatTypeByCredNo("310106199003077108","lv-浮沉")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>CredNo:%String,Name:%String="",PatientID:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:(CredNo="")||(PatientID="") ""
+	s PatType="",PatTypeExeResult=""
+	s SPRowId=0 for{
+		s SPRowId=$o(^DHCSP("0","CredNo",CredNo,SPRowId)) 
+		q:SPRowId=""
+		s SPName=$p($g(^DHCSP(SPRowId)),"^",1)
+		continue:(Name'="")&&(SPName'="")&&(Name'=SPName)
+		s SPStDate=$p($g(^DHCSP(SPRowId)),"^",5)
+		continue:(SPStDate>(+$h))
+		s SPEndDate=$p($g(^DHCSP(SPRowId)),"^",6)
+		continue:(SPEndDate'="")&&(SPEndDate<(+$h))
+		s SPTypeDr=$p($g(^DHCSP(SPRowId)),"^",4)
+		if (SPTypeDr'="")&&($d(^DHCPatType(SPTypeDr))) {
+			s ExecuteCode=$P(^DHCPatType(SPTypeDr),"^",3)
+			i ExecuteCode'="" {
+				s Expression=$tr(ExecuteCode,"&","""")
+				s Expression="s PatTypeExeResult="_Expression
+				X Expression
+			}
+		}
+		i PatType="" s PatType=SPType_";"_PatTypeExeResult
+		e  s PatType=PatType_","_SPType_";"_PatTypeExeResult
+	}
+	q PatType
+]]></Implementation>
+</Method>
+
+<Query name="FindPatListType">
+<Description>
+查询患者类型</Description>
+<Type>%Query</Type>
+<Parameter name="ROWSPEC" value="Code:%String,Desc:%String,RowId:%String,ExecCode:%String"/>
+</Query>
+
+<Method name="FindPatListTypeExecute">
+<Description>
+User.DHCPatListType.cls
+d ##class(%ResultSet).RunQuery("web.DHCSpecPat","FindPatListType")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set repid=$I(^CacheTemp)	
+	If $g(ind)="" Set ind=1
+	s Rowid=0 for {
+		s Rowid=$o(^DHCPatType(Rowid))
+		q:Rowid=""
+		s Code=$p($g(^DHCPatType(Rowid)),"^",1)
+		s Desc=$p($g(^DHCPatType(Rowid)),"^",2)
+		s ExecCode=$p($g(^DHCPatType(Rowid)),"^",3)
+		s Data=$lb(Code,Desc,Rowid,ExecCode)
+		s ^CacheTemp(repid,ind)=Data
+		s ind=ind+1
+	}
+	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindPatListTypeFetch">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary,&Row:%List,&AtEnd:%Integer=0]]></FormalSpec>
+<PlaceAfter>FindPatListTypeExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	//
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				// if there are no more rows, finish fetching
+		Set AtEnd=1
+		Set Row=""
+	}Else      {				// fetch row
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	// Save QHandle
+ 	s qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="FindPatListTypeClose">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&qHandle:%Binary]]></FormalSpec>
+<PlaceAfter>FindPatListTypeExecute</PlaceAfter>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="InsertPatListType">
+<Description>
+患者类型插入
+w ##class(web.DHCSpecPat).InsertPatListType("","App","预约")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>RowID:%String,Code:%String,Desc:%String,ExecuteCode:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:(Code="")||(Desc="") ""
+	s rtn=""
+	if (RowID=""){
+		&SQL(insert into SQLUser.DHC_PatListType(DHC_PatTypeCode,DHC_PatTypeDesc,DHC_PatTypeExecCode) Values(:Code,:Desc,:ExecuteCode))
+		s rtn=SQLCODE
+	}else{
+		&SQL(Update SQLUser.DHC_PatListType set DHC_PatTypeCode=:Code,DHC_PatTypeDesc=:Desc,DHC_PatTypeExecCode=:ExecuteCode where DHC_PatTypeRowID=:RowID)
+		s rtn=SQLCODE
+	}
+	q rtn
+]]></Implementation>
+</Method>
+
+<Method name="DeletePatListType">
+<Description>
+患者类型删除
+w ##class(web.DHCSpecPat).DeletePatListType("","App","预约")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>RowID:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q:RowID="" ""
+	&SQL(Delete From SQLUser.DHC_PatListType where DHC_PatTypeRowID=:RowID)
+	Q SQLCODE
+]]></Implementation>
+</Method>
+
+<Method name="ImportPatList">
+<Description>
+批量导入特殊患者（前端 SheetJS 解析 .xlsx → TSV）
+w ##class(web.DHCSpecPat).ImportPatList("姓名	身份证号	类型代码", 1, "85")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>TSVContent:%String,UserID:%String,LocID:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s result = {}
+	s result.total = 0, result.success = 0, result.skip = 0
+	s result.errors = []
+
+	s rows = $lfs(TSVContent, $c(10))
+	for i = 2:1:$ll(rows) {
+		s line = $lg(rows, i)
+		continue:(line = "")
+		s result.total = result.total + 1
+
+		s name = $p(line, $c(9), 1)
+		s credNo = $p(line, $c(9), 2)
+		s typeCode = $p(line, $c(9), 3)
+		s note = $p(line, $c(9), 4)
+		s stDate = $p(line, $c(9), 5)
+		s endDate = $p(line, $c(9), 6)
+		s locCode = $p(line, $c(9), 7)
+
+		#; 校验必填字段
+		if (name = "") || (credNo = "") || (typeCode = "") {
+			s reason = "必填字段缺失"
+			d result.errors.%Push({"row":(i),"reason":(reason)})
+			s result.skip = result.skip + 1
+			continue
+		}
+
+		#; 患者类型代码 → RowId（遍历查找，无 Code 索引）
+		s typeDr = ""
+		s tmpId = 0
+		for {
+			s tmpId = $o(^DHCPatType(tmpId))
+			q:(tmpId = "")||(typeDr '= "")
+			s tmpCode = $p($g(^DHCPatType(tmpId)),"^",1)
+			if (tmpCode = typeCode) {
+				s typeDr = tmpId
+			}
+		}
+		if (typeDr = "") {
+			s reason = "患者类型代码无效: "_typeCode
+			d result.errors.%Push({"row":(i),"reason":(reason)})
+			s result.skip = result.skip + 1
+			continue
+		}
+
+		#; 科室代码 → RowId（遍历查找，无 Code 索引）
+		s locDr = ""
+		if (locCode '= "") {
+			s tmpId = 0
+			for {
+				s tmpId = $o(^CTLOC(tmpId))
+				q:(tmpId = "")||(locDr '= "")
+				s tmpCode = $p($g(^CTLOC(tmpId)),"^",1)
+				if (tmpCode = locCode) {
+					s locDr = tmpId
+				}
+			}
+		}
+
+		#; 复用 InsertPatList 入库
+		s rtn = ..InsertPatList(name,credNo,note,typeDr,stDate,endDate,UserID,"",locDr)
+		if (rtn = 0) {
+			s result.success = result.success + 1
+		} else {
+			d result.errors.%Push({"row":(i),"reason":(rtn)})
+			s result.skip = result.skip + 1
+		}
+	}
+	q result.%ToJSON()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

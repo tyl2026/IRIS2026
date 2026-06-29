@@ -1,0 +1,1588 @@
+{
+  "_description": "从v4.21 60-surgery.json提取的规则别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "OPA_ID": {
+      "keywords": [
+        "OPA_ID",
+        "opaId",
+        "OP_ARRANGE_ID",
+        "手术安排ID",
+        "SSAPID",
+        "OP_AR_ID",
+        "手术安排RowID"
+      ],
+      "ruleStandardName": "手术安排ID",
+      "valueExpression": "opaId",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ADM_ID": {
+      "keywords": [
+        "ADM_ID",
+        "AdmID",
+        "adm",
+        "PAADM",
+        "就诊ID",
+        "VisitID",
+        "EpisodeID"
+      ],
+      "ruleStandardName": "就诊ID",
+      "valueExpression": "s adm=$p($p(^DHCANOPArrange(opaId),\\\"^\\\",2),\\\"||\\\",1)",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPER_SN": {
+      "keywords": [
+        "OPER_SN",
+        "OperSn",
+        "OP_SERIAL_NO",
+        "手术唯一号",
+        "手术操作唯一号",
+        "OP_SN"
+      ],
+      "ruleStandardName": "手术操作唯一号",
+      "valueExpression": "opaId",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPERATION_CODE": {
+      "keywords": [
+        "OPERATION_CODE",
+        "OperationCode",
+        "OP_CODE",
+        "手术编码",
+        "SSBM",
+        "OP_CODE_ICD10",
+        "OP_ICD_CODE",
+        "HDSD0005016"
+      ],
+      "ruleStandardName": "手术编码(ICD10)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPERATION_DESC": {
+      "keywords": [
+        "OPERATION_DESC",
+        "OperationDesc",
+        "OP_DESC",
+        "手术名称",
+        "SSMC",
+        "OP_NAME",
+        "手术描述"
+      ],
+      "ruleStandardName": "手术名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPERATION_GRADE_CODE": {
+      "keywords": [
+        "OPERATION_GRADE_CODE",
+        "OperationGradeCode",
+        "OP_GRADE_CODE",
+        "手术级别代码",
+        "SSJB_DM",
+        "OP_LEVEL_CODE"
+      ],
+      "ruleStandardName": "手术级别代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPERATION_GRADE_DESC": {
+      "keywords": [
+        "OPERATION_GRADE_DESC",
+        "OperationGradeDesc",
+        "OP_GRADE_DESC",
+        "手术级别",
+        "SSJB",
+        "手术级别名称"
+      ],
+      "ruleStandardName": "手术级别描述",
+      "valueExpression": "$p($g(^ORC(\\\"CATEG\\\",+OPCategoryId)),\\\"^\\\",2)",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPER_START_DATE": {
+      "keywords": [
+        "OPER_START_DATE",
+        "OP_DATE",
+        "OperationSDate",
+        "手术日期",
+        "手术开始日期",
+        "SSRQ",
+        "手术日期时间",
+        "SSKSSJ"
+      ],
+      "ruleStandardName": "OP_START_TIME",
+      "valueExpression": "$zd($lg(^CIS.AN.OperScheduleD(opsId),15),3)_\" \"_$zt($lg(^CIS.AN.OperScheduleD(opsId),16),1)",
+      "global": "^CIS.AN",
+      "domain": "60-surgery"
+    },
+    "OPER_END_DATE": {
+      "keywords": [
+        "OPER_END_DATE",
+        "OP_END_DATE",
+        "OperationEDate",
+        "手术结束日期",
+        "SSJSSJ",
+        "手术结束时间",
+        "SSJSRQ"
+      ],
+      "ruleStandardName": "OP_END_TIME",
+      "valueExpression": "$zd($lg(anaData,16),3)_\" \"_$zt($lg(anaData,16),1)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery"
+    },
+    "THEATRE_IN_DT": {
+      "keywords": [
+        "THEATRE_IN_DT",
+        "ROOM_IN_DT",
+        "入室时间",
+        "RSSJ",
+        "HDSD0008053",
+        "IN_OP_ROOM_DT",
+        "THEATRE_IN_DATE",
+        "THEATRE_IN_DATETIME"
+      ],
+      "ruleStandardName": "入手术室日期时间",
+      "valueExpression": "$zdt(\\\"0,0\\\",3)",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "THEATRE_OUT_DT": {
+      "keywords": [
+        "THEATRE_OUT_DT",
+        "ROOM_OUT_DT",
+        "出室时间",
+        "CSSJ",
+        "HDSD0008012",
+        "OUT_OP_ROOM_DT",
+        "THEATRE_OUT_DATE",
+        "THEATRE_OUT_DATETIME"
+      ],
+      "ruleStandardName": "出手术室日期时间",
+      "valueExpression": "$zdt(\\\"0,0\\\",3)",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SURGEON_CODE": {
+      "keywords": [
+        "SURGEON_CODE",
+        "OperationDocCode",
+        "DOCTOR_CODE",
+        "手术者代码",
+        "SSZ_DM",
+        "主刀代码",
+        "SURGEON_ID",
+        "SURGEON_USER_CODE"
+      ],
+      "ruleStandardName": "手术者代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SURGEON_NAME": {
+      "keywords": [
+        "SURGEON_NAME",
+        "OperationDocName",
+        "DOCTOR_NAME",
+        "手术者",
+        "SSZ",
+        "主刀医生",
+        "主刀姓名",
+        "手术医生"
+      ],
+      "ruleStandardName": "OPER_DOC_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(^CIS.AN.OperScheduleD(opsId),18),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "YIZHU_CODE": {
+      "keywords": [
+        "ASSISTANT_1_CODE",
+        "ASSIST_CODE_1",
+        "OperationFCode",
+        "Ⅰ助代码",
+        "一助代码",
+        "YIZHU_CODE",
+        "FIRST_ASSIST_CODE"
+      ],
+      "ruleStandardName": "Ⅰ助代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "YIZHU": {
+      "keywords": [
+        "ASSISTANT_1_NAME",
+        "ASSIST_NAME_1",
+        "OperationFName",
+        "Ⅰ助",
+        "一助",
+        "YIZHU",
+        "FIRST_ASSIST"
+      ],
+      "ruleStandardName": "FIRST_ASSIST_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,9),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "ERZHU_CODE": {
+      "keywords": [
+        "ASSISTANT_2_CODE",
+        "ASSIST_CODE_2",
+        "OperationTCode",
+        "Ⅱ助代码",
+        "二助代码",
+        "ERZHU_CODE",
+        "SECOND_ASSIST_CODE"
+      ],
+      "ruleStandardName": "Ⅱ助代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ERZHU": {
+      "keywords": [
+        "ASSISTANT_2_NAME",
+        "ASSIST_NAME_2",
+        "OperationTName",
+        "Ⅱ助",
+        "二助",
+        "ERZHU",
+        "SECOND_ASSIST"
+      ],
+      "ruleStandardName": "Ⅱ助姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTH_METHOD_ID": {
+      "keywords": [
+        "麻醉方式ID",
+        "AnesthMethodID",
+        "AN_METHOD_ID",
+        "麻醉方法ID"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_ID",
+      "valueExpression": "$lg(anaData,3)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery",
+      "description": "麻醉方式ID=AnaMethod(lg3)"
+    },
+    "NARCOSIS_MODE_CODE": {
+      "keywords": [
+        "NARCOSIS_MODE_CODE",
+        "ANESTHESIA_CODE",
+        "NarcosisModeCode",
+        "麻醉方式代码",
+        "MZFS_DM",
+        "麻醉方法代码",
+        "AN_METHOD_CODE",
+        "AnmethCode",
+        "麻醉方式编码"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_CODE",
+      "valueExpression": "$p($g(^ORC(\"ANMET\",$lg(anaData,3))),\"^\",1)",
+      "global": "^ORC(\"ANMET\")",
+      "domain": "60-surgery"
+    },
+    "NARCOSIS_MODE_DESC": {
+      "keywords": [
+        "NARCOSIS_MODE_DESC",
+        "ANESTHESIA_DESC",
+        "NarcosisModeDesc",
+        "麻醉方式",
+        "MZFS",
+        "麻醉方法",
+        "AN_METHOD_DESC",
+        "AnmethDesc",
+        "麻醉方式名称",
+        "麻醉方式描述"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_NAME",
+      "valueExpression": "$p($g(^ORC(\"ANMET\",$lg(anaData,3))),\"^\",2)",
+      "global": "^ORC(\"ANMET\")",
+      "domain": "60-surgery"
+    },
+    "ANESTH_METHOD_TYPE_CODE": {
+      "keywords": [
+        "麻醉方式类型code",
+        "麻醉方式类型代码",
+        "AnesthMethodTypeCode",
+        "AN_METHOD_TYPE_CODE"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_TYPE_CODE",
+      "valueExpression": "$p($g(^ORC(\"ANMET\",$lg(anaData,3))),\"^\",5)",
+      "global": "^ORC(\"ANMET\")",
+      "domain": "60-surgery",
+      "description": "麻醉方式类型代码(ORC_ANMET^5)"
+    },
+    "ANESTH_METHOD_TYPE_DESC": {
+      "keywords": [
+        "麻醉方式类型描述",
+        "麻醉方式类型",
+        "AnesthMethodTypeDesc",
+        "AN_METHOD_TYPE_DESC"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_TYPE_DESC",
+      "valueExpression": "$p($g(^ORC(\"ANMET\",$lg(anaData,3))),\"^\",6)",
+      "global": "^ORC(\"ANMET\")",
+      "domain": "60-surgery",
+      "description": "麻醉方式类型描述(ORC_ANMET^6)"
+    },
+    "ANESTH_METHOD_ACTIVE_FLAG": {
+      "keywords": [
+        "是否有效",
+        "有效标志",
+        "ActiveFlag",
+        "麻醉方式有效标志"
+      ],
+      "ruleStandardName": "ANESTH_METHOD_ACTIVE_FLAG",
+      "valueExpression": "$p($g(^ORC(\"ANMET\",$lg(anaData,3))),\"^\",4)",
+      "global": "^ORC(\"ANMET\")",
+      "domain": "60-surgery",
+      "description": "麻醉方式有效标志(ORC_ANMET^4)"
+    },
+    "NARCOSIS_DOCTOR_CODE": {
+      "keywords": [
+        "NARCOSIS_DOCTOR_CODE",
+        "ANESTHESIA_DOCTOR_CODE",
+        "NarcosisDocCode",
+        "麻醉医生代码",
+        "MZYS_DM",
+        "麻醉医师代码"
+      ],
+      "ruleStandardName": "麻醉医生代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "NARCOSIS_DOCTOR_NAME": {
+      "keywords": [
+        "NARCOSIS_DOCTOR_NAME",
+        "ANESTHESIA_DOCTOR_NAME",
+        "NarcosisDocName",
+        "麻醉医生",
+        "MZYS",
+        "麻醉医师"
+      ],
+      "ruleStandardName": "ANESTH_DOC_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(anaData,5),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "CUT_TYPE_CODE": {
+      "keywords": [
+        "CUT_TYPE_CODE",
+        "INCISION_CODE",
+        "CutTypeCode",
+        "切口代码",
+        "切口类别代码",
+        "QK_DM",
+        "BLADE_TYPE_CODE"
+      ],
+      "ruleStandardName": "手术切口类别代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "CUT_TYPE_DESC": {
+      "keywords": [
+        "CUT_TYPE_DESC",
+        "INCISION_DESC",
+        "CutTypeDesc",
+        "切口类别",
+        "QK",
+        "切口描述",
+        "切口名称"
+      ],
+      "ruleStandardName": "手术切口类别描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "CUT_GRADE_CODE": {
+      "keywords": [
+        "CUT_GRADE_CODE",
+        "CutGradeCode",
+        "切口愈合等级代码",
+        "切口愈合代码",
+        "INCISION_HEAL_CODE",
+        "ssxxSsqkyhdjMc"
+      ],
+      "ruleStandardName": "CUT_GRADE_CODE",
+      "valueExpression": "$p($g(^ORC(\"BLDTP\",$lg(opListData,5))),\"^\",1)",
+      "global": "^ORC(\"BLDTP\")",
+      "domain": "60-surgery",
+      "description": "切口愈合等级代码(BladeType lg5)"
+    },
+    "CUT_GRADE_DESC": {
+      "keywords": [
+        "CUT_GRADE_DESC",
+        "CutGradeDesc",
+        "切口愈合等级",
+        "切口愈合描述",
+        "INCISION_HEAL_DESC"
+      ],
+      "ruleStandardName": "切口愈合等级描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "BODY_SITE_CODE": {
+      "keywords": [
+        "BODY_SITE_CODE",
+        "OP_SITE_CODE",
+        "HDSD0003036",
+        "手术部位代码",
+        "SSBW_DM",
+        "BODS_CODE"
+      ],
+      "ruleStandardName": "手术部位代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "BODY_SITE_DESC": {
+      "keywords": [
+        "BODY_SITE_DESC",
+        "OP_SITE_DESC",
+        "HDSD00030361",
+        "手术部位名称",
+        "SSBW",
+        "目标部位名称",
+        "BODS_DESC"
+      ],
+      "ruleStandardName": "手术部位名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPER_POSITION_CODE": {
+      "keywords": [
+        "OPER_POSITION_CODE",
+        "POSITION_CODE",
+        "HDSD0006083",
+        "手术体位代码",
+        "SSTW_DM",
+        "体位代码"
+      ],
+      "ruleStandardName": "手术体位代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPER_POSITION_DESC": {
+      "keywords": [
+        "OPER_POSITION_DESC",
+        "POSITION_DESC",
+        "HDSD00060831",
+        "手术体位",
+        "SSTW",
+        "体位描述",
+        "体位名称"
+      ],
+      "ruleStandardName": "手术体位描述",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OPER_ROOM_DESC": {
+      "keywords": [
+        "OPER_ROOM_DESC",
+        "OP_ROOM",
+        "HDSD0006076",
+        "手术间",
+        "SSJ",
+        "手术间名称",
+        "ROOM_NAME"
+      ],
+      "ruleStandardName": "手术间名称",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SCRUB_NURSE_CODE": {
+      "keywords": [
+        "SCRUB_NURSE_CODE",
+        "OP_NURSE_CODE",
+        "HDSD0006067",
+        "器械护士代码",
+        "洗手护士代码",
+        "QXHS_CODE"
+      ],
+      "ruleStandardName": "器械护士代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SCRUB_NURSE_NAME": {
+      "keywords": [
+        "SCRUB_NURSE_NAME",
+        "OP_NURSE_NAME",
+        "HDSD00060671",
+        "器械护士",
+        "洗手护士",
+        "QXHS"
+      ],
+      "ruleStandardName": "器械护士姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "CIRCUL_NURSE_CODE": {
+      "keywords": [
+        "CIRCUL_NURSE_CODE",
+        "CIRC_NURSE_CODE",
+        "HDSD0006124",
+        "巡台护士代码",
+        "巡回护士代码",
+        "XTHS_CODE"
+      ],
+      "ruleStandardName": "巡台护士代码",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "CIRCUL_NURSE_NAME": {
+      "keywords": [
+        "CIRCUL_NURSE_NAME",
+        "CIRC_NURSE_NAME",
+        "HDSD00061241",
+        "巡台护士",
+        "巡回护士",
+        "XTHS"
+      ],
+      "ruleStandardName": "巡台护士姓名",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTHESIA_OBSERVATION": {
+      "keywords": [
+        "HDSD0005061",
+        "麻醉观察结果",
+        "ANESTHESIA_OBSERVATION",
+        "AN_SUMMARY",
+        "麻醉评估结果"
+      ],
+      "ruleStandardName": "麻醉观察结果",
+      "valueExpression": "\\\"-\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTHESIA_ACUPUNCTURE_CODE": {
+      "keywords": [
+        "HDSD0005063",
+        "麻醉中西医代码",
+        "ANESTHESIA_ACUPUNCTURE_CODE"
+      ],
+      "ruleStandardName": "麻醉中西医标识代码",
+      "valueExpression": "\\\"1\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTHESIA_ACUPUNCTURE_DESC": {
+      "keywords": [
+        "HDSD00050631",
+        "麻醉中西医描述",
+        "ANESTHESIA_ACUPUNCTURE_DESC"
+      ],
+      "ruleStandardName": "麻醉中西医标识描述",
+      "valueExpression": "\\\"西医麻醉\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SURGERY_REQUIREMENT": {
+      "keywords": [
+        "HDSD0010046",
+        "手术要求",
+        "术前准备",
+        "SURGERY_REQUIREMENT",
+        "OP_REQUIREMENT"
+      ],
+      "ruleStandardName": "手术要求/术前准备",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "PATIENT_NOTICE": {
+      "keywords": [
+        "HDSD0006145",
+        "HDSD0008097",
+        "注意事项",
+        "病人须知",
+        "准备事项",
+        "PATIENT_NOTICE",
+        "PREPARATION"
+      ],
+      "ruleStandardName": "注意事项/病人须知",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTHESIA_PREOP_MEDICATION": {
+      "keywords": [
+        "HDSD0006102",
+        "术前麻醉医嘱",
+        "术前麻醉用药",
+        "ANESTHESIA_PREOP_MEDICATION",
+        "术前用药"
+      ],
+      "ruleStandardName": "术前麻醉用药",
+      "valueExpression": "\\\"-\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANESTHESIA_ADAPTATION": {
+      "keywords": [
+        "HDSD0006050",
+        "麻醉适应证",
+        "ANESTHESIA_ADAPTATION",
+        "AN_INDICATION"
+      ],
+      "ruleStandardName": "麻醉适应证",
+      "valueExpression": "\\\"-\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "OP_PROCEDURE_DESC": {
+      "keywords": [
+        "HDSD0006142",
+        "手术过程描述",
+        "手术操作描述",
+        "OP_PROCEDURE_DESC",
+        "SURGERY_DESCRIPTION"
+      ],
+      "ruleStandardName": "手术过程描述",
+      "valueExpression": "\\\"-\\\"",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "POST_DIAGNOSIS": {
+      "keywords": [
+        "POST_DIAGNOSIS",
+        "PostDiagnosis",
+        "术后诊断",
+        "手术后诊断"
+      ],
+      "ruleStandardName": "术后诊断",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "PREV_DIAGNOSIS": {
+      "keywords": [
+        "PREV_DIAGNOSIS",
+        "PrevDiagnosis",
+        "术前诊断",
+        "手术前诊断"
+      ],
+      "ruleStandardName": "术前诊断",
+      "valueExpression": "$lg(data,5)",
+      "global": "DHC_EMR",
+      "domain": "60-surgery"
+    },
+    "ANA_START_DT": {
+      "keywords": [
+        "ANA_START_DT",
+        "AnaStartDT",
+        "麻醉开始时间",
+        "麻醉开始日期时间",
+        "ANESTHESIA_START_DT"
+      ],
+      "ruleStandardName": "麻醉开始时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ANA_FINISH_DT": {
+      "keywords": [
+        "ANA_FINISH_DT",
+        "AnaFinishDT",
+        "麻醉结束时间",
+        "麻醉结束日期时间",
+        "ANESTHESIA_FINISH_DT"
+      ],
+      "ruleStandardName": "麻醉结束时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "TUBE_IN_DT": {
+      "keywords": [
+        "TUBE_IN_DT",
+        "TubeInDT",
+        "插管时间",
+        "气管插管时间"
+      ],
+      "ruleStandardName": "插管时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "TUBE_OUT_DT": {
+      "keywords": [
+        "TUBE_OUT_DT",
+        "TubeOutDT",
+        "拔管时间",
+        "气管拔管时间"
+      ],
+      "ruleStandardName": "拔管时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "PACU_IN_DT": {
+      "keywords": [
+        "PACU_IN_DT",
+        "PACUInDT",
+        "入PACU时间",
+        "PACU入室时间"
+      ],
+      "ruleStandardName": "入PACU时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "PACU_OUT_DT": {
+      "keywords": [
+        "PACU_OUT_DT",
+        "PACUOutDT",
+        "出PACU时间",
+        "PACU离室时间"
+      ],
+      "ruleStandardName": "出PACU时间",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "ASA_CODE": {
+      "keywords": [
+        "ASA_CODE",
+        "ASA",
+        "ASA分级代码",
+        "HDSD0006004",
+        "ASA_GRADE_CODE",
+        "ASA_CLASS"
+      ],
+      "ruleStandardName": "ASA分级代码(CIS)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "BLOOD_TYPE": {
+      "keywords": [
+        "BLOOD_TYPE",
+        "BloodType",
+        "血型",
+        "XX"
+      ],
+      "ruleStandardName": "血型",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "SOURCE_TYPE": {
+      "keywords": [
+        "SOURCE_TYPE",
+        "SourceType",
+        "手术类型",
+        "急诊择期",
+        "OP_TYPE",
+        "手术类别"
+      ],
+      "ruleStandardName": "手术类型(急诊/择期/日间)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "MIS_FLAG": {
+      "keywords": [
+        "MIS_FLAG",
+        "MIS",
+        "微创手术",
+        "微创标志",
+        "MINIMALLY_INVASIVE"
+      ],
+      "ruleStandardName": "微创手术标志",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "DAY_SURGERY": {
+      "keywords": [
+        "DAY_SURGERY",
+        "DaySurgery",
+        "日间手术",
+        "日间标志"
+      ],
+      "ruleStandardName": "日间手术标志",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "REENTRY_OPERATION": {
+      "keywords": [
+        "REENTRY_OPERATION",
+        "ReentryOperation",
+        "重返手术",
+        "非计划二次手术",
+        "UNPLAN_SEC_OP"
+      ],
+      "ruleStandardName": "重返手术标志(非计划二次手术)",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "BLOOD_LOSS_VOL": {
+      "keywords": [
+        "BLOOD_LOSS_VOL",
+        "BloodLossVol",
+        "术中失血",
+        "失血量",
+        "SHI_XUE_LIANG",
+        "HDSD0006022_2"
+      ],
+      "ruleStandardName": "术中失血总量",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "URINE_VOL": {
+      "keywords": [
+        "URINE_VOL",
+        "UrineVol",
+        "术中尿量",
+        "尿量",
+        "NIAO_LIANG"
+      ],
+      "ruleStandardName": "术中尿量",
+      "valueExpression": "",
+      "global": "",
+      "domain": "60-surgery"
+    },
+    "术中诊断": {
+      "keywords": [
+        "术中诊断",
+        "手术后诊断"
+      ],
+      "ruleStandardName": "POST_DIAGNOSIS",
+      "valueExpression": "$lg(data,6)",
+      "global": "DHC_EMR",
+      "domain": "60-surgery",
+      "description": "用户反馈回流 2026-05-21 11:23"
+    },
+    "SSCZBWDM": {
+      "keywords": [
+        "ssczbwdm",
+        "手术操作部位代码"
+      ],
+      "ruleStandardName": "OPER_BODY_PART_CODE",
+      "valueExpression": "$p($g(^ORC(\"OPER\",operDr)),\"^\",5)",
+      "global": "^ORC",
+      "domain": "60-surgery",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "SSCZBW": {
+      "keywords": [
+        "ssczbw",
+        "手术操作部位"
+      ],
+      "ruleStandardName": "OPER_BODY_PART",
+      "valueExpression": "$p($g(^ORC(\"OPER\",operDr)),\"^\",6)",
+      "global": "^ORC",
+      "domain": "60-surgery",
+      "description": "用户反馈回流 2026-05-21 11:24"
+    },
+    "OPER_ROOM_NO": {
+      "keywords": [
+        "OperRoomNo",
+        "RoomNo",
+        "手术室编号",
+        "手术间编号"
+      ],
+      "ruleStandardName": "OPER_ROOM_NO",
+      "valueExpression": "$lg(data,23)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术室编号(OperRoomDR)"
+    },
+    "IN_ROOM_TIME": {
+      "keywords": [
+        "InRoomTime",
+        "入室时间",
+        "进入手术间时间"
+      ],
+      "ruleStandardName": "IN_ROOM_TIME",
+      "valueExpression": "$zd($lg(data,35),3)_\" \"_$zt($lg(data,35),1)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "患者进入手术间时间"
+    },
+    "APPOINTMENT_TIME": {
+      "keywords": [
+        "AppointmentTime",
+        "手术预约时间"
+      ],
+      "ruleStandardName": "APPOINTMENT_TIME",
+      "valueExpression": "$zd($lg(data,13),3)_\" \"_$zt($lg(data,13),1)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术预约时间"
+    },
+    "VISIT_COUNT": {
+      "keywords": [
+        "VisitCount",
+        "住院次数"
+      ],
+      "ruleStandardName": "VISIT_NUM",
+      "valueExpression": "$p($g(^PAADM(admRowId)),\"^\",29)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "住院次数"
+    },
+    "OPER_COUNT": {
+      "keywords": [
+        "OperCount",
+        "手术次数"
+      ],
+      "ruleStandardName": "OPER_COUNT",
+      "valueExpression": "1",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "手术次数（每条记录一次）"
+    },
+    "EMERGENCY_INDICATOR": {
+      "keywords": [
+        "EmergencyIndicator",
+        "急诊择期表示",
+        "急诊择期"
+      ],
+      "ruleStandardName": "OPERATE_TYPE",
+      "valueExpression": "$lg(data,19)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "SourceType(lg19): B=择期/E=急诊/D=日间"
+    },
+    "INTUBATION_TIME": {
+      "keywords": [
+        "IntubationTime",
+        "插管时间"
+      ],
+      "ruleStandardName": "INTUBATION_TIME",
+      "valueExpression": "$zd($lg(anaData,18),3)_\" \"_$zt($lg(anaData,18),1)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery",
+      "description": "插管时间"
+    },
+    "EXTUBATION_TIME": {
+      "keywords": [
+        "ExtubationTime",
+        "拔管时间"
+      ],
+      "ruleStandardName": "EXTUBATION_TIME",
+      "valueExpression": "$zd($lg(anaData,19),3)_\" \"_$zt($lg(anaData,19),1)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery",
+      "description": "拔管时间"
+    },
+    "EMERGENCY": {
+      "keywords": [
+        "Emergency",
+        "挂诊类型",
+        "急诊"
+      ],
+      "ruleStandardName": "ADM_TYPE_CODE",
+      "valueExpression": "$p($g(^PAADM(admRowId)),\"^\",2)",
+      "global": "^PAADM",
+      "domain": "20-visit",
+      "description": "O=门诊/I=住院/E=急诊"
+    },
+    "EXECUTE_STATUS_NAME": {
+      "keywords": [
+        "executeStatusName",
+        "ExecuteStatusName",
+        "执行状态名称",
+        "手术执行状态"
+      ],
+      "ruleStandardName": "EXECUTE_STATUS_NAME",
+      "valueExpression": "$case($lg(data,27),\"A\":\"申请\",\"R\":\"安排\",\"D\":\"实施\",\"F\":\"完成\",\"C\":\"撤销\",:\"\")",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术执行状态(lg27)"
+    },
+    "EXECUTE_STATUS_CODE": {
+      "keywords": [
+        "executeStatusCode",
+        "ExecuteStatusCode",
+        "执行状态编码",
+        "手术执行状态编码"
+      ],
+      "ruleStandardName": "EXECUTE_STATUS_CODE",
+      "valueExpression": "$lg(data,27)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术执行状态编码(lg27)"
+    },
+    "STATUS_CODE": {
+      "keywords": [
+        "statusCode",
+        "StatusCode",
+        "手术状态编码"
+      ],
+      "ruleStandardName": "STATUS_CODE",
+      "valueExpression": "$lg(data,27)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术状态编码(lg27)"
+    },
+    "STATUS_DESC": {
+      "keywords": [
+        "statusDesc",
+        "StatusDesc",
+        "手术状态说明"
+      ],
+      "ruleStandardName": "STATUS_DESC",
+      "valueExpression": "$case($lg(data,27),\"A\":\"申请\",\"R\":\"安排\",\"D\":\"实施\",\"F\":\"完成\",\"C\":\"撤销\",:\"\")",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery",
+      "description": "手术状态说明(lg27)"
+    },
+    "SSXX_SSDM": {
+      "keywords": [
+        "SSXX_SSDM",
+        "手术代码",
+        "手术编码"
+      ],
+      "ruleStandardName": "OPER_CODE",
+      "valueExpression": "$p($g(^ORC(\"OPER\",$lg(opListData,3))),\"^\",1)",
+      "global": "^ORC(\"OPER\")",
+      "domain": "60-surgery"
+    },
+    "SSXX_SSQYYMC": {
+      "keywords": [
+        "SSXX_SSQYYMC",
+        "手术前医院名称"
+      ],
+      "ruleStandardName": "SSXX_SSQYYMC",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "手术前医院名称（无直接Global存储）"
+    },
+    "SSXX_SSCXL": {
+      "keywords": [
+        "SSXX_SSCXL",
+        "手术持续率"
+      ],
+      "ruleStandardName": "SSXX_SSCXL",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "手术持续率（无直接Global存储）"
+    },
+    "SSXX_SSSXL": {
+      "keywords": [
+        "SSXX_SSSXL",
+        "手术失血量"
+      ],
+      "ruleStandardName": "BLOOD_LOSS_VOL",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "手术失血量（无直接Global存储）"
+    },
+    "SSXX_SXLX": {
+      "keywords": [
+        "SSXX_SXLX",
+        "输血类型"
+      ],
+      "ruleStandardName": "SSXX_SXLX",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "输血类型（无直接Global存储）"
+    },
+    "SQFS_SQZDDM": {
+      "keywords": [
+        "SQFS_SQZDDM",
+        "术前诊断代码"
+      ],
+      "ruleStandardName": "PRE_DIAG_CODE",
+      "valueExpression": "$p($g(^MRC(\"ID\",$p($g(^MR(mradm,\"DIA\",1)),\"^\",1))),\"^\",4)",
+      "global": "^MRC(\"ID\")",
+      "domain": "30-diagnosis"
+    },
+    "SQFS_SQZDMC": {
+      "keywords": [
+        "SQFS_SQZDMC",
+        "术前诊断名称"
+      ],
+      "ruleStandardName": "PRE_DIAG_NAME",
+      "valueExpression": "$p($g(^MRC(\"ID\",$p($g(^MR(mradm,\"DIA\",1)),\"^\",1))),\"^\",2)",
+      "global": "^MRC(\"ID\")",
+      "domain": "30-diagnosis"
+    },
+    "EVALUATOR": {
+      "keywords": [
+        "Evaluator",
+        "评估者",
+        "评估人"
+      ],
+      "ruleStandardName": "EVALUATOR",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "70-nursing",
+      "description": "评估者（无直接Global存储）"
+    },
+    "EVALUATOR_CODE": {
+      "keywords": [
+        "EvaluatorCode",
+        "评估者代码"
+      ],
+      "ruleStandardName": "EVALUATOR_CODE",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "70-nursing",
+      "description": "评估者代码（无直接Global存储）"
+    },
+    "DIRECTOR_NAME": {
+      "keywords": [
+        "DirectorName",
+        "主任姓名",
+        "科主任"
+      ],
+      "ruleStandardName": "DIRECTOR_NAME",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "20-visit",
+      "description": "主任姓名（无直接Global存储）"
+    },
+    "OEORI_REQUIRE_EXEC_DATE": {
+      "keywords": [
+        "OEORIRequireExecDate",
+        "要求执行日期"
+      ],
+      "ruleStandardName": "OEORI_REQUIRE_EXEC_DATE",
+      "valueExpression": "$zd($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",1),3)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "IN_PACU_TIME": {
+      "keywords": [
+        "inPacuTime",
+        "入PACU时间"
+      ],
+      "ruleStandardName": "IN_PACU_TIME",
+      "valueExpression": "$zd($lg(anaData,20),3)_\" \"_$zt($lg(anaData,20),1)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery"
+    },
+    "OUT_PACU_TIME": {
+      "keywords": [
+        "outPactTime",
+        "出PACU时间"
+      ],
+      "ruleStandardName": "OUT_PACU_TIME",
+      "valueExpression": "$zd($lg(anaData,21),3)_\" \"_$zt($lg(anaData,21),1)",
+      "global": "^CIS.AN.Anaesthesia",
+      "domain": "60-surgery"
+    },
+    "OEORI_EXEC_DOC_CODE": {
+      "keywords": [
+        "OEORIExecDocCode",
+        "执行医生代码"
+      ],
+      "ruleStandardName": "OEORI_EXEC_DOC_CODE",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),\"X\",1)),\"^\",15)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "BLOOD_BAG_NO": {
+      "keywords": [
+        "BloodBagNo",
+        "血袋号"
+      ],
+      "ruleStandardName": "BLOOD_BAG_NO",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "血袋号（无直接Global存储）"
+    },
+    "BLOOD": {
+      "keywords": [
+        "Blood",
+        "血液"
+      ],
+      "ruleStandardName": "BLOOD",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "血液（无直接Global存储）"
+    },
+    "BLOOD_RH_TYPE": {
+      "keywords": [
+        "BloodRhType",
+        "RH血型"
+      ],
+      "ruleStandardName": "BLOOD_RH_TYPE",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",5)),\"^\",4)",
+      "global": "^PAPER",
+      "domain": "10-patient"
+    },
+    "BLOOD_TYPE": {
+      "keywords": [
+        "BloodType",
+        "血型"
+      ],
+      "ruleStandardName": "BLOOD_TYPE",
+      "valueExpression": "$p($g(^PAPER(patDR,\"PER\",5)),\"^\",3)",
+      "global": "^PAPER",
+      "domain": "10-patient"
+    },
+    "BLOOD_VOLUME": {
+      "keywords": [
+        "BloodVolume",
+        "血量"
+      ],
+      "ruleStandardName": "BLOOD_VOLUME",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "血量（无直接Global存储）"
+    },
+    "EFFECTIVE_TIME": {
+      "keywords": [
+        "EffectiveTime",
+        "有效时间"
+      ],
+      "ruleStandardName": "EFFECTIVE_TIME",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "有效时间（无直接Global存储）"
+    },
+    "BLOOD_RESULTS": {
+      "keywords": [
+        "BloodResults",
+        "血液结果"
+      ],
+      "ruleStandardName": "BLOOD_RESULTS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "血液结果（无直接Global存储）"
+    },
+    "START_DOCT_CODE": {
+      "keywords": [
+        "StartDoctCode",
+        "开医嘱医生代码"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_DR",
+      "valueExpression": "$p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",11)",
+      "global": "^OEORD",
+      "domain": "40-order"
+    },
+    "START_DOCT_NAME": {
+      "keywords": [
+        "StartDoctName",
+        "开医嘱医生姓名"
+      ],
+      "ruleStandardName": "ORD_DOCTOR_NAME",
+      "valueExpression": "$p($g(^CTPCP($p($g(^OEORD(+ordItm,\"I\",$p(ordItm,\"||\",2),1)),\"^\",11),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "40-order"
+    },
+    "HIGH_RISK_FLAG": {
+      "keywords": [
+        "HighRiskFlag",
+        "高危标志"
+      ],
+      "ruleStandardName": "HIGH_RISK_FLAG",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "40-order",
+      "description": "高危标志（无直接Global存储）"
+    },
+    "ITEM_DESC": {
+      "keywords": [
+        "ItemDesc",
+        "项目描述"
+      ],
+      "ruleStandardName": "ITEM_DESC",
+      "valueExpression": "$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",2)",
+      "global": "^ARCIM",
+      "domain": "40-order"
+    },
+    "FIRST_ASSISTANT_DOCTOR_CODE": {
+      "keywords": [
+        "FirstAssistantDoctorCode",
+        "一助医生代码"
+      ],
+      "ruleStandardName": "FIRST_ASSIST_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,9),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_ASSISTANT_DOCTOR_NAME": {
+      "keywords": [
+        "SecondAssistantDoctorName",
+        "二助医生姓名"
+      ],
+      "ruleStandardName": "SECOND_ASSISTANT_DOCTOR_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,10),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_ASSISTANT_DOCTOR_CODE": {
+      "keywords": [
+        "SecondAssistantDoctorCode",
+        "二助医生代码"
+      ],
+      "ruleStandardName": "SECOND_ASSISTANT_DOCTOR_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,10),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "THIRD_ASSISTANT_DOCTOR_NAME": {
+      "keywords": [
+        "ThirdAssistantDoctorName",
+        "三助医生姓名"
+      ],
+      "ruleStandardName": "THIRD_ASSISTANT_DOCTOR_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,11),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "THIRD_ASSISTANT_DOCTOR_CODE": {
+      "keywords": [
+        "ThirdAssistantDoctorCode",
+        "三助医生代码"
+      ],
+      "ruleStandardName": "THIRD_ASSISTANT_DOCTOR_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,11),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "FOURTH_ASSISTANT_DOCTOR_NAME": {
+      "keywords": [
+        "FourthAssistantDoctorName",
+        "四助医生姓名"
+      ],
+      "ruleStandardName": "FOURTH_ASSISTANT_DOCTOR_NAME",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "四助医生姓名（无直接Global存储）"
+    },
+    "FOURTH_ASSISTANT_DOCTOR_CODE": {
+      "keywords": [
+        "FourthAssistantDoctorCode",
+        "四助医生代码"
+      ],
+      "ruleStandardName": "FOURTH_ASSISTANT_DOCTOR_CODE",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "四助医生代码（无直接Global存储）"
+    },
+    "FIRST_HAND_WASHING_NURSE_NAME": {
+      "keywords": [
+        "FirstHandWashingNurseName",
+        "一洗手护士姓名"
+      ],
+      "ruleStandardName": "FIRST_HAND_WASHING_NURSE_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,12),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "FIRST_HAND_WASHING_NURSE_CODE": {
+      "keywords": [
+        "FirstHandWashingNurseCode",
+        "一洗手护士代码"
+      ],
+      "ruleStandardName": "FIRST_HAND_WASHING_NURSE_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,12),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "FIRST_CIRCULATING_NURSE_NAME": {
+      "keywords": [
+        "FirstCirculatingNurseName",
+        "一巡回护士姓名"
+      ],
+      "ruleStandardName": "FIRST_CIRCULATING_NURSE_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,13),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "FIRST_CIRCULATING_NURSE_CODE": {
+      "keywords": [
+        "FirstCirculatingNurseCode",
+        "一巡回护士代码"
+      ],
+      "ruleStandardName": "FIRST_CIRCULATING_NURSE_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,13),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_HAND_WASHING_NURSE_NAME": {
+      "keywords": [
+        "SecondHandWashingNurseName",
+        "二洗手护士姓名"
+      ],
+      "ruleStandardName": "SECOND_HAND_WASHING_NURSE_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,14),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_HAND_WASHING_NURSE_CODE": {
+      "keywords": [
+        "SecondHandWashingNurseCode",
+        "二洗手护士代码"
+      ],
+      "ruleStandardName": "SECOND_HAND_WASHING_NURSE_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,14),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_CIRCULATING_NURSE_NAME": {
+      "keywords": [
+        "SecondCirculatingNurseName",
+        "二巡回护士姓名"
+      ],
+      "ruleStandardName": "SECOND_CIRCULATING_NURSE_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,15),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "SECOND_CIRCULATING_NURSE_CODE": {
+      "keywords": [
+        "SecondCirculatingNurseCode",
+        "二巡回护士代码"
+      ],
+      "ruleStandardName": "SECOND_CIRCULATING_NURSE_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,15),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "OPERATING_ROOM_NAME": {
+      "keywords": [
+        "OperatingRoomName",
+        "手术室名称"
+      ],
+      "ruleStandardName": "OPER_ROOM_DESC",
+      "valueExpression": "$p($g(^CTLOC($lg(data,23))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "60-surgery"
+    },
+    "CLINICAL_DEPARTMENTS": {
+      "keywords": [
+        "ClinicalDepartments",
+        "临床科室"
+      ],
+      "ruleStandardName": "CLINICAL_DEPARTMENTS",
+      "valueExpression": "$p($g(^CTLOC($lg(data,5))),\"^\",2)",
+      "global": "^CTLOC",
+      "domain": "60-surgery"
+    },
+    "INCISION_GRADE": {
+      "keywords": [
+        "IncisionGrade",
+        "切口等级"
+      ],
+      "ruleStandardName": "SURGICAL_CLASS",
+      "valueExpression": "$lg(opListData,5)",
+      "global": "^CIS.AN.OperationList",
+      "domain": "60-surgery"
+    },
+    "SURGICAL_POSITION": {
+      "keywords": [
+        "SurgicalPosition",
+        "手术体位"
+      ],
+      "ruleStandardName": "SURGICAL_POSITION",
+      "valueExpression": "$lg(data,28)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery"
+    },
+    "DEVICE_NURSE_ONE_NAME": {
+      "keywords": [
+        "DeviceNurseOneName",
+        "器械护士一姓名"
+      ],
+      "ruleStandardName": "DEVICE_NURSE_ONE_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,16),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "DEVICE_NURSE_ONE_CODE": {
+      "keywords": [
+        "DeviceNurseOneCode",
+        "器械护士一代码"
+      ],
+      "ruleStandardName": "DEVICE_NURSE_ONE_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,16),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "DEVICE_NURSE_TWO_NAME": {
+      "keywords": [
+        "DeviceNurseTwoName",
+        "器械护士二姓名"
+      ],
+      "ruleStandardName": "DEVICE_NURSE_TWO_NAME",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,17),1)),\"^\",2)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "DEVICE_NURSE_TWO_CODE": {
+      "keywords": [
+        "DeviceNurseTwoCode",
+        "器械护士二代码"
+      ],
+      "ruleStandardName": "DEVICE_NURSE_TWO_CODE",
+      "valueExpression": "$p($g(^CTPCP($lg(opListData,17),1)),\"^\",1)",
+      "global": "^CTPCP",
+      "domain": "60-surgery"
+    },
+    "OPERATION_CANCEL_TIME": {
+      "keywords": [
+        "OperationCancelTime",
+        "手术取消时间"
+      ],
+      "ruleStandardName": "OPERATION_CANCEL_TIME",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "手术取消时间（无直接Global存储）"
+    },
+    "SCHEDULE_TIME": {
+      "keywords": [
+        "ScheduleTime",
+        "排程时间"
+      ],
+      "ruleStandardName": "SCHEDULE_TIME",
+      "valueExpression": "$zd($lg(data,13),3)_\" \"_$zt($lg(data,13),1)",
+      "global": "^CIS.AN.OperSchedule",
+      "domain": "60-surgery"
+    },
+    "OUT_OPER_ID": {
+      "keywords": [
+        "outOperId",
+        "出手术ID"
+      ],
+      "ruleStandardName": "OUT_OPER_ID",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "60-surgery",
+      "description": "出手术ID（无直接Global存储）"
+    }
+  },
+  "_lastUpdated": "2026-06-02"
+}

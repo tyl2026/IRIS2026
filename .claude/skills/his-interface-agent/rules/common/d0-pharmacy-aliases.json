@@ -1,0 +1,441 @@
+{
+  "_description": "d0-pharmacy域自动生成的别名",
+  "_version": "1.0.0",
+  "aliases": {
+    "ExpDateMonth` (YXQ)": {
+      "keywords": [
+        "ExpDateMonth` (YXQ)",
+        "expdatemonth` (yxq)",
+        "expdatemonth` (yxq)"
+      ],
+      "ruleStandardName": "ExpDateMonth` (YXQ)",
+      "valueExpression": "RecNo = $p(^DHCINGR(Ingd), \"^\", 1)`; `InitDetatilNo = RecNo_\"_\"_LastIngditm",
+      "global": "^DHCINGR",
+      "domain": "d0-pharmacy"
+    },
+    "YYKSSJ": {
+      "keywords": [
+        "YYKSSJ",
+        "用药开始时间"
+      ],
+      "ruleStandardName": "YYKSSJ",
+      "valueExpression": "$p($g(^OEORD(+oeori,\"I\",+$p(oeori,\"||\",2),3)),\"^\",7)",
+      "global": "^OEORD",
+      "domain": "d0-pharmacy",
+      "description": "用户反馈回流 2026-05-21 11:22"
+    },
+    "YPBM": {
+      "keywords": [
+        "YPBM",
+        "药品编码",
+        "药品代码"
+      ],
+      "ruleStandardName": "CTMM_Code",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",1)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "用户反馈回流 2026-05-21 11:23"
+    },
+    "CTMM_Desc_ALIAS": {
+      "keywords": [
+        "描述",
+        "药品名称",
+        "药品描述"
+      ],
+      "ruleStandardName": "CTMM_Desc",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",2)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_GenericName_ALIAS": {
+      "keywords": [
+        "通用名",
+        "通用名称"
+      ],
+      "ruleStandardName": "CTMM_GenericName",
+      "valueExpression": "s arcimDR=$p($g(^INCI(inci,1)),\"^\",3) s arcSub=$p(arcimDR,\"||\",1) s arcVer=$p(arcimDR,\"||\",2) s genericDR=$p($g(^ARCIM(arcSub,arcVer,8)),\"^\",20) s genericName=\"\" i genericDR'=\"\" s genericName=$p($g(^PHCGeneric(genericDR)),\"^\",2)",
+      "global": "^PHCGeneric",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_Spec_ALIAS": {
+      "keywords": [
+        "规格",
+        "药品规格"
+      ],
+      "ruleStandardName": "CTMM_Spec",
+      "valueExpression": "##class(web.dHCST.Common.DrugInfoCommon).GetSpec(\"\",inci)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_DosageFormDesc_ALIAS": {
+      "keywords": [
+        "剂型描述",
+        "剂型"
+      ],
+      "ruleStandardName": "CTMM_DosageFormDesc",
+      "valueExpression": "s arcimDR=$p($g(^INCI(inci,1)),\"^\",3) s arcSub=$p(arcimDR,\"||\",1) s arcVer=$p(arcimDR,\"||\",2) s pHCDFDR=$p($g(^ARCIM(arcSub,arcVer,1)),\"^\",12) s dosageFormDesc=\"\" i pHCDFDR'=\"\" s dosageFormDesc=$p($g(^PHCD(+pHCDFDR,\"DF\",$p(pHCDFDR,\"||\",2))),\"^\",1)",
+      "global": "^PHCD",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_UnitPrice_ALIAS": {
+      "keywords": [
+        "单价",
+        "药品单价"
+      ],
+      "ruleStandardName": "CTMM_UnitPrice",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",5)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_Manufacturer_ALIAS": {
+      "keywords": [
+        "厂商",
+        "生产厂家",
+        "制造商"
+      ],
+      "ruleStandardName": "CTMM_Manufacturer",
+      "valueExpression": "##class(web.dHCST.Common.DrugInfoCommon).GetManf(inci)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_PackingUnit_ALIAS": {
+      "keywords": [
+        "整包装单位"
+      ],
+      "ruleStandardName": "CTMM_PackingUnit",
+      "valueExpression": "s infoDR=$o(^DHCITMINFO(0,\"INCI\",inci,0)) s packUomDr=\"\" i infoDR'=\"\" d .s packUomDr=$p($g(^DHCITMINFO(infoDR)),\"^\",51) s packUomDesc=\"\" i packUomDr'=\"\" s packUomDesc=$p($g(^CT(\"UOM\",packUomDr)),\"^\",2)",
+      "global": "^DHCITMINFO",
+      "domain": "d1-drug-dict"
+    },
+    "CTMM_PackingCoefficient_ALIAS": {
+      "keywords": [
+        "整包转换系数"
+      ],
+      "ruleStandardName": "CTMM_PackingCoefficient",
+      "valueExpression": "s infoDR=$o(^DHCITMINFO(0,\"INCI\",inci,0)) s packFac=\"\" i infoDR'=\"\" d .s packFac=$p($g(^DHCITMINFO(infoDR)),\"^\",52)",
+      "global": "^DHCITMINFO",
+      "domain": "d1-drug-dict"
+    },
+    "INSU_FLAG_ALIAS": {
+      "keywords": [
+        "医保标志",
+        "医保标识"
+      ],
+      "ruleStandardName": "INSU_FLAG",
+      "valueExpression": "$p($g(^DHCITMINFO($o(^DHCITMINFO(0,\"INCI\",inci,0)))),\"^\",13)",
+      "global": "^DHCITMINFO",
+      "domain": "d1-drug-dict"
+    },
+    "INSU_CODE_ALIAS": {
+      "keywords": [
+        "医保编码",
+        "医保代码"
+      ],
+      "ruleStandardName": "INSU_CODE",
+      "valueExpression": "$p($g(^DHCITMINFO($o(^DHCITMINFO(0,\"INCI\",inci,0)))),\"^\",14)",
+      "global": "^DHCITMINFO",
+      "domain": "d1-drug-dict"
+    },
+    "INSU_CATEGORY_ALIAS": {
+      "keywords": [
+        "医保类别"
+      ],
+      "ruleStandardName": "INSU_CATEGORY",
+      "valueExpression": "$p($g(^DHCITMINFO($o(^DHCITMINFO(0,\"INCI\",inci,0)))),\"^\",15)",
+      "global": "^DHCITMINFO",
+      "domain": "d1-drug-dict"
+    },
+    "ORDER_CAT_ALIAS": {
+      "keywords": [
+        "医嘱大类"
+      ],
+      "ruleStandardName": "ORDER_CAT",
+      "valueExpression": "$p($g(^OEC(\"ORCAT\",$p($g(^ARC(\"IC\",$p($g(^ARCIM($p($p($g(^INCI(inci,1)),\"^\",3),\"||\",1),$p($p($g(^INCI(inci,1)),\"^\",3),\"||\",2),1)),\"^\",9))),\"^\",8))),\"^\",1)",
+      "global": "^OEC(\"ORCAT\")",
+      "domain": "d1-drug-dict"
+    },
+    "ORDER_SUB_CAT_ALIAS": {
+      "keywords": [
+        "医嘱子类"
+      ],
+      "ruleStandardName": "ORDER_SUB_CAT",
+      "valueExpression": "$p($g(^ARC(\"IC\",$p($g(^ARCIM($p($p($g(^INCI(inci,1)),\"^\",3),\"||\",1),$p($p($g(^INCI(inci,1)),\"^\",3),\"||\",2),1)),\"^\",9))),\"^\",1)",
+      "global": "^ARC(\"IC\")",
+      "domain": "d1-drug-dict"
+    },
+    "DRUG_TRADE_NAME": {
+      "keywords": [
+        "商品名",
+        "药品商品名"
+      ],
+      "ruleStandardName": "DRUG_TRADE_NAME",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",3)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "药品商品名"
+    },
+    "BILLING_UNIT": {
+      "keywords": [
+        "计价单位",
+        "计价单位名称"
+      ],
+      "ruleStandardName": "BILLING_UNIT",
+      "valueExpression": "$p($g(^CT(\"UOM\",$p($g(^INCI(inci,1)),\"^\",10))),\"^\",2)",
+      "global": "^CT(\"UOM\")",
+      "domain": "d1-drug-dict",
+      "description": "计价单位名称"
+    },
+    "RETAIL_PRICE_OUTPATIENT": {
+      "keywords": [
+        "零售价门诊",
+        "门诊零售价"
+      ],
+      "ruleStandardName": "RETAIL_PRICE_OUTPATIENT",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",5)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "零售价门诊"
+    },
+    "PHARMACOLOGY_CATEGORY1": {
+      "keywords": [
+        "药理学大类"
+      ],
+      "ruleStandardName": "PHARMACOLOGY_CATEGORY1",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "药理学大类（无直接Global存储）"
+    },
+    "PHARMACOLOGY_CATEGORY2": {
+      "keywords": [
+        "药理学子类"
+      ],
+      "ruleStandardName": "PHARMACOLOGY_CATEGORY2",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "药理学子类（无直接Global存储）"
+    },
+    "PHARMACOLOGY_CATEGORY3": {
+      "keywords": [
+        "药理学小类"
+      ],
+      "ruleStandardName": "PHARMACOLOGY_CATEGORY3",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "药理学小类（无直接Global存储）"
+    },
+    "DRUG_PRECAUTIONS": {
+      "keywords": [
+        "注意事项",
+        "药品注意事项"
+      ],
+      "ruleStandardName": "DRUG_PRECAUTIONS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "注意事项（无直接Global存储）"
+    },
+    "DRUG_INDICATIONS": {
+      "keywords": [
+        "适应症",
+        "药品适应症"
+      ],
+      "ruleStandardName": "DRUG_INDICATIONS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "适应症（无直接Global存储）"
+    },
+    "DRUG_CONTRAINDICATIONS": {
+      "keywords": [
+        "禁忌症",
+        "药品禁忌症"
+      ],
+      "ruleStandardName": "DRUG_CONTRAINDICATIONS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "禁忌症（无直接Global存储）"
+    },
+    "DRUG_ADVERSE_REACTIONS": {
+      "keywords": [
+        "不良反应",
+        "药品不良反应"
+      ],
+      "ruleStandardName": "DRUG_ADVERSE_REACTIONS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "不良反应（无直接Global存储）"
+    },
+    "DRUG_INTERACTIONS": {
+      "keywords": [
+        "相互作用",
+        "药物相互作用"
+      ],
+      "ruleStandardName": "DRUG_INTERACTIONS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "相互作用（无直接Global存储）"
+    },
+    "DRUG_DESCRIPTION": {
+      "keywords": [
+        "药品说明书",
+        "说明书"
+      ],
+      "ruleStandardName": "DRUG_DESCRIPTION",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "药品说明书（无直接Global存储）"
+    },
+    "DRUG_CODE_TABLE_TYPE": {
+      "keywords": [
+        "代码表类型",
+        "药品代码表类型"
+      ],
+      "ruleStandardName": "DRUG_CODE_TABLE_TYPE",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "代码表类型（无直接Global存储）"
+    },
+    "DRUG_TIPS": {
+      "keywords": [
+        "提示",
+        "药品提示"
+      ],
+      "ruleStandardName": "DRUG_TIPS",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "提示（无直接Global存储）"
+    },
+    "DRUG_PRECIOUS_FLAG": {
+      "keywords": [
+        "贵重标记",
+        "贵重药品标记"
+      ],
+      "ruleStandardName": "DRUG_PRECIOUS_FLAG",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "贵重标记（无直接Global存储）"
+    },
+    "DRUG_EFFECTIVE_DATE": {
+      "keywords": [
+        "生效日期",
+        "药品生效日期"
+      ],
+      "ruleStandardName": "DRUG_EFFECTIVE_DATE",
+      "valueExpression": "$zd($p($g(^INCI(inci,1)),\"^\",13),3)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "生效日期"
+    },
+    "DRUG_SKIN_FLAG": {
+      "keywords": [
+        "皮式标记",
+        "皮试标记"
+      ],
+      "ruleStandardName": "DRUG_SKIN_FLAG",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "皮式标记（无直接Global存储）"
+    },
+    "DRUG_LIMIT_FEATURES": {
+      "keywords": [
+        "限制特性",
+        "药品限制特性"
+      ],
+      "ruleStandardName": "DRUG_LIMIT_FEATURES",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "限制特性（无直接Global存储）"
+    },
+    "DRUG_CRITICAL_FLAG": {
+      "keywords": [
+        "危重药物标志",
+        "危重药品标志"
+      ],
+      "ruleStandardName": "DRUG_CRITICAL_FLAG",
+      "valueExpression": "\"\"",
+      "global": "",
+      "domain": "d1-drug-dict",
+      "description": "危重药物标志（无直接Global存储）"
+    },
+    "DRUG_START_DATE": {
+      "keywords": [
+        "启用日期",
+        "药品启用日期"
+      ],
+      "ruleStandardName": "DRUG_START_DATE",
+      "valueExpression": "$zd($p($g(^INCI(inci,1)),\"^\",13),3)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "启用日期"
+    },
+    "DRUG_DOSAGE": {
+      "keywords": [
+        "药品剂量",
+        "剂量"
+      ],
+      "ruleStandardName": "DRUG_DOSAGE",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",5)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "药品剂量"
+    },
+    "DRUG_MIN_PACKAGE_QTY": {
+      "keywords": [
+        "最小包装数量",
+        "最小包装"
+      ],
+      "ruleStandardName": "DRUG_MIN_PACKAGE_QTY",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",6)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "最小包装数量"
+    },
+    "DRUG_PINYIN_CODE": {
+      "keywords": [
+        "拼音码",
+        "药品拼音码"
+      ],
+      "ruleStandardName": "DRUG_PINYIN_CODE",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",7)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "拼音码"
+    },
+    "DRUG_ANTI_FLAG": {
+      "keywords": [
+        "抗菌药物标志",
+        "抗菌药物",
+        "抗菌标志"
+      ],
+      "ruleStandardName": "DRUG_ANTI_FLAG",
+      "valueExpression": "$p($g(^INCI(inci,1)),\"^\",20)",
+      "global": "^INCI",
+      "domain": "d1-drug-dict",
+      "description": "抗菌药物标志(INCI^20)"
+    },
+    "DRUG_DOSAGE_UNIT": {
+      "keywords": [
+        "剂量单位",
+        "药品剂量单位"
+      ],
+      "ruleStandardName": "DRUG_DOSAGE_UNIT",
+      "valueExpression": "$p($g(^CT(\"UOM\",$p($g(^INCI(inci,1)),\"^\",10))),\"^\",2)",
+      "global": "^CT(\"UOM\")",
+      "domain": "d1-drug-dict",
+      "description": "剂量单位名称"
+    }
+  },
+  "_lastUpdated": "2026-06-01"
+}
