@@ -70,7 +70,7 @@ ClassMethod GenerateCSV(YearMonth As %String) As %String
 	; 写入数据行
 	for {
 		s sc = rs.Next(.sc)
-		q:sc = 0
+		q:sc=0
 		if $$$ISOK(sc) {
 			s rowData = ""
 			for colIdx=1:1:Columns {
@@ -115,7 +115,7 @@ ClassMethod ListFiles() As %String
 
 	for {
 		s ok = rs.Next(.sc)
-		q:ok = 0
+		q:ok=0
 		i '$$$ISOK(sc) q
 
 		s name = rs.Get("Name")
@@ -162,7 +162,7 @@ ClassMethod DownloadFile(fileName As %String) As %String
 	s content = ""
 	for {
 		s line = file.ReadLine(.sc)
-		q:sc = -1
+		q:sc=-1
 		s content = content _ line _ $c(13, 10)
 	}
 
