@@ -1,0 +1,49 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>门诊信息首页生成下载</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0;overflow-y:auto}
+.toolbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7}
+.toolbar label{font-size:13px;color:#15428b;font-weight:600}
+.toolbar .sep{width:12px}
+#dgFiles{width:100%;height:calc(100vh - 130px)}
+</style>
+</head>
+<body>
+<div style="display:flex;flex-direction:column;min-height:100vh">
+    <!-- 标题栏 -->
+    <div style="display:flex;align-items:center;padding:8px 14px;background:#E4F0FF;border-bottom:1px solid #95B8E7">
+        <span style="font-weight:700;font-size:14px;color:#15428b">门诊信息首页生成下载</span>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+        <label>选择年月：</label>
+        <select id="selYear" class="hisui-combobox" style="width:90px" onchange="onYearMonthChange()"></select>
+        <select id="selMonth" class="hisui-combobox" style="width:80px" onchange="onYearMonthChange()"></select>
+        <span class="sep"></span>
+        <a id="btnGenerate" class="hisui-linkbutton" onclick="generateCSV()" data-options="iconCls:'icon-w-export'">生成文件</a>
+        <a class="hisui-linkbutton" onclick="loadFileList()" data-options="iconCls:'icon-reload'">刷新列表</a>
+    </div>
+
+    <!-- 文件列表 -->
+    <div style="flex:1;min-height:400px">
+        <table id="dgFiles" class="hisui-datagrid"></table>
+    </div>
+</div>
+
+<script type="text/javascript" src="../scripts/dhcmrinfopagedownload.js"></script>
+</body>
+</html>
+</csp:content>
