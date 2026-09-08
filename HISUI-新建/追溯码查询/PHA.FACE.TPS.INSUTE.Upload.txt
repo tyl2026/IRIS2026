@@ -1,0 +1,1516 @@
+/// Description:国家医保两定接口药品进销存上传
+/// Creator:    hulihua
+/// CreateDate: 2024-12-06
+Class PHA.FACE.TPS.INSUTE.Upload Extends (Data, Format, LogSave)
+{
+
+/// Description:【3501A】商品盘存上传A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-12
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3501A("65045", "2", "1")
+ClassMethod Method3501A(BusIdStr, HospId, UserId = "", InsuManf = "1") As %String
+{
+	q:(BusIdStr = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3501Data("", BusIdStr, "", HospId, "", InsuManf, pid, "N")
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	k Method3501AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3501", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("invinfo", newBusDetObj)
+				d titleObj.%Set("infno", "3501")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3501AArr(pointer, trdnFlag) = ""
+				s insertRet = ..SaveLog("Method3501", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3501A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("invinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3501AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3501AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3501", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				d ..UpdateLog("Method3501", retInfo, pointer, trdnFlag, "Y", InsuManf)
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3501AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid)
+	q 0
+}
+
+/// Description:【3502A】商品库存变更A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-09
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3502A("65045", "2", "1")
+ClassMethod Method3502A(BusIdStr, HospId, UserId = "", InsuManf = "1") As %String
+{
+	q:(BusIdStr = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3502Data("", BusIdStr, "", HospId, "", InsuManf, pid, "N")
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	k Method3502AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3502", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("invinfo", newBusDetObj)
+				d titleObj.%Set("infno", "3502")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s batchNo = $lg(otherSqlStr, 2)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3502AArr(pointer, trdnFlag) = batchNo
+				s insertRet = ..SaveLog("Method3502", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3502A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("invinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3502AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3502AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			s batchNo = Method3502AArr(pointer, trdnFlag)
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				s outputData = retObj.%Get("output")
+				if ('$IsObject(outputData)) {
+					d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				} else {
+					s resultData = outputData.%Get("invinfoErrDetail")
+					if ((resultData = "null") || (resultData = "")) {
+						d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					} else {
+						s upFlag = 0
+						for errDataI = 0 : 1 : (resultData.%Size() - 1) {
+							s oneErrData = resultData.%Get(errDataI)
+							s bchno = oneErrData.%Get("fixmedins_bchno")
+							continue:(batchNo '= bchno)						
+							s upFlag = 1
+							if ('$IsObject(resultData)) {
+								d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "Y", InsuManf)	
+							} else {
+								s resultCode = resultData.%Get("retRslt")
+								if (resultCode = 0) {
+									d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "N", InsuManf)
+								} else {
+									d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "Y", InsuManf)
+								}
+							}	
+						}
+						if (upFlag = 0) {
+							d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "Y", InsuManf)
+						}
+					}
+				}
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3502AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid)
+	q 0
+}
+
+/// Description:【3503A】商品采购A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3503A("65045", "2", "1")
+ClassMethod Method3503A(BusIdStr, HospId, UserId = "", InsuManf = "1") As %String
+{
+	q:(BusIdStr = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3503Data("", BusIdStr, "", HospId, "", InsuManf, pid, "N")
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	k Method3503AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3503", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("purcinfo", busDetObj)
+				d titleObj.%Set("infno", "3503")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3503AArr(pointer, trdnFlag) = ""
+				s insertRet = ..SaveLog("Method3503", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3503A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("purcinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3503AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3503AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				s outputData = retObj.%Get("output")
+				if ('$IsObject(outputData)) {
+					d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				} else {
+					s resultData = outputData.%Get("result")
+					if ('$IsObject(resultData)) {
+						d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					} else {
+						s resultCode = resultData.%Get("retRslt")
+						if (resultCode = 0) {
+							d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "N", InsuManf)
+						} else {
+							d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "Y", InsuManf)
+						}
+					}
+				}
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3503AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid)
+	q 0
+}
+
+/// Description:【3504A】商品采购退货A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3504A("65045", "2", "1")
+ClassMethod Method3504A(BusIdStr, HospId, UserId = "", InsuManf = "1") As %String
+{
+	q:(BusIdStr = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3504Data("", BusIdStr, "", HospId, "", InsuManf, pid, "N")
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	k Method3504AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3504", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("purcinfo", busDetObj)
+				d titleObj.%Set("infno", "3504")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s batchNo = $lg(otherSqlStr, 2)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3504AArr(pointer, trdnFlag) = batchNo
+				s insertRet = ..SaveLog("Method3504", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3504A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("purcinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3504AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3504AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			s batchNo = Method3504AArr(pointer, trdnFlag)
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				s resultData = retObj.%Get("output").%Get("purcinfoErrDetail")
+				if ((resultData = "null") || (resultData = "")) {
+					d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				} else {
+					s upFlag = 0
+					for errDataI = 0 : 1 : (resultData.%Size() - 1) {
+						s oneErrData = resultData.%Get(errDataI)
+						s bchno = oneErrData.%Get("fixmedins_bchno")
+						continue:(batchNo '= bchno)
+						s upFlag = 1
+						if ('$IsObject(resultData)) {
+							d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "Y", InsuManf)
+						} else {
+							s resultCode = resultData.%Get("retRslt")
+							if (resultCode = 0) {
+								d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "N", InsuManf)
+							} else {
+								d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "Y", InsuManf)
+							}
+						}	
+					}
+					if (upFlag = 0) {
+						d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					}
+				}
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3504AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid)
+	q 0
+}
+
+/// Description:【3505A】商品销售A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-06
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3505A("", "2", "4","1","N",19628830)
+ClassMethod Method3505A(BusIdStr, HospId, UserId = "", InsuManf = "1", TaskFlag = "N", IntrId = "") As %String
+{
+	q:(BusIdStr = "")&&(IntrId = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3505Data("", BusIdStr, IntrId, HospId, "", InsuManf, pid, TaskFlag)
+	// b ; ret
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	k Method3505AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3505", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				/*
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				*/
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("selinfoDetail", newBusDetObj)
+				d titleObj.%Set("infno", "3505A")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3505AArr(pointer, trdnFlag) = ""
+				s insertRet = ..SaveLog("Method3505", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3505A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("selinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3505AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3505AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				s outputData = retObj.%Get("output")
+				if ('$IsObject(outputData)) {
+					d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					s resultData = outputData.%Get("selinfoDetail")
+					if ('$IsObject(resultData)) {
+						d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "N", InsuManf)
+					} else {
+						s resultCode = resultData.%Get("retRslt")
+						if (resultCode = 0) {
+							d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "N", InsuManf)
+						} else {
+							d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "Y", InsuManf)
+						}
+					}
+				}
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3505AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid)
+	q 0
+}
+
+/// Description:【3506A】商品销售退货A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-06
+/// Table:		
+/// Input:		 BusIdStr-业务ID串，HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3506A("65045", "2", "1")
+ClassMethod Method3506A(BusIdStr, HospId, UserId = "", InsuManf = "1", TaskFlag = "N", IntrId = "") As %String
+{
+	q:(BusIdStr = "") ..Error(-1, "业务表信息串为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3506Data("", BusIdStr, IntrId, HospId, "", InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	k Method3506AArr
+	s dataArr = ##class(PHA.COM.Array).%New()
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3506", busData, InsuManf, HospId)
+				d dataArr.%Push(busDetObj)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("selinfoDetail", newBusDetObj)
+				d titleObj.%Set("infno", "3506A")
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Log", index1, index2, index3))
+				s pointer = $lg(otherSqlStr, 1)
+				s batchNo = $lg(otherSqlStr, 2)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				s Method3506AArr(pointer, trdnFlag) = batchNo
+				s insertRet = ..SaveLog("Method3506", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("infno")
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+			}
+		}
+	}
+	d titleObj.%Set("infno", "3506A")
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("selinfoDetail", dataArr)
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s pointer = ""
+	for {
+		s pointer = $o(Method3506AArr(pointer))
+		q:(pointer = "")
+		s trdnFlag = ""
+		for {
+			s trdnFlag = $o(Method3506AArr(pointer, trdnFlag))
+			q:(trdnFlag = "")
+			s batchNo = Method3506AArr(pointer, trdnFlag)
+			if (infoCode '= 0) {
+				d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "N", InsuManf)
+			} else {
+				s resultData = retObj.%Get("output").%Get("selinfoErrDetail")
+				if ((resultData = "null") || (resultData = "")) {
+					d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				} else {
+					s upFlag = 0
+					for errDataI = 0 : 1 : (resultData.%Size() - 1) {
+						s oneErrData = resultData.%Get(errDataI)
+						s bchno = oneErrData.%Get("fixmedins_bchno")
+						continue:(batchNo '= bchno)
+						s upFlag = 1
+						if ('$IsObject(resultData)) {
+							d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "Y", InsuManf)
+						} else {
+							s resultCode = resultData.%Get("retRslt")						
+							if (resultCode = 0) {
+								d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "N", InsuManf)
+							} else {
+								d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "Y", InsuManf)
+							}
+						}	
+					}
+					if (upFlag = 0) {
+						d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					}
+				}
+			}
+		}
+	}
+	d dataArr.%Clear()
+	d inputObj.%Clear()
+	d titleObj.%Clear()
+	d retObj.%Clear()
+	k Method3506AArr
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid)
+	q 0
+}
+
+/// Description:【3507A】商品信息删除A
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 BatchStr-批次流水号^删除类型（多条以英文逗号分隔），HospId-院区ID，UserId-操作人ID
+/// Output:		 
+/// Return:		 0-成功，空-失败
+/// Others: 
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3507A("397869,397870", "2", "1")
+ClassMethod Method3507A(BatchStr, HospId, UserId = "") As %String
+{
+	q:(BatchStr = "") ..Error(-1, "需要删除的批次流水号为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s batchLen = $l(BatchStr, ",")
+    q:(batchLen = 0) ..Error(-1, "需要删除的批次流水号为空！")
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	k Method3507AArr
+	s dataCount = 0
+	for batchI = 1 : 1 : batchLen {
+		s batchData = $p(BatchStr, ",", batchI)
+		s batchNo = $p(batchData, "^", 1)
+		s delType = $p(batchData, "^", 2)
+		s insuManf = $p(batchData, "^", 3)
+		s upLoadLogId = $o(^BS.PHA.IN.InsuDataLogI("DeleteBatch", " "_delType, " "_batchNo ,""))		
+		continue:(upLoadLogId = "")
+		s upInsuLogData = $g(^BS.PHA.IN.InsuDataLogD(upLoadLogId))
+		s type = $lg(upInsuLogData, 2)
+		s pointer = $lg(upInsuLogData, 4)
+		continue:(..GetSuccFlag(type, pointer, insuManf) '= "Y")
+		s dataCount = dataCount + 1
+		s Method3507AArr("INSUMANF", insuManf, dataCount) = batchData
+	}
+	s insuManf = ""
+	for {
+		s insuManf = $o(Method3507AArr("INSUMANF", insuManf))
+		q:(insuManf = "")
+		s dataArr = ##class(PHA.COM.Array).%New()
+		s index = ""
+		for {
+			s index = $o(Method3507AArr("INSUMANF", insuManf, index))
+			q:(index = "")
+			s arrData = Method3507AArr("INSUMANF", insuManf, index)
+			s batchNo = $p(arrData, "^", 1)
+			s delType = $p(arrData, "^", 2)
+			s busData = $lb(batchNo, delType)
+			s busDetObj = ..DataToJSON("3507", busData, insuManf, HospId)
+			d dataArr.%Push(busDetObj)
+			s Method3507AArr("POINTBN", pointer, batchNo) = delType
+		}
+		s titleObj = ##class(PHA.COM.Object).%New()
+		d ..SetTitleData(titleObj, UserId, HospId, insuManf)
+		d titleObj.%Set("infno", "3507A")
+		s inputObj = ##class(PHA.COM.Object).%New()
+		d inputObj.%Set("goodDetail", dataArr)
+		d titleObj.%Set("input", inputObj)
+		/* 调用医保接口 */
+		s retObj = ..SendToInsuFace(titleObj, HospId, insuManf)
+		s infoCode = retObj.infcode
+		s retInfo = retObj.%ToJSON()
+		s pointer = ""
+		for {
+			s pointer = $o(Method3507AArr("POINTBN", pointer))
+			q:(pointer = "")
+			s batchNo = ""
+			for {
+				s batchNo = $o(Method3507AArr("POINTBN", pointer, batchNo))
+				q:(batchNo = "")
+				s delType = Method3507AArr("POINTBN", pointer, batchNo)
+				s logId = ""
+				for {
+					s logId = $o(^BS.PHA.IN.InsuDataLogI("DeleteBatch", " "_delType, " "_batchNo ,logId))
+					q:(logId = "")
+					s insuLogData = $g(^BS.PHA.IN.InsuDataLogD(logId))
+					s faceType = $lg(insuLogData, 2)
+					s trdnFlag = $lg(insuLogData, 15)
+					s checkFlag = $lg(insuLogData, 7)
+					s insuManf = $lg(insuLogData, 14)
+					s onepointer = $lg(insuLogData, 4)
+					if (infoCode '= 0) {
+						d ..UpdateLog(faceType, retInfo, onepointer, trdnFlag, checkFlag, insuManf)
+					} else {
+						s errDetail = "goodErrDetail"
+						if ((hospProName [ "内蒙古") || (hospProName [ "福建")) {
+							s errDetail = "invinfoErrDetail"
+						}
+						s resultData = retObj.%Get("output").%Get(errDetail)
+						if (resultData = "null") {
+							d ..UpdateLog(faceType, retInfo, onepointer, trdnFlag, "N", insuManf)
+						} else {
+							s upFlag = 0
+							for errDataI = 0 : 1 : (resultData.%Size() - 1) {
+								s oneErrData = resultData.%Get(errDataI)
+								s bchno = oneErrData.%Get("fixmedins_bchno")
+								continue:(batchNo '= bchno)
+								s resultCode = resultData.%Get("retRslt")
+								s upFlag = 1
+								if (resultCode = 0) {
+									d ..UpdateLog(faceType, retInfo, onepointer, trdnFlag, checkFlag, insuManf)
+								} else {
+									d ..UpdateLog(faceType, retInfo, onepointer, trdnFlag, "N", insuManf)
+								}	
+							}
+							if (upFlag = 0) {
+								d ..UpdateLog(faceType, retInfo, onepointer, trdnFlag, "N", insuManf)
+							}
+						}
+					}
+				}
+			}
+		}
+		d dataArr.%Clear()
+		d inputObj.%Clear()
+		d titleObj.%Clear()
+		d retObj.%Clear()
+	}
+	k Method3507AArr
+	q 0
+}
+
+/// Description:【3501】商品盘存上传
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 InstItmId-盘点子表ID，HospId-院区ID，TrdnFlag-拆零标志，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3501("65045", "2", "1")
+ClassMethod Method3501(InstItmId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(InstItmId = "") ..Error(-1, "入参盘点明细ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3501Data("", "", InstItmId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	d titleObj.%Set("infno", "3501")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3501", busData, InsuManf, HospId)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("invinfo", newBusDetObj)
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3501", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("invinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3501", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					d ..UpdateLog("Method3501", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3501Data", pid)
+	q 0
+}
+
+/// Description:【3502】商品库存变更
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 IntrId-台帐ID，HospId-院区ID，UserId-操作人ID，TrdnFlag-拆零标志，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3502("65045", "2", "1")
+ClassMethod Method3502(IntrId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(IntrId = "") ..Error(-1, "入参台帐ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3502Data("", "", IntrId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	d titleObj.%Set("infno", "3502")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3502", busData, InsuManf, HospId)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("invinfo", newBusDetObj)
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3502", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("invinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					d ..UpdateLog("Method3502", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3502Data", pid)
+	q 0
+}
+
+/// Description:【3503】商品采购
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 IntrId-入库台帐ID，HospId-院区ID，TrdnFlag-拆零标志，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3503("65045", "2", "1")
+ClassMethod Method3503(IntrId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(IntrId = "") ..Error(-1, "入参入库子表的ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3503Data("", "", IntrId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	d titleObj.%Set("infno", "3503")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3503", busData, InsuManf, HospId)
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("purcinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				s data = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3503", data, otherSqlStr, HospId, InsuManf)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					s resultData = retObj.%Get("output").%Get("result")
+					s resultCode = 1
+					if ((resultData '= "") && (resultData '= "null")) {
+						s resultCode = resultData.%Get("retRslt")
+					}
+					if (resultCode = 0) {
+						d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "N", InsuManf)
+					} else {
+						d ..UpdateLog("Method3503", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					}
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3503Data", pid)
+	q 0
+}
+
+/// Description:【3504】商品采购退货
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 IntrId-台帐ID，HospId-院区ID，TrdnFlag-拆零标志，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3504("65045", "2", "1")
+ClassMethod Method3504(IntrId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(IntrId = "") ..Error(-1, "入参退货台账ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3504Data("", "", IntrId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	d titleObj.%Set("infno", "3504")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3504", busData, InsuManf, HospId)
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("purcinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				s data = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3504", data, otherSqlStr, HospId, InsuManf)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					s resultData = retObj.%Get("output").%Get("result")
+					s resultCode = 1
+					if ((resultData '= "") && (resultData '= "null")) {
+						s resultCode = resultData.%Get("retRslt")
+					}
+					if (resultCode = 0) {
+						d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "N", InsuManf)
+					} else {
+						d ..UpdateLog("Method3504", retInfo, pointer, trdnFlag, "Y", InsuManf)
+					}
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3504Data", pid)
+	q 0
+}
+
+/// Description:【3505】商品销售
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 IntrId-台帐ID，HospId-院区ID，UserId-操作人ID，TrdnFlag-拆零标志，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3505("19732858", "2", "",1)
+ClassMethod Method3505(IntrId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(IntrId = "") ..Error(-1, "入参台帐ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3505Data("", "", IntrId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	d titleObj.%Set("infno", "3505")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3505", busData, InsuManf, HospId)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				/*
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				*/
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("selinfo", newBusDetObj)
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3505", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("selinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					d ..UpdateLog("Method3505", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3505Data", pid)
+	q 0
+}
+
+/// Description:【3506】商品销售退货
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 IntrId-台帐ID，HospId-院区ID，UserId-操作人ID，TrdnFlag-拆零标志，InsuManf-医保厂商(1-国家医保)，TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：非0^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3506("65045", "2", "1")
+ClassMethod Method3506(IntrId, HospId, TrdnFlag = "", UserId = "", InsuManf = "1", TaskFlag = "N") As %String
+{
+	q:(IntrId = "") ..Error(-1, "入参台帐ID为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s pid = ..NewPid()
+	s ret = ..Get3506Data("", "", IntrId, HospId, TrdnFlag, InsuManf, pid, TaskFlag)
+	s retCode = $p(ret, "^", 1)
+	q:(retCode < 0) ret
+	q:('$d(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid))) 0
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, InsuManf)
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	d titleObj.%Set("infno", "3506")
+	s index1 = ""
+	for {
+		s index1 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1))
+		q:(index1 = "")
+		s index2 = ""
+		for {
+			s index2 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2))
+			q:(index2 = "")
+			s index3 = ""
+			for{
+				s index3 = $o(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2, index3))
+				q:(index3 = "")
+				s busData = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Data", index1, index2, index3))
+				continue:(busData = "")
+				s busDetObj = ..DataToJSON("3506", busData, InsuManf, HospId)
+				s busDetJsonStr = busDetObj.%ToJSON()
+				s newBusDetObj = ##class(PHA.COM.Object).%FromJSON(busDetJsonStr)
+				if (hospProName [ "陕西") {
+					d newBusDetObj.%Remove("drug_trac_info")
+				} else {
+					d newBusDetObj.%Remove("drugtracinfo")
+				}
+				s logObj = ##class(PHA.COM.Object).%New()
+				d logObj.%Set("selinfo", newBusDetObj)
+				d titleObj.%Set("input", logObj)
+				s logData = titleObj.%ToJSON()
+				s otherSqlStr = $g(^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid, "Log", index1, index2, index3))
+				s insertRet = ..SaveLog("Method3506", logData, otherSqlStr, HospId, InsuManf)	
+				d titleObj.%Remove("input")
+				d newBusDetObj.%Clear()
+				d logObj.%Clear()
+				s inputObj = ##class(PHA.COM.Object).%New()
+				d inputObj.%Set("selinfo", busDetObj)
+				d titleObj.%Set("input", inputObj)
+				/* 调用医保接口 */
+				s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+				s infoCode = retObj.infcode
+				s retInfo = retObj.%ToJSON()
+				s pointer = $lg(otherSqlStr, 1)
+				s trdnFlag = $lg(otherSqlStr, 4)
+				if (infoCode '= 0) {
+					d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "N", InsuManf)
+				} else {
+					d ..UpdateLog("Method3506", retInfo, pointer, trdnFlag, "Y", InsuManf)
+				}
+				d inputObj.%Clear()
+				d retObj.%Clear()
+				d titleObj.%Remove("input")
+			}
+		}
+	}
+	d titleObj.%Clear()
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3506Data", pid)
+	q 0
+}
+
+/// Description:【3507】商品信息删除
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-16
+/// Table:		
+/// Input:		 BchNoStr-批次流水号^删除类型，HospId-院区ID，UserId-操作人ID
+/// Output:		 
+/// Return:		 0-成功，空-失败
+/// Others: 
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).Method3507("397869,397870", "2", "1")
+ClassMethod Method3507(BchNoStr, HospId, UserId = "") As %String
+{
+	q:(BchNoStr = "") ..Error(-1, "需要删除的批次流水号为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s batchNo = $p(BchNoStr, "^", 1)
+	s delType = $p(BchNoStr, "^", 2)
+	s insuManf = $p(BchNoStr, "^", 3)
+	s upLoadLogId = $o(^BS.PHA.IN.InsuDataLogI("DeleteBatch", " "_delType, " "_batchNo ,""))		
+	q:(upLoadLogId = "") ..Error(-1, "要删除的批次流水号不存在！")
+	s busData = $lb(batchNo, delType)
+	s busDetObj = ..DataToJSON("3507", busData, insuManf, HospId)
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("data", busDetObj) 
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ..SetTitleData(titleObj, UserId, HospId, insuManf)
+	d titleObj.%Set("infno", "3507")
+	d titleObj.%Set("input", inputObj)
+	/* 调用医保接口 */
+	s retObj = ..SendToInsuFace(titleObj, HospId, insuManf)
+	s infoCode = retObj.infcode
+	s retInfo = retObj.%ToJSON()
+	s logId = ""
+	for {
+		s logId = $o(^BS.PHA.IN.InsuDataLogI("DeleteBatch", " "_delType, " "_batchNo ,logId))
+		q:(logId = "")
+		s insuLogData = $g(^BS.PHA.IN.InsuDataLogD(logId))
+		s faceType = $lg(insuLogData, 2)
+		s trdnFlag = $lg(insuLogData, 15)
+		s checkFlag = $lg(insuLogData, 7)
+		s insuManf = $lg(insuLogData, 14)
+		s pointer = $lg(insuLogData, 4)
+		if (infoCode '= 0) {
+			d ..UpdateLog(faceType, retInfo, pointer, trdnFlag, checkFlag, insuManf)
+		} else {
+			d ..UpdateLog(faceType, retInfo, pointer, trdnFlag, "N", insuManf)
+		}
+	}
+	q 0
+}
+
+/// Description:调用3507接口删除上传数据
+/// Creator：	WangYaJun
+/// CreatDate： 2024-12-24
+/// Table：     
+/// Input：     BatchStr-批次流水号^删除类型（多条以英文逗号分隔），HospId-院区ID，UserId-操作人ID，InsuManf-医保厂商(1-国家医保)
+/// Output：				
+/// Return：			       
+/// Others： 		
+/// Debug:		w ##class(PHA.FACE.TPS.INSUTE.Upload).DeleteData("508||3^4","2","","1")
+ClassMethod DeleteData(BatchStr, HospId, UserId = "")
+{
+	s paramStr = "^^^"_HospId
+	s appName = ..%GetParameter("AppName")
+	s upLoadWay = ##class(web.DHCST.Common.AppCommon).GetAppPropValue(appName, "UpLoadWay", paramStr)
+	if (upLoadWay = "1") {
+		s ret = ..Method3507A(BatchStr, HospId, UserId)
+	} else {
+		for i = 1 : 1 : $l(BatchStr,","){
+			s batchStr = $p(BatchStr,",",i)
+			s ret = ..Method3507(batchStr, HospId, UserId)
+		}
+	}
+	q ret
+}
+
+/// Description: 商品销售数据撤销; 删除的时候先判断是否上传成功,未成功直接更新CheckFlag;成功了则删除!
+/// Creator: 	 tanwenbin
+/// CreatDate:	 2026-08-14
+/// Table:		
+/// Input:		 BatchStr-批次流水号^删除类型（多条以英文逗号分隔），HospId-院区ID，UserId-操作人ID
+/// Output:		 
+/// Return:		 0-成功，空-失败
+/// Others: 
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).DeleteBy3506("3710621,3716704,3716853,3716909,3716943", "2", "1")
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Upload).DeleteBy3506("9347533","2","4")
+ClassMethod DeleteBy3506(LogStr, HospId, UserId = "") As %String
+{
+	//s ^tmptwb("PHA.FACE.TPS.INSUTE.Upload","DeleteBy3506") = $lb(LogStr, HospId, UserId)
+	q:(LogStr = "") ..Error(-1, "需要删除的日志记录为空！")
+	q:(HospId = "") ..Error(-1, "院区不能为空！")
+	s logIdLen = $l(LogStr, ",")
+    q:(logIdLen = 0) ..Error(-1, "需要删除的日志记录为空！")
+    for logI = 1:1:logIdLen {
+		s logId = $p(LogStr , ",", logI)
+		s checkFlag = $lg(^BS.PHA.IN.InsuDataLogD(logId),7)
+		s logDate = $lg(^BS.PHA.IN.InsuDataLogD(logId),9)
+		continue:checkFlag'="Y"
+		if (logDate > 67803) {
+			s inText = $lg(^BS.PHA.IN.InsuDataLogD(logId),5)
+		}else {
+			s inText = ##class(PHA.FACE.TPS.INSUTE.LogQuery).GetLogInText(logId)
+		}
+		continue:inText=""
+		s inTextObj = ##class(PHA.COM.Object).FromJSON(inText)
+		s info = inTextObj.Get("infno")
+		continue:(info'="3505")&&(info'="3505A")
+		s manfType = $lg(^BS.PHA.IN.InsuDataLogD(logId),14)
+		s deleType = $lg(^BS.PHA.IN.InsuDataLogD(logId),12)
+		s seleteType = $lg(^BS.PHA.IN.InsuDataLogD(logId),3)
+		s logPointer = $lg(^BS.PHA.IN.InsuDataLogD(logId),4)
+		s oeori = ..GetTransOrdItem(logPointer)
+		s oeoriSelteType = ..GetSetlType(oeori, "")
+		// continue:oeoriSelteType=seleteType    // 处理住院自费穿错的特殊筛选
+		s logInci = $lg(^BS.PHA.IN.InsuDataLogD(logId),16)
+		if (info = "3505") {
+			s selInfoObj = inTextObj.Get("input").Get("selinfo")
+		}else{
+			s selInfoObj = inTextObj.Get("input").Get("selinfoDetail")
+		}
+		continue:selInfoObj=""
+		s medListCode = selInfoObj.Get("med_list_codg")
+		s bchno = selInfoObj.Get("fixmedins_bchno")
+		s date = $zd(logDate,3)
+		s mdtrtId = selInfoObj.Get("mdtrt_sn")
+		s drugtracinfo = selInfoObj.Get("drugtracinfo")
+		//continue:drugtracinfo=""
+		if $ISOBJECT(drugtracinfo) {
+            s drugtracinfoSize = drugtracinfo.%Size()
+        }else {
+            s drugtracinfoSize = 0
+        }
+		s drugtracinfoSize = drugtracinfo.%Size()
+		/// 追溯码去重
+		s DRUGTRACEARRAY(0) = ""
+		for drugtracinfoI = 0:1:(drugtracinfoSize - 1) {
+			s drugTraceCode = drugtracinfo.%Get(drugtracinfoI).Get("drug_trac_codg")
+			continue:drugTraceCode=""
+			s DRUGTRACEARRAY(drugTraceCode) = ""
+		}
+		if (+$o(DRUGTRACEARRAY(0))) = 0 {
+			//b ; 12
+			&sql(UPDATE BS_PHA_IN.InsuDataLog
+				SET CheckFlag = 'N'
+				WHERE ID = :logId
+			)
+		}else {
+			k medinsProdSelNoArr
+			s traceCode = 0,upFlag = 0
+			for {
+				s traceCode = $o(DRUGTRACEARRAY(traceCode))	q:(traceCode = "")
+				s paramStr = HospId _"^3513^"_ UserId _"^"_ $p($g(^INCI(logInci,1)),"^",1) _"^"_ bchno _"^"_ date _"^"_ date _"^"_ manfType _"^"_ deleType _"^"_ mdtrtId _"^"_ traceCode _"^"_ medListCode
+				if (67796<(+$h)<67813) {
+					s saveLogFlag = "Y"
+				}else {
+					s saveLogFlag = "N"
+				}
+				s ret = ##class(PHA.FACE.TPS.INSUTE.UpQuery).GetFaceData(paramStr,saveLogFlag)
+				if (+ret < 0) {
+					//b ; 3
+					continue
+				}else {
+					s retObj = ##class(PHA.COM.Object).FromJSON(ret)
+					s output = retObj.Get("output")
+					if (output = "null") {
+						//b ; 4
+						&sql(UPDATE BS_PHA_IN.InsuDataLog
+							SET CheckFlag = 'N'
+							WHERE ID = :logId
+						)
+						q
+					}else {
+						//b ; 5
+						s outputSize = output.%Size()
+						for ProdSelI = 0:1:(outputSize - 1) {
+							s medinsProdSelNo = output.Get(ProdSelI).Get("medinsProdSelNo")
+							//b ; 6
+							continue:(medinsProdSelNo="null")||(medinsProdSelNo="")
+							if ('$d(medinsProdSelNoArr(medinsProdSelNo))) {
+								s medinsProdSelNoArr(medinsProdSelNo) = ""
+							}else {   
+							//b ; 7
+								continue
+							}
+							/// 调用3506A删除
+							d selInfoObj.%Remove("MDTRT_SETL_TYPE")
+							d selInfoObj.%Remove("bchno")
+							d selInfoObj.%Remove("drug_prod_barc")
+							d selInfoObj.%Remove("hi_feesetl_type")
+							d selInfoObj.%Remove("phar_cert_type")
+							d selInfoObj.%Remove("phar_certno")
+							d selInfoObj.%Remove("phar_name")
+							d selInfoObj.%Remove("phar_prac_cert_no")
+							d selInfoObj.%Remove("prsc_dr_cert_type")
+							d selInfoObj.%Remove("prsc_dr_certno")
+							d selInfoObj.%Remove("rtal_docno")
+							d selInfoObj.%Remove("rx_circ_flag")
+							d selInfoObj.%Remove("rxno")
+							d selInfoObj.%Remove("shelf_posi")
+							d selInfoObj.%Remove("stoout_no")
+							d selInfoObj.%Set("medins_prod_sel_no",medinsProdSelNo)
+							s deleteObj = ##class(PHA.COM.Object).FromJSON(inText)
+							d deleteObj.%Remove("input")
+							d deleteObj.%Remove("infno")
+							s inoutObj = ##class(PHA.COM.Object).%New()
+							d inoutObj.%Set("selinfoDetail",selInfoObj)
+							d deleteObj.%Set("input",inoutObj)
+							d deleteObj.%Set("infno","3506A")
+							/* 调用医保接口 */
+							s retObj = ..SendToInsuFace(deleteObj, HospId, manfType)
+							s infoCode = retObj.infcode
+							//b ; retObj
+							s retInfo = retObj.%ToJSON()
+							if (infoCode = 0) {
+								s insuLogData = $g(^BS.PHA.IN.InsuDataLogD(logId))
+								s faceType = $lg(insuLogData, 2)
+								s trdnFlag = $lg(insuLogData, 15)
+								s checkFlag = $lg(insuLogData, 7)
+								s insuManf = $lg(insuLogData, 14)
+								s onepointer = $lg(insuLogData, 4)
+								s resultData = retObj.%Get("output").%Get("selinfoErrDetail")
+								if ((resultData = "null") || (resultData = "")) {
+									s upFlag = 1
+									//b ; retObj  2
+									// d ..UpdateLog(faceType, retInfo, logPointer, trdnFlag, "N", manfType)
+								} else {
+									s tempUpFlag = 0
+									for errDataI = 0 : 1 : (resultData.%Size() - 1) {
+										s oneErrData = resultData.%Get(errDataI)
+										s bchno = oneErrData.%Get("fixmedins_bchno")
+										s tempUpFlag = 1
+										if ('$IsObject(resultData)) {
+											s upFlag = 1
+											//b ; retObj  3
+											// d ..UpdateLog("Method3506", retInfo, logPointer, trdnFlag, "N", manfType)
+										} else {
+											s resultCode = resultData.%Get("retRslt")						
+											if (resultCode '= 0) {
+												s upFlag = 1
+												//b ; retObj  4
+												// d ..UpdateLog("Method3506", retInfo, logPointer, trdnFlag, "N", manfType)
+											} 
+										}	
+									}
+									if (tempUpFlag = 0) {
+										s upFlag = 1
+											//b ; retObj  5
+										// d ..UpdateLog("Method3506", retInfo, logPointer, trdnFlag, "N", manfType)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			if (upFlag = 1) { // 本次遍历有传成功的就更新
+				//b ; 12333
+				d ..UpdateLog("Method3506", retInfo, logPointer, trdnFlag, "N", manfType)
+			}
+		}
+	}
+	q 1
+}
+
+}

@@ -1,0 +1,1 @@
+if (typeof jQuery === "undefined") { document.write('<script src="jquery-1.11.3.min.js"><\/script>'); }

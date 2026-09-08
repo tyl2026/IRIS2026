@@ -1,0 +1,588 @@
+Class web.DHCLYLDZN.Method.Tools Extends %RegisteredObject
+{
+
+/// w ##class(web.DHCLYLDZN.Method.Tools).Getorginfo()
+ClassMethod Getorginfo() As %String
+{
+	///H43010400157-20250605-01-1
+	///批次号由医疗机构代码-填报日期(格式为YYYYMMDD)-当天批次(两位数字)-上传类型(1新增；2重传)
+	S orgcode="H43110300029"
+	s orgname="永州市第三人民医院"
+	q orgcode_"^"_orgname
+}
+
+/// w ##class(web.DHCLYLDZN.Method.Tools).GetorgbatchnoByDate()
+ClassMethod GetorgbatchnoByDate() As %String
+{
+	///H43010400157-20250605-0-1
+	///批次号由医疗机构代码-填报日期(格式为YYYYMMDD)-当天批次(两位数字)-上传类型(1新增；2重传)
+	S dqDate=$zd(+$h,8)
+	s ^OrgbatchnoByDate(+$H)="H43110300029-"_dqDate_"-"_$g(^OrgLYLD(+$h,"batchno"))_"-"_$g(^OrgLYLD("XGBZ"))
+	q ""
+}
+
+/// 重传设置
+/// w ##class(web.DHCLYLDZN.Method.Tools).SetReUpINFO()
+ClassMethod SetReUpINFO(ReUpflag = "") As %String
+{
+	
+	//初始化调用位置：web.DHCLYLDZN.Method.JCXX
+	k ^OrgLYLD
+	s SDate=""
+	
+	//k ^OrgLYLDBC(+$h)
+	//补传日期和批次流水号设置，单日期补传,^OrgLYLDBC保存每日补传最大批次流水号
+	//补传日期1.1-1.11，2.2-2.23,3.3-3.15
+	//补传日期4.3-4.5  4.11  4.27-4.28
+	s SDate="2026-03-26"
+				
+	
+	s EDate=SDate      
+	s bcbatchno="02"    //补传批次流水号号02开始递增
+	i $d(^OrgLYLDBC(+$h,"bcbatchno")) d
+	.i +(^OrgLYLDBC(+$h,"bcbatchno"))>8  s ^OrgLYLDBC(+$h,"bcbatchno")=$g(^OrgLYLDBC(+$h,"bcbatchno"))+1
+	.e  s ^OrgLYLDBC(+$h,"bcbatchno")="0"_(+$g(^OrgLYLDBC(+$h,"bcbatchno"))+1)
+	e  s ^OrgLYLDBC(+$h,"bcbatchno")=bcbatchno
+	
+	
+	i (SDate = "")||(EDate = "") d
+	.s ^OrgLYLD("SDate")=$zd(+$h-1,3)
+	.s ^OrgLYLD("EDate")=$zd(+$h-1,3)
+	.s ^OrgLYLD("SDate2")=$zd(+$h,3)
+	.s ^OrgLYLD("EDate2")=$zd(+$h,3)
+	.s ^OrgLYLD("XGBZ")=1
+	.s ^OrgLYLD(+$h,"batchno")="01"
+	e  d
+	.s ^OrgLYLD("SDate")=SDate
+	.s ^OrgLYLD("EDate")=EDate
+	.s ^OrgLYLD("SDate2")=SDate
+	.s ^OrgLYLD("EDate2")=EDate
+	.s ^OrgLYLD("XGBZ")=1
+	.s ^OrgLYLD(+$h,"batchno")=$g(^OrgLYLDBC(+$h,"bcbatchno"))
+	.i ReUpflag'="" s ^OrgLYLD("XGBZ")=2  //重传传2
+	D ##class(web.DHCLYLDZN.Method.Tools).GetorgbatchnoByDate()   ///产生批次号
+	q ""
+}
+
+/// 4.1.1 业务量统计表(TBL_BUSINESS_METRICS)
+/// SELECT * FROM web_DHCLYLDZN_Method.GetTBLBUSINESSMETRICS("","")
+/// d ##class(%ResultSet).RunQuery("web.DHCLYLDZN.Method.Tools","GetTBLBUSINESSMETRICS","","")
+/// call web_DHCLYLDZN_Method.Tools_GetTBLBUSINESSMETRICS("","")
+Query GetTBLBUSINESSMETRICS(SDate = "", EDate = "") As websys.Query(ROWSPEC = "org_code,org_name,hospital_dept_code,hospital_dept_name,biz_time,outpatient_visits,emergency_visits,admissions,discharges,discharge_settlements,current_inpatients,authorized_beds,actual_beds,occupied_beds,available_beds,op_er_medical_costs,ipt_medical_costs,op_er_drug_costs,ipt_drug_costs,op_er_medicare_medical,ipt_medicare_medical,op_er_medicare_drug,ipt_medicare_drug,ipt_actual_costs,stat_field1,stat_field2,stat_field3,stat_field4,stat_field5,stat_field6,stat_field7,stat_field8,security_level,vali_flag,create_time,update_time,org_batch_no") [ SqlProc ]
+{
+}
+
+ClassMethod GetTBLBUSINESSMETRICSExecute(ByRef qHandle As %Binary, SDate = "", EDate = "") As %Status
+{
+	///D ##class(%ResultSet).RunQuery("web.DHCLYLDZN.Method.Tools","GetTBLBUSINESSMETRICS","","")
+	Set repid=$I(^CacheTemp)
+	Set qHandle=$lb(0,repid,0)
+	Set ind=1
+	
+	s HospitalID=""
+
+	s orgcode="H43110300029"
+	s orgname="永州市第三人民医院"
+	s securitylevel="000"
+	s:SDate=$c(0) SDate=""
+	s:EDate=$c(0) EDate=""	
+	i SDate="" S SDate=+$h-1
+	e  S SDate=$ZDH(SDate,3)
+	i EDate="" S EDate=+$h-1
+	e  S EDate=$ZDH(EDate,3)
+	
+	i $d(^OrgLYLD("SDate")) s SDate=$zdh(^OrgLYLD("SDate"),3)
+	i $d(^OrgLYLD("EDate")) s EDate=$zdh(^OrgLYLD("EDate"),3)
+	
+	
+	s orgbatchno=$g(^OrgbatchnoByDate(+$H))  ///批次号
+	
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BUSINESS_METRICS","St")=$zd(SDate,3)_" 00:00:01"
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BUSINESS_METRICS","Et")=$zd(EDate,3)_" 23:59:59"
+	
+	
+	k ^TMPTBLBUSINESSMETRICS($j)
+	k ^TMPChuanWeiCS($j)
+	s orgcode="H43110300029"
+	For tmpdate=SDate:1:EDate d
+	.s PAADMRowID=""
+	.f  s PAADMRowID=$o(^PAADMi("PAADM_AdmDate",tmpdate,PAADMRowID)) q:PAADMRowID=""  d
+	..s AdmType=$P(^PAADM(PAADMRowID),"^",2)
+	..q:AdmType'="O"
+	..s VisitStatus=$P(^PAADM(PAADMRowID),"^",20)
+	..q:VisitStatus'="A"
+	..s DepID=$P(^PAADM(PAADMRowID),"^",4)
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"outpatientvisits")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"outpatientvisits"))+1   ///门诊
+	.s PAADMRowID=""
+	.f  s PAADMRowID=$o(^PAADMi("AdminDateExt",tmpdate,PAADMRowID)) q:PAADMRowID=""  d
+	..s VisitStatus=$P(^PAADM(PAADMRowID),"^",20)
+	..q:VisitStatus'="A"
+	..s DepID=$P(^PAADM(PAADMRowID),"^",4)
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"admissions")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"admissions"))+1  ///入院
+	.s PAADMRowID=""
+	.f  s PAADMRowID=$o(^PAADMi("DischargeDateExt",tmpdate,PAADMRowID)) q:PAADMRowID=""  d
+	..s VisitStatus=$P(^PAADM(PAADMRowID),"^",20)
+	..s DepID=$P(^PAADM(PAADMRowID),"^",4)
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"discharges")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"discharges"))+1  ///出院
+	.s PRTRowid=""
+	.f  s PRTRowid=$o(^DHCINVPRTZY(0,"DATE",tmpdate,PRTRowid)) q:PRTRowid=""  d
+	..s PRTFlag=$P(^DHCINVPRTZY(PRTRowid),"^",8)
+	..q:PRTFlag'="N"
+	..s PRTAdm=$P(^DHCINVPRTZY(PRTRowid),"^",4)
+	..s DepID=$P(^PAADM(PRTAdm),"^",4)
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"dischargesettlements")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepID,"dischargesettlements"))+1  ///结算(出院)人次
+	.s InHosPatAdmID=""
+	.f  s InHosPatAdmID=$o(^User.InHosPatAdmI("SDatendex",tmpdate,InHosPatAdmID)) q:InHosPatAdmID=""  d
+	..s Bed=$Li(^User.InHosPatAdmD(InHosPatAdmID),4)
+	..q:Bed=""
+	..s DepDR=$Li(^User.InHosPatAdmD(InHosPatAdmID),5)
+	..s WardDr=$Li(^User.InHosPatAdmD(InHosPatAdmID),3)
+	..s WardID=$P(^PAWARD(WardDr),"^",5)
+	..S PAADMRowID=$Li(^User.InHosPatAdmD(InHosPatAdmID),2)
+	..s AdmType=$P(^PAADM(PAADMRowID),"^",2)
+	..q:AdmType'="I"
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"currentinpatients")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"currentinpatients"))+1  ///在院人数
+	..s ^TMPTBLBUSINESSMETRICS($j,tmpdate,WardID,"Ward")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,WardID,"Ward"))+1  ///在院病区人数
+	..
+	
+	s WARDRowID="0"
+	f  s WARDRowID=$O(^PAWARD(WARDRowID)) q:WARDRowID=""  d
+	.s WardID=$P($g(^PAWARD(WARDRowID)),"^",5)    ///转locID
+	.q:WardID=""
+	.s BEDChildsub=0
+	.f  s BEDChildsub=$O(^PAWARD(WARDRowID,"BED",BEDChildsub)) q:BEDChildsub=""  d
+	..s BEDCode=$p(^PAWARD(WARDRowID,"BED",BEDChildsub),"^",1)
+	..s RcFlag=$p(^PAWARD(WARDRowID,"BED",BEDChildsub),"^",4)
+	..q:RcFlag'="Y"
+	..S ^TMPChuanWeiCS($j,WardID,"actualbeds")=$g(^TMPChuanWeiCS($j,WardID,"actualbeds"))+1    ///实有床位数
+	..i BEDCode'["+" s ^TMPChuanWeiCS($j,WardID,"authorizedbeds")=$g(^TMPChuanWeiCS($j,WardID,"authorizedbeds"))+1   ///编制床位数  去掉加床
+	
+    For tmpdate=SDate:1:EDate d
+    .s WorkLoadRowid=""
+    .f  s WorkLoadRowid=$O(^DHCWorkLoad(0,"ORDDATE",tmpdate,WorkLoadRowid)) q:WorkLoadRowid=""  d
+    ..s TotalPrice=$P(^DHCWorkLoad(WorkLoadRowid),"^",16)
+    ..s WorkLoadType=$P(^DHCWorkLoad(WorkLoadRowid),"^",4)  ///门诊住院统计
+    ..s ResDepDR=$P(^DHCWorkLoad(WorkLoadRowid),"^",3)  ///患者科室
+    ..s ItemOrdDR=$P(^DHCWorkLoad(WorkLoadRowid),"^",2)
+    ..s ItemCatDR=$P(^ARCIM(+ItemOrdDR,$P(ItemOrdDR,"||",2),1),"^",10)
+    ..s OrderType=$P(^ARC("IC",ItemCatDR),"^",7)
+    ..s WorkLoadPAADMDR= $P(^DHCWorkLoad(WorkLoadRowid),"^",12)
+    ..s AdmReasonDR=$P(^PAADM(WorkLoadPAADMDR,1),"^",7)
+    ../////其他医院注意肿瘤没有急诊
+    ..i ((WorkLoadType="O")&&(OrderType'="R")) d
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicalcosts")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicalcosts"))+TotalPrice  //门急诊医疗费用
+    ...q:AdmReasonDR=1  ///自费的
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicaremedical")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicaremedical"))+TotalPrice  //门急诊医保医疗费用
+    ..i ((WorkLoadType="I")&&(OrderType'="R")) d
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicalcosts")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicalcosts"))+TotalPrice  //住院医疗费用
+    ...q:AdmReasonDR=1  ///自费的
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicaremedical")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicaremedical"))+TotalPrice  //住院医保医疗费用
+    ..i ((WorkLoadType="O")&&(OrderType="R")) d
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"operdrugcosts")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"operdrugcosts"))+TotalPrice  //门急诊药品费用
+    ...q:AdmReasonDR=1
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicaredrug")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"opermedicaredrug"))+TotalPrice   //门急诊医保药品费用
+    ..i ((WorkLoadType="I")&&(OrderType="R")) d
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptdrugcosts")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptdrugcosts"))+TotalPrice  //住院药品费用
+    ...q:AdmReasonDR=1
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicaredrug")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptmedicaredrug"))+TotalPrice  //住院医保药品费用
+    ..i WorkLoadType="I"  d
+    ...s ^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptactualcosts")=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,ResDepDR,"iptactualcosts"))+TotalPrice  //住院实际发生费用
+  
+    s createtime=$zd(+$h,3)_" "_$zt($P($h,",",2),1)
+    s updatetime=createtime
+    b ;1212121
+    s tmpdate=""
+    f  s tmpdate=$o(^TMPTBLBUSINESSMETRICS($j,tmpdate)) q:tmpdate=""  d
+    .s DepDR=""
+    .f  s DepDR=$O(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR)) q:DepDR=""  d
+    ..s (statfield1,statfield2,statfield3,statfield4,statfield5,statfield6,statfield7,statfield8)=""
+    ..s hospitaldeptcode=$P(^CTLOC(DepDR),"^",1)
+    ..S hospitaldeptname=$P(^CTLOC(DepDR),"^",2)
+    ..I hospitaldeptname["-" S hospitaldeptname=$p(hospitaldeptname,"-",2)
+    ..S biztime=$ZD(tmpdate,3)
+    ..S outpatientvisits=$G(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"outpatientvisits"))
+    ..S emergencyvisits=0  ///肿瘤没有急诊
+    ..s admissions=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"admissions"))
+    ..s discharges=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"discharges"))
+    ..s dischargesettlements=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"dischargesettlements"))
+    ..s currentinpatients=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"currentinpatients"))
+    ..s authorizedbeds=$g(^TMPChuanWeiCS($j,DepDR,"authorizedbeds"))   //编制床位数
+    ..s actualbeds=$g(^TMPChuanWeiCS($j,DepDR,"actualbeds")) ///实有床位数
+    ..s occupiedbeds=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"Ward"))   ///实际使用床位数
+    ..s availablebeds=actualbeds-occupiedbeds
+    ..s opermedicalcosts=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"opermedicalcosts"))
+    ..s iptmedicalcosts=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"iptmedicalcosts"))
+    ..s operdrugcosts=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"operdrugcosts"))
+    ..s iptdrugcosts=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"iptdrugcosts"))
+    ..s opermedicaremedical=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"opermedicaremedical"))
+    ..s iptmedicaremedical=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"iptmedicaremedical"))
+    ..s opermedicaredrug=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"opermedicaredrug"))
+    ..s iptmedicaredrug=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"iptmedicaredrug"))
+    ..s iptactualcosts=$g(^TMPTBLBUSINESSMETRICS($j,tmpdate,DepDR,"iptactualcosts"))
+    ..s valiflag=1
+	..d OutputRow 
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BUSINESS_METRICS","UPTime")=$zd(+$h,3)_" "_$zt($p($h,",",2),1) 
+	k ^TMPTBLBUSINESSMETRICS($j)
+	k ^TMPChuanWeiCS($j)
+	
+	Quit $$$OK
+OutputRow  
+    s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BUSINESS_METRICS","TNum")=ind                        
+	s data=$lb(orgcode,orgname,hospitaldeptcode,hospitaldeptname,biztime,$fn(outpatientvisits,"",2),$fn(emergencyvisits,"",2),$fn(admissions,"",2),$fn(discharges,"",2),$fn(dischargesettlements,"",2),$fn(currentinpatients,"",2),$fn(authorizedbeds,"",2),$fn(actualbeds,"",2),$fn(occupiedbeds,"",2),$fn(availablebeds,"",2),$fn(opermedicalcosts,"",2),$fn(iptmedicalcosts,"",2),$fn(operdrugcosts,"",2),$fn(iptdrugcosts,"",2),$fn(opermedicaremedical,"",2),$fn(iptmedicaremedical,"",2),$fn(opermedicaredrug,"",2),$fn(iptmedicaredrug,"",2),$fn(iptactualcosts,"",2),statfield1,statfield2,statfield3,statfield4,statfield5,statfield6,statfield7,statfield8,securitylevel,valiflag,createtime,updatetime,orgbatchno)
+    s ^CacheTemp(repid,ind)=data
+	s ind=ind+1
+
+	q
+}
+
+/// 4.1.2 数据量记录汇总表(TBL_DATA_VOLUME_STATS)
+/// d ##class(%ResultSet).RunQuery("web.DHCLYLDZN.Method.Tools","GetTBLDATAVOLUMESTATS","","")
+/// call web_DHCLYLDZN_Method.Tools_GetTBLDATAVOLUMESTATS("","")
+Query GetTBLDATAVOLUMESTATS(SDate = "", EDate = "") As websys.Query(ROWSPEC = "org_code,platform_table_name,process_start_time,process_end_time,expected_total_count,actual_upload_count,detail_upload_flag,statistics_flag,security_level,vali_flag,create_time,update_time,org_batch_no") [ SqlProc ]
+{
+}
+
+ClassMethod GetTBLDATAVOLUMESTATSExecute(ByRef qHandle As %Binary, SDate = "", EDate = "") As %Status
+{
+	///D ##class(%ResultSet).RunQuery("web.UDHCWJWDZBLOne","GetTBLDATAVOLUMESTATS","","")
+	Set repid=$I(^CacheTemp)
+	Set qHandle=$lb(0,repid,0)
+	Set ind=1
+	
+	s orgcode="H43110300029"
+	s:SDate=$c(0) SDate=""
+	s:EDate=$c(0) EDate=""	
+	i SDate="" S SDate=+$h
+	e  S SDate=$ZDH(SDate,3)
+	i EDate="" S EDate=+$h
+	e  S EDate=$ZDH(EDate,3)
+	
+	i $d(^OrgLYLD("SDate2")) s SDate=$zdh(^OrgLYLD("SDate2"),3)
+	i $d(^OrgLYLD("EDate2")) s EDate=$zdh(^OrgLYLD("EDate2"),3)
+
+	
+	s tSDate=SDate
+	I tSDate=+$H S tSDate=+$H-1
+	s tEDate=EDate
+	I tEDate=+$H S tEDate=+$H-1
+	
+	s orgcode="H43110300029"
+	s orgbatchno=$g(^OrgbatchnoByDate(+$H))  ///批次号
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_DATA_VOLUME_STATS","St")=$zd(tSDate,3)_" 00:00:01"
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_DATA_VOLUME_STATS","Et")=$zd(tEDate,3)_" 23:59:59"
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_DATA_VOLUME_STATS","UPTime")=$zd(+$h,3)_" "_$zt($p($h,",",2),1)
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_DATA_VOLUME_STATS","TNum")="85"
+	s ct=0,tempdata=""
+	For tmpdate=SDate:1:EDate d
+	.s orgbatchno=$g(^OrgbatchnoByDate(+$h))  ///批次号
+	.q:orgbatchno=""
+    .s platformtablename=""
+    .f  s platformtablename=$o(^TOrgbatchnoByDate(+$h,orgbatchno,platformtablename)) q:platformtablename=""  d
+    ..s processstarttime=$g(^TOrgbatchnoByDate(+$h,orgbatchno,platformtablename,"St"))
+    ..s processendtime=$g(^TOrgbatchnoByDate(+$h,orgbatchno,platformtablename,"Et"))
+    ..s expectedtotalcount=+$g(^TOrgbatchnoByDate(+$h,orgbatchno,platformtablename,"TNum"))
+    ..s actualuploadcount=expectedtotalcount
+    ..s detailuploadflag=1
+    ..s statisticsflag=2
+    ..s securitylevel="000"
+    ..s valiflag=1
+    ..s createtime=$zd(+$h,3)_" "_$zt($p($h,",",2),1)
+    ..s updatetime=createtime
+	..d OutputRow 
+	
+	Quit $$$OK
+OutputRow                             
+	s data=$lb(orgcode,platformtablename,processstarttime,processendtime,expectedtotalcount,actualuploadcount,detailuploadflag,statisticsflag,securitylevel,valiflag,createtime,updatetime,orgbatchno)
+    s ^CacheTemp(repid,ind)=data
+	s ind=ind+1
+
+	q
+}
+
+/// 4.1.3 批次表(TBL_BATCHES)
+/// d ##class(%ResultSet).RunQuery("web.DHCLYLDZN.Method.Tools","GetTBLBATCHES","","")
+/// call web_DHCLYLDZN_Method.Tools_GetTBLBATCHES("","")
+Query GetTBLBATCHES(SDate = "", EDate = "") As websys.Query(ROWSPEC = "org_code,table_name,org_batch_no,report_date,upload_date,batches_status") [ SqlProc ]
+{
+}
+
+ClassMethod GetTBLBATCHESExecute(ByRef qHandle As %Binary, SDate = "", EDate = "") As %Status
+{
+	///D ##class(%ResultSet).RunQuery("web.UDHCWJWDZBLOne","GetTBLDATAVOLUMESTATS")
+	Set repid=$I(^CacheTemp)
+	Set qHandle=$lb(0,repid,0)
+	Set ind=1
+	
+	s orgcode="H43110300029"
+	s:SDate=$c(0) SDate=""
+	s:EDate=$c(0) EDate=""	
+	i SDate="" S SDate=+$h
+	e  S SDate=$ZDH(SDate,3)
+	i EDate="" S EDate=+$h
+	e  S EDate=$ZDH(EDate,3)
+	
+	
+	i $d(^OrgLYLD("SDate2")) s SDate=$zdh(^OrgLYLD("SDate2"),3)
+	i $d(^OrgLYLD("EDate2")) s EDate=$zdh(^OrgLYLD("EDate2"),3)
+	
+	
+	s orgcode="H43110300029"
+	s orgbatchno=$g(^OrgbatchnoByDate(+$H))  ///批次号
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","St")=$zd(SDate,3)_" 00:00:01"
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","Et")=$zd(EDate,3)_" 23:59:59"
+	
+	s (reportdate,uploaddate,batchesstatus)=""  //批次表用
+	
+	For tmpdate=SDate:1:EDate d
+    .s tablename=""
+    .f  s tablename=$o(^TOrgbatchnoByDate(+$h,orgbatchno,tablename)) q:tablename=""  d
+    ..s uploaddate=$g(^TOrgbatchnoByDate(+$h,orgbatchno,tablename,"UPTime"))
+    ..q:uploaddate=""
+    ..i tmpdate=+$h s update=+$h-1
+    ..e  s update=tmpdate
+    ..s uploaddate=$zd(update,3)_" "_$p(uploaddate," ",2)
+    ..s reportdate=$zd(+$h,3)_" "_$zt($p($h,",",2),1)
+    ..s batchesstatus=1
+	..d OutputRow 
+	s tablename="TBL_BATCHES"
+	d OutputRow
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","UPTime")=$zd(+$h,3)_" "_$zt($p($h,",",2),1)
+	s:'$d(^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","TNum")) ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","TNum")=0
+	Quit $$$OK
+OutputRow                            
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TBL_BATCHES","TNum")=ind 
+	s data=$lb(orgcode,tablename,orgbatchno,reportdate,uploaddate,batchesstatus)
+    s ^CacheTemp(repid,ind)=data
+	s ind=ind+1
+
+	q
+}
+
+/// 根据类型获取ID
+/// w ##class(web.DHCLYLDZN.Method.Tools).GetAllSectionDataByAdm(1131,"日常病程记录")
+ClassMethod GetAllSectionDataByAdm(EpisodeID As %String, Type As %String, aa = "") As %String
+{
+	q:Type="" ""
+	i aa'="" k ^TMPfDZBLData(aa)
+	s Str=""
+	s HappenDate=""
+    f  s HappenDate=$O(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate)) q:HappenDate=""  d
+    .s HappenTime=""
+    .f  s HappenTime=$o(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate,HappenTime)) q:HappenTime=""  d
+    ..s Instanceid=""
+    ..F  S Instanceid=$o(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate,HappenTime,Instanceid)) Q:Instanceid=""  D
+    ...Set objInstance=##Class(EMR.DB.DocumentData).%OpenId(Instanceid)
+	...q:objInstance=""
+	...S Title=objInstance.DOCName
+	...
+	...q:((Title'=Type)&&(Type'="日常病程"))
+	...q:((Type="日常病程")&&(Title'["日常病程")&&(Title'["查房记录"))
+	...s TemplateID=objInstance.TemplateID.Sequence
+	...s CreatDate=objInstance.CreateDate
+	...s CreatTime=objInstance.CreateTime
+	...s Status=objInstance.Status
+	...q:Status'="Save"
+	...s CreatDateTime=$zd(CreatDate,3)_" "_$zt(CreatTime,1)
+	...s ModifyDate=objInstance.ModifyDate
+	...s ModifyTime=objInstance.ModifyTime
+	...s ModifyDateTime=""
+	...i ModifyDate'="" s ModifyDateTime=$zd(ModifyDate,3)_" "_$zt(ModifyTime,1)
+	...s HappenDate=objInstance.HappenDate
+	...s HappenTime=objInstance.HappenTime
+	...i HappenDate'="" s HappenDateTime=$zd(HappenDate,3)_" "_$zt(HappenTime,1)
+	...s Str=CreatDateTime_"^"_ModifyDateTime_"^"_Instanceid_"^"_TemplateID_"^"_objInstance.CreateUser.SSUSRName_"^"_HappenDateTime_"^"_objInstance.ModifyUser.SSUSRName
+	...i aa'="" s ^TMPfDZBLData(aa,Instanceid)=Str
+	...
+	...
+	q Str
+}
+
+/// 根据类型获取ID
+/// w ##class(web.DHCLYLDZN.Method.Tools).GetZQTYAllSectionDataByAdm(1131,"首次病程记录")
+ClassMethod GetZQTYAllSectionDataByAdm(EpisodeID As %String, Type As %String) As %String
+{
+	k ^TMPfDZBLData($j)
+	s Str=""
+	s HappenDate=""
+    f  s HappenDate=$O(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate)) q:HappenDate=""  d
+    .s HappenTime=""
+    .f  s HappenTime=$o(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate,HappenTime)) q:HappenTime=""  d
+    ..s Instanceid=""
+    ..F  S Instanceid=$o(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate,HappenTime,Instanceid)) Q:Instanceid=""  D
+    ...s RowID=""
+    ...f  s RowID=$O(^EMR.DB.DocumentDataI("IdxEpisodeStatusHDT",EpisodeID," SAVE",HappenDate,HappenTime,Instanceid,RowID)) q:RowID=""  d
+    ....s InstanceID=Instanceid_"||"_RowID
+    ....Set objInstance=##Class(EMR.DB.DocumentData).%OpenId(InstanceID)
+	....q:objInstance=""
+	....S Title=objInstance.DOCName
+	....q:Title'[Type
+	....q:((Type="知情同意书")&&((Title="手术（有创操作检查）知情同意书")||(Title="择期输血血液制品知情同意书")))
+	....s TemplateID=objInstance.TemplateID
+	....s CreatDate=objInstance.CreateDate
+	....s CreatTime=objInstance.CreateTime
+	....s Status=objInstance.Status
+	....q:Status'="Save"
+	....s CreatDateTime=$zd(CreatDate,3)_" "_$zt(CreatTime,1)
+	....s ModifyDate=objInstance.ModifyDate
+	....s ModifyTime=objInstance.ModifyTime
+	....s ModifyDateTime=""
+	....i ModifyDate'="" s ModifyDateTime=$zd(ModifyDate,3)_" "_$zt(ModifyTime,1)
+	....s ModifyUser=objInstance.ModifyUser
+	....s HappenDate=objInstance.HappenDate
+	....s HappenTime=objInstance.HappenTime
+	....i HappenDate'="" s HappenDateTime=$zd(HappenDate,3)_" "_$zt(HappenTime,1)
+	....s Str=CreatDateTime_"^"_ModifyDateTime_"^"_InstanceID_"^"_TemplateID_"^"_objInstance.CreateUser_"^"_HappenDateTime_"^"_Title_"^"_ModifyUser
+	....s ^TMPfDZBLData($j,InstanceID)=Str
+	....
+	....
+	q Str
+}
+
+ClassMethod GetSectionData(InstanceID As %String, TemplateID As %String, ElementCode As %String) As %String
+{
+	s result=""
+	s AID=""
+	f  s AID=$o(^DHCEMRI.ISectionDescI("IdxForUpdate"," "_InstanceID," "_ElementCode,AID)) Q:AID=""  D
+	.s objSection = ##Class(EMRinstance.ISectionDesc).%OpenId(AID)
+    .do objSection.Text.Rewind()
+    .Q:(objSection.Text.AtEnd '= 0)
+    .S len = 1024
+    .s result = objSection.Text.Read(len) 
+  	Q result
+}
+
+/// Description:：     根据就诊号获取有效的InstanceIDList
+/// Table：            
+/// Input：         Adm:就诊号
+/// Output：         获取该患者所有的有效的病例实例ID列表，以“^”作为分割符
+/// Return：         
+/// Others：        w ##class(MKLCYX.LCYXInterface).GetALLInstanceID("136419")
+ClassMethod GetALLInstanceID(Adm As %String) As %String
+{
+    q:($d(Adm)=0)||(Adm="") ""
+    
+    s (InstanceIDList,ValidInstanceIDList) = ""
+    s DocID = "66"
+       s TheECRecord=""
+    For {
+        
+        ;s DocID = $O(^DHCEMRI.ECRecordI("IdxEpisodeIDChartItemID",Adm,DocID,""))
+        ;q:(DocID="")
+        s TheECRecord = $O(^DHCEMRI.ECRecordI("IdxEpisodeIDChartItemID",Adm,DocID,TheECRecord))
+        Q:(TheECRecord="")
+        
+        s LisNo = ""
+        For{
+           
+            s InstanceID = ""
+            s LisNo = $O(^DHCEMRI.InstanceDataI("IdxEcRecordAndListNo",TheECRecord,LisNo))
+            q:(LisNo="")
+            s InstanceID = $TR(TheECRecord_"||"_LisNo," ","")
+            s objInstance = ##class(EMRinstance.InstanceData).%OpenId(InstanceID)
+            continue:($IsObject(objInstance)=0)
+            s status = objInstance.Status
+            continue:(status'="Save")
+            // 过滤因同一模板挂到两个界面展示下导致的数据重复
+            s tempInstanceID = "^"_InstanceID_"^"
+            continue:(ValidInstanceIDList[tempInstanceID)
+            s ValidInstanceIDList = ValidInstanceIDList_tempInstanceID
+            
+            s:(InstanceIDList'="") InstanceIDList = InstanceIDList_"^"
+            s InstanceIDList = InstanceIDList_InstanceID
+        }
+    }
+    q InstanceIDList
+}
+
+/// 科室信息
+/// d ##class(%ResultSet).RunQuery("web.DHCLYLDZN.Method.JCXX","TBDICDEPARTMENT")
+/// call web_DHCLYLDZN_Method.JCXX_TBDICDEPARTMENT()
+Query TBDICDEPARTMENT() As %Query(ROWSPEC = "org_code:%String,hospital_dept_code:%String,hospital_dept_name:%String,standard_dept_code:%String,standard_dept_name:%String,dept_phone:%String,description:%String,d_status:%String,vali_flag:%String,create_time,update_time,org_batch_no") [ SqlProc ]
+{
+}
+
+ClassMethod TBDICDEPARTMENTExecute(ByRef qHandle As %Binary) As %Status
+{
+   
+	Set repid=$I(^CacheTemp)
+	Set qHandle=$lb(0,repid,0)
+	Set ind=1
+	//D ##class(web.DHCLYLDZN.Method.Tools).GetorgbatchnoByDate()   ///产生批次号
+	
+	D ##class(web.DHCLYLDZN.Method.Tools).SetReUpINFO()  //重传初始化日期、产生批次号
+	
+	s orgcode="H43110300029"
+	s orgbatchno=$g(^OrgbatchnoByDate(+$H))  ///批次号
+    s ^TOrgbatchnoByDate(+$H,orgbatchno,"TB_DIC_DEPARTMENT","St")=$zd(+$h,3)_" 00:00:01"
+    s ^TOrgbatchnoByDate(+$H,orgbatchno,"TB_DIC_DEPARTMENT","Et")=$zd(+$h,3)_" 23:59:59"
+    
+	s CTLOCID=0  
+	f  s CTLOCID=$o(^CTLOC(CTLOCID))  q:CTLOCID=""  d
+	.s ID=CTLOCID  //ID
+	.s DEPTCODE=$P(^CTLOC(CTLOCID),"^",1)  //科室编号
+	.s DEPTNAME=$P(^CTLOC(CTLOCID),"^",2)  //科室名称
+	.//s Locinfo=##class(web.JKPTLookupTable).GetNameByBusCodeAndTableName("CDC","CT_LOC",DEPTCODE)  
+	.s standarddeptcode=##class(web.INSUDicDataCom).GetDicByCodeAndInd("deptCon00A",DEPTCODE,6,2)   //标志科室编号   待确认
+	.q:standarddeptcode=""
+	.s standarddeptname=##class(web.INSUDicDataCom).GetDicByCodeAndInd("deptCon00A",DEPTCODE,7,2)	//标准科室名称   待确认
+	.s deptphone="0731-00000"     //科室电话 HIS未维护，可写死
+	.s description=""
+	.s CTLOCDateActiveTo=$P(^CTLOC(CTLOCID),"^",25)   //科室结束时间
+	.s dstatus="0"
+	.i (CTLOCDateActiveTo="") s dstatus="1"
+	.s valiflag=1
+    .s SPCODE=$P(^CTLOC(CTLOCID),"^",43)  //首拼码 
+    .s DEPId=$P(^CTLOC(CTLOCID),"^",19) 
+    .q:DEPId="" 
+    .s loctypeid="3",TYPENAME="其它"
+	.s createtime=$P(^CTLOC(CTLOCID),"^",24)
+	.i createtime'="" s createtime=$zd(createtime,3)_" 00:00:01"     //最后同步日期 
+    .s CTLOCDateActiveFrom=$P(^RBC("DEP",DEPId),"^",24)
+    .s SYNCAT=""
+    .i CTLOCDateActiveFrom'="" s SYNCAT=$zd(CTLOCDateActiveFrom,3)_" 00:00:01"     //最后同步日期 
+    .s:SYNCAT="" SYNCAT=createtime
+    .s HOSPId=$P(^CTLOC(CTLOCID),"^",22)
+    .q:HOSPId=""
+    
+    .s orgbatchno=$tr(orgbatchno,"-01-1","-01-2")
+	.s createtime=$zdt($h,3)  ///改成每天凌晨重传
+    
+	.do output
+	s ^TOrgbatchnoByDate(+$H,orgbatchno,"TB_DIC_DEPARTMENT","UPTime")=$zd(+$h,3)_" "_$zt($p($h,",",2),1) 
+	Quit $$$OK
+	
+output
+
+
+    s ^TOrgbatchnoByDate(+$H,orgbatchno,"TB_DIC_DEPARTMENT","TNum")=ind  
+	s data=$lb(orgcode,DEPTCODE,DEPTNAME,standarddeptcode,standarddeptname,deptphone,description,dstatus,valiflag,createtime,SYNCAT,orgbatchno)
+	s ^CacheTemp(repid,ind)=data
+ 	s ind=ind+1
+	q
+}
+
+ClassMethod TBDICDEPARTMENTClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = TBDICDEPARTMENTExecute ]
+{
+	Set repid=$LIST(qHandle,2)
+	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod TBDICDEPARTMENTFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = TBDICDEPARTMENTExecute ]
+{
+	Set AtEnd=$LIST(qHandle,1)
+	Set repid=$LIST(qHandle,2)
+	Set ind=$LIST(qHandle,3)
+	Set ind=$o(^CacheTemp(repid,ind))
+	If ind="" {				
+		Set AtEnd=1
+		Set Row=""
+	}
+	Else      {				
+		Set Row=^CacheTemp(repid,ind)
+	}
+	s qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+}

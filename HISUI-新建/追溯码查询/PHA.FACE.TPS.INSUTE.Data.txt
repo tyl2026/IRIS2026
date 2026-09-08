@@ -1,0 +1,2565 @@
+/// Description:国家医保两定接口药品进销存数据
+/// Creator:    hulihua
+/// CreateDate: 2024-12-04
+/// d $system.OBJ.MakeClassDeployed("PHA.FACE.TPS.INSUTE.Data")
+Class PHA.FACE.TPS.INSUTE.Data Extends Com
+{
+
+/// Description: 拉取3512方法,将3512的返回中的配送批次流水
+/// Creator: 	 tanwenbin
+/// CreatDate:	 20250812
+/// Table:		
+/// Input:		 inci 库存项ID, traceCode追溯码, UserId拉取的用户ID, HospId 院区ID, InsuManf
+/// Output:		 
+/// Return:		 成功：fixmedinsBchno，失败："" 原因查日志表 BS_PHA_IN.InsuDataLog
+/// Others:
+/// w ##class(PHA.FACE.TPS.INSUTE.Data).get3512FixmedinsBchno(5175,"83830471090549422714",1,"2","1")
+ClassMethod get3512FixmedinsBchno(inciId, traceCode, UserId, HospId, InsuManf)
+{
+	q:traceCode="" ""
+	s titleObj = ##class(PHA.COM.Object).%New()
+	d ##class(Format).SetTitleData(titleObj, UserId, HospId, InsuManf)
+	d titleObj.%Set("infno", "3512")
+	s inciCode = $p(^INCI(inciId,1),"^",1)
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s busData = $lb(insuCode,inciCode,traceCode)
+	s busDetObj = ##class(Format).DataToJSON("3512", busData, InsuManf, HospId)
+	s inputObj = ##class(PHA.COM.Object).%New()
+	d inputObj.%Set("data", busDetObj)
+	d titleObj.%Set("input", inputObj)
+	s logStr = $lb(traceCode,"",inciId,0)
+	s insertRet = ##class(LogSave).SaveLog("Method3512", (titleObj.%ToJSON()), logStr, HospId, InsuManf)
+
+	s retObj = ..SendToInsuFace(titleObj, HospId, InsuManf)
+
+	s infoCode = retObj.infcode
+	s fixmedinsBchno = "" ;retObj.output.%Get(0).fixmedinsBchno
+	s retInfo = retObj.%ToJSON()
+	s pointer = traceCode
+	s trdnFlag = 0
+	if (infoCode '= 0) {
+		d ##class(LogSave).UpdateLog("Method3512", retInfo, pointer, trdnFlag, "N", InsuManf)
+	} else {
+		s:retObj.output'="null" fixmedinsBchno = retObj.output.%Get(0).fixmedinsBchno
+		d ##class(LogSave).UpdateLog("Method3512", retInfo, pointer, trdnFlag, "Y", InsuManf)
+	}
+	d inputObj.%Clear()
+	d retObj.%Clear()
+	d titleObj.%Remove("input")
+	q fixmedinsBchno
+}
+
+/// 项目HIS版本号
+/// 0 ：8.3之前版本
+/// 1 : 8.3以及之后版本
+/// 2 : 8.5以及之后版本
+Parameter PHAVERSION = 2;
+
+/// Description: 获取3501商品盘存上传接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-12
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, InstItmId-盘点明细表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3501Data()
+ClassMethod Get3501Data(Date, BusIdStr, InstItmId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(InstItmId = "") ..Error(-1, "日期、业务或盘点明细ID不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3501Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s uomType = $p(configStr, "^", 1)
+	s resQtyType = $p(configStr, "^", 2)
+	s upExtTCodeFlag = $p(configStr, "^", 5)
+	s ret = 0
+	if (InstItmId '= "") {
+		q:('$d(^DHCINST(+InstItmId, "STI", $p(InstItmId, "||", 2)))) ..Error(-1, "该明细在盘点表中不存在！")
+		s locId = $p($g(^DHCINST(+InstItmId)), "^", 5)
+		s hospId = $p(^CTLOC(locId), "^", 22)
+		q:((hospId '= "") && (HospId '= hospId)) ..Error(-1, "该台帐院区不匹配！")
+		s instItmId = InstItmId
+		d BuildData
+	} elseif (BusIdStr '= "") {
+		s instId = $p(BusIdStr, "^", 1)
+		q:('$d(^DHCINST(instId))) ..Error(-1, "该盘点单数据在系统中不存在！")
+		s locId = $p(^DHCINST(instId), "^", 5)
+		s hospId = $p(^CTLOC(locId), "^", 22)
+		q:((hospId '= "") && (HospId '= hospId)) ..Error(-1, "该盘点单院区不匹配！")
+		s instCh = ""
+		for {
+			s instCh = $o(^DHCINST(instId, "STI",instCh))
+			q:(instCh = "")
+			continue:('$d(^DHCINST(instId, "STI",instCh)))
+			s instItmId = instId_"||"_instCh
+			d BuildData
+		}
+	} else {
+		s instId = ""
+		for {
+			s instId = $o(^DHCINST(0, "DATE", Date, instId))
+			q:(instId = "")
+			continue:('$d(^DHCINST(instId)))
+			s locId = $p(^DHCINST(instId), "^", 5)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			continue:((hospId '= "") && (HospId '= hospId))
+			s instCh = 0
+			for {
+				s instCh = $o(^DHCINST(instId, "STI",instCh))
+				q:(instCh = "")
+				continue:('$d(^DHCINST(instId, "STI",instCh)))
+				s instItmId = instId_"||"_instCh
+				d BuildData
+			}
+		}
+	}
+	q ret
+BuildData
+	s instItmData = $g(^DHCINST(+instItmId, "STI", $p(instItmId, "||", 2)))
+	s inclb = $p(instItmData, "^", 1)
+	s inciId = +inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	s indexId = instItmId
+	q:(..GetSuccFlag("Method3501",indexId, InsuManf, TrdnFlag) = "Y") ""
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	s instDate = $p(^DHCINST(+instItmId), "^", 5)
+	if (instDate '= "") {
+		s instDate = $zd(instDate, 3)
+	}
+	s bchNo = instItmId
+	s batData = ..GetBatByInclb(inclb)
+	s batNo = $lg(batData, 1)
+	s expDate = $lg(batData, 2) 
+	s produceDate = $lg(batData, 3)
+	s remarks = ""													// 备注
+	s countQty = $p(instItmData, "^", 5)
+	s instUomId = $p(instItmData, "^", 17)
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+ 	s instFac = ..UomFac(instUomId, bUomId)
+ 	s bCountQty= countQty * instFac
+ 	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s retCodeObj = ..GetTraceCode(instItmId)
+	s pQty = retCodeObj.%Get("PQty")
+	s pTCodeArr = retCodeObj.%Get("PTCode")
+	if (pTCodeArr.%Size() > 0) {
+		s trdnFlag = 0
+		if ((uomType = "1") || (uomType = "2")) {
+			s qty = pQty / inciFac
+		} else {
+			s qty = pQty
+		}
+		s traceCodeArr = pTCodeArr
+		d OutPutRow
+	}
+	s sTCodeArr = retCodeObj.%Get("STCode")
+	if (resQtyType = "1") {
+		s sQty = retCodeObj.%Get("SQty")
+	} else {
+		s sQty = bCountQty - pQty
+	}
+	if (sQty > 0) {
+		s trdnFlag = 1
+		if (uomType = "1") {
+			s qty = sQty / inciFac
+		} else {
+			s qty = sQty
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow
+	} elseif (pTCodeArr.%Size() = 0) {
+		s sQty = bCountQty
+		s trdnFlag = 1
+		if (uomType = "1") {
+			s qty = sQty / inciFac
+		} else {
+			s qty = sQty
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow 
+	}
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s noTCodeFlag = retCodeObj.%Get("NoTCodeFlag")
+	if (traceCodeArr.%Size() > 0) {
+		if (noTCodeFlag = "N") {
+			s existCode = "Y"
+		} else {
+			s existCode = "C"
+		}
+	} else {
+		s existCode = "N"
+		q:(TaskFlag = "N")||(upExtTCodeFlag = "Y")
+	}
+	s tCodeJsonStr = traceCodeArr.%ToJSON()
+	s data1 = $lb(insuCode, inciCode, inciDesc, rxFlag, instDate)
+	s data2 = $lb(qty, batNo, bchNo, produceDate, expDate)
+	s data3 = $lb(remarks, tCodeJsonStr)
+	s data = data1_data2_data3
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", Pid, "Data", +instItmId, $p(instItmId, "||", 2), trdnFlag) = data
+	s logData = $lb(indexId, bchNo, inciId, trdnFlag, existCode)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3501Data", Pid, "Log", +instItmId, $p(instItmId, "||", 2), trdnFlag) = logData
+	q
+}
+
+/// Description: 获取3502商品库存变更接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-09
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3502Data()
+ClassMethod Get3502Data(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(IntrId = "") ..Error(-1, "日期、业务或台账不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3502Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s uomType = $p(configStr, "^", 1)
+	s resQtyType = $p(configStr, "^", 2)
+	s upExtTCodeFlag = $p(configStr, "^", 5)
+	s ret = 0
+	if (IntrId '= "") {
+		q:('$d(^DHCINTR(IntrId))) ..Error(-1, "该业务在台帐中不存在！")
+		s intrData = $g(^DHCINTR(IntrId))
+		s inclb = $p(intrData, "^", 7)
+		s recLocId = $$LOC^ST01(inclb)
+		s hospId = $p(^CTLOC(recLocId), "^", 22)
+		q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该台帐院区不匹配！")
+		s intrId = IntrId
+		d BuildData
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if ((busType = "T")||(busType = "K")) {
+			s initId = $p(BusIdStr, "^", 1)
+			q:('$d(^DHCINIT(initId))) ..Error(-1, "该库存转移单在系统不存在！")
+			s frLocId = $p(^DHCINIT(initId), "^", 5)
+			s hospId = $p(^CTLOC(frLocId), "^", 22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该库存转移单院区不匹配！")
+			s initCh = 0
+			for {
+				s initCh = $o(^DHCINIT(initId, "ITI",initCh))
+				q:(initCh = "")
+				continue:('$d(^DHCINIT(initId, "ITI",initCh)))
+				s intrPointer = initId_"||"_initCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", busType, intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s inclb = $p(^DHCINTR(intrId), "^", 7)
+					d BuildData
+				}
+			}
+		} elseif (busType = "G") {
+			s ingdRecId = $p(BusIdStr, "^", 1)
+			q:('$d(^DHCINGR(ingdRecId))) ..Error(-1, "该入库单在系统不存在！")
+			s locId = $p(^DHCINGR(ingdRecId), "^", 13)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该入库单院区不匹配！")
+			s ingdRecCh = 0
+			for {
+				s ingdRecCh = $o(^DHCINGR(ingdRecId, "GRI", ingdRecCh))
+				q:(ingdRecCh = "")
+				continue:('$d(^DHCINGR(ingdRecId, "GRI", ingdRecCh)))
+				s intrPointer = ingdRecId_"||"_ingdRecCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", busType, intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s inclb = $p(^DHCINTR(intrId), "^", 7)
+					d BuildData
+				}
+			}
+		} elseif (busType = "R") {
+			s ingdRetId = $p(BusIdStr, "^", 1)
+			q:('$d(^INGRT(ingdRetId))) ..Error(-1, "该退货单在系统不存在！")
+			s locId = $p(^INGRT(ingdRetId), "^", 7)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该退货单院区不匹配！")
+			s ingdRetCh = 0
+			for {
+				s ingdRetCh = $o(^INGRT(ingdRetId,"DHCGRR", ingdRetCh))
+				q:(ingdRetCh = "")
+				continue:('$d(^INGRT(ingdRetId,"DHCGRR", ingdRetCh)))
+				s intrPointer = ingdRetId_"||"_ingdRetCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", busType, intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s inclb = $p(^DHCINTR(intrId), "^", 7)
+					d BuildData
+				}
+			}
+		} elseif (busType = "A") {
+			s inadjId = $p(BusIdStr, "^", 1)
+			q:('$d(^DHCINAD(inadjId))) ..Error(-1, "该库存调整单在系统不存在！")
+			s locId = $p(^DHCINAD(inadjId), "^", 16)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该库存调整单院区不匹配！")
+			s inadjCh = 0
+			for {
+				s inadjCh = $o(^DHCINAD(inadjId, "ADI", inadjCh))
+				q:(inadjCh = "")
+				continue:('$d(^DHCINAD(inadjId, "ADI", inadjCh)))
+				s intrPointer = inadjId_"||"_inadjCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", busType, intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s inclb = $p(^DHCINTR(intrId), "^", 7)
+					d BuildData
+				}
+			}
+		} elseif (busType = "D") {
+			s inscpId = $p(BusIdStr, "^", 1)
+			q:('$d(^DHCINSP(inscpId))) ..Error(-1, "该库存报损单在系统不存在！")
+			s locId = $p(^DHCINSP(inscpId), "^", 5)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该库存报损单院区不匹配！")
+			s inscpCh = 0
+			for {
+				s inscpCh = $o(^DHCINSP(inscpId, "I", inscpCh))
+				q:(inscpCh = "")
+				continue:('$d(^DHCINSP(inscpId, "I", inscpCh)))
+				s intrPointer = inscpId_"||"_inscpCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", busType, intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s inclb = $p(^DHCINTR(intrId), "^", 7)
+					d BuildData
+				}
+			}
+		}
+	} else {
+		s typeList = $lb("A", "D", "T", "K", "G", "R")
+		s typeLen = $ll(typeList)
+		for typeJ = 1 : 1 : typeLen {
+			s type = $lg(typeList, typeJ)
+			s intrId = ""
+			for {
+				s intrId = $o(^DHCINTR(0, "TypeDate", type, Date, intrId))
+				q:(intrId = "")
+				continue:('$d(^DHCINTR(intrId)))
+				s intrData = ^DHCINTR(intrId)
+				s indexId = intrId
+				s inclb = $p(intrData, "^", 7)
+				s recLocId = $$LOC^ST01(inclb)
+				s hospId = $p(^CTLOC(recLocId), "^", 22)
+				continue:(hospId '= "")&&(HospId '= hospId)
+				d BuildData
+			}
+		}
+	}
+	q ret
+BuildData
+	s inciId = +inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	s indexId = intrId
+	q:(..GetSuccFlag("Method3502",indexId, InsuManf, TrdnFlag) = "Y") ""
+	s intrData = $g(^DHCINTR(intrId))
+	s intrDate = $p(intrData, "^", 2)
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s chgType = ..ChangeType(intrId, HospId)
+	q:(chgType = "") ""
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	
+	s incib=$p(^INCI(+inclb,"IL",$p(inclb,"||",2),"LB",$p(inclb,"||",3)),"^",1)
+	s bchNo =..getApprovalNoByIncib(incib) //incib  // intrId
+	i bchNo="" s bchNo=incib
+	s intrTime = $p(intrData, "^", 3)
+	if (intrDate '= "") {
+		s chgDate = $zd(intrDate, 3)
+	}
+	if (intrTime '= "") {
+		s chgTime = $zt(intrTime, 1)
+	}
+	s chgDateTime = chgDate_" "_chgTime
+	s intrUserId = $p(intrData, "^", 11)
+	s intrUserStr = ..GetPharUserStr(intrUserId)
+	s intrUserName = $p(intrUserStr, "^", 1)
+	s remarks = ""													// 备注
+	s intrUom = $p(intrData, "^", 10)
+	s intrQty = $ZABS($p(intrData, "^", 6))
+	s intrSp = +$p(intrData, "^", 14)
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s intrFac = ..UomFac(intrUom, bUomId)
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s bQty = intrQty * intrFac
+	s bSp = intrSp / intrFac
+	s retCodeObj = ..GetTraceCode(intrId)
+	s pQty = retCodeObj.%Get("PQty")
+	s pTCodeArr = retCodeObj.%Get("PTCode")
+	if (pTCodeArr.%Size() > 0) {
+		s trdnFlag = 0
+		if ((uomType = "1") || (uomType = "2")) {
+			s qty = pQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = pQty
+			s sp = bSp
+		}
+		s traceCodeArr = pTCodeArr
+		d OutPutRow
+	}
+	s sTCodeArr = retCodeObj.%Get("STCode")
+	if (resQtyType = "1") {
+		s sQty = retCodeObj.%Get("SQty")
+	} else {
+		s sQty = bQty - pQty
+	}
+	if (sQty > 0) {
+		s trdnFlag = 1
+		if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow
+	} elseif (pTCodeArr.%Size() = 0) {
+		s sQty = bQty
+		s trdnFlag = 1
+		if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow 
+	}
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s qty = ..AddZero(qty)
+	s sp = ..AddZero(sp)
+	s noTCodeFlag = retCodeObj.%Get("NoTCodeFlag")
+	if (traceCodeArr.%Size() > 0) {
+		if (noTCodeFlag = "N") {
+			s existCode = "Y"
+		} else {
+			s existCode = "C"
+		}
+	} else {
+		s existCode = "N"
+		q:(TaskFlag = "N")||(upExtTCodeFlag = "Y")
+	}
+	s tCodeJsonStr = traceCodeArr.%ToJSON()	
+	s data1 = $lb(insuCode, chgType, inciCode, inciDesc, bchNo)
+	s data2 = $lb(sp, qty, rxFlag, chgDateTime, intrUserName)
+	s data3 = $lb(remarks, trdnFlag, tCodeJsonStr)
+	s data = data1_data2_data3
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", Pid, "Data", intrDate, intrId, trdnFlag) = data
+	s logData = $lb(indexId, bchNo, inciId, trdnFlag, existCode)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3502Data", Pid, "Log", intrDate, intrId, trdnFlag) = logData
+	q
+}
+
+/// Description: 获取3503商品采购接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-入库台帐ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3503Data()
+ClassMethod Get3503Data(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(IntrId = "") ..Error(-1, "日期、业务或入库明细表ID不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3503Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s uomType = $p(configStr, "^", 1)
+	s ret = 0
+	if (IntrId '= "") {
+		q:('$d(^DHCINTR(IntrId))) ..Error(-1, "该入库台帐在台帐表中不存在！")
+		s intrData = $g(^DHCINTR(IntrId))
+		s inclb = $p(intrData, "^", 7)
+		s recLocId = $$LOC^ST01(inclb)
+		s hospId = $p(^CTLOC(recLocId), "^", 22)
+		q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该台帐院区不匹配！")
+		s pointer = $p(^DHCINTR(IntrId), "^", 9)
+		s inRecId = +pointer
+		s inRecCh = $p(pointer, "||", 2)
+		s intrId = IntrId
+		d BuildData
+	} elseif (BusIdStr '= "") {
+		s inRecId = $p(BusIdStr, "^", 1)
+		q:('$d(^DHCINGR(inRecId))) ..Error(-1, "该入库单不存在！")
+		s locId = $p($g(^DHCINGR(inRecId)), "^", 13)
+		s hospId = $p(^CTLOC(locId), "^", 22)
+		q:((hospId '= "") && (HospId '= hospId)) ..Error(-1, "该入库单院区不匹配！")
+		s inRecCh = 0
+		for {
+			s inRecCh = $o(^DHCINGR(inRecId, "GRI", inRecCh))
+			q:(inRecCh = "")
+			continue:('$d(^DHCINGR(inRecId, "GRI", inRecCh)))
+			s intrPointer = inRecId_"||"_inRecCh
+			s intrId = ""
+			for {
+				s intrId = $o(^DHCINTR(0, "TypePointer", "G", intrPointer, intrId))
+				q:(intrId = "")
+				continue:('$d(^DHCINTR(intrId)))
+				d BuildData
+			}
+		}
+	} else {
+		s inRecId = ""
+		for {
+			s inRecId = $o(^DHCINGR(0, "DODate", Date, inRecId))
+			q:(inRecId = "")
+			continue:('$d(^DHCINGR(inRecId)))
+			s locId = $p($g(^DHCINGR(inRecId)), "^", 13)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			continue:((hospId '= "") && (HospId '= hospId))
+			s inRecCh = 0
+			for {
+				s inRecCh = $o(^DHCINGR(inRecId, "GRI", inRecCh))
+				q:(inRecCh = "")
+				continue:('$d(^DHCINGR(inRecId, "GRI", inRecCh)))
+				s intrPointer = inRecId_"||"_inRecCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", "G", intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					d BuildData
+				}
+			}
+		}
+	}
+	q ret
+BuildData
+	s inRecItm = $g(^DHCINGR(inRecId, "GRI", inRecCh))
+	s intrData = $g(^DHCINTR(intrId))
+	s inclb = $p(intrData, "^", 7)
+	s inciId = +inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	s indexId = intrId
+	q:(..GetSuccFlag("Method3503",indexId, InsuManf, TrdnFlag) = "Y") ""
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	s sxNo = $p(inRecItm, "^", 38)
+	s bchNo = inRecId_"||"_inRecCh
+	s vendorId = $p($g(^DHCINGR(inRecId)), "^", 3)
+	s vendorList = ..GetVendorStr(vendorId)
+	s vendorName = $lg(vendorList, 2)
+	s vendorPmtNo = $lg(vendorList, 3)
+	s manfId = $p(inRecItm, "^", 29)
+	s manfName = $p($g(^PHMNF(+manfId)), "^", 2)
+	if (manfName = "") {
+		s manfName = "---"
+	}
+	s batData = ..GetBatByInclb(inclb)
+	s batNo = $lg(batData, 1)
+	s expDate = $lg(batData, 2) 
+	s produceDate = $lg(batData, 3)
+	s aprvNo = ..GetInciRemark(inciId)
+	s intrRp = +$p(intrData, "^", 16)
+	if (intrRp = 0) {
+		s intrRp = $p(inRecItm, "^", 30)
+	}
+	s intrQty = $ZABS($p(intrData, "^", 6))
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+	s intrUom = $p(intrData, "^", 10)
+	s intrFac = ..UomFac(intrUom, bUomId)
+	s bQty = intrQty * intrFac
+	s bRp = intrRp / intrFac
+	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s trdnFlag = 0
+	if ((uomType = "1") || (uomType = "2")) {
+		s qty = bQty / inciFac
+		s rp = bRp * inciFac
+	} else {
+		s qty = bQty
+		s rp = bRp
+	}
+	s qty = ..AddZero(qty)
+	s rp = ..AddZero(rp)
+	s invCode = $p(inRecItm, "^", 51)
+	s invNo = $p(inRecItm, "^", 27)
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	s intrDate = $p(intrData, "^", 2)
+	if (intrDate '= "") {
+		s intrDate = $zd(intrDate, 3)
+	}
+	s intrTime = $p(intrData, "^", 3)
+	if (intrTime '= "") {
+		s intrTime = $zt(intrTime, 1)
+	}
+	s inRecDate = intrDate_" "_intrTime
+	s inRecUserId = $p($g(^DHCINGR(inRecId)), "^", 8)
+	s inRecUserStr = ..GetPharUserStr(inRecUserId)
+	s inRecUserName = $p(inRecUserStr, "^", 1)
+	s giftFlag = $p($g(^DHCINGR(inRecId)), "^", 31)
+	if ((giftFlag = "Y")||(giftFlag = "1")) {
+		s giftFlag = "1"
+	} else {
+		s giftFlag = "0"
+	}
+	s remarks = $g(^DHCINGR(inRecId, "REM", 1))
+	d OutPutRow
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s existCode = ""	
+	s data1 = $lb(insuCode, inciCode, inciDesc, sxNo, bchNo)
+	s data2 = $lb(vendorName, vendorPmtNo, batNo, manfName, aprvNo)
+	s data3 = $lb(produceDate, expDate, rp, qty, invCode)
+	s data4 = $lb(invNo, rxFlag, inRecDate, inRecUserName, giftFlag)
+	s data5 = $lb(remarks)
+	s data = data1_data2_data3_data4_data5
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", Pid, "Data", inRecId, inRecCh, trdnFlag) = data
+	s logData = $lb(indexId, bchNo, inciId, trdnFlag, existCode)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3503Data", Pid, "Log", inRecId, inRecCh, trdnFlag) = logData
+	q
+}
+
+/// Description: 获取3504商品采购退货接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-13
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-退货台帐ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3504Data()
+ClassMethod Get3504Data(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(IntrId = "") ..Error(-1, "日期、业务或退货明细表ID不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3504Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s uomType = $p(configStr, "^", 1)
+	s ret = 0
+	if (IntrId '= "") {
+		q:('$d(^DHCINTR(IntrId))) ..Error(-1, "该退货台帐在台帐表中不存在！")
+		s intrData = $g(^DHCINTR(IntrId))
+		s inclb = $p(intrData, "^", 7)
+		s recLocId = $$LOC^ST01(inclb)
+		s hospId = $p(^CTLOC(recLocId), "^", 22)
+		q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该台帐院区不匹配！")
+		s pointer = $p(^DHCINTR(IntrId), "^", 9)
+		s inRetId = +pointer
+		s inRetCh = $p(pointer, "||", 2)
+		s intrId = IntrId
+		d BuildData
+	} elseif (BusIdStr '= "") {
+		s inRetId = $p(BusIdStr, "^", 1)
+		q:('$d(^INGRT(inRetId))) ..Error(-1, "该退货单不存在！")
+		s locId = $p($g(^INGRT(inRetId)), "^", 7)
+		s hospId = $p(^CTLOC(locId), "^", 22)
+		q:((hospId '= "") && (HospId '= hospId)) ..Error(-1, "该退货单院区不匹配！")
+		s inRetCh = 0
+		for {
+			s inRetCh = $o(^INGRT(inRetId, "DHCGRR", inRetCh))
+			q:(inRetCh = "")
+			continue:('$d(^INGRT(inRetId, "DHCGRR", inRetCh)))
+			s intrPointer = inRetId_"||"_inRetCh
+			s intrId = ""
+			for {
+				s intrId = $o(^DHCINTR(0, "TypePointer", "R", intrPointer, intrId))
+				q:(intrId = "")
+				continue:('$d(^DHCINTR(intrId)))
+				d BuildData
+			}
+		}
+	} else {
+		s inRetId = ""
+		for {
+			s inRetId = $o(^INGRT(0, "AUDITDATE", Date, inRetId))
+			q:(inRetId = "")
+			continue:('$d(^INGRT(inRetId)))
+			s locId = $p($g(^INGRT(inRetId)), "^", 7)
+			s hospId = $p(^CTLOC(locId), "^", 22)
+			continue:((hospId '= "") && (HospId '= hospId))
+			s inRetCh = 0
+			for {
+				s inRetCh = $o(^INGRT(inRetId, "DHCGRR", inRetCh))
+				q:(inRetCh = "")
+				continue:('$d(^INGRT(inRetId, "DHCGRR", inRetCh)))
+				s intrPointer = inRetId_"||"_inRetCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", "R", intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					d BuildData
+				}
+			}
+		}
+	}
+	q ret
+BuildData
+	s inRetItm = $g(^INGRT(inRetId, "DHCGRR", inRetCh))
+	s intrData = $g(^DHCINTR(intrId))
+	s inclb = $p(intrData, "^", 7)
+	s inciId = +inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	s indexId = intrId
+	q:(..GetSuccFlag("Method3504",indexId, InsuManf, TrdnFlag) = "Y") ""
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	s inRecItmId = $p(inRetItm, "^", 1)
+	s bchNo = inRecItmId
+	s vendorId = $p($g(^INGRT(inRetId)), "^", 2)
+	s vendorList = ..GetVendorStr(vendorId)
+	s vendorName = $lg(vendorList, 2)
+	s vendorPmtNo = $lg(vendorList, 3)
+	s batData = ..GetBatByInclb(inclb)
+	s expDate = $lg(batData, 2) 
+	s produceDate = $lg(batData, 3)
+	s intrRp = +$p(intrData, "^", 16)
+	if (intrRp = 0) {
+		s intrRp = $p(inRetItm, "^", 7)
+	}
+	s intrQty = $ZABS($p(intrData, "^", 6))
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+	s intrUom = $p(intrData, "^", 10)
+	s intrFac = ..UomFac(intrUom, bUomId)
+	s bQty = intrQty * intrFac
+	s bRp = intrRp / intrFac
+	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s trdnFlag = 0
+	if ((uomType = "1") || (uomType = "2")) {
+		s qty = bQty / inciFac
+		s rp = bRp * inciFac
+	} else {
+		s qty = bQty
+		s rp = bRp
+	}
+	s qty = ..AddZero(qty)
+	s rp = ..AddZero(rp)
+	s invCode = $p(inRetItm, "^", 19)
+	s invNo = $p(inRetItm, "^", 12)
+	if (invNo = "") {
+		s invNo = "---"
+	}
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	s intrDate = $p(intrData, "^", 2)
+	if (intrDate '= "") {
+		s intrDate = $zd(intrDate, 3)
+	}
+	s intrTime = $p(intrData, "^", 3)
+	if (intrTime '= "") {
+		s intrTime = $zt(intrTime, 1)
+	}
+	s inRecDate = intrDate_" "_intrTime
+	s inRecUserId = $p($g(^INGRT(inRetId)), "^", 8)
+	s inRecUserStr = ..GetPharUserStr(inRecUserId)
+	s inRecUserName = $p(inRecUserStr, "^", 1)
+	s remarks = $p($g(^INGRT(inRetId)), "^", 26)
+	s prodPurcNo = $p(^DHCINGR(+inRecItmId), "^", 1)
+	d OutPutRow
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s existCode = ""	
+	s data1 = $lb(insuCode, inciCode, inciDesc, bchNo, vendorName)
+	s data2 = $lb(vendorPmtNo, produceDate, expDate, rp, qty)
+	s data3 = $lb(invCode, invNo, rxFlag, inRecDate, inRecUserName)
+	s data4 = $lb(remarks, prodPurcNo)
+	s data = data1_data2_data3_data4
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", Pid, "Data", inRetId, inRetCh, trdnFlag) = data
+	s logData = $lb(indexId, bchNo, inciId, trdnFlag, existCode)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3504Data", Pid, "Log", inRetId, inRetCh, trdnFlag) = logData
+	q
+}
+
+/// Description: 获取3505商品销售接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3505Data()
+ClassMethod Get3505Data(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(IntrId = "") ..Error(-1, "日期、业务或台账不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3505Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s ret = 0
+	if (IntrId '= "") {
+		q:('$d(^DHCINTR(IntrId))) ..Error(-1, "该业务在台帐中不存在！")
+		s intrData = $g(^DHCINTR(IntrId))
+		s inclb = $p(intrData, "^", 7)
+		s recLocId = $$LOC^ST01(inclb)
+		s hospId = $p(^CTLOC(recLocId), "^", 22)
+		q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该台帐院区不匹配！")
+		s intrType = $p(intrData, "^", 1)
+		if (intrType = "P") || (intrType = "PH") {
+			s ret = ..GetIPDispData("", "", IntrId, HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		} else {
+			s ret = ..GetOPDispData("", "", IntrId, HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		}
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "P") || (busType = "PH") {
+			s ret = ..GetIPDispData("", BusIdStr, "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		} else {
+			s ret = ..GetOPDispData("", BusIdStr, "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		}
+	} else {
+		s ret = ..GetIPDispData(Date, "", "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		s ret = ..GetOPDispData(Date, "", "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+	}
+	q ret
+}
+
+/// Description: 获取3506商品销售退货接口所需数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).Get3506Data()
+ClassMethod Get3506Data(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, TaskFlag)
+{
+	q:(..CheckHosp(HospId) '= 1) ..Error(-1, "该接口未授权，请联系系统管理员！")
+	q:(Date = "")&&(BusIdStr = "")&&(IntrId = "") ..Error(-1, "日期、业务或台账不能同时为空！")
+	d ..ClearTmp("PHA.FACE.TPS.INSUTE.Data", "Get3506Data", Pid)
+	s paramStr = "^^^"_HospId
+	s configStr = ..GetParamProp(paramStr)
+	s ret = 0
+	if (IntrId '= "") {
+		q:('$d(^DHCINTR(IntrId))) ..Error(-1, "该业务在台帐中不存在！")
+		s intrData = $g(^DHCINTR(IntrId))
+		s inclb = $p(intrData, "^", 7)
+		s recLocId = $$LOC^ST01(inclb)
+		s hospId = $p(^CTLOC(recLocId), "^", 22)
+		q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该台帐院区不匹配！")
+		s intrType = $p(intrData, "^", 1)
+		if (intrType = "Y") || (intrType = "YH") {
+			s ret = ..GetIPRetData("", "", IntrId, HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		} else {
+			s ret = ..GetOPRetData("", "", IntrId, HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		}
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "Y") || (busType = "YH") {
+			s ret = ..GetIPRetData("", BusIdStr, "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		} else {
+			s ret = ..GetOPRetData("", BusIdStr, "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		}
+	} else {
+		s ret = ..GetIPRetData(Date, "", "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+		s ret = ..GetOPRetData(Date, "", "", HospId, TrdnFlag, InsuManf, Pid, configStr, TaskFlag)
+	}
+	q ret
+}
+
+/// Description: 获取住院发药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-04
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, ConfigStr-参数设置串, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetIPDispData()
+ClassMethod GetIPDispData(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, ConfigStr, TaskFlag)
+{
+	s ipDataWay = $p(ConfigStr, "^", 3)
+	if (IntrId '= "") {
+		s intrId = IntrId
+		s indexId = IntrId
+		s intrData = $g(^DHCINTR(intrId))
+		s inclb = $p(intrData, "^", 7)
+		s oeori = ..GetTransOrdItem(intrId)
+		q:(oeori = "") ..Error(-1, "该台帐对应医嘱不存在！")
+		s admStatus = 0
+		if (ipDataWay '= "1") {
+			s admDr = $p(^OEORD(+oeori),"^",1) 
+			s admStatus = ..GetPatAdmStatus(admDr)	
+		}
+		q:(admStatus = 1) 0	
+		s oeore = ""
+		s intrType = $p(intrData, "^", 1)
+		s pointer = $p(^DHCINTR(intrId), "^", 9)
+		if (intrType = "PH") {
+			s dspId = $lg($g(^BS.PHA.HERB.DISPEND(+pointer, "I", $p(pointer, "||", 2))), 4)
+			s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)
+		} else {
+			s dspId = +$p($g(^DHCPHAC(+pointer, "I", $p(pointer, "||", 2), "B", +$p(pointer, "||", 3))), "^", 7)
+			if (dspId = 0) {
+				s dspId = $p($p($g(^DHCPHAC(+pointer, "I", $p(pointer, "||", 2))), "^", 13), ",", 1)
+			}
+			s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+		}
+		s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "PH") {
+			s phbdId = $p(BusIdStr, "^", 1)
+			s phaLocId = $lg($g(^BS.PHA.HERB.DISPEND(phbdId)), 7)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phbdCh = ""
+			for {
+				s phbdCh = $o(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh))
+				q:(phbdCh = "")
+				continue:('$d(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh)))
+				s phbdItmData = $g(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh))
+				s oeori = $lg(phbdItmData, 3)
+				s admStatus = 0
+				if (ipDataWay '= "1") {
+					s admDr = $p(^OEORD(+oeori),"^",1) 
+					s admStatus = ..GetPatAdmStatus(admDr)	
+				}
+				continue:(admStatus = 1)
+				s dspId = $lg(phbdItmData, 4)
+				s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)		
+				s phbdSub = ""
+				for {
+					s phbdSub = $o(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub))	
+					q:(phbdSub="")
+					continue:('$d(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub)))
+					s intrPointer = phbdId_"||"_phbdCh_"||"_phbdSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "PH", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+					}
+				}
+			}
+		} else {
+			s phacId = $p(BusIdStr, "^", 1)
+			s phaLocId = $p($g(^DHCPHAC(+phacId)), "^", 1)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phacCh = ""
+			for {
+				s phacCh = $o(^DHCPHAC(phacId, "I", phacCh))
+				q:(phacCh = "")
+				continue:('$d(^DHCPHAC(phacId, "I", phacCh)))
+				s oeori = $p(^DHCPHAC(phacId, "I", phacCh), "^", 7)
+				s admStatus = 0
+				if (ipDataWay '= "1") {
+					s admDr = $p(^OEORD(+oeori),"^",1) 
+					s admStatus = ..GetPatAdmStatus(admDr)	
+				}
+				continue:(admStatus = 1)
+				s phacSub = ""
+				for {
+					s phacSub = $o(^DHCPHAC(phacId, "I", phacCh, "B", phacSub))
+					q:(phacSub = "")
+					continue:('$d(^DHCPHAC(phacId, "I", phacCh, "B", phacSub)))
+					s dspId = +$p($g(^DHCPHAC(phacId, "I", phacCh, "B", phacSub)), "^", 7)
+					if (dspId = 0) {
+						s dspId = $p($p(^DHCPHAC(phacId, "I", phacCh), "^", 13), ",", 1)
+					}
+					s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+					s intrPointer = phacId_"||"_phacCh_"||"_phacSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "P", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+					}
+				}
+			}
+		}
+	}else {
+		if (ipDataWay = "1") {
+			s ret = ..GetDispByPhaDisp(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag)	
+		} else {
+			s ret = ..GetDispBySettle(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag)
+		}
+	}
+	q 0
+}
+
+/// Description: 依据结算日期获取当天结算病人的住院发药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-04
+/// Table:		
+/// Input:		 Date-数据日期, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetDispBySettle()
+ClassMethod GetDispBySettle(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag) As %String
+{
+	s prtId = ""
+	for {
+		s prtId = $o(^DHCINVPRTZY(0, "DATE", Date, prtId))
+		q:(prtId = "")
+		s prtData = $g(^DHCINVPRTZY(prtId))
+		s prtFlag = $p(prtData, "^", 8)
+		continue:((prtFlag '= "N") && (prtFlag '= "I"))
+		s admDr = $p(prtData, "^", 4)
+		s admType = $p(^PAADM(admDr),"^",2)
+		continue:(admType '= "I")
+		s pbId = $p(prtData, "^", 5)
+		s pbCh = 0
+		for {
+			s pbCh = $o(^DHCPB(pbId, "O", pbCh))
+			q:(pbCh = "")
+			continue:('$d(^DHCPB(pbId, "O", pbCh)))
+			s oeore = $p($g(^DHCPB(pbId, "O", pbCh)), "^", 20)
+			continue:(oeore = "")
+			s ordId = +oeore
+			s ordItm = $p(oeore, "||", 2)
+			s oeori = ordId_"||"_ordItm
+			// 过滤-非药品医嘱
+			continue:'$d(^DHCOEDISQTY(0, "OEORI", oeori))
+			s arcItm = $p(^OEORD(ordId, "I", ordItm, 1), "^", 2) 
+			s arcVer = $p(arcItm, "||", 1)
+			s arcSub = $p(arcItm, "||", 2)
+			// 过滤-不存在库存项
+			s incId = $o(^INCI(0, "ARCIM_DR", arcVer, "")) 
+			continue:(incId = "") 
+			s arcItmCatId = $p($g(^ARCIM(arcVer, arcSub, 1)), "^", 10)
+			// 过滤非药品的医嘱子类(R-药品)
+			continue:($p($g(^ARC("IC", +arcItmCatId)), "^", 7) '= "R")
+			s dspId = $o(^DHCOEDISQTY(0, "OEORE", oeore, ""))
+			continue:(dspId = "")
+			continue:('$d(^DHCOEDISQTY(dspId)))
+			s dspData = $g(^DHCOEDISQTY(dspId))
+			s dspStatus = $p(dspData, "^", 7)
+			continue:(dspStatus '= "C")
+			s recLocId = $p(dspData, "^", 24)
+			s hospId = $p(^CTLOC(recLocId), "^", 22)
+			continue:(hospId '= "")&&(HospId '= hospId)
+			s dspPointer = $p(dspData, "^", 14)
+			s dspType = $p(dspData, "^", 13)
+			if (dspType = "PH") {
+				s phbdId = +dspPointer
+				s phbdCh = $p(dspPointer, "||", 2)
+				s phbdSub = ""
+				for {
+					s phbdSub = $o(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub))	
+					q:(phbdSub="")
+					continue:('$d(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub)))
+					s intrPointer = phbdId_"||"_phbdCh_"||"_phbdSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "PH", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+					}
+				}
+			} else {
+				s phacId = +dspPointer
+				s phacCh = $p(dspPointer, "||", 2)
+				s phacSub = ""
+				for {
+					s phacSub = $o(^DHCPHAC(phacId, "I", phacCh, "B", phacSub))
+					q:(phacSub = "")
+					continue:'$d(^DHCPHAC(phacId, "I", phacCh, "B", phacSub))
+					s intrPointer = phacId_"||"_phacCh_"||"_phacSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "P", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+					}
+				}
+			}
+		}
+	}
+	q 0
+}
+
+/// Description: 依据发药日期获取当天的住院发药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-04
+/// Table:		
+/// Input:		 Date-数据日期, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetDispByPhaDisp()
+ClassMethod GetDispByPhaDisp(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag) As %String
+{
+	
+	s typeList = $lb("P", "PH")
+	s typeLen = $ll(typeList)
+	for typeJ = 1 : 1 : typeLen {
+		s type = $lg(typeList, typeJ)
+		s intrId = ""
+		for {
+			s intrId = $o(^DHCINTR(0, "TypeDate", type, Date, intrId))
+			q:(intrId = "")
+			continue:('$d(^DHCINTR(intrId)))
+			s intrData = ^DHCINTR(intrId)
+			s indexId = intrId
+			s inclb = $p(intrData, "^", 7)
+			s recLocId = $$LOC^ST01(inclb)
+			s hospId = $p(^CTLOC(recLocId), "^", 22)
+			continue:(hospId '= "")&&(HospId '= hospId)
+			s oeori = ..GetTransOrdItem(intrId)
+			continue:(oeori = "")
+			s intrType = $p(intrData, "^", 1)
+			s pointer = $p(^DHCINTR(intrId), "^", 9)
+			if (intrType = "PH") {
+				s dspId = $lg($g(^BS.PHA.HERB.DISPEND(+pointer, "I", $p(pointer, "||", 2))), 4)
+				s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)
+			} else {
+				s dspId = +$p($g(^DHCPHAC(+pointer, "I", $p(pointer, "||", 2), "B", +$p(pointer, "||", 3))), "^", 7)
+				if (dspId = 0) {
+					s dspId = $p($p($g(^DHCPHAC(+pointer, "I", $p(pointer, "||", 2))), "^", 13), ",", 1)
+				}
+				s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+			}
+			s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+		}
+	}
+	q 0
+}
+
+/// Description: 获取门急诊发药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, ConfigStr-参数设置串, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetOPDispData()
+ClassMethod GetOPDispData(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, ConfigStr, TaskFlag)
+{
+	if (IntrId '= "") {
+		s intrId = IntrId
+		s indexId = IntrId
+		q:('$d(^DHCINTR(intrId))) ..Error(-1, "该业务在台帐中不存在！")
+		s intrData = $g(^DHCINTR(intrId))
+		s inclb = $p(intrData, "^", 7)
+		s oeori = ..GetTransOrdItem(intrId)
+		q:(oeori = "") ..Error(-1, "该台帐对应医嘱不存在！")
+		s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "FH") {
+			s phbdId = $p(BusIdStr, "^", 1)
+			s phaLocId = $lg($g(^BS.PHA.HERB.DISPEND(phbdId)), 7)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phbdCh = ""
+			for {
+				s phbdCh = $o(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh))
+				q:(phbdCh = "")
+				continue:('$d(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh)))
+				s phbdItmData = $g(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh))		
+				s phbdSub = ""
+				for {
+					s phbdSub = $o(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub))	
+					q:(phbdSub="")
+					continue:('$d(^BS.PHA.HERB.DISPEND(phbdId, "I", phbdCh, "B", phbdSub)))
+					s intrPointer = phbdId_"||"_phbdCh_"||"_phbdSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "FH", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+					}
+				}
+			}
+		} else {
+			s phdId = $p(BusIdStr, "^", 1)
+			s phlId = $p(^DHCPHDISP(phdId, 1), "^", 1)
+			s phaLocId = $p($g(^DHCPHLOC(+phlId)),"^",1)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phdCh = ""
+			for {
+				s phdCh = $o(^DHCPHDI(phdId, "PHDI", phdCh))
+				q:(phdCh = "")
+				continue:('$d(^DHCPHDI(phdId, "PHDI", phdCh)))
+				s oeori = $p(^DHCPHDI(phdId, "PHDI", phdCh), "^", 5)
+				s phdSub = ""
+				for {
+					s phdSub = $o(^DHCPHDI(phdId, "PHDI", phdCh, "INCLB", phdSub))
+					q:(phdSub = "")
+					continue:('$d(^DHCPHDI(phdId, "PHDI", phdCh, "INCLB", phdSub)))
+					s intrPointer = phdId_"||"_phdCh_"||"_phdSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "F", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+					}
+				}
+			}
+		}
+	}else {
+		s typeList = $lb("F", "FH")
+		s typeLen = $ll(typeList)
+		for typeJ = 1 : 1 : typeLen {
+			s type = $lg(typeList, typeJ)
+			s intrId = ""
+			for {
+				s intrId = $o(^DHCINTR(0, "TypeDate", type, Date, intrId))
+				q:(intrId = "")
+				continue:('$d(^DHCINTR(intrId)))
+				s intrData = ^DHCINTR(intrId)
+				s indexId = intrId
+				s inclb = $p(intrData, "^", 7)
+				s recLocId = $$LOC^ST01(inclb)
+				s hospId = $p(^CTLOC(recLocId), "^", 22)
+				continue:(hospId '= "")&&(HospId '= hospId)
+				s oeori = ..GetTransOrdItem(intrId)
+				continue:(oeori = "")
+				s ret = ..SetDispData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+			}
+		}
+	}
+	q 0
+}
+
+/// Description: 构造发药数据集合
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 IntrId-台帐ID, Inclb-科室批次ID, IndexId-索引, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, Oeori-医嘱ID, Oeore-执行记录ID, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).SetDispData()
+ClassMethod SetDispData(IntrId, Inclb, IndexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, Oeori, Oeore, TaskFlag)
+{
+	s uomType = $p(ConfigStr, "^", 1)
+	s resQtyType = $p(ConfigStr, "^", 2)
+	s upExtTCodeFlag = $p(ConfigStr, "^", 5)
+	s inciId = +Inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	q:(..GetSuccFlag("Method3505",IndexId, InsuManf, TrdnFlag) = "Y") ""
+	s intrData = $g(^DHCINTR(IntrId))
+	s intrDate = $p(intrData, "^", 2)
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	s incib=$p(^INCI(+Inclb,"IL",$p(Inclb,"||",2),"LB",$p(Inclb,"||",3)),"^",1)
+	s bchNo =..getApprovalNoByIncib(incib) // incib //..Getfixmedinsbchno(IntrId, Oeori)
+	i bchNo="" s bchNo=incib
+	s doctorStr = ..GetDoctorStr(Oeori)
+	s doctorName = $p(doctorStr, "^", 1)
+	s certType = $p(doctorStr, "^", 3)
+	s certNo = $p(doctorStr, "^", 4)
+	s pharUserId = $p(intrData, "^", 11)
+	s pharStr = ..GetPharUserStr(pharUserId, IntrId)
+	s pharUserName = $p(pharStr, "^", 1)
+	s pharLiceNo = $p(pharStr, "^", 2)
+	s pharCertType = $p(pharStr, "^", 3)
+	s pharCertNo = $p(pharStr, "^", 4)
+	s setlStr = ..GetInsuSetlData(Oeori)
+	//b ;;setlStr
+	s feeSetlType = $p(setlStr, "^", 1)
+	s setlId = $p(setlStr, "^", 2)
+	s mdtrtSn = $p(setlStr, "^", 3)
+	s psnNo = $p(setlStr, "^", 4)
+	s patInfo = ..GetPatInfo(Oeori)
+	s patCertType = $p(patInfo, "^", 1)
+	s patCertNo = $p(patInfo, "^", 2)
+	s patName = $p(patInfo, "^", 3)
+	s admDr = $p(patInfo, "^", 4)
+	s papmi = $p(patInfo, "^", 5)
+	s batData = ..GetBatByInclb(Inclb)
+	s batNo = $lg(batData, 1)
+	s expDate = $lg(batData, 2) 
+	s produceDate = $lg(batData, 3)
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	s circFlag = ..GetInciCircFlag(inciId)
+	s rtalDocNo = bchNo												// 零售单据号
+	s stooutNo = $p(intrData, "^", 13)								// 销售出库单据号
+	s barCode = $p($g(^INCI(inciId, 3)), "^", 9)
+	s incib = $p(^INCI(inciId, "IL", $p(Inclb, "||", 2), "LB", $p(Inclb, "||", 3)),"^",1)
+	s prescNo = $p($g(^OEORD(+Oeori, "I", $p(Oeori, "||", 2), 1)), "^", 14)
+	s incil = $p(Inclb, "||", 1, 2)
+	s stkBin = ..GetStkBin(incil)
+	s intrTime = $p(intrData, "^", 3)
+	if (intrDate '= "") {
+		s retnDate = $zd(intrDate, 3)
+	}
+	if (intrTime '= "") {
+		s retnTime = $zt(intrTime, 1)
+	}
+	s retnDT = retnDate_" "_retnTime
+	s remarks = ""													// 备注
+	s setlType = ..GetSetlType(Oeori, Oeore)
+	s intrUom = $p(intrData, "^", 10)
+	s intrQty = $ZABS($p(intrData, "^", 6))
+	s intrSp = +$p(intrData, "^", 14)
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s intrFac = ..UomFac(intrUom, bUomId)
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s bQty = intrQty * intrFac
+	s bSp = intrSp / intrFac
+	s retCodeObj = ..GetTraceCode(IntrId)
+	s pQty = retCodeObj.%Get("PQty")
+	s pTCodeArr = retCodeObj.%Get("PTCode")
+	;b ; retCodeObj
+	if (pTCodeArr.%Size() > 0) {
+		s trdnFlag = 0
+		if ((uomType = "1") || (uomType = "2")) {
+			s qty = pQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = pQty
+			s sp = bSp
+		}
+		s traceCodeArr = pTCodeArr
+		d OutPutRow
+	}
+	s sTCodeArr = retCodeObj.%Get("STCode")
+	;b ; sTCodeArr
+	if (resQtyType = "1") {
+		s sQty = retCodeObj.%Get("SQty")
+	} else {
+		s sQty = bQty - pQty
+	}
+	if (sQty > 0) {
+	    s trdnFlag = 1
+	    if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow
+	} elseif (pTCodeArr.%Size() = 0) {
+	    s sQty = bQty
+	    s trdnFlag = 1
+	    if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow 
+	}
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s qty = ..AddZero(qty)
+	s sp = ..AddZero(sp)
+	s noTCodeFlag = retCodeObj.%Get("NoTCodeFlag")
+	if (traceCodeArr.%Size() > 0) {
+		if (noTCodeFlag = "N") {
+			s existCode = "Y"
+		} else {
+			s existCode = "C"
+		}
+	} else {
+		s existCode = "N"
+		q:(TaskFlag = "N")||(upExtTCodeFlag = "Y")
+	}
+	s tCodeJsonStr = traceCodeArr.%ToJSON()	
+	;b ; tCodeJsonStr
+	s data1 = $lb(insuCode, inciCode, inciDesc, bchNo, certType)
+	s data2 = $lb(certNo, doctorName, pharCertType, pharCertNo, pharUserName)
+	s data3 = $lb(pharLiceNo, feeSetlType, setlId, mdtrtSn, psnNo)
+	s data4 = $lb(patCertType, patCertNo, patName, batNo, produceDate)
+	s data5 = $lb(expDate, rxFlag, trdnFlag, sp, prescNo)
+	s data6 = $lb(circFlag, rtalDocNo, stooutNo, incib, barCode)
+	s data7 = $lb(stkBin, qty, retnDT, pharUserName, remarks)
+	s data8 = $lb(setlType, tCodeJsonStr)
+	s data = data1_data2_data3_data4_data5_data6_data7_data8
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", Pid, "Data", intrDate, IntrId, trdnFlag) = data
+	s logData = $lb(IndexId, bchNo, inciId, trdnFlag, existCode, admDr, papmi, setlType)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3505Data", Pid, "Log", intrDate, IntrId, trdnFlag) = logData
+	q
+}
+
+/// Description: 获取住院退药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, ConfigStr-参数设置串, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetIPRetData()
+ClassMethod GetIPRetData(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, ConfigStr, TaskFlag)
+{
+	s ipDataWay = $p(ConfigStr, "^", 3)
+	if (IntrId '= "") {
+		s intrId = IntrId
+		s indexId = IntrId
+		s intrData = $g(^DHCINTR(intrId))
+		s inclb = $p(intrData, "^", 7)
+		s oeori = ..GetTransOrdItem(intrId)
+		q:(oeori = "") ..Error(-1, "该台帐对应医嘱不存在！")
+		s admStatus = 0
+		if (ipDataWay '= "1") {
+			s admDr = $p(^OEORD(+oeori),"^",1) 
+			s admStatus = ..GetPatAdmStatus(admDr)	
+		}
+		q:(admStatus = 1) 0
+		s oeore = ""
+		s intrType = $p(intrData, "^", 1)
+		s pointer = $p(^DHCINTR(intrId), "^", 9)
+		if (intrType = "YH") {
+			s dspId = +$lg($g(^BS.PHA.HERB.RETURND(+pointer, "I", $p(pointer, "||", 2))), 9)
+			s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)
+		} else {
+			s dspId = +$p($g(^PHARET(+pointer, "I", $p(pointer, "||", 2), "B", $p(pointer, "||", 3))), "^", 7)
+			if (dspId = 0) {
+				s dspId = $p($g(^PHARET(+pointer, "I", $p(pointer, "||", 2))), "^", 13)
+			}
+			s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+		}
+		s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+	} elseif (BusIdStr '= "") {
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "YH") {
+			s phbrId = $p(BusIdStr, "^", 1)
+			s phaLocId = $lg($g(^BS.PHA.HERB.RETURND(phbrId)), 5)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phbrCh = ""
+			for {
+				s phbrCh = $o(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh))
+				q:(phbrCh = "")
+				continue:('$d(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh)))
+				s phbrItmData = $g(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh))
+				s dspId = +$lg(phbrItmData, 9)
+				s oeori = $p($g(^DHCOEDISQTY(dspId)), "^", 1)
+				s admStatus = 0
+				if (ipDataWay '= "1") {
+					s admDr = $p(^OEORD(+oeori),"^",1) 
+					s admStatus = ..GetPatAdmStatus(admDr)	
+				}
+				continue:(admStatus = 1)
+				s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)		
+				s intrPointer = phbrId_"||"_phbrCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", "YH", intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s intrData = $g(^DHCINTR(intrId))
+					s indexId = intrId
+					s inclb = $p(intrData, "^", 7)
+					s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+				}
+			}
+		} else {
+			s pharId = $p(BusIdStr, "^", 1)
+			s phaLocId = $p($g(^PHARET(+pharId)), "^", 5)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s pharCh = ""
+			for {
+				s pharCh = $o(^PHARET(pharId, "I", pharCh))
+				q:(pharCh = "")
+				continue:('$d(^PHARET(pharId, "I", pharCh)))
+				s oeori = $p(^PHARET(pharId, "I", pharCh), "^", 1)
+				s admStatus = 0
+				if (ipDataWay '= "1") {
+					s admDr = $p(^OEORD(+oeori),"^",1) 
+					s admStatus = ..GetPatAdmStatus(admDr)	
+				}
+				continue:(admStatus = 1)
+				s pharSub = ""
+				for {
+					s pharSub = $o(^PHARET(pharId, "I", pharCh, "B", pharSub))
+					q:(pharSub = "")
+					continue:('$d(^PHARET(pharId, "I", pharCh, "B", pharSub)))
+					s dspId = +$p($g(^PHARET(pharId, "I", pharCh, "B", pharSub)), "^", 7)
+					if (dspId = 0) {
+						s dspId = $p($g(^PHARET(+pointer, "I", $p(pointer, "||", 2))), "^", 13)
+					}
+					s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+					s intrPointer = pharId_"||"_pharCh_"||"_pharSub 
+					s intrId = ""
+					for {
+						s intrId = $o(^DHCINTR(0, "TypePointer", "Y", intrPointer, intrId))
+						q:(intrId = "")
+						continue:('$d(^DHCINTR(intrId)))
+						s intrData = $g(^DHCINTR(intrId))
+						s indexId = intrId
+						s inclb = $p(intrData, "^", 7)
+						s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+					}
+				}
+			}
+		}
+	}else {
+		if (ipDataWay = "1") {
+			s ret = ..GetRetByPhaDisp(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag)	
+		} else {
+			s ret = ..GetRetBySettle(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag)
+		}
+	}
+	q 0
+}
+
+/// Description: 依据结算日期获取当天结算病人的住院退药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-04
+/// Table:		
+/// Input:		 Date-数据日期, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetRetBySettle()
+ClassMethod GetRetBySettle(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag) As %String
+{
+	s prtId = ""
+	for {
+		s prtId = $o(^DHCINVPRTZY(0, "DATE", Date, prtId))
+		q:(prtId = "")
+		s prtData = $g(^DHCINVPRTZY(prtId))
+		s prtFlag = $p(prtData, "^", 8)
+		continue:((prtFlag '= "N") && (prtFlag '= "I"))
+		s admDr = $p(prtData, "^", 4)
+		s admType = $p(^PAADM(admDr),"^",2)
+		continue:(admType '= "I")
+		s pbId = $p(prtData, "^", 5)
+		s pbCh = 0
+		for {
+			s pbCh = $o(^DHCPB(pbId, "O", pbCh))
+			q:(pbCh = "")
+			continue:('$d(^DHCPB(pbId, "O", pbCh)))
+			s oeore = $p($g(^DHCPB(pbId, "O", pbCh)), "^", 20)
+			continue:(oeore = "")
+			s ordId = +oeore
+			s ordItm = $p(oeore, "||", 2)
+			s oeori = ordId_"||"_ordItm
+			// 过滤-非药品医嘱
+			continue:'$d(^DHCOEDISQTY(0, "OEORI", oeori))
+			s arcItm = $p(^OEORD(ordId, "I", ordItm, 1), "^", 2) 
+			s arcVer = $p(arcItm, "||", 1)
+			s arcSub = $p(arcItm, "||", 2)
+			// 过滤-不存在库存项
+			s incId = $o(^INCI(0, "ARCIM_DR", arcVer, "")) 
+			continue:(incId = "") 
+			s arcItmCatId = $p($g(^ARCIM(arcVer, arcSub, 1)), "^", 10)
+			// 过滤非药品的医嘱子类(R-药品)
+			continue:($p($g(^ARC("IC", +arcItmCatId)), "^", 7) '= "R")
+			s dspId = ""
+			for {
+				s dspId = $o(^DHCOEDISQTY(0, "OEORE", oeore, dspId))
+				q:(dspId = "")
+				continue:('$d(^DHCOEDISQTY(dspId)))
+				s dspData = $g(^DHCOEDISQTY(dspId))
+				s dspStatus = $p(dspData, "^", 7)
+				continue:(dspStatus '= "R")
+				s recLocId = $p(dspData, "^", 24)
+				s hospId = $p(^CTLOC(recLocId), "^", 22)
+				continue:(hospId '= "")&&(HospId '= hospId)
+				s dspPointer = $p(dspData, "^", 14)
+				s dspType = $p(dspData, "^", 13)
+				if (dspType = "YH") {
+					s phbrId = +dspPointer
+					s dspSub = 0
+					for {
+						s dspSub = $o(^DHCOEDISQTY(dspId, "I", dspSub))
+						q:(dspSub = "")
+						continue:('$d(^DHCOEDISQTY(dspId, "I", dspSub)))
+						s dspBatId = dspId_"||"_dspSub
+						s phbrCh = ""
+						for {
+							s phbrCh = $o(^BS.PHA.HERB.RETURNI("DSPB", dspBatId, phbrId, phbrCh))
+							q:(phbrCh = "")
+							continue:('$d(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh)))
+							s phbrItmData = $g(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh))	
+							s intrPointer = phbrId_"||"_phbrCh
+							s intrId = ""
+							for {
+								s intrId = $o(^DHCINTR(0, "TypePointer", "YH", intrPointer, intrId))
+								q:(intrId = "")
+								continue:('$d(^DHCINTR(intrId)))
+								s intrData = $g(^DHCINTR(intrId))
+								s indexId = intrId
+								s inclb = $p(intrData, "^", 7)
+								s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+							}
+						}
+						
+					}
+				} else {
+					if (dspPointer '[ "||") {
+						s dspSub = 0
+						for {
+							s dspSub = $o(^DHCOEDISQTY(dspId, "I", dspSub))
+							q:(dspSub = "")
+							continue:('$d(^DHCOEDISQTY(dspId, "I", dspSub)))
+							s dspBatId = dspId_"||"_dspSub
+							s pharId = +dspPointer
+							s pharCh = ""
+							for {
+								s pharCh = $o(^PHARETi("DSPB", dspBatId, pharId, pharCh))
+								q:(pharCh = "")
+								s pharSub = ""
+								for {
+									s pharSub = $o(^PHARETi("DSPB", dspBatId, pharId, pharCh, pharSub))
+									q:(pharSub = "")
+									continue:('$d(^PHARET(pharId, "I", pharCh, "B", pharSub)))
+									s intrPointer = pharId_"||"_pharCh_"||"_pharSub 
+									s intrId = ""
+									for {
+										s intrId = $o(^DHCINTR(0, "TypePointer", "Y", intrPointer, intrId))
+										q:(intrId = "")
+										continue:('$d(^DHCINTR(intrId)))
+										s intrData = $g(^DHCINTR(intrId))
+										s indexId = intrId
+										s inclb = $p(intrData, "^", 7)
+										s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+									}
+								}
+							}
+						}
+					} else {
+						s pharId = +dspPointer
+						s pharCh = $p(dspPointer, "||", 2)
+						continue:('$d(^PHARET(pharId, "I", pharCh)))
+						s pharSub = ""
+						for {
+							s pharSub = $o(^PHARET(pharId, "I", pharCh, "B", pharSub))
+							q:(pharSub = "")
+							continue:('$d(^PHARET(pharId, "I", pharCh, "B", pharSub)))
+							s intrPointer = pharId_"||"_pharCh_"||"_pharSub 
+							s intrId = ""
+							for {
+								s intrId = $o(^DHCINTR(0, "TypePointer", "Y", intrPointer, intrId))
+								q:(intrId = "")
+								continue:('$d(^DHCINTR(intrId)))
+								s intrData = $g(^DHCINTR(intrId))
+								s indexId = intrId
+								s inclb = $p(intrData, "^", 7)
+								s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, oeore, TaskFlag)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	q 0
+}
+
+/// Description: 依据退药日期获取当天的住院退药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-04
+/// Table:		
+/// Input:		 Date-数据日期, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetRetByPhaDisp()
+ClassMethod GetRetByPhaDisp(Date, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, TaskFlag) As %String
+{
+	
+	s typeList = $lb("Y", "YH")
+	s typeLen = $ll(typeList)
+	for typeJ = 1 : 1 : typeLen {
+		s type = $lg(typeList, typeJ)
+		s intrId = ""
+		for {
+			s intrId = $o(^DHCINTR(0, "TypeDate", type, Date, intrId))
+			q:(intrId = "")
+			continue:('$d(^DHCINTR(intrId)))
+			s intrData = ^DHCINTR(intrId)
+			s indexId = intrId
+			s inclb = $p(intrData, "^", 7)
+			s recLocId = $$LOC^ST01(inclb)
+			s hospId = $p(^CTLOC(recLocId), "^", 22)
+			continue:(hospId '= "")&&(HospId '= hospId)
+			s oeori = ..GetTransOrdItem(intrId)
+			continue:(oeori = "")
+			s intrType = $p(intrData, "^", 1)
+			s pointer = $p(^DHCINTR(intrId), "^", 9)
+			if (intrType = "YH") {
+				s dspId = +$lg($g(^BS.PHA.HERB.RETURND(+pointer, "I", $p(pointer, "||", 2))), 9)
+				s oeore = $p($g(^DHCOEDISQTY(dspId)), "^", 3)
+			} else {
+				s dspId = +$p($g(^PHARET(+pointer, "I", $p(pointer, "||", 2), "B", $p(pointer, "||", 3))), "^", 7)
+				if (dspId = 0) {
+					s dspId = $p($g(^PHARET(+pointer, "I", $p(pointer, "||", 2))), "^", 13)
+				}
+				s oeore = $p($g(^DHCOEDISQTY(+dspId)), "^", 3)
+			}
+			s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+		}
+	}
+	q 0
+}
+
+/// Description: 获取门急诊退药数据
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 Date-数据日期, BusId-业务表ID, IntrId-台账表ID, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保厂商, Pid-计数器, ConfigStr-参数设置串, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetOPRetData()
+ClassMethod GetOPRetData(Date, BusIdStr, IntrId, HospId, TrdnFlag, InsuManf, Pid, ConfigStr, TaskFlag)
+{
+	if (IntrId '= "") {
+		s intrId = IntrId
+		s indexId = IntrId
+		q:('$d(^DHCINTR(intrId))) ..Error(-1, "该业务在台帐中不存在！")
+		s intrData = $g(^DHCINTR(intrId))
+		s inclb = $p(intrData, "^", 7)
+		s oeori = ..GetTransOrdItem(intrId)
+		q:(oeori = "") ..Error(-1, "该台帐对应医嘱不存在！")
+		s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+	} elseif (BusIdStr '= "") {
+		s busId = $p(BusIdStr, "^", 1)
+		s busType = $p(BusIdStr, "^", 2)
+		if (busType = "HH") {
+			s phbrId = busId
+			s phaLocId = $lg($g(^BS.PHA.HERB.RETURND(phbrId)), 5)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phbrCh = ""
+			for {
+				s phbrCh = $o(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh))
+				q:(phbrCh = "")
+				continue:('$d(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh)))
+				s phbrItmData = $g(^BS.PHA.HERB.RETURND(phbrId, "I", phbrCh))
+				s dspId = $lg(phbrItmData, 9)
+				s oeori = $p($g(^DHCOEDISQTY(dspId)), "^", 1)		
+				s intrPointer = phbrId_"||"_phbrCh
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", "YH", intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s intrData = $g(^DHCINTR(intrId))
+					s indexId = intrId
+					s inclb = $p(intrData, "^", 7)
+					s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+				}
+			}
+		} else {
+			s phretId = busId
+			s phlId = $p(^DHCPHRET(phretId), "^", 1)
+			s phaLocId = $p($g(^DHCPHLOC(+phlId)),"^",1)
+			s hospId = $p($g(^CTLOC(+phaLocId)),"^",22)
+			q:(hospId '= "")&&(HospId '= hospId) ..Error(-1, "该业务院区不匹配！")
+			s phretCh = ""
+			for {
+				s phretCh = $o(^DHCPHRTI(phretId, "RTI", phretCh))
+				q:(phretCh = "")
+				continue:('$d(^DHCPHRTI(phretId, "RTI", phretCh)))
+				s intrPointer = phretId_"||"_phretCh
+				s oeori = $p(^DHCPHRTI(phretId, "RTI", phretCh), "^", 2)
+				s intrId = ""
+				for {
+					s intrId = $o(^DHCINTR(0, "TypePointer", "H", intrPointer, intrId))
+					q:(intrId = "")
+					continue:('$d(^DHCINTR(intrId)))
+					s intrData = $g(^DHCINTR(intrId))
+					s indexId = intrId
+					s inclb = $p(intrData, "^", 7)
+					s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+				}
+			}
+		}
+	}else {
+		s typeList = $lb("H", "HH")
+		s typeLen = $ll(typeList)
+		for typeJ = 1 : 1 : typeLen {
+			s type = $lg(typeList, typeJ)
+			s intrId = ""
+			for {
+				s intrId = $o(^DHCINTR(0, "TypeDate", type, Date, intrId))
+				q:(intrId = "")
+				continue:('$d(^DHCINTR(intrId)))
+				s intrData = ^DHCINTR(intrId)
+				s indexId = intrId
+				s inclb = $p(intrData, "^", 7)
+				s recLocId = $$LOC^ST01(inclb)
+				s hospId = $p(^CTLOC(recLocId), "^", 22)
+				continue:(hospId '= "")&&(HospId '= hospId)
+				s oeori = ..GetTransOrdItem(intrId)
+				continue:(oeori = "")
+				s ret = ..SetRetData(intrId, inclb, indexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, oeori, "", TaskFlag)
+			}
+		}
+	}
+	q 0
+}
+
+/// Description: 构造退药数据集合
+/// Creator: 	 hulihua
+/// CreatDate:	 2024-12-05
+/// Table:		
+/// Input:		 IntrId-台帐ID, Inclb-科室批次ID, IndexId-索引, HospId-院区ID, Pid-计数器, ConfigStr-参数设置串, TrdnFlag-拆零标志, InsuManf-医保厂商, Oeori-医嘱ID, Oeore-执行记录ID, TaskFlag-系统任务标志
+/// Output:		 
+/// Return:		 成功：0
+/// Others:
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).SetRetData()
+ClassMethod SetRetData(IntrId, Inclb, IndexId, HospId, Pid, ConfigStr, TrdnFlag, InsuManf, Oeori, Oeore, TaskFlag)
+{
+	s uomType = $p(ConfigStr, "^", 1)
+	s resQtyType = $p(ConfigStr, "^", 2)
+	s upExtTCodeFlag = $p(ConfigStr, "^", 5)
+	s upLoadWay = $p(ConfigStr, "^", 6)
+	s inciId = +Inclb
+	s stkGrpStr = ..GetStkCatGrp(inciId)
+	/* 过滤-非药品 */
+	q:($p(stkGrpStr, "^", 3) '= "G") ""
+	/* 过滤-已上传 */
+	q:(..GetSuccFlag("Method3506",IndexId, InsuManf, TrdnFlag) = "Y") ""
+	s intrData = $g(^DHCINTR(IntrId))
+	s intrDate = $p(intrData, "^", 2)
+	s insuCode = $p(..GetInsuData(inciId, HospId), "^", 1)
+	s inciCode = $p(^INCI(inciId, 1), "^", 1)
+	s inciDesc = $p(^INCI(inciId, 1), "^", 2)
+	
+	s incib=$p(^INCI(+Inclb,"IL",$p(Inclb,"||",2),"LB",$p(Inclb,"||",3)),"^",1)
+	s bchNo =..getApprovalNoByIncib(incib) //incib // ..Getfixmedinsbchno(IntrId, Oeori)
+	i bchNo="" s bchNo=incib
+	s pharUserId = $p(intrData, "^", 11)
+	s pharStr = ..GetPharUserStr(pharUserId)
+	s pharUserName = $p(pharStr, "^", 1)
+	s setlStr = ..GetInsuSetlData(Oeori)
+	s setlId = $p(setlStr, "^", 2)
+	s mdtrtSn = $p(setlStr, "^", 3)
+	s psnNo = $p(setlStr, "^", 4)
+	s patInfo = ..GetPatInfo(Oeori)
+	s patCertType = $p(patInfo, "^", 1)
+	s patCertNo = $p(patInfo, "^", 2)
+	s patName = $p(patInfo, "^", 3)
+	s admDr = $p(patInfo, "^", 4)
+	s papmi = $p(patInfo, "^", 5)
+	s batData = ..GetBatByInclb(Inclb)
+	s batNo = $lg(batData, 1)
+	s expDate = $lg(batData, 2) 
+	s produceDate = $lg(batData, 3)
+	s rxFlag = ..GetInciOtcFlag(inciId)
+	if (upLoadWay = 1) {
+		s rtalDocNo = ..GetMethod3505AMedinsProdSelNo(IntrId)
+	}else {
+		s rtalDocNo = batNo												// 零售单据号
+	}
+	s intrTime = $p(intrData, "^", 3)
+	if (intrDate '= "") {
+		s retnDate = $zd(intrDate, 3)
+	}
+	if (intrTime '= "") {
+		s retnTime = $zt(intrTime, 1)
+	}
+	s retnDT = retnDate_" "_retnTime
+	s remarks = ""													// 备注
+	s intrUom = $p(intrData, "^", 10)
+	s intrQty = $ZABS($p(intrData, "^", 6))
+	s intrSp = +$p(intrData, "^", 14)
+	s bUomId = $p(^INCI(inciId, 1), "^", 10)
+	s pUomId = $p(^INCI(inciId, 1), "^", 17)
+ 	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId, 3), "^", 6)
+ 	}
+ 	s intrFac = ..UomFac(intrUom, bUomId)
+ 	s inciFac = ..UomFac(pUomId, bUomId)
+	s bQty = intrQty * intrFac
+	s bSp = intrSp / intrFac
+	s retCodeObj = ..GetTraceCode(IntrId)
+	s pQty = retCodeObj.%Get("PQty")
+	s pTCodeArr = retCodeObj.%Get("PTCode")
+	if (pTCodeArr.%Size() > 0) {
+		s trdnFlag = 0
+		if ((uomType = "1") || (uomType = "2")) {
+			s qty = pQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = pQty
+			s sp = bSp
+		}
+		s traceCodeArr = pTCodeArr
+		d OutPutRow
+	}
+	s sTCodeArr = retCodeObj.%Get("STCode")
+	if (resQtyType = "1") {
+		s sQty = retCodeObj.%Get("SQty")
+	} else {
+		s sQty = bQty - pQty
+	}
+	if (sQty > 0) {
+	    s trdnFlag = 1
+	    if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow
+	} elseif (pTCodeArr.%Size() = 0) {
+	    s sQty = bQty
+	    s trdnFlag = 1
+	    if (uomType = "1") {
+			s qty = sQty / inciFac
+			s sp = bSp * inciFac
+		} else {
+			s qty = sQty
+			s sp = bSp
+		}
+		s traceCodeArr = sTCodeArr
+		d OutPutRow 
+	}
+	q 0
+ 
+OutPutRow
+	q:(TrdnFlag '= "")&&(TrdnFlag '= trdnFlag)
+	s qty = ..AddZero(qty)
+	s sp = ..AddZero(sp)
+	s noTCodeFlag = retCodeObj.%Get("NoTCodeFlag")
+	if (traceCodeArr.%Size() > 0) {
+		if (noTCodeFlag = "N") {
+			s existCode = "Y"
+		} else {
+			s existCode = "C"
+		}
+	} else {
+		s existCode = "N"
+		q:(TaskFlag = "N")||(upExtTCodeFlag = "Y")
+	}
+	s tCodeJsonStr = traceCodeArr.%ToJSON()	
+	s data1 = $lb(insuCode, inciCode, inciDesc, bchNo, setlId)
+	s data2 = $lb(psnNo, patCertType, patCertNo, patName, batNo)
+	s data3 = $lb(produceDate, expDate, rxFlag, trdnFlag, sp)
+	s data4 = $lb(qty, retnDT, pharUserName, remarks, rtalDocNo)
+	s data5 = $lb(mdtrtSn, tCodeJsonStr)
+	s data = data1_data2_data3_data4_data5
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", Pid, "Data", intrDate, IntrId, trdnFlag) = data
+	s setlType = ..GetSetlType(Oeori, Oeore)
+	s logData = $lb(IndexId, bchNo, inciId, trdnFlag, existCode, admDr, papmi, setlType)
+	s ^||TMP("PHA", "PHA.FACE.TPS.INSUTE.Data", "Get3506Data", Pid, "Log", intrDate, IntrId, trdnFlag) = logData
+	q
+}
+
+/// Description: 调用医保接口的公共入口
+/// Creator: 	 WangYaJun
+/// CreatDate:	 2024-08-27
+/// Table:		
+/// Input:		 JsonObj-入参对象, HospId-院区ID, InsuManf-医保厂商
+/// Output:		 
+/// Return:		 成功：0
+/// Others:
+/// Debug:
+ClassMethod SendToInsuFace(JsonObj As PHA.COM.Object, HospId, InsuManf) As PHA.COM.Object
+{
+	q:'$IsObject(JsonObj) ..Error(-1, "调用医保接口入参类型错误！")
+	q:'JsonObj.%IsA("PHA.COM.Object") ..Error(-1, "调用医保接口入参类型错误！")
+	s hospProName = $lg(..GetHospAddress(HospId), 2)
+	if (hospProName [ "安徽"){
+		s inputObj = ##class(PHA.COM.Object).%New()
+		d inputObj.%Set("arg0",JsonObj)
+		s JsonObj = inputObj	
+	}
+	
+	if ((hospProName [ "陕西") || (hospProName [ "青海")) {
+		s sendObj = ##class(PHA.COM.Object).%New()
+		d sendObj.%Set("hospDr", HospId)
+		d sendObj.%Set("insuType", ..GetInsuTypeCode(HospId))
+		d sendObj.%Set("admDr","")
+		d sendObj.%Set("bizTime", $ZD($H,8)_$replace($zt($p($h,",",2)),":",""))
+		d sendObj.%Set("body", JsonObj)
+		s inputJosnStr = sendObj.%ToJSON()
+		s ret = ##class(INSU.BL.Interface.HttpSrv).SendAPI(inputJosnStr)
+	}elseif (hospProName [ "福建") {
+		s stream = ##class(%GlobalCharacterStream).%New()
+		d stream.Write(JsonObj.%ToJSON())
+		s ret=##class(INSU.DLL.WebService.Interface).InsuPsiService(1, JsonObj.infno, stream.Read())
+	}else {
+		s stream = ##class(%GlobalCharacterStream).%New()
+		d stream.Write(JsonObj.%ToJSON())
+		s infno=JsonObj.infno
+		s insutype=..GetInsuTypeCode(HospId)
+		s user=JsonObj.opter
+		// s ret=  ##class(INSU.OFFBIZ.BL.BIZ00A).INSUAPI(stream, ..#InsuTypeCode_"^"_JsonObj.infno_"^"_HospId)   //江西部分
+		;b ; 1
+		;w $h,!
+		s ret = ##class(INSU.OFFBIZ.BL.BIZ00A).INSUAPI(stream, insutype_"^"_infno_"^"_HospId_"^"_user)  //"00A^3501^2^1"
+		;w $h,!
+		// b ; ret
+	}
+	s retObj = ##class(PHA.COM.Object).FromJSON(ret)
+	/* 非两定接口返回值类的处理 */
+	if ('$IsObject(retObj)||(+ret < 0)) {
+		s retObj = ##class(PHA.COM.Object).%New()
+		d retObj.%Set("infcode", $p(ret, "^", 1))
+		d retObj.%Set("err_msg", $p(ret, "^", 2))
+	} elseif (retObj.%Get("error_code") '= "") {
+		d retObj.%Set("infcode", "-1")
+		d retObj.%Set("err_msg", retObj.%Get("error_msg"))
+	}
+	if (hospProName [ "安徽"){
+		s retObj.infcode = retObj.body.infcode
+	}
+	q retObj
+}
+
+/// ////////////////////// ////////////////////// ////////////////////// ///////////////////
+/// ///////////////////上面为Query方法,下面为过程函数,请按此规则////////////////////////////
+/// ////////////////////// ////////////////////// ////////////////////// ///////////////////
+/// Description:给接口所属医院授权
+/// Creator:    hulihua
+/// CreateDate: 2019-11-08
+/// Table:      CT_HospTial     
+/// Input:      HospId(院区ID)     
+/// Output:     0-不通过，1-通过  
+/// Return：
+/// Debug：     w ##class(PHA.FACE.TPS.INSUTE.Data).CheckHosp("2")
+ClassMethod CheckHosp(HospId As %String) As %String
+{
+	q:HospId="" 0
+	q:'$d(^CT("HOSP", HospId)) 0
+	s hospDateFrom = $p(^CT("HOSP", HospId), "^", 9)
+	q:((hospDateFrom '= "") && (hospDateFrom > +$h)) 0
+	s hospDateTo = $p(^CT("HOSP", HospId), "^", 10)
+	q:((hospDateTo '= "") && (hospDateTo '> +$h)) 0
+	s hospDesc = $p($g(^CT("HOSP",HospId)),"^",2)
+	s hospDesc1 = "永州市第三人民医院"
+	s hospList = $lb(hospDesc1)
+	q:($lf(hospList, hospDesc) > 0) 1
+	q 0
+}
+
+/// Description: 获取批次流水号
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Data).Getfixmedinsbchno
+/// Others:		 8.3以前的3505 门诊医嘱id 住院医嘱id||住院发药子表id
+ClassMethod Getfixmedinsbchno(intr, orditm)
+{
+	s pointer = $p(^DHCINTR(intr), "^", 9)
+	s type = $p(^DHCINTR(intr),"^",1)
+	q:((type = "F") || (type = "H")) orditm
+	s fixmedinsbchno = orditm
+	s hisVersion = ..#PHAVERSION
+	if (hisVersion = 0) {
+		if (type = "P") {
+			s fixmedinsbchno = $p(pointer, "||", 1, 2)	
+		} elseif (type = "Y") {
+			q:'$d(^PHARET($p(pointer, "||", 1), "I", $p(pointer, "||", 2)))
+			s dspId = $p(^PHARET($p(pointer, "||", 1), "I", $p(pointer, "||", 2)), "^", 13)
+			s oeore = $p(^DHCOEDISQTY(dspId), "^", 3)
+			S fyDspId = $o(^DHCOEDISQTY(0, "OEORE", oeore, ""))
+			s fyRowId = $p(^DHCOEDISQTY(fyDspId), "^", 14)
+			s fixmedinsbchno = $p(fyRowId, "||", 1 ,2)
+		}
+	} else {
+		if (type = "P") {
+			s fixmedinsbchno = pointer
+		} elseif (type = "Y") {
+			s fixmedinsbchno = $p(^PHARET(+pointer, "I", $p(pointer, "||", 2), "B", $p(pointer, "||", 3)), "^", 8)
+		}
+	}
+	q fixmedinsbchno
+}
+
+/// Description: 获取开单医生相关信息
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetDoctorStr("115342||43")
+ClassMethod GetDoctorStr(oeori) As %String
+{
+	s doctor = $p($g(^OEORD(+oeori, "I", $p(oeori, "||", 2), 1)), "^", 11)
+	q:(doctor = "") ""
+	s docTextOne = $p($g(^CTPCP(doctor, 2)), "^", 8)
+	S doctorName = $p($g(^CTPCP(doctor, 1)), "^", 2)
+	s cardNo = ""
+	s hisVersion = ..#PHAVERSION
+	if (hisVersion = 0) {
+		s cardNo = $p($g(^CTPCP(doctor, 1)), "^", 3)
+	} elseif (hisVersion = 1) {
+		s userId = $o(^SSU("SSUSR", 0, "CTPCP", doctor, ""), -1)
+		s cardNo = $s(userId '= "" : $p($g(^SSU("SSUSR", +userId)), "^", 122), 1 : "")
+		if (cardNo = "") {
+			s cardNo = $p($g(^CTPCP(doctor,3)),"^",11)
+		}
+	} else {
+		s userId = $o(^SSU("SSUSR", 0, "CTPCP", doctor, ""), -1)
+		s cardNo = $s(userId '= "" : $p($g(^SSU("SSUSR", +userId)), "^", 122), 1 : "")
+	}
+	q doctorName_"^"_docTextOne_"^01^"_cardNo
+}
+
+/// Description: 获取药师相关信息
+/// Debug:		 w ##class(PHA.FACE.TPS.INSUTE.Data).GetPharUserStr("1")
+ClassMethod GetPharUserStr(UserId, IntrId = "") As %String
+{
+	if ((UserId = "") && (IntrId '= "")) {
+		s intrData = $g(^DHCINTR(IntrId))
+		s type = $p(intrData, "^", 1) 
+		s pointer = $p(intrData, "^", 9)
+		if (type = "P") {
+			s UserId = $p($g(^DHCPHAC(+pointer)), "^", 13)
+		}
+	}
+	q:(UserId = "") ""
+	s (cardNo, phaUserName, phaTextOne) = ""
+	if (UserId '= "") {
+		s phaUserName = $p(^SSU("SSUSR",UserId), "^", 2)
+	}
+	s userCPId = ##class(web.SSUser).GetDefaultCareProvider(UserId)
+	if (userCPId '= "") {
+		s phaTextOne = $p($g(^CTPCP(userCPId,2)), "^", 8)
+	}
+	s hisVersion = ..#PHAVERSION
+	if (hisVersion = 0) {
+		s cardNo = $p($g(^CTPCP(+userCPId,1)),"^",3)
+	} elseif (hisVersion = 1) {
+		s cardNo = $p($g(^SSU("SSUSR", +UserId)), "^", 122)
+		if (cardNo = "") {
+			s cardNo = $p($g(^CTPCP(+userCPId, 3)), "^", 11)
+		}
+	} else {
+		s cardNo = $p($g(^SSU("SSUSR", +UserId)), "^", 122)
+	}
+	if (phaTextOne = "") {
+		s phaTextOne = "---"
+	}
+	if (phaUserName = "") {
+		s phaUserName = "---"
+	}
+	q phaUserName_"^"_phaTextOne_"^01^"_cardNo
+}
+
+/// Description:根据供应商Id获取供应商代码名称许可证号
+/// Debug:		w ##class(PHA.FACE.TPS.INSUTE.Data).GetVendorStr("490")
+ClassMethod GetVendorStr(VendorId) As %String
+{
+	s vendorName = "---"
+	s (vendorCode, vendorPmtNo) = ""
+	s retStr = $lb(vendorCode, vendorName, vendorPmtNo)
+	q:VendorId="" retStr
+	s vendorCode = $p($g(^APC("APCVM",+VendorId)), "^", 2)
+	s vendorName = $p($g(^APC("APCVM",+VendorId)), "^", 3)
+	s dhcVendorId = $o(^DHCSTV(0, VendorId, ""))
+	s hisVersion = ..#PHAVERSION	
+	if (hisVersion = 2) {		
+		s vendorPmtNo = $p($g(^DHCSTV(+dhcVendorId)), "^", 51)
+	} else {
+		s vendorPmtNo = $p($g(^DHCSTV(+dhcVendorId)), "^", 4)
+	}
+	s retStr = $lb(vendorCode, vendorName, vendorPmtNo)
+	q retStr
+}
+
+/// Description:根据科室批次ID获取批次信息
+/// Others:		生产日期为空默认取1840-12-31
+/// Debug:		w ##class(PHA.FACE.TPS.INSUTE.Data).GetBatByInclb("100||1||1")
+ClassMethod GetBatByInclb(Inclb)
+{
+	q:(Inclb = "") ""
+	s inciId = +Inclb
+	s incib = $p(^INCI(+Inclb, "IL", $p(Inclb, "||", 2), "LB", $p(Inclb, "||", 3)),"^",1)
+	s inciChl = $p(incib, "||", 2)
+	s batNo = $p(^INCI(inciId, "IB", inciChl),"^",1)
+	if (batNo = "") {
+		s batNo = "---"
+	}
+	s expDate = $p(^INCI(inciId, "IB", inciChl),"^",2)
+	s produceDate = ..GetProDate(Inclb)	
+	if (produceDate = "") {
+		s produceDate = $zd(+$h-300, 3)
+	}
+	
+	if (expDate '= "") {
+		s expDate = $zd(expDate, 3)	
+	}
+	s data = $lb(batNo, expDate, produceDate)
+	q data
+}
+
+/// Description:根据批次取某药品的生产日期
+/// Debug:		w ##class(PHA.FACE.TPS.INSUTE.Data).GetProDate("100||1||1")
+ClassMethod GetProDate(Inclb) As %Library.String
+{
+	q:(Inclb = "")	
+	s inciId = +Inclb
+	s inciIL = $p(Inclb,"||",2)
+	s inciLB = $p(Inclb,"||",3)
+ 	s incib = $p(^INCI(inciId,"IL",inciIL,"LB",inciLB),"^",1)
+ 	q:(incib = "") ""
+ 	s dhcIncib = $o(^DHCINCIB(0,"INCIB",incib,0))
+ 	q:(dhcIncib = "") ""
+ 	s produceDate = $p(^DHCINCIB(dhcIncib),"^",2)
+ 	if (produceDate = "") {
+	 	if ($$$comMemberDefined("web.DHCST.Common.DrugStkCommon", "m", "GetClbDHCIngrNew")) {
+	 		s ingdRecItmId = ##class(web.DHCST.Common.DrugStkCommon).GetClbDHCIngrNew(Inclb)
+	 		q:(ingdRecItmId = "") ""
+	 		s ingdRecId = +ingdRecItmId
+	 		s ingdRecCh = $p(ingdRecItmId,"||",2)
+	 	} elseif ($$$comMemberDefined("web.DHCST.Common.DrugStkCommon", "m", "GetClbDHCIngr")) {
+	 		s ingdRecItmId = ##class(web.DHCST.Common.DrugStkCommon).GetClbDHCIngr(Inclb)
+	 		q:(ingdRecItmId = "") ""
+	 		s ingdRecId = +ingdRecItmId
+	 		s ingdRecCh = $p(ingdRecItmId,"||",2)
+	 	} else {
+			s ingdRecId = $o(^DHCINGR(0,"GRI_INCIB",incib,""))
+			q:(ingdRecId = "") ""
+			s ingdRecCh = $o(^DHCINGR(0,"GRI_INCIB",incib,ingdRecId,""))
+			q:(ingdRecCh = "") ""
+		}
+	 	s produceDate = $p($g(^DHCINGR(ingdRecId,"GRI",ingdRecCh)),"^",49)	 	
+	}
+	if (produceDate '= "") {
+		s produceDate = $zd(produceDate,3)
+	}
+ 	q produceDate
+}
+
+/// Description:通过业务指针获取已记录的追溯码  
+/// Debug:      w ##class(PHA.FACE.TPS.INSUTE.Data).GetTraceCode("588117").%ToJSON()
+ClassMethod GetTraceCode(Pointer)
+{
+	s retObj = ##class(PHA.COM.Object).%New()
+	q:('$d(^DHCINTR(Pointer))&&(Pointer'["||")) retObj    
+	if (Pointer["||") {
+		s oeori = ""
+	} else {
+		s oeori = ..GetTransOrdItem(Pointer)
+	}
+	// 对于发退药类业务拆零按照配置，非发退药就按照实际是否拆零
+	if (oeori '= "") {
+		s inclb = $p(^DHCINTR(Pointer), "^", 7)
+		s locId = $$LOC^ST01(inclb)
+		s hospId = $p($g(^CTLOC(+locId)),"^",22)
+		s paramStr = "^^^"_hospId
+		s appName = ..%GetParameter("AppName")
+		s tCodeWay = ##class(web.DHCST.Common.AppCommon).GetAppPropValue(appName, "GetTraceCodeWay", paramStr)
+		if ((tCodeWay = "1") || (tCodeWay = "2") || (tCodeWay = "3")) {
+			s ret = ..GetTraceCodeByAct(Pointer, tCodeWay)
+		} elseif ((tCodeWay = "4") || (tCodeWay = "5")) {
+			s ret = ..GetTraceCodeByUom(Pointer, tCodeWay)
+		} else {
+			s ret = ..GetTraceCodeByAct(Pointer, "1")
+		}
+	} else {
+		s ret = ..GetTraceCodeByAct(Pointer, "1")
+	}
+	q ret
+}
+
+/// Description:通过实际业务判断拆零标识
+/// Others:		配置1，非拆零单个码，拆零码个数和拆零数相等
+/// 			配置2，非拆零和拆零码个数和业务数量相等
+/// 			配置3，非拆零和拆零都传单个码 
+/// Debug:      w ##class(PHA.FACE.TPS.INSUTE.Data).GetTraceCodeA("15263194")
+ClassMethod GetTraceCodeByAct(Pointer, TCodeWay)
+{
+	s retObj = ##class(PHA.COM.Object).%New()
+	q:('$d(^DHCINTR(Pointer))&&(Pointer'["||")) retObj    
+	if (Pointer["||") {
+		s type = "AT"
+		s inclb = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 1)
+	} else {
+		s type = $p(^DHCINTR(Pointer), "^", 1) 
+		s inclb = $p(^DHCINTR(Pointer), "^", 7)
+	}
+	s locId = $$LOC^ST01(inclb)
+	s hospId = $p($g(^CTLOC(+locId)),"^",22)
+	s hospProName = $lg(..GetHospAddress(hospId), 2)
+	s sTraceArr = ##class(PHA.COM.Array).%New()		// 拆零
+	s pTraceArr = ##class(PHA.COM.Array).%New()		// 不拆零
+	s (sQty, pQty) = 0
+	s tbpId = ""
+	for {
+		s tbpId = $o(^INCTBPi("TypePointer",type,Pointer,tbpId))
+		q:(tbpId = "")
+		continue:('$d(^INCTBP(tbpId)))
+		s codeObj = ##class(PHA.COM.Object).%New()
+		s barCode = $p(^INCTBP(tbpId), "^", 9)
+		d codeObj.%Set("drug_trac_codg", barCode)
+		s bQty = $p(^INCTBP(tbpId), "^", 4)
+		s trdnFlag = $p(^INCTBP(tbpId), "^", 12)
+		if hospProName [ "江西"  {
+			d codeObj.%Set("trdn_flag", trdnFlag)
+		}
+		if (trdnFlag = 1) {
+			if (TCodeWay = "1") || (TCodeWay = "2") {
+				for codeI = 1 : 1 : bQty {
+					d sTraceArr.Push(codeObj)
+				}
+			} else {
+				d sTraceArr.Push(codeObj)
+			}
+			s sQty = sQty + bQty
+		} else {
+			if (TCodeWay = "2") {
+				for codeI = 1 : 1 : bQty {
+					d pTraceArr.Push(codeObj)
+				}
+			} else {
+				d pTraceArr.Push(codeObj)
+			}
+			s pQty = pQty + bQty
+		}
+	}
+	/* 无码药品的处理-全归在拆零中 */
+	s noTCodeFlag = "N"
+	if ((pTraceArr.%Size() = 0) && (sTraceArr.%Size() = 0)) {
+		s sQty = 0
+		s inciId = +inclb
+		s noTraceCodeFlag = ..GetIncitmPropValue(inciId, "NoTraceCode")
+		if (noTraceCodeFlag = "Y") {
+			s codeObj = ##class(PHA.COM.Object).%New()
+			s paramStr = "^^^"_hospId
+			s appName = ..%GetParameter("AppName")
+			s barCode = ##class(web.DHCST.Common.AppCommon).GetAppPropValue(appName, "NoTraceCodeVal", paramStr)
+			d codeObj.%Set("drug_trac_codg", barCode)
+			if hospProName [ "江西"  {
+				d codeObj.%Set("trdn_flag", trdnFlag)
+			}
+			s bUomId = $p(^INCI(inciId, 1), "^", 10)
+			if (type = "AT") {
+				s instQty = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 2)
+				s instUomId = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 17)
+				s instFac = ..UomFac(instUomId, bUomId)
+				s bQty = instQty * instFac
+			} else {
+				s intrQty = $ZABS($p(^DHCINTR(Pointer), "^", 6))
+				s intrUomId = $p(^DHCINTR(Pointer), "^", 10)
+				s intrFac = ..UomFac(intrUomId, bUomId)
+				s bQty = intrQty * intrFac
+			}
+			s noTCodeFlag = "Y"
+			if (TCodeWay = "1") || (TCodeWay = "2") {
+				for codeI = 1 : 1 : bQty {
+					d sTraceArr.Push(codeObj)
+				}
+			} else {
+				d sTraceArr.Push(codeObj)
+			}
+			s sQty = bQty
+		}
+	}
+	d retObj.%Set("SQty", sQty)
+	d retObj.%Set("PQty", pQty)
+	d retObj.%Set("STCode", sTraceArr)
+	d retObj.%Set("PTCode", pTraceArr)
+	d retObj.%Set("NoTCodeFlag", noTCodeFlag)
+	q retObj
+}
+
+/// Description:拆零标识通过基本单位和码类型包装单位是否一致来判断，一致非拆零标识为0，不一致拆零标识为1	
+/// Others:		配置4，非拆零上传单个追溯码，拆零重复码个数和拆零数相等（陕西西安东软医保要求的规则）
+/// 			配置5，非拆零和拆零都传单个码
+/// Debug:      w ##class(PHA.FACE.TPS.INSUTE.Data).GetTraceCodeD("11811373")
+ClassMethod GetTraceCodeByUom(Pointer, TCodeWay)
+{
+	s retObj = ##class(PHA.COM.Object).%New()
+	q:('$d(^DHCINTR(Pointer))&&(Pointer'["||")) retObj    
+	if (Pointer["||") {
+		s type = "AT"
+		s inclb = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 1)
+	} else {
+		s type = $p(^DHCINTR(Pointer), "^", 1) 
+		s inclb = $p(^DHCINTR(Pointer), "^", 7)
+	}
+	s locId = $$LOC^ST01(inclb)
+	s hospId = $p($g(^CTLOC(+locId)),"^",22)
+	s hospProName = $lg(..GetHospAddress(hospId), 2)
+	s inciId = +inclb
+	s bUomId = $p(^INCI(inciId,1), "^", 10)
+	s pUomId = $p(^INCI(inciId,1), "^", 17)
+	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId,3), "^", 6)
+	}
+	if (pUomId = bUomId) {
+		s trdnFlag = 0
+	} else {
+		s trdnFlag = 1
+	}
+	s sTraceArr = ##class(PHA.COM.Array).%New()		// 拆零
+	s pTraceArr = ##class(PHA.COM.Array).%New()		// 不拆零
+	s (sQty, pQty) = 0
+	s tbpId = ""
+	for {
+		s tbpId = $o(^INCTBPi("TypePointer",type,Pointer,tbpId))
+		q:(tbpId = "")
+		continue:('$d(^INCTBP(tbpId)))
+		s codeObj = ##class(PHA.COM.Object).%New()
+		s barCode = $p(^INCTBP(tbpId), "^", 9)
+		/* 针对非小码的码类型应重新判断 */
+		s codeTypeDr = $p(^INCTBP(tbpId), "^", 11)
+		s codeType = $p($g(^DHCSTSCDI(+codeTypeDr)), "^", 1)
+		if (codeType '= "STC") {
+			s codeUomId = pUomId
+			s infoId = $o(^DHCITMINFO(0, "INCI", inciId, 0))
+			if (codeType = "BTC") {
+				s codeUomId = $p($g(^DHCITMINFO(+infoId)), "^", 51)
+			} elseif (codeType = "MTC") {
+				s codeUomId = $p($g(^DHCITMINFO(+infoId)), "^", 88)
+			}
+			if (codeUomId = bUomId) {
+				s trdnFlag = 0
+			} else {
+				s trdnFlag = 1
+			}
+		}
+		d codeObj.%Set("drug_trac_codg", barCode)
+		if hospProName [ "江西"  {
+			d codeObj.%Set("trdn_flag", trdnFlag)
+		}
+		s bQty = $p(^INCTBP(tbpId), "^", 4)
+		if (trdnFlag = 1) {
+			if (TCodeWay = "4") {
+				for codeI = 1 : 1 : bQty {
+					d sTraceArr.Push(codeObj)
+				}
+			} else {
+				d sTraceArr.Push(codeObj)
+			}
+			s sQty = sQty + bQty
+		} else {
+			d pTraceArr.Push(codeObj)
+			s pQty = pQty + bQty
+		}
+	}
+	/* 无码药品的处理*/
+	s noTCodeFlag = "N"
+	if ((pTraceArr.%Size() = 0) && (sTraceArr.%Size() = 0)) {
+		s (sQty, pQty) = 0
+		s noTraceCodeFlag = ..GetIncitmPropValue(inciId, "NoTraceCode")
+		if (noTraceCodeFlag = "Y") {
+			s codeObj = ##class(PHA.COM.Object).%New()
+			s paramStr = "^^^"_hospId
+			s appName = ..%GetParameter("AppName")
+			s barCode = ##class(web.DHCST.Common.AppCommon).GetAppPropValue(appName, "NoTraceCodeVal", paramStr)
+			d codeObj.%Set("drug_trac_codg", barCode)
+			if hospProName [ "江西"  {
+				d codeObj.%Set("trdn_flag", trdnFlag)
+			}
+			if (type = "AT") {
+				s instQty = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 2)
+				s instUomId = $p(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2)), "^", 17)
+				s instFac = ..UomFac(instUomId, bUomId)
+				s bQty = instQty * instFac
+			} else {
+				s intrQty = $ZABS($p(^DHCINTR(Pointer), "^", 6))
+				s intrUomId = $p(^DHCINTR(Pointer), "^", 10)
+				s intrFac = ..UomFac(intrUomId, bUomId)
+				s bQty = intrQty * intrFac
+			}
+			s noTCodeFlag = "Y"
+			if (trdnFlag = 1) {
+				if (TCodeWay = "4") {
+					for codeI = 1 : 1 : bQty {
+						d sTraceArr.Push(codeObj)
+					}
+				} else {
+					d sTraceArr.Push(codeObj)
+				}
+				s sQty = bQty
+			} else {
+				d pTraceArr.Push(codeObj)
+				s pQty = bQty
+			}
+		}
+	}
+	d retObj.%Set("SQty", sQty)
+	d retObj.%Set("PQty", pQty)
+	d retObj.%Set("STCode", sTraceArr)
+	d retObj.%Set("PTCode", pTraceArr)
+	d retObj.%Set("NoTCodeFlag", noTCodeFlag)
+	q retObj
+}
+
+/// 依据批次Id取最新的供应商配送流水
+ClassMethod getApprovalNoByIncib(incib)
+{
+    q:incib="" ""
+    s ingr = +$o(^DHCINGR(0,"GRI_INCIB",incib,""),-1)
+    q:ingr=0 ""
+    q:'$d(^DHCINGR(ingr)) ""
+    s approvalNo = $p(^DHCINGR(ingr),"^",46)
+    q approvalNo
+}
+
+}

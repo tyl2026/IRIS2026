@@ -10,7 +10,15 @@ from datetime import date, timedelta
 from collections import defaultdict
 from playwright.async_api import async_playwright
 
-CONTENT_FILE = r"d:\claude code\IRIS\HISUI-新建\日报提交\日报内容.txt"
+# 自动检测项目根目录
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root = _script_dir
+for _ in range(10):
+    if os.path.exists(os.path.join(_project_root, "CLAUDE.md")):
+        break
+    _project_root = os.path.dirname(_project_root)
+CONTENT_FILE = os.path.join(_project_root, "日报提交", "日报内容.txt")
+no_submit = False
 LOGIN_URL = "https://xt.imedway.com/ylxt/Login.aspx"
 PROJ_REPORT_URL = "https://xt.imedway.com/ylxt/WeekReportPM/UIProjectReport.aspx"
 
@@ -220,6 +228,12 @@ async def submit_one_week(page, monday, desc):
     this_content, next_content = generate_weekly_content(monday)
     print(f"  本周: {len(this_content)} chars, 下周: {len(next_content)} chars")
 
+    # 本周已完成为空时拒绝提交
+    if "【本周已完成】\n\n" in this_content or "【本周已完成】\n【" in this_content:
+        print("  ERROR: No completed items this week — refusing to submit empty content.")
+        print("  Please provide daily reports first, then retry.")
+        return 'skip'
+
     # 切换到项目周报表单
     url = f"{PROJ_REPORT_URL}?modefiytime={monday.isoformat()}&bjType=bj"
     await page.goto(url, wait_until="networkidle", timeout=30000)
@@ -333,6 +347,10 @@ async def submit_one_week(page, monday, desc):
     await page.wait_for_timeout(1000)
 
     # Step 5: 提交周报
+    if no_submit:
+        print("  5. 跳过提交 (--no-submit)")
+        print(f"  内容已填充，请手动审核后提交: {PROJ_REPORT_URL}?modefiytime={monday.isoformat()}&bjType=bj")
+        return 'filled'
     print("  5. 提交周报...")
     submit_vis = await page.evaluate("""() => {
         var s = document.getElementById('BtnSubmit');
@@ -353,6 +371,22 @@ async def submit_one_week(page, monday, desc):
 
 
 # ============ Main ============
+
+def get_month_weeks(year, month):
+    """获取指定年月的所有周一"""
+    first_day = date(year, month, 1)
+    if month == 12:
+        last_day = date(year + 1, 1, 1) - timedelta(days=1)
+    else:
+        last_day = date(year, month + 1, 1) - timedelta(days=1)
+    weeks = []
+    d = first_day
+    while d <= last_day:
+        if d.weekday() == 0:
+            weeks.append(d)
+        d += timedelta(days=1)
+    return weeks
+
 
 def get_last_month_weeks():
     """获取上月所有周一"""
@@ -375,9 +409,20 @@ def get_last_month_weeks():
 
 
 async def main():
-    # Parse args
+    global no_submit
+    # Args: --date YYYY-MM-DD | --month YYYY-MM | --year YYYY | --no-submit | default last month
     args = sys.argv[1:]
-    if '--year' in args:
+    if '--no-submit' in args:
+        no_submit = True
+        args.remove('--no-submit')
+    if '--date' in args:
+        idx = args.index('--date')
+        d = args[idx + 1] if idx + 1 < len(args) else ""
+        dt = date.fromisoformat(d)
+        monday = dt - timedelta(days=dt.weekday())
+        weeks = [monday]
+        print(f"Single week: {weeks[0]}")
+    elif '--year' in args:
         idx = args.index('--year')
         year = int(args[idx + 1]) if idx + 1 < len(args) else date.today().year
         today = date.today()
@@ -387,6 +432,13 @@ async def main():
             if d.weekday() == 0: weeks.append(d)
             d += timedelta(days=1)
         print(f"Year {year}: {len(weeks)} weeks")
+    elif '--month' in args:
+        idx = args.index('--month')
+        ms = args[idx + 1] if idx + 1 < len(args) else ""
+        parts = ms.split('-')
+        y, m = (int(parts[0]), int(parts[1])) if len(parts) == 2 else (date.today().year, int(parts[0]))
+        weeks = get_month_weeks(y, m)
+        print(f"Month {y}-{m:02d}: {len(weeks)} weeks")
     else:
         weeks = get_last_month_weeks()
         print(f"Last month: {len(weeks)} weeks")
@@ -394,6 +446,16 @@ async def main():
     if not weeks:
         print("No weeks to process")
         return
+
+    # Require daily report content — refuse to submit empty project weekly
+    daily_reports = parse_daily_reports()
+    if not daily_reports:
+        print("=" * 50)
+        print("ERROR: No daily report content found!")
+        print(f"Expected at: {CONTENT_FILE}")
+        print("Please provide daily report content first before submitting project weekly.")
+        print("=" * 50)
+        sys.exit(1)
 
     # Check log
     log_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proj_weekly_log.json")

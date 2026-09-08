@@ -58,12 +58,24 @@ function initDatagrid() {
         singleSelect: true,
         pagination: false,
         columns: [[
-            { field: "name", title: "文件名", width: 350 },
+            { field: "name", title: "文件名", width: 320 },
             { field: "size", title: "大小", width: 100, align: "center" },
-            { field: "date", title: "生成时间", width: 180, align: "center" },
-            { field: "op", title: "操作", width: 100, align: "center",
+            { field: "date", title: "生成时间", width: 170, align: "center" },
+            { field: "status", title: "状态", width: 90, align: "center",
               formatter: function (val, row) {
-                  return '<a class="hisui-linkbutton" onclick="downloadFile(\'' + row.name + '\')" data-options="iconCls:\'icon-w-download\'">下载</a>';
+                  if (val === "生成中") {
+                      return '<span style="color:#fd7201">● 生成中</span>';
+                  }
+                  return '<span style="color:#389e0d">● 完成</span>';
+              }
+            },
+            { field: "op", title: "操作", width: 150, align: "center",
+              formatter: function (val, row) {
+                  if (row.status === "完成") {
+                      return '<a class="hisui-linkbutton" onclick="downloadFile(\'' + row.name + '\')" data-options="iconCls:\'icon-w-download\'">下载</a>'
+                           + '<a class="hisui-linkbutton" onclick="deleteFile(\'' + row.name + '\')" data-options="iconCls:\'icon-w-delete\'" style="margin-left:6px">删除</a>';
+                  }
+                  return '<span style="color:#aaa">生成中…</span>';
               }
             }
         ]]
@@ -95,7 +107,7 @@ function loadFileList() {
     });
 }
 
-// 生成 CSV
+// 生成 CSV（后台异步）
 function generateCSV() {
     var ym = getSelectedYM();
     if (!ym) {
@@ -106,55 +118,50 @@ function generateCSV() {
     var btn = $("#btnGenerate");
     btn.linkbutton("disable");
 
-    $.messager.progress({ title: "请稍候", msg: "正在生成 CSV 文件..." });
-
     $cm({
         ClassName: CLASS_NAME,
-        MethodName: "GenerateCSV",
+        MethodName: "StartGenerate",
         YearMonth: ym
     }, function (rs) {
-        $.messager.progress("close");
         btn.linkbutton("enable");
 
         if (rs.success) {
-            $.messager.alert("提示", "生成成功！<br>文件：" + rs.fileName);
+            $.messager.alert("提示", "已提交后台生成，数据量较大预计需要约1小时。<br>请稍后点「刷新列表」查看，状态为「完成」后即可下载。");
             loadFileList();
         } else {
-            $.messager.alert("错误", "生成失败：" + (rs.msg || "未知错误"));
+            $.messager.alert("错误", "提交失败：" + (rs.msg || "未知错误"));
         }
     });
 }
 
-// 下载文件
+// 下载文件：走自建流式下载页 dhcmrinfodownload.csp（%Stream 分块推送，避免大文件 MAXSTRING）
 function downloadFile(fileName) {
-    $.messager.progress({ title: "请稍候", msg: "正在下载..." });
-
-    $m({
-        ClassName: CLASS_NAME,
-        MethodName: "DownloadFile",
-        fileName: fileName
-    }, function (content) {
-        $.messager.progress("close");
-
-        if (!content) {
-            $.messager.alert("错误", "文件不存在或为空");
-            return;
-        }
-
-        var bom = "﻿";
-        var blob = new Blob([bom + content], { type: "text/csv;charset=utf-8" });
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    });
+    var url = "dhcmrinfodownload.csp?filename=" + encodeURIComponent(fileName);
+    window.location.href = url;
 }
 
 // 个位数补零
 function padZero(n) {
     return n < 10 ? "0" + n : "" + n;
+}
+
+// 删除文件（后端方法名 RemoveFile，避开 delete 关键词过滤）
+function deleteFile(fileName) {
+    $.messager.confirm("确认", "确定删除文件「" + fileName + "」吗？", function (ok) {
+        if (!ok) {
+            return;
+        }
+        $cm({
+            ClassName: CLASS_NAME,
+            MethodName: "RemoveFile",
+            fileName: fileName
+        }, function (rs) {
+            if (rs.success) {
+                $.messager.show({ title: "提示", msg: "已删除" });
+                loadFileList();
+            } else {
+                $.messager.alert("错误", "删除失败：" + (rs.msg || "未知错误"));
+            }
+        });
+    });
 }

@@ -1,0 +1,159 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>病案编目数据自定义查询</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0;overflow-y:auto}
+.tpl-panel-header{cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:2px solid #95B8E7;background:#F9FBFF;user-select:none}
+.tpl-panel-header:hover{background:#eef3fb}
+.tpl-panel-header .icon-arrow{display:inline-block;transition:transform .2s;font-size:12px;color:#666}
+.tpl-panel-header.expanded .icon-arrow{transform:rotate(90deg)}
+.tpl-current-bar{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:13px;background:#eaf2ff;border-bottom:1px solid #d0dcee}
+.tpl-list{padding:0 14px;background:#F9FBFF;border-bottom:1px solid #d0dcee}
+.tpl-item{display:flex;align-items:center;gap:8px;padding:5px 0 5px 20px;font-size:12px;border-bottom:1px dotted #e0e0e0}
+.tpl-item:last-child{border-bottom:none}
+.tpl-item .tpl-name{flex:1;font-weight:600}
+.tpl-item .tpl-info{color:#888;font-size:11px}
+.tpl-item .scope-tag{padding:1px 8px;border-radius:10px;font-size:10px;background:#e6f7e6;color:#389e0d}
+.tpl-item .scope-tag.personal{background:#fff7e6;color:#d46b08}
+.config-card{background:#fff;border:1px solid #ddd;border-radius:6px;margin:10px 14px 0;padding:10px 12px}
+.config-card .card-header{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:8px}
+.cond-row{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;flex-wrap:wrap}
+.cond-row select,.cond-row input{padding:2px 4px;border:1px solid #95B8E7;border-radius:3px}
+.cond-group{border:1px dashed #95B8E7;border-radius:6px;padding:8px 10px;margin-top:6px;background:#fafcff}
+.cond-group .group-label{font-size:11px;color:#017bce;margin-bottom:4px}
+.hisui-linkbutton{margin:0 3px}
+#btnArea{display:flex;align-items:center;gap:10px;padding:8px 14px}
+#btnArea .hisui-linkbutton{margin-right:4px}
+#dgResult{width:100%;height:100%}
+#dlgColumn .panel-body{display:flex;flex-direction:column;height:100%}
+</style>
+</head>
+<body>
+<div id="mainLayout" style="display:flex;flex-direction:column;min-height:100vh">
+    <div>
+
+        <!-- 标题栏 -->
+        <div style="display:flex;align-items:center;padding:8px 14px;gap:10px;background:#F9FBFF;border-bottom:2px solid #95B8E7">
+            <span style="font-weight:700;font-size:14px">病案编目数据自定义查询</span>
+            <div style="flex:1"></div>
+            <a class="hisui-linkbutton" onclick="openTemplateMgmt()" data-options="iconCls:'icon-w-config'">模板管理</a>
+        </div>
+
+        <!-- 模板面板（默认折叠） -->
+        <div id="tplPanel">
+            <div id="tplPanelHeader" class="tpl-panel-header" onclick="toggleTemplatePanel()">
+                <span class="icon-arrow">&#9654;</span>
+                <strong style="font-size:13px">模板</strong>
+                <span id="tplCount" class="wf-pill" style="display:none">0</span>
+                <div style="flex:1"></div>
+                <a class="hisui-linkbutton" onclick="event.stopPropagation();saveTemplate()" style="font-size:11px">修改当前模板</a>
+                <a class="hisui-linkbutton" onclick="event.stopPropagation();newTemplate()" style="font-size:11px">新增模板</a>
+            </div>
+            <div id="tplCurrentBar" class="tpl-current-bar" style="display:none">
+                <span id="currentTplName" style="font-weight:600"></span>
+                <span id="currentTplInfo" style="color:#888;font-size:11px"></span>
+                <span id="currentTplScope" class="scope-tag"></span>
+                <div style="flex:1"></div>
+                <a class="hisui-linkbutton" onclick="viewTemplateDetail()" style="font-size:11px">查看明细</a>
+            </div>
+            <div id="tplList" class="tpl-list" style="display:none"></div>
+        </div>
+
+        <!-- 输出列配置 -->
+        <div class="config-card">
+            <div class="card-header">
+                <span>输出列</span>
+                <span id="colCount" style="font-size:11px;color:#888">已选 0 列</span>
+                <div style="flex:1"></div>
+                <a class="hisui-linkbutton" onclick="openColumnSelector()" data-options="iconCls:'icon-w-edit'">选择列...</a>
+            </div>
+            <div id="colChips" style="display:flex;gap:6px;flex-wrap:wrap">
+                <span style="font-size:12px;color:#aaa">未选择输出列</span>
+            </div>
+        </div>
+
+        <!-- 查询条件 -->
+        <div class="config-card" style="margin-bottom:0">
+            <div class="card-header">
+                <span>查询条件</span>
+                <span style="font-size:11px;color:#888">组内AND，组间OR</span>
+                <div style="flex:1"></div>
+                <a class="hisui-linkbutton" onclick="addConditionGroup()" style="font-size:11px">+ 添加条件组</a>
+                <a class="hisui-linkbutton" onclick="addCondition()" style="font-size:11px">+ 添加条件</a>
+            </div>
+            <div id="condContainer">
+                <div id="condGroup0" class="cond-group">
+                    <div class="group-label">条件组 1</div>
+                    <div id="condList0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 按钮区 -->
+        <div id="btnArea">
+            <a id="btnQuery" class="hisui-linkbutton" onclick="doQuery()" data-options="iconCls:'icon-search'">查询</a>
+            <a id="btnExport" class="hisui-linkbutton" onclick="doExport()" data-options="iconCls:'icon-w-export'">导出 Excel</a>
+        </div>
+    </div>
+
+    <!-- 结果 datagrid -->
+    <div style="flex:1;min-height:400px;height:calc(100vh - 200px)">
+        <table id="dgResult" class="hisui-datagrid"></table>
+    </div>
+</div>
+
+<!-- 保存模板弹窗 -->
+<div id="dlgSaveTpl" class="hisui-dialog" data-options="closed:true,title:'保存查询模板',width:500,height:420,modal:true">
+    <div style="padding:12px">
+        <div style="margin-bottom:10px"><label>模板名称（中文描述，至少4字）</label><input id="saveTplName" style="width:100%"></div>
+        <div style="margin-bottom:10px"><label>可见范围</label><select id="saveTplScope" style="width:150px"><option value="P">个人（仅自己可见）</option><option value="G">通用（所有人可见）</option></select></div>
+        <div style="border-top:1px solid #ddd;padding-top:8px;margin-top:4px"><div style="font-weight:600;font-size:12px;margin-bottom:4px">输出列（<span id="saveColCount">0</span>列）：</div><div id="saveColPreview" style="display:flex;gap:4px;flex-wrap:wrap;font-size:12px;margin-bottom:8px"></div></div>
+        <div style="border-top:1px solid #ddd;padding-top:8px"><div style="font-weight:600;font-size:12px;margin-bottom:4px">查询条件（<span id="saveCondCount">0</span>条）：</div><div id="saveCondPreview" style="font-size:12px;color:#555"></div></div>
+        <div style="text-align:right;padding-top:10px;border-top:1px solid #ddd;margin-top:8px">
+            <a class="hisui-linkbutton" onclick="doSaveTemplate()" data-options="iconCls:'icon-ok'">保存</a>
+            <a class="hisui-linkbutton" onclick="$('#dlgSaveTpl').dialog('close')">取消</a>
+        </div>
+    </div>
+</div>
+
+<!-- 字段选择弹窗 -->
+<div id="dlgColumn" class="hisui-dialog" data-options="closed:true,title:'选择输出列',width:750,height:500,modal:true">
+    <div style="display:flex;flex:1;gap:10px;padding:10px;min-height:0">
+        <div style="flex:1;display:flex;flex-direction:column">
+            <input id="fieldSearch" placeholder="搜索字段..." style="margin-bottom:6px;padding:4px;border:1px solid #95B8E7;border-radius:3px" onkeyup="filterFieldTree()">
+            <div id="groupTabs" style="flex-shrink:0;padding:4px 0;margin-bottom:6px;min-height:28px"></div>
+            <div id="fieldTree" style="flex:1;overflow:auto;border:1px solid #d0dcee;border-radius:4px;padding:4px;min-height:0"></div>
+        </div>
+        <div style="width:220px;display:flex;flex-direction:column">
+            <div style="font-weight:600;font-size:12px;margin-bottom:4px">已选列（拖拽排序）</div>
+            <div id="selectedList" style="flex:1;overflow:auto;border:1px solid #d0dcee;border-radius:4px;padding:4px"></div>
+            <div id="selectedCount" style="font-size:11px;color:#888;margin-top:4px">已选 0 列</div>
+        </div>
+    </div>
+    <div style="text-align:right;padding:8px;border-top:1px solid #ddd">
+        <a class="hisui-linkbutton" onclick="selectAllFields()">全选</a>
+        <a class="hisui-linkbutton" onclick="invertSelection()">反选</a>
+        <a class="hisui-linkbutton" onclick="confirmColumnSelection()" data-options="iconCls:'icon-ok'">确定</a>
+    </div>
+</div>
+
+<!-- 模板明细弹窗 -->
+<div id="dlgTplDetail" class="hisui-dialog" data-options="closed:true,title:'模板明细',width:600,height:400,modal:true">
+    <div id="dlgTplDetailContent" style="padding:12px;font-size:13px"></div>
+</div>
+
+<script type="text/javascript" src="../scripts/dhcmrcustomquery.js"></script>
+</body>
+</html>
+</csp:content>

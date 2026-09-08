@@ -1,0 +1,493 @@
+/**
+ * 基数药维护
+ * scripts/pha/op/v4/basemed.js
+ * 2021-11-19 Huxt 修改
+ */
+var GridCmbInci = "";
+var GridCmbInst = "";
+var GridCmbDocLoc = "";
+var GridCmbUseLoc = "";
+var GridCmbExeLoc = "";
+$(function () {
+	InitHosp();
+	InitDict();
+	InitGridDict();
+	InitEvent();
+	InitBaseMedGrid();
+	HelpInfo();
+})
+function InitDict() {
+	PHA.ComboBox("conBaseType", {
+		required: false,
+		width: 150,
+		panelHeight: 'auto',
+		data: [{
+				RowId: "",
+				Description: "全部 "
+			}, {
+				RowId: "O",
+				Description: "门诊 "
+			}, {
+				RowId: "I",
+				Description: "住院"
+			}
+		]
+	})
+	$('#conBaseType').combobox('setValue', "");
+}
+function InitGridDict() {
+	// 类型
+	GridCmdType = PHA.EditGrid.ComboBox({
+		required: true,
+		width: 150,
+		panelHeight: 'auto',
+		data: [{
+				RowId: "O",
+				Description: "门诊 "
+			}, {
+				RowId: "I",
+				Description: "住院"
+			}
+		]
+	});
+	// 医嘱项
+	var options = {
+		panelWidth: '500',
+		required: true,
+		onSelect: function (index, rowData) {
+			var gridSelect = $('#gridBaseMed').datagrid('getSelected');
+			gridSelect.arcItmRowId = rowData.arcItmRowId;
+		},
+		onBeforeLoad: function (param) {
+			if (param.q == undefined) {
+				param.q = $('#gridBaseMed').datagrid("getSelected").arcItmDesc;
+			}
+			param.QText = param.q;
+			param.HospId = PHA_COM.Session.HOSPID;
+		}
+	};
+	options = $.extend({}, PHAOP_STORE.ArcItm(), options);
+	GridCmbArc = PHA.EditGrid.ComboGrid(options);
+	
+	// 用法
+	GridCmbInst = PHA.EditGrid.ComboBox({
+		required: false,
+		tipPosition: 'top',
+		width: 150,
+		url: PHAOP_STORE.Instruction().url,
+		defaultFilter: 5,
+		mode: 'remote',
+		onSelect: function (index, rowData) {
+			var editIndex = $("#gridBaseMed").datagrid('options').editIndex;
+			if (editIndex == undefined) {
+				return;
+			}
+			var instId = $(this).combobox("getValue"); //当前combobox的值
+			if ((instId == "") || (instId == null)) {
+				return;
+			}
+			var gridSelect = $('#gridBaseMed').datagrid("getSelected");
+			gridSelect.instRowId = instId;
+		},
+		onBeforeLoad: function (param) {
+			if (param.q == undefined) {
+				param.q = $('#gridBaseMed').datagrid("getSelected").instDesc;
+			}
+			param.QText = param.q;
+			param.HospId = PHA_COM.Session.HOSPID;
+		}
+	});
+	
+	// 开单科室
+	GridCmbDocLoc = PHA.EditGrid.ComboBox({
+		required: true,
+		tipPosition: 'top',
+		url: PHAOP_STORE.CTLOC().url ,
+		defaultFilter: 5,
+		mode: 'remote',
+		onSelect: function (index, rowData) {
+			var editIndex = $("#gridBaseMed").datagrid('options').editIndex;
+			if (editIndex == undefined) {
+				return;
+			}
+			var docLocRowId = $(this).combobox("getValue"); //当前combobox的值
+			if ((docLocRowId == "") || (docLocRowId == null)) {
+				return;
+			}
+			var gridSelect = $('#gridBaseMed').datagrid("getSelected");
+			gridSelect.docLocRowId = docLocRowId;
+		},
+		onBeforeLoad: function (param) {
+			if (param.q == undefined) {
+				param.q = $('#gridBaseMed').datagrid("getSelected").docLocDesc;
+			}
+			param.QText = param.q;
+			param.HospId = PHA_COM.Session.HOSPID;
+		}
+	});
+	// 取药科室(原使用科室)
+	GridCmbUseLoc = PHA.EditGrid.ComboBox({
+		required: true,
+		tipPosition: 'top',
+		url: PHAOP_STORE.CTLOC().url,
+		defaultFilter: 5,
+		mode: 'remote',
+		onSelect: function (index, rowData) {
+			var editIndex = $("#gridBaseMed").datagrid('options').editIndex;
+			if (editIndex == undefined) {
+				return;
+			}
+			var useLocRowId = $(this).combobox("getValue"); //当前combobox的值
+			if ((useLocRowId == "") || (useLocRowId == null)) {
+				return;
+			}
+			var gridSelect = $('#gridBaseMed').datagrid("getSelected");
+			gridSelect.useLocRowId = useLocRowId;
+		},
+		onBeforeLoad: function (param) {
+			if (param.q == undefined) {
+				param.q = $('#gridBaseMed').datagrid("getSelected").useLocDesc;
+			}
+			param.QText = param.q;
+			param.HospId = PHA_COM.Session.HOSPID;
+		}
+	});
+	// 使用科室/执行科室
+	GridCmbExeLoc = PHA.EditGrid.ComboBox({
+		required: false,
+		tipPosition: 'top',
+		url: PHAOP_STORE.CTLOC().url,
+		defaultFilter: 5,
+		mode: 'remote',
+		onSelect: function (index, rowData) {
+			var editIndex = $("#gridBaseMed").datagrid('options').editIndex;
+			if (editIndex == undefined) {
+				return;
+			}
+			var exeLocRowId = $(this).combobox("getValue"); //当前combobox的值
+			if ((exeLocRowId == "") || (exeLocRowId == null)) {
+				return;
+			}
+			var gridSelect = $('#gridBaseMed').datagrid("getSelected");
+			gridSelect.exeLocRowId = exeLocRowId;
+		},
+		onBeforeLoad: function (param) {
+			if (param.q == undefined) {
+				param.q = $('#gridBaseMed').datagrid("getSelected").exeLocDesc;
+			}
+			param.QText = param.q;
+			param.HospId = PHA_COM.Session.HOSPID;
+		}
+	});
+}
+
+function InitEvent() {
+	//基数药维护
+	$('#btnFind').on('click', Query);
+	$('#btnAdd').on('click', function () {
+		$('#gridBaseMed').datagrid('addNewRow', {
+			editField: 'baseMedType'
+		});
+	});
+	$('#btnSave').on('click', SaveBaseMed);
+	$('#btnDelete').on('click', DelBaseMed);
+}
+
+function InitBaseMedGrid() {
+	var columns = [[{
+				field: 'baseMedRowId',
+				title: '门诊药房id',
+				hidden: true,
+				width: 100
+			}, {
+				field: 'baseMedType',
+				title: '类型',
+				descField: 'baseMedTypeDesc',
+				width: 80,
+				editor: GridCmdType,
+				formatter: function (value, row, index) {
+					return row.baseMedTypeDesc;
+				}
+			}, {
+				field: 'baseMedTypeDesc',
+				title: '类型',
+				width: 150,
+				hidden: true
+			}, {
+				field: 'arcItmDesc',
+				title: '药品名称',
+				descField: 'arcItmDesc',
+				width: 250,
+				editor: GridCmbArc,
+				formatter: function (value, row, index) {
+					return row.arcItmDesc;
+				}
+			}, {
+				field: 'arcItmRowId',
+				title: '药品名称',
+				hidden: true,
+				width: 250
+			}, {
+				field: 'instDesc',
+				title: '用法',
+				descField: 'instDesc',
+				width: 150,
+				editor: GridCmbInst,
+				formatter: function (value, row, index) {
+					return row.instDesc;
+				}
+			}, {
+				field: 'instRowId',
+				title: '用法描述id',
+				hidden: true,
+				width: 150
+			}, {
+				field: 'docLocDesc',
+				title: '开单科室',
+				descField: 'docLocDesc',
+				width: 200,
+				editor: GridCmbDocLoc,
+				formatter: function (value, row, index) {
+					return row.docLocDesc;
+				}
+			}, {
+				field: 'docLocRowId',
+				title: '开单科室id',
+				hidden: true,
+				width: 200
+			}, {
+				field: 'useLocDesc',
+				title: '取药科室',
+				descField: 'useLocDesc',
+				width: 200,
+				editor: GridCmbUseLoc,
+				formatter: function (value, row, index) {
+					return row.useLocDesc;
+				}
+			}, {
+				field: 'useLocRowId',
+				title: '取药科室Id',
+				hidden: true,
+				width: 200
+			}, {
+				field: 'exeLocDesc',
+				title: '使用科室',
+				descField: 'exeLocDesc',
+				width: 200,
+				editor: GridCmbExeLoc,
+				formatter: function (value, row, index) {
+					return row.exeLocDesc;
+				}
+			}, {
+				field: 'exeLocRowId',
+				title: '使用科室Id',
+				hidden: true,
+				width: 200
+			}, {
+				field: 'remarks',
+				title: '备注',
+				width: 200,
+				editor: {
+					type: 'validatebox'
+				}
+			}
+		]
+	];
+	var dataGridOption = {
+		url: $URL,
+		queryParams: {
+			ClassName: 'PHA.OP.CfBase.Query',
+			QueryName: 'QueryLocBaseMed',
+			pJsonStr: JSON.stringify({
+				hospId: PHA_COM.Session.HOSPID
+			}),
+			rows: 999
+		},
+		pagination: false,
+		columns: columns,
+		toolbar: '#gridBaseMedGridBar',
+		enableDnd: false,
+		fitColumns: false,
+		rownumbers: true,
+		exportXls: false,
+		onClickRow: function (rowIndex, rowData) {
+			$(this).datagrid('endEditing');
+		},
+		onDblClickRow: function (rowIndex, rowData) {
+			if (rowData) {
+				$(this).datagrid('beginEditRow', {
+					rowIndex: rowIndex,
+					editField: 'arcItmDesc'
+				});
+			}
+		},
+		onLoadSuccess: function (data) {}
+	};
+	PHA.Grid('gridBaseMed', dataGridOption);
+}
+function InitHosp() {
+	var hospComp = GenHospComp('PHA-COM-BasicDrug', '', {
+		width: 280
+	});
+	hospComp.options().onSelect = function (rowIndex, rowData) {
+		PHA_COM.Session.HOSPID = rowData.HOSPRowId;
+		Query();
+	};
+}
+function Query() {
+	var pJson = {};
+	pJson.hospId = PHA_COM.Session.HOSPID;
+	pJson.baseMedType = $('#conBaseType').combobox("getValue"); ;
+	$("#gridBaseMed").datagrid("query", {
+		pJsonStr: JSON.stringify(pJson),
+
+	});
+}
+function SaveBaseMed() {
+	var $grid = $('#gridBaseMed');
+	if ($grid.datagrid('endEditing') == false) {
+		PHA.Popover({
+			msg: '请先完成必填项',
+			type: 'alert'
+		});
+		return;
+	}
+	var dataArr = [];
+	var gridChanges = $grid.datagrid('getChanges', "updated");
+	var gridChangeLen = gridChanges.length;
+	for (var i = 0; i < gridChangeLen; i++) {
+		var rowData = gridChanges[i];
+		var docLocRowId = rowData.docLocRowId || '';
+		var useLocRowId = rowData.useLocRowId || '';
+		if ((docLocRowId == "") || (useLocRowId == "")) {
+			continue;
+		}
+		var instRowId = rowData.instRowId || '';
+		var instDesc = rowData.instDesc || '';
+		if (instDesc == "") {
+			instRowId = "";
+		}
+		var exeLocRowId = rowData.exeLocRowId || '';
+		
+		var iJson = {
+			baseMedRowId: rowData.baseMedRowId || '',
+			baseMedType: rowData.baseMedType || '',
+			arcItmRowId: rowData.arcItmRowId || '',
+			instRowId: instRowId,
+			docLocRowId: docLocRowId,
+			useLocRowId: useLocRowId,
+			remarks: rowData.remarks || '',
+			exeLocRowId: exeLocRowId
+		};
+		dataArr.push(iJson);
+	}
+	var gridChanges = $grid.datagrid('getChanges', "inserted");
+	var gridChangeLen = gridChanges.length;
+	for (var i = 0; i < gridChangeLen; i++) {
+		var rowData = gridChanges[i];
+		var docLocRowId = rowData.docLocRowId || '';
+		var useLocRowId = rowData.useLocRowId || '';
+		if ((docLocRowId == "") || (useLocRowId == "")) {
+			continue;
+		}
+		var instRowId = rowData.instRowId || '';
+		var instDesc = rowData.instDesc || '';
+		if (instDesc == "") {
+			instRowId = "";
+		}
+		var exeLocRowId = rowData.exeLocRowId || '';
+		
+		var iJson = {
+			baseMedRowId: rowData.baseMedRowId || '',
+			baseMedType: rowData.baseMedType || '',
+			arcItmRowId: rowData.arcItmRowId || '',
+			instRowId: instRowId,
+			docLocRowId: docLocRowId,
+			useLocRowId: useLocRowId,
+			remarks: rowData.remarks || '',
+			exeLocRowId: exeLocRowId,
+		};
+		dataArr.push(iJson);
+	}
+	if (dataArr.length === 0) {
+		PHA.Popover({
+			msg: '没有需要保存的数据',
+			type: 'alert'
+		});
+		return;
+	}
+	var retJson = $.cm({
+		ClassName: 'PHA.OP.Data.Api',
+		MethodName: 'HandleInOne',
+		pClassName: 'PHA.OP.CfBase.OperTab',
+		pMethodName: 'SaveBaseMed',
+		pJsonStr: JSON.stringify(dataArr)
+	}, false);
+
+	if (retJson.success === 'N') {
+		msg = PHAOP_COM.DataApi.Msg(retJson)
+			PHA.Alert('提示', msg, 'warning');
+		return;
+	} else {
+		PHA.Popover({
+			msg: '保存成功',
+			type: 'success'
+		});
+	}
+	$grid.datagrid('reload');
+}
+function DelBaseMed() {
+	var gridSelect = $('#gridBaseMed').datagrid('getSelected') || '';
+	if (gridSelect == '') {
+		PHA.Popover({
+			msg: '请先选中需要删除的行',
+			type: 'alert',
+			timeout: 1000
+		});
+		return;
+	}
+	var baseMedRowId = gridSelect.baseMedRowId || '';
+	if (baseMedRowId !== "") {
+		var arcItmDesc = gridSelect.arcItmDesc || '';
+		var dataArr = [];
+		var iJson = {
+			baseMedRowId: baseMedRowId,
+			arcItmDesc: arcItmDesc
+		};
+		dataArr.push(iJson);
+		var retJson = $.cm({
+			ClassName: 'PHA.OP.Data.Api',
+			MethodName: 'HandleInOne',
+			pClassName: 'PHA.OP.CfBase.OperTab',
+			pMethodName: 'DelPhBaseMed',
+			pJsonStr: JSON.stringify(dataArr)
+		}, false);
+		if (retJson.success === 'N') {
+			msg = PHAOP_COM.DataApi.Msg(retJson)
+				PHA.Alert('提示', msg, 'warning');
+			return;
+		}
+	}
+	PHA.Popover({
+		msg: '删除成功',
+		type: 'success'
+	});
+	var rowIndex = $('#gridBaseMed').datagrid('getRowIndex', gridSelect);
+	$('#gridBaseMed').datagrid('deleteRow', rowIndex);
+}
+
+function HelpInfo() {
+	$("#btnHelp").popover({
+		title: '基数药维护解释',
+		trigger: 'hover',
+		padding: '10px',
+		width: 650,
+		content: '<div>'
+		 + '基数药：药品在取药科室，发药在药房；取药科室定期补货。<br>'
+		 + '<p class="pha-row">&emsp;&emsp;&emsp;&emsp;需满足已维护条件才可以，类型、药品、开单科室、取药科室必填</p >'
+		 + '<div class="pha-row pha-line" ><a style="color:red">名词解释：</a></div>'
+		 + '&emsp;&emsp;类型：住院--开单科室开立的药品在执行医嘱(医技)界面可以被取药科室查看并执行<br>'
+		 + '<p class="pha-row">&emsp;&emsp;类型：门诊--下医嘱时开单科室在记录中存在则视为基数药，药房发药时向对应取药科室补货</p >'
+		 + '</div>'
+	});
+}

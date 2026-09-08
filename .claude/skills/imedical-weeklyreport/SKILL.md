@@ -10,13 +10,19 @@ description: >
 
 ## 工作流
 
-说"补交周报" → 自动补交上月周报。说"补交2026年所有周报" → 补交全年。
+说"补交周报" → 自动补交上月。说"补交6月周报" → 补交指定月。说"补交6月22号那周" → 补交单周。
 
 ### 运行
 
 ```bash
 # 默认补交上月
 python scripts/weekly_backfill.py
+
+# 补交单周（指定该周内任一天）
+python scripts/weekly_backfill.py --date 2026-06-24
+
+# 补交指定月份
+python scripts/weekly_backfill.py --month 2026-06
 
 # 补交指定年份
 python scripts/weekly_backfill.py --year 2026

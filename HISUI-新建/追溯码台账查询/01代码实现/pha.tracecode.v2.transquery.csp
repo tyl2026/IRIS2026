@@ -1,0 +1,109 @@
+﻿<!DOCTYPE html>
+<!--药品追溯码使用查询
+    csp:csp/pha.tracecode.v2.transquery.csp
+    js: scripts/pha/tracecode/v2/transquery.js
+-->
+<HTML XMLNS=TRAK>
+
+    <HEAD>
+        <title>
+            <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+        </title>
+        <TRAK:HEAD></TRAK:HEAD>
+        <HISUI/>
+        <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+        </link> 
+        <style>
+            .pha-row {
+                margin-top: 10px;
+                margin-bottom: 10px;
+                text-align: left;
+            }
+
+            .pha-col:first-child {
+                margin-left: -1px;
+            }
+
+            /* inline-block 有间隙,大概4px */
+            .pha-col {
+                display: inline-block;
+                margin-left: -4px;
+                padding-left: 10px;
+                vertical-align: middle;
+            }
+        </style>
+    </HEAD>
+
+    <body>
+        <div class="hisui-layout" fit="true" border="false">
+            <div data-options="region:'center'" class="dhcpha-hisui-container">
+
+                <div class="hisui-layout" fit="true" border="false">
+	                <div data-options="region:'center',title:'追溯码查询',split:true,headerCls:'panel-header-gray',iconCls:'icon-panel-drug'">
+	                    <table id="gridTraceCode"></table>
+	                </div>
+	                <div data-options="region:'south',title:'追溯码使用明细',split:true,headerCls:'panel-header-gray',iconCls:'icon-panel-drug'" style="height:300px;">
+						 <table id="gridTraceCodeDetail"></table>
+					</div>
+           		</div>
+            </div>
+        </div>
+        <div id="gridTraceCodeBar">
+            <div class="datagrid-toolbar" style="border-bottom:0">
+                <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtCodeType">码类型</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="comCodeType" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtTraceCode">追溯码</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="txtTraceCode" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true'
+                            spellcheck="false" style="width:260px">
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbStatus">使用状态</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbStatus" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col">
+                        <a id="btnFind" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-find',plain:false">查询</a>
+                    </div>
+                    <div class="pha-col">
+                        <a id="btnClean" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-save',plain:false">清屏</a>
+                    </div>
+                </div>
+                <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbgridInci">药品名称</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbgridInci"  class="hisui-lookup" style="width:320px"/>
+                    </div>
+                    <div class="pha-col" style="margin-left:228px;">
+                        <a id="btnExport" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-export',plain:false">导出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="../scripts/hisui/websys.comm.js"></script>
+        <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.extend.js"></script>
+        <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.com.js"></script>
+        <!-- Excel(.xls)导出标准组件 DHCExcelExport（通用组件库，部署至 csp/scripts_lib/DHCExcelExport.js） -->
+        <script type="text/javascript" src="../scripts_lib/DHCExcelExport.js"></script>
+        <script type="text/javascript" src="../scripts/pha/tracecode/v2/transquery.js"></script>
+    </body>
+
+</HTML>

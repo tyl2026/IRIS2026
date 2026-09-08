@@ -1,0 +1,1064 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 22:18:37">
+<Class name="User.DHCINGdRec">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>INGR_RowId</SqlRowIdName>
+<SqlTableName>DHC_INGdRec</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent,User.Abstract</Super>
+<TimeChanged>65774,53762.957131</TimeChanged>
+<TimeCreated>62602,34463.630929</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="ChildDHCINGdRecItm">
+<Type>User.DHCINGdRecItm</Type>
+<Cardinality>children</Cardinality>
+<Inverse>INGRIINGRParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="INGRAPCVMDR">
+<Description>
+Des Ref to APCVM</Description>
+<Type>User.APCVendor</Type>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>INGR_APCVM_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRCompleted">
+<Description>
+Completed Flag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>INGR_Completed</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRCTCURDR">
+<Description>
+Des Ref to CTCUR</Description>
+<Type>User.CTCurrency</Type>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>INGR_CTCUR_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRDate">
+<Description>
+Date Of Delivery (DO Date)</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>INGR_Date</SqlFieldName>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="INGRDONo">
+<Description>
+Delivery Order No</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>INGR_DO_No</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRExRate">
+<Description>
+Exchange Rate</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlComputeCode>	s {INGR_ExRate}=$$COFO08^at297({INGR_Date},{INGR_CTCUR_DR},{INGR_ExRate})
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlFieldName>INGR_ExRate</SqlFieldName>
+<Transient>1</Transient>
+</Property>
+
+<Property name="INGRHandChg">
+<Description>
+Handling Charges</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>INGR_HandChg</SqlFieldName>
+</Property>
+
+<Property name="INGRINPODR">
+<Description>
+Purchase Order</Description>
+<Type>User.INPO</Type>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>INGR_INPO_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRNo">
+<Description>
+Goods Receive Note No</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>INGR_No</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="50"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGROverallDiscount">
+<Description>
+Overall Discount</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>INGR_OverallDiscount</SqlFieldName>
+</Property>
+
+<Property name="INGRRemarks">
+<Description>
+Remarks</Description>
+<Type>%Library.String</Type>
+<Collection>list</Collection>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>INGR_Remarks</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="40"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRSSUSRDR">
+<Description>
+Des Ref to SSUSR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>INGR_SSUSR_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRTime">
+<Description>
+Time of Delivery</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>INGR_Time</SqlFieldName>
+</Property>
+
+<Property name="INGRLocDr">
+<Description>
+recive Loc DR</Description>
+<Type>User.CTLoc</Type>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>INGR_Loc_Dr</SqlFieldName>
+</Property>
+
+<Property name="INGRCreateUser">
+<Description>
+INGR_CreateUser</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>INGR_CreateUser</SqlFieldName>
+</Property>
+
+<Property name="INGRCreateDate">
+<Description>
+INGR_CreateDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>INGR_CreateDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="INGRCreateTime">
+<Description>
+INGR_CreateTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>INGR_CreateTime</SqlFieldName>
+</Property>
+
+<Property name="INGRBackup1">
+<Description>
+INGR_Backup1</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>INGR_Backup1</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRBackup2">
+<Description>
+INGR_Backup2</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>INGR_Backup2</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRBackup3">
+<Description>
+INGR_Backup3</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>INGR_Backup3</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRGdRecDR">
+<Description>
+Pointer to IN_GdRec</Description>
+<Type>User.INGdRec</Type>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>INGR_GdRec_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRPayAllowed">
+<Description>
+INGR_PayAllowed</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>INGR_PayAllowed</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRType">
+<Description>
+INGR_Type</Description>
+<Type>User.DHCOperateType</Type>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>INGR_Type</SqlFieldName>
+</Property>
+
+<Property name="INGRSSUSRPurchDR">
+<Description>
+INGR_SSUSR_Purch_DR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>INGR_SSUSR_Purch_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRReqLocDr">
+<Description>
+INGR_ReqLoc_Dr</Description>
+<Type>User.CTLoc</Type>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>INGR_ReqLoc_Dr</SqlFieldName>
+</Property>
+
+<Property name="INGRSSUSRAcceptDR">
+<Description>
+INGR_SSUSR_Accept_DR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>INGR_SSUSR_Accept_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRSSUSRTreasurerDR">
+<Description>
+INGR_SSUSR_Treasurer_DR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>INGR_SSUSR_Treasurer_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRSCGDR">
+<Description>
+INGR_StkCat_DR</Description>
+<Type>User.DHCStkCatGroup</Type>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>INGR_SCG_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRAuditFlag">
+<Description>
+INGR_AuditFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>30</SqlColumnNumber>
+<SqlFieldName>INGR_AuditFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRStkType">
+<Description>
+INGR_StkType</Description>
+<Type>%String</Type>
+<SqlColumnNumber>31</SqlColumnNumber>
+<SqlFieldName>INGR_StkType</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Drug,Material,Others"/>
+<Parameter name="MAXLEN" value="8"/>
+<Parameter name="SELECTIVITY" value="25.0000%"/>
+<Parameter name="VALUELIST" value=",G,M,O"/>
+</Property>
+
+<Property name="INGRGiftFlag">
+<Description>
+INGR_GiftFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>32</SqlColumnNumber>
+<SqlFieldName>INGR_GiftFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRAdjCheque">
+<Description>
+INGR_AdjCheque</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>33</SqlColumnNumber>
+<SqlFieldName>INGR_AdjCheque</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRPayAllowUser">
+<Description>
+INGR_PayAllowUser</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>INGR_PayAllowUser</SqlFieldName>
+</Property>
+
+<Property name="INGRPayAllowDate">
+<Description>
+INGR_PayAllowDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>35</SqlColumnNumber>
+<SqlFieldName>INGR_PayAllowDate</SqlFieldName>
+</Property>
+
+<Property name="INGRPayAllowTime">
+<Description>
+INGR_PayAllowTime</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>36</SqlColumnNumber>
+<SqlFieldName>INGR_PayAllowTime</SqlFieldName>
+</Property>
+
+<Property name="INGRSourceOfFund">
+<Description>
+INGR_SourceOfFund</Description>
+<Type>User.DHCSourceOfFund</Type>
+<SqlColumnNumber>37</SqlColumnNumber>
+<SqlFieldName>INGR_SourceOfFund</SqlFieldName>
+</Property>
+
+<Property name="INGRPurchDate">
+<Description>
+INGR_PurchDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>38</SqlColumnNumber>
+<SqlFieldName>INGR_PurchDate</SqlFieldName>
+</Property>
+
+<Property name="INGRPurchTime">
+<Description>
+INGR_PurchTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>39</SqlColumnNumber>
+<SqlFieldName>INGR_PurchTime</SqlFieldName>
+</Property>
+
+<Property name="INGRTreasureDate">
+<Description>
+INGR_TreasureDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>40</SqlColumnNumber>
+<SqlFieldName>INGR_TreasureDate</SqlFieldName>
+</Property>
+
+<Property name="INGRTreasureTime">
+<Description>
+INGR_TreasureTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>41</SqlColumnNumber>
+<SqlFieldName>INGR_TreasureTime</SqlFieldName>
+</Property>
+
+<Property name="INGRRed">
+<Description>
+INGR_Red - 红冲标志</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>42</SqlColumnNumber>
+<SqlFieldName>INGR_Red</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRGRRed">
+<Description>
+INGR_GR_Red - 被红冲的入库单</Description>
+<Type>User.DHCINGdRec</Type>
+<SqlColumnNumber>43</SqlColumnNumber>
+<SqlFieldName>INGR_GR_Red</SqlFieldName>
+</Property>
+
+<Property name="INGRPrintFlag">
+<Description>
+INGR_PrintFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>44</SqlColumnNumber>
+<SqlFieldName>INGR_PrintFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRINIsTrfDR">
+<Description>
+INGR_INIsTrf_DR - 根据出库单生成入库单</Description>
+<Type>User.DHCInIsTrf</Type>
+<SqlColumnNumber>45</SqlColumnNumber>
+<SqlFieldName>INGR_INIsTrf_DR</SqlFieldName>
+</Property>
+
+<Property name="INGROeoriRecFlag">
+<Description>
+INGR_OeoriRecFlag  高值医嘱补录标志</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>46</SqlColumnNumber>
+<SqlFieldName>INGR_OeoriRecFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRApprovalNO">
+<Description>
+流水单号(付款审批)</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>47</SqlColumnNumber>
+<SqlFieldName>INGR_ApprovalNO</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRCompleteDate">
+<Description>
+INGR_CompleteDate完成日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>48</SqlColumnNumber>
+<SqlFieldName>INGR_CompleteDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="INGRStkCatDR">
+<Description>
+INGR_StkCat_DR库存分类</Description>
+<Type>User.INCStkCat</Type>
+<SqlColumnNumber>49</SqlColumnNumber>
+<SqlFieldName>INGR_StkCat_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRCarrierDR">
+<Description>
+Des Ref to Carrier</Description>
+<Type>User.DHCCarrier</Type>
+<SqlColumnNumber>50</SqlColumnNumber>
+<SqlFieldName>INGR_Carrier_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRHRPFlag">
+<Type>%Library.String</Type>
+<SqlColumnNumber>51</SqlColumnNumber>
+<SqlFieldName>INGR_HRPFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRCanPay">
+<Description>
+INGRCanPay 是否可以挂账 for HRP</Description>
+<Type>%Library.String</Type>
+<InitialExpression>"N"</InitialExpression>
+<SqlColumnNumber>52</SqlColumnNumber>
+<SqlFieldName>INGR_CanPay</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INGRSSUSRReceiveDR">
+<Description>
+INGR_SSUSR_Receive_DR  入库单制单记录接收人带到自动生成的库存转移制单</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>53</SqlColumnNumber>
+<SqlFieldName>INGR_SSUSR_Receive_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRDeliveryMan">
+<Description>
+供应商送货联系人</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>54</SqlColumnNumber>
+<SqlFieldName>INGR_DeliveryMan</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRHDCMIngdId">
+<Description>
+医共体主院入库单id</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>55</SqlColumnNumber>
+<SqlFieldName>INGR_HDCMIngdId</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INGRPSVendorDR">
+<Description>
+INGR_PSVendor_DR 货主 </Description>
+<Type>User.APCVendor</Type>
+<SqlColumnNumber>56</SqlColumnNumber>
+<SqlFieldName>INGR_PSVendor_DR</SqlFieldName>
+</Property>
+
+<Property name="INGRDirectorDR">
+<Description>
+INGR_Director_DR 科室主任</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>57</SqlColumnNumber>
+<SqlFieldName>INGR_Director_DR</SqlFieldName>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCINGR)</SqlIdExpression>
+<StreamLocation>^User.DHCINGdRecS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="DataMaster">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCINGR</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+<Data name="INGR_APCVM_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="INGR_AdjCheque">
+<Delimiter>"^"</Delimiter>
+<Piece>32</Piece>
+</Data>
+<Data name="INGR_ApprovalNO">
+<Delimiter>"^"</Delimiter>
+<Piece>46</Piece>
+</Data>
+<Data name="INGR_AuditFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>29</Piece>
+</Data>
+<Data name="INGR_Backup1">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="INGR_Backup2">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="INGR_Backup3">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="INGR_CTCUR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="INGR_CanPay">
+<Delimiter>"^"</Delimiter>
+<Piece>51</Piece>
+</Data>
+<Data name="INGR_Carrier_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>49</Piece>
+</Data>
+<Data name="INGR_CompleteDate">
+<Delimiter>"^"</Delimiter>
+<Piece>47</Piece>
+</Data>
+<Data name="INGR_Completed">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="INGR_CreateDate">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="INGR_CreateTime">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+<Data name="INGR_CreateUser">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="INGR_DO_No">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="INGR_Date">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="INGR_DeliveryMan">
+<Delimiter>"^"</Delimiter>
+<Piece>53</Piece>
+</Data>
+<Data name="INGR_Director_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>56</Piece>
+</Data>
+<Data name="INGR_ExRate">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="INGR_GR_Red">
+<Delimiter>"^"</Delimiter>
+<Piece>42</Piece>
+</Data>
+<Data name="INGR_GdRec_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="INGR_GiftFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>31</Piece>
+</Data>
+<Data name="INGR_HDCMIngdId">
+<Delimiter>"^"</Delimiter>
+<Piece>54</Piece>
+</Data>
+<Data name="INGR_HRPFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>50</Piece>
+</Data>
+<Data name="INGR_HandChg">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="INGR_INIsTrf_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>44</Piece>
+</Data>
+<Data name="INGR_INPO_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="INGR_Loc_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="INGR_No">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="INGR_OeoriRecFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>45</Piece>
+</Data>
+<Data name="INGR_OverallDiscount">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="INGR_PSVendor_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>55</Piece>
+</Data>
+<Data name="INGR_PayAllowDate">
+<Delimiter>"^"</Delimiter>
+<Piece>34</Piece>
+</Data>
+<Data name="INGR_PayAllowTime">
+<Delimiter>"^"</Delimiter>
+<Piece>35</Piece>
+</Data>
+<Data name="INGR_PayAllowUser">
+<Delimiter>"^"</Delimiter>
+<Piece>33</Piece>
+</Data>
+<Data name="INGR_PayAllowed">
+<Delimiter>"^"</Delimiter>
+<Piece>22</Piece>
+</Data>
+<Data name="INGR_PrintFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>43</Piece>
+</Data>
+<Data name="INGR_PurchDate">
+<Delimiter>"^"</Delimiter>
+<Piece>37</Piece>
+</Data>
+<Data name="INGR_PurchTime">
+<Delimiter>"^"</Delimiter>
+<Piece>38</Piece>
+</Data>
+<Data name="INGR_Red">
+<Delimiter>"^"</Delimiter>
+<Piece>41</Piece>
+</Data>
+<Data name="INGR_Remarks">
+<Node>"REM"</Node>
+</Data>
+<Data name="INGR_ReqLoc_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>25</Piece>
+</Data>
+<Data name="INGR_SCG_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>28</Piece>
+</Data>
+<Data name="INGR_SSUSR_Accept_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>26</Piece>
+</Data>
+<Data name="INGR_SSUSR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="INGR_SSUSR_Purch_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>24</Piece>
+</Data>
+<Data name="INGR_SSUSR_Receive_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>52</Piece>
+</Data>
+<Data name="INGR_SSUSR_Treasurer_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>27</Piece>
+</Data>
+<Data name="INGR_SourceOfFund">
+<Delimiter>"^"</Delimiter>
+<Piece>36</Piece>
+</Data>
+<Data name="INGR_StkCat_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>48</Piece>
+</Data>
+<Data name="INGR_StkType">
+<Delimiter>"^"</Delimiter>
+<Piece>30</Piece>
+</Data>
+<Data name="INGR_Time">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="INGR_TreasureDate">
+<Delimiter>"^"</Delimiter>
+<Piece>39</Piece>
+</Data>
+<Data name="INGR_TreasureTime">
+<Delimiter>"^"</Delimiter>
+<Piece>40</Piece>
+</Data>
+<Data name="INGR_Type">
+<Delimiter>"^"</Delimiter>
+<Piece>23</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexCreateDateLOC">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"CreateDate"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{INGR_CreateDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{INGR_Loc_Dr}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDONo">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"DO"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>$$ALPHAUP({INGR_DO_No})</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDateGdrecdr">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"DateGdDr"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INGR_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_GdRec_DR}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINGRDate">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"DODate"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INGR_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINGRNO">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"No"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>$$ALPHAUP({INGR_No})</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINIsTrfDR">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"INIsTrf"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{INGR_INIsTrf_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINPODR">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"PO"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{INGR_INPO_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTrakINGR">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"INGR"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INGR_GdRec_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTreasureDate">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"TreaDate"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{INGR_TreasureDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="indexAPCVMDR">
+<Type>index</Type>
+<Global>^DHCINGR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"Vendor"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INGR_APCVM_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INGR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INGR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCINGR)
+	s oldI = +$g(^mdata("DHCINGDREC"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCINGR = maxI
+	s ^mdata("DHCINGDREC") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

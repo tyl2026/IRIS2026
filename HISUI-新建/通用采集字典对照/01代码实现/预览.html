@@ -1,0 +1,1177 @@
+﻿
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script>if (typeof jQuery === "undefined") { document.write('<script src="jquery-1.11.3.min.js"><\/script>'); }</script>
+
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通用数据采集字典与HIS字典对照维护</title>
+
+<style>
+/* ============================================================
+   通用数据采集字典与 HIS 字典对照维护 · 现代化界面
+   自研组件(表格/分页/弹窗/Toast), 不依赖 HISUI 插件外观
+   ============================================================ */
+:root{
+    --bg:#eef1f7;  --card:#ffffff; --line:#e5e9f1; --line2:#d7deea;
+    --txt:#1f2733; --sub:#68748a;  --faint:#99a3b8;
+    --pri:#3167f6; --pri-d:#2757d8; --pri-soft:#edf2ff; --pri-line:#c3d4ff;
+    --ok:#158a52;  --ok-soft:#e6f7ee;  --ok-line:#b9e6cc;
+    --warn:#b9780f; --warn-soft:#fdf3df; --warn-line:#efdcae;
+    --dgr:#d43d3d; --dgr-soft:#fdecec;  --dgr-line:#f3c7c7;
+    --vio:#6d5ae0; --vio-soft:#f0edfd;  --vio-line:#d6ccfa;
+    --r:10px; --r-sm:6px;
+    --shadow:0 1px 2px rgba(16,24,40,.05), 0 1px 8px rgba(16,24,40,.05);
+    --thead:#f6f8fc;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+    margin:0; background:var(--bg); color:var(--txt);
+    font:13px/1.5 -apple-system,"Segoe UI","Microsoft Yahei","PingFang SC",sans-serif;
+    -webkit-font-smoothing:antialiased;
+}
+#app{height:100vh; display:flex; flex-direction:column; min-height:0}
+
+/* ---------- 顶栏 ---------- */
+.appbar{
+    flex:none; display:flex; align-items:center; gap:16px;
+    padding:0 20px; height:56px; background:linear-gradient(90deg,#2450d8 0%,#3167f6 55%,#4d83ff 100%);
+    color:#fff; box-shadow:0 1px 4px rgba(23,58,150,.18);
+}
+.appbar .brand{display:flex; align-items:center; gap:12px; min-width:0}
+.appbar .logo{
+    width:34px; height:34px; border-radius:9px; flex:none;
+    background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35);
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.appbar h1{margin:0; font-size:16px; font-weight:700; letter-spacing:.5px; white-space:nowrap}
+.appbar .sub{margin:1px 0 0; font-size:11px; opacity:.75; white-space:nowrap}
+.appbar .right{margin-left:auto; display:flex; align-items:center; gap:8px}
+.appbar .right label{font-size:12px; opacity:.85}
+.appbar select{
+    height:30px; min-width:190px; border-radius:8px; padding:0 8px;
+    border:1px solid rgba(255,255,255,.45); background:rgba(255,255,255,.94); color:#22314f; font-size:12.5px; outline:none;
+}
+
+/* ---------- 页签 ---------- */
+.tabsbar{
+    flex:none; display:flex; align-items:center; gap:4px;
+    background:var(--card); border-bottom:1px solid var(--line); padding:0 16px;
+}
+.tabsbar .tab{
+    position:relative; padding:12px 18px 10px; cursor:pointer; user-select:none;
+    font-size:13.5px; color:var(--sub); border-radius:8px 8px 0 0;
+    display:flex; align-items:center; gap:6px; transition:color .15s;
+}
+.tabsbar .tab:hover{color:var(--pri)}
+.tabsbar .tab.on{color:var(--pri); font-weight:700}
+.tabsbar .tab.on::after{
+    content:""; position:absolute; left:14px; right:14px; bottom:-1px; height:3px;
+    background:var(--pri); border-radius:3px 3px 0 0;
+}
+.tabsbar .tab .ti{font-size:14px; opacity:.85}
+.tabsbar .spring{flex:1}
+
+/* ---------- 内容区 ---------- */
+.content{flex:1; min-height:0; padding:12px 14px; overflow:hidden}
+.page{height:100%; min-height:0; display:none; flex-direction:column; gap:10px}
+.page.on{display:flex}
+.page.scroll{overflow:auto; display:block; padding-right:2px}
+.page.scroll.on{display:block}
+
+/* ---------- 卡片 ---------- */
+.card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    box-shadow:var(--shadow); display:flex; flex-direction:column; min-height:0;
+}
+.card.fill{flex:1}
+.card-h{
+    flex:none; display:flex; align-items:center; flex-wrap:wrap; gap:8px 10px;
+    padding:9px 12px; border-bottom:1px solid var(--line);
+}
+.card-h b{font-size:13.5px; color:var(--txt)}
+.card-h .cnt{font-size:12px; color:var(--faint)}
+.card-h .tip{font-size:12px; color:var(--sub)}
+.card-tools{margin-left:auto; display:flex; align-items:center; flex-wrap:wrap; gap:6px}
+.card-f{
+    flex:none; display:flex; align-items:center; gap:8px;
+    padding:8px 12px; border-top:1px solid var(--line); background:#fbfcfe; border-radius:0 0 var(--r) var(--r);
+}
+
+/* ---------- 工具条 ---------- */
+.toolbar{
+    flex:none; flex-direction:row; align-items:center; flex-wrap:wrap;
+    gap:10px 14px; padding:10px 14px;
+}
+.field{display:flex; align-items:center; gap:6px}
+.field>label{font-size:12.5px; color:var(--sub); white-space:nowrap}
+
+/* ---------- 输入控件 ---------- */
+.ipt,.sel{
+    height:30px; padding:0 9px; font-size:12.5px; color:var(--txt);
+    background:#fff; border:1px solid var(--line2); border-radius:8px; outline:none;
+    transition:border .15s, box-shadow .15s;
+}
+.ipt{width:170px}
+.ipt:focus,.sel:focus{border-color:var(--pri); box-shadow:0 0 0 3px rgba(49,103,246,.12)}
+.ipt.sm,.sel.sm{height:28px; width:140px}
+.ipt.xs{width:110px}
+textarea.ipt{height:auto; width:100%; padding:8px 9px; line-height:1.55; font-family:var(--mono); resize:vertical}
+.sel{min-width:96px; cursor:pointer}
+
+/* ---------- 按钮 ---------- */
+.btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:5px;
+    height:30px; padding:0 14px; font-size:12.5px; cursor:pointer; user-select:none;
+    border-radius:8px; border:1px solid var(--line2); background:#fff; color:var(--txt);
+    transition:all .15s; white-space:nowrap;
+}
+.btn:hover{border-color:var(--pri); color:var(--pri); background:var(--pri-soft)}
+.btn:active{transform:translateY(1px)}
+.btn.pri{background:var(--pri); border-color:var(--pri); color:#fff}
+.btn.pri:hover{background:var(--pri-d); border-color:var(--pri-d); color:#fff}
+.btn.sm{height:27px; padding:0 11px; font-size:12px}
+.btn.xs{height:24px; padding:0 9px; font-size:11.5px; border-radius:6px}
+.btn.danger{background:var(--dgr); border-color:var(--dgr); color:#fff}
+.btn.danger:hover{background:#bf3535; border-color:#bf3535; color:#fff}
+.btn.danger-ghost{color:var(--dgr); border-color:var(--dgr-line); background:#fff}
+.btn.danger-ghost:hover{background:var(--dgr-soft); border-color:var(--dgr)}
+.btn.pri-ghost{color:var(--pri); border-color:var(--pri-line); background:#fff}
+.btn.pri-ghost:hover{background:var(--pri-soft)}
+.btn:disabled{opacity:.5; cursor:not-allowed; pointer-events:none}
+
+/* ---------- 分段控件 ---------- */
+.seg{display:inline-flex; background:#eef1f7; border-radius:8px; padding:2px}
+.seg a{
+    padding:4px 12px; font-size:12px; color:var(--sub); cursor:pointer; user-select:none;
+    border-radius:6px; transition:all .15s; white-space:nowrap;
+}
+.seg a:hover{color:var(--pri)}
+.seg a.on{background:#fff; color:var(--pri); font-weight:700; box-shadow:0 1px 3px rgba(16,24,40,.1)}
+
+/* ---------- 徽章 ---------- */
+.tag{
+    display:inline-flex; align-items:center; gap:4px; padding:1px 8px;
+    font-size:11.5px; border-radius:20px; border:1px solid transparent; white-space:nowrap;
+}
+.tag.ok{background:var(--ok-soft); color:var(--ok); border-color:var(--ok-line)}
+.tag.warn{background:var(--warn-soft); color:var(--warn); border-color:var(--warn-line)}
+.tag.dgr{background:var(--dgr-soft); color:var(--dgr); border-color:var(--dgr-line)}
+.tag.pri{background:var(--pri-soft); color:var(--pri); border-color:var(--pri-line)}
+.tag.vio{background:var(--vio-soft); color:var(--vio); border-color:var(--vio-line)}
+.tag.gray{background:#f1f3f8; color:var(--sub); border-color:var(--line2)}
+.tag .dot{width:5px; height:5px; border-radius:50%; background:currentColor}
+
+/* ---------- 表格 ---------- */
+.tbl{flex:1; min-height:0; display:flex; flex-direction:column}
+.tbl-scroll{flex:1; min-height:0; overflow:auto; border-radius:0 0 var(--r) var(--r)}
+.xtbl{width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px}
+.xtbl th{
+    position:sticky; top:0; z-index:2; background:var(--thead); color:#51607a;
+    font-weight:600; text-align:left; padding:7px 10px; white-space:nowrap;
+    border-bottom:1px solid var(--line2);
+}
+.xtbl td{
+    padding:6px 10px; border-bottom:1px solid var(--line);
+    color:var(--txt); word-break:break-all; vertical-align:middle;
+}
+.xtbl tbody tr:nth-child(even) td{background:#fafbfd}
+.xtbl tbody tr:hover td{background:var(--pri-soft)}
+.xtbl tbody tr.sel td{background:#e3edff}
+.xtbl tbody tr.hit td{background:var(--ok-soft)}
+.xtbl tbody tr.hit.sel td{background:#d3f0e0}
+.xtbl tbody tr.lock td{background:#f2f6f3; color:#8a9790; cursor:not-allowed}
+.xtbl tbody tr.lock:hover td{background:#e9f1ea}
+.xtbl tbody tr.row-dgr td{background:#fff6f6}
+.xtbl tbody tr.row-dgr:hover td{background:#ffeded}
+.xtbl .ck,.xtbl .num{text-align:center; white-space:nowrap}
+.xtbl .ck input{cursor:pointer; vertical-align:middle; margin:0}
+.xtbl .ck input:disabled{cursor:not-allowed; opacity:.35}
+.xtbl .mono{font-family:var(--mono); font-size:12px}
+.xtbl .sub{color:var(--faint); font-size:11.5px}
+.xtbl a.op{color:var(--pri); cursor:pointer; margin-right:8px; text-decoration:none; white-space:nowrap}
+.xtbl a.op:hover{text-decoration:underline}
+.xtbl a.op.dgr{color:var(--dgr)}
+.xtbl .num-mapped{color:var(--ok); font-weight:700}
+.xtbl .num-zero{color:var(--faint)}
+.mini-bar{display:inline-block; width:52px; height:5px; border-radius:3px; background:#e8edf5; overflow:hidden; vertical-align:middle; margin-left:5px}
+.mini-bar i{display:block; height:100%; background:linear-gradient(90deg,#38b26b,#158a52); border-radius:3px}
+.tbl-empty{padding:36px 0; text-align:center; color:var(--faint); font-size:12.5px}
+.tbl-empty .eico{font-size:26px; display:block; margin-bottom:8px; opacity:.55}
+
+/* ---------- 分页 ---------- */
+.tbl-foot{
+    flex:none; display:flex; align-items:center; gap:10px;
+    padding:6px 10px; border-top:1px solid var(--line); background:#fbfcfe;
+    border-radius:0 0 var(--r) var(--r); font-size:12px; color:var(--sub);
+}
+.tbl-foot .pg{display:flex; align-items:center; gap:4px}
+.tbl-foot .pg a{
+    min-width:26px; height:24px; padding:0 6px; display:inline-flex; align-items:center; justify-content:center;
+    border:1px solid var(--line2); border-radius:6px; background:#fff; color:var(--sub);
+    cursor:pointer; user-select:none; font-size:12px;
+}
+.tbl-foot .pg a:hover:not(.dis):not(.on){border-color:var(--pri); color:var(--pri)}
+.tbl-foot .pg a.on{background:var(--pri); border-color:var(--pri); color:#fff; font-weight:700}
+.tbl-foot .pg a.dis{opacity:.4; cursor:default}
+.tbl-foot .pg-info{margin-right:auto}
+.tbl-foot .pg-size{height:24px; padding:0 4px; font-size:11.5px; border:1px solid var(--line2); border-radius:6px; background:#fff; color:var(--sub); cursor:pointer}
+
+/* ---------- 空状态 ---------- */
+.empty{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:30px 20px; color:var(--sub)}
+.empty .eico{width:52px; height:52px; border-radius:14px; background:#f1f4fa; display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:4px}
+.empty h3{margin:0; font-size:14px; color:var(--txt)}
+.empty p{margin:0; font-size:12px; color:var(--faint)}
+.empty .ebtns{display:flex; gap:10px; margin-top:10px}
+
+/* ---------- 布局: Tab1 三栏 ---------- */
+.split{flex:1; min-height:0; display:flex; gap:10px}
+.split .col-l{width:46%; min-width:420px; display:flex; flex-direction:column; gap:10px; min-height:0}
+.split .col-r{flex:1; min-width:0; display:flex; flex-direction:column; gap:10px; min-height:0}
+.col-l .pane-d{flex:1.06}
+.col-l .pane-i{flex:1}
+.col-r .pane-his{flex:1.45}
+.col-r .pane-cur{flex:1; max-height:34%}
+.pane-cur .tbl-scroll{max-height:100%}
+
+/* ---------- 统计卡片 (Tab3) ---------- */
+.stats{flex:none; display:flex; gap:10px}
+.stat{
+    flex:1; background:var(--card); border:1px solid var(--line); border-radius:var(--r);
+    box-shadow:var(--shadow); padding:12px 16px; display:flex; flex-direction:column; gap:4px;
+}
+.stat .k{font-size:12px; color:var(--sub)}
+.stat .v{font-size:24px; font-weight:800; line-height:1.15; font-family:Georgia,serif}
+.stat .v small{font-size:12px; font-weight:400; color:var(--faint); margin-left:2px}
+.stat.pri .v{color:var(--pri)}
+.stat.ok .v{color:var(--ok)}
+.stat.dgr .v{color:var(--dgr)}
+.stat .bar{height:6px; border-radius:3px; background:#edf1f8; overflow:hidden}
+.stat .bar i{display:block; height:100%; border-radius:3px; transition:width .3s}
+
+/* ---------- Tab5 布局 ---------- */
+.subplat{flex:none; height:262px}
+.subimp{flex:1; min-height:0; overflow:auto}
+.imp-grid{display:flex; flex-wrap:wrap; gap:14px 20px; padding:14px 16px}
+.imp-block{flex:1; min-width:320px; display:flex; flex-direction:column; gap:8px}
+.imp-block h4{margin:0; font-size:12.5px; color:var(--sub); font-weight:600}
+.dropzone{
+    border:1.5px dashed var(--line2); border-radius:10px; padding:18px 16px;
+    display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer;
+    transition:all .15s; background:#fbfcfe; color:var(--sub);
+}
+.dropzone:hover{border-color:var(--pri); background:var(--pri-soft)}
+.dropzone .dz-ico{font-size:22px}
+.dropzone b{color:var(--txt); font-size:13px}
+.dropzone span{font-size:11.5px; color:var(--faint)}
+.dropzone.has{border-color:var(--ok-line); background:var(--ok-soft)}
+.imp-opts{display:flex; align-items:center; gap:16px; padding:0 16px 10px; flex-wrap:wrap}
+.imp-path{display:flex; gap:8px; align-items:center; padding:0 16px 8px; flex-wrap:wrap}
+.imp-progress{
+    margin:4px 16px 14px; padding:9px 12px; border-radius:8px; font-size:12.5px;
+    background:#f4f7fd; color:var(--sub); border:1px solid var(--line); display:none;
+}
+.imp-progress.show{display:block}
+.imp-progress b{color:var(--pri)}
+.hint{font-size:11.5px; color:var(--faint); line-height:1.7}
+.hint code{background:#f1f4fa; border-radius:4px; padding:0 4px; font-family:var(--mono); font-size:11px}
+
+/* ---------- 行内编辑 (当前对照关系) ---------- */
+.cell-edit{
+    width:100%; min-width:80px; height:26px; padding:0 7px; font-size:12px;
+    border:1px solid transparent; border-radius:6px; background:transparent; color:var(--txt);
+    outline:none; font-family:inherit;
+}
+.cell-edit:hover{border-color:var(--line2); background:#fff}
+.cell-edit:focus{border-color:var(--pri); background:#fff; box-shadow:0 0 0 3px rgba(49,103,246,.1)}
+.cell-edit.dirty{border-color:var(--warn)}
+.swflag{cursor:pointer; user-select:none}
+
+/* ---------- 弹窗 ---------- */
+.mask{position:fixed; inset:0; background:rgba(15,23,42,.42); z-index:9000; display:flex; align-items:flex-start; justify-content:center; overflow:auto; padding:60px 16px 30px}
+.dlg{
+    background:#fff; border-radius:14px; box-shadow:0 18px 50px rgba(15,23,42,.25);
+    min-width:360px; max-width:94vw; display:flex; flex-direction:column; overflow:hidden;
+    animation:pop .18s ease-out;
+}
+@keyframes pop{from{transform:translateY(-10px) scale(.98); opacity:0} to{transform:none; opacity:1}}
+.dlg-h{flex:none; display:flex; align-items:center; padding:13px 18px; border-bottom:1px solid var(--line)}
+.dlg-h b{font-size:14px}
+.dlg-h .x{margin-left:auto; width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--faint); font-size:15px}
+.dlg-h .x:hover{background:var(--dgr-soft); color:var(--dgr)}
+.dlg-b{padding:16px 18px; max-height:62vh; overflow:auto}
+.dlg-f{flex:none; display:flex; justify-content:flex-end; gap:8px; padding:12px 18px; border-top:1px solid var(--line); background:#fbfcfe}
+.dlg .form{display:flex; flex-direction:column; gap:12px}
+.dlg .fi{display:flex; flex-direction:column; gap:5px}
+.dlg .fi>label{font-size:12.5px; color:var(--sub); font-weight:600}
+.dlg .fi>label .req{color:var(--dgr); margin-left:2px}
+.dlg .fi .fi-note{font-size:11.5px; color:var(--faint); line-height:1.6}
+.dlg .fi-row{display:flex; gap:12px}
+.dlg .fi-row .fi{flex:1}
+.radio-row{display:flex; gap:10px; flex-wrap:wrap}
+.radio-pill{
+    display:inline-flex; align-items:center; gap:6px; padding:6px 14px; cursor:pointer;
+    border:1px solid var(--line2); border-radius:8px; font-size:12.5px; color:var(--sub); user-select:none;
+}
+.radio-pill:hover{border-color:var(--pri); color:var(--pri)}
+.radio-pill.on{border-color:var(--pri); background:var(--pri-soft); color:var(--pri); font-weight:700}
+.radio-pill .rd{width:14px; height:14px; border-radius:50%; border:2px solid currentColor; position:relative}
+.radio-pill.on .rd::after{content:""; position:absolute; inset:2px; border-radius:50%; background:currentColor}
+.dlg .probe-list{display:flex; flex-direction:column; gap:6px}
+.dlg .probe-item{display:flex; gap:10px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fbfcfe; font-size:12.5px}
+.dlg .probe-item .pc{font-family:var(--mono); color:var(--pri); font-weight:600; min-width:56px}
+.dlg .tipbox{padding:9px 12px; border-radius:8px; background:var(--warn-soft); border:1px solid var(--warn-line); color:var(--warn); font-size:12px; line-height:1.6}
+
+/* ---------- Toast ---------- */
+#toastWrap{position:fixed; top:16px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; gap:8px; align-items:center}
+.toast{
+    display:flex; align-items:center; gap:8px; padding:10px 18px; border-radius:10px;
+    background:#fff; border:1px solid var(--line2); box-shadow:0 6px 22px rgba(15,23,42,.14);
+    font-size:13px; color:var(--txt); animation:tin .2s ease-out; max-width:70vw;
+}
+.toast .tico{width:18px; height:18px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:800}
+.toast.ok .tico{background:var(--ok)}
+.toast.err .tico{background:var(--dgr)}
+.toast.info .tico{background:var(--pri)}
+@keyframes tin{from{transform:translateY(-8px); opacity:0} to{transform:none; opacity:1}}
+
+/* ---------- 滚动条 ---------- */
+::-webkit-scrollbar{width:9px; height:9px}
+::-webkit-scrollbar-thumb{background:#cdd6e4; border-radius:5px; border:2px solid #fff}
+::-webkit-scrollbar-thumb:hover{background:#b4c0d4}
+::-webkit-scrollbar-track{background:transparent}
+
+/* 小屏适配: 左列收窄 */
+@media (max-width:1280px){
+    .split .col-l{width:42%; min-width:380px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div style="background:#fff7e6;border-bottom:1px solid #ffd591;color:#ad6800;padding:5px 16px;font-size:12px">
+<b>离线预览</b>：本页为界面效果演示，数据为内置样例，后端交互由本地脚本模拟，不会读写任何数据库。
+</div>
+
+
+    <!-- ================= 顶栏 ================= -->
+    <header class="appbar">
+        <div class="brand">
+            <div class="logo">📚</div>
+            <div>
+                <h1>通用数据采集字典与 HIS 字典对照维护</h1>
+                <p class="sub">第三方采集标准值域 / 条目 · HIS 内部字典 · 对照关系一体化维护</p>
+            </div>
+        </div>
+        <div class="right">
+            <label>采集平台</label>
+            <select id="gPlat" onchange="onPlatChange()"></select>
+        </div>
+    </header>
+
+    <!-- ================= 页签 ================= -->
+    <nav class="tabsbar" id="mainTabs">
+        <a class="tab on" data-i="0"><span class="ti">🔀</span>字典对照维护</a>
+        <a class="tab" data-i="1"><span class="ti">🔍</span>对照关系查询</a>
+        <a class="tab" data-i="2"><span class="ti">📊</span>对照覆盖查询</a>
+        <a class="tab" data-i="3"><span class="ti">🗂</span>HIS 字典表注册</a>
+        <a class="tab" data-i="4"><span class="ti">⬆️</span>字典导入维护</a>
+    </nav>
+
+    <main class="content">
+
+    <!-- ================= Tab1 字典对照维护 ================= -->
+    <section class="page on" id="page0">
+        <div class="toolbar card">
+            <div class="field"><label>值域关键字</label><input class="ipt" id="qDomain" placeholder="值域代码 / 名称" onkeydown="if(event.keyCode===13)loadDomain(1)"></div>
+            <div class="field"><label>绑定状态</label>
+                <select class="sel" id="qMapFlag">
+                    <option value="">全部</option><option value="D">已绑定</option><option value="M">未绑定</option>
+                </select>
+            </div>
+            <button class="btn pri" onclick="loadDomain(1)">查 询</button>
+            <button class="btn" onclick="resetDomain()">重 置</button>
+            <div class="card-tools"><span class="tip" id="domainStat">共 0 个值域</span></div>
+        </div>
+
+        <div class="split">
+            <!-- 左列: 值域 + 条目 -->
+            <div class="col-l">
+                <div class="card pane-d">
+                    <div class="card-h">
+                        <b>采集值域</b><span class="cnt">点击行选中值域</span>
+                    </div>
+                    <div class="tbl" id="tblDomain"></div>
+                </div>
+                <div class="card pane-i">
+                    <div class="card-h">
+                        <b>采集条目</b><span class="cnt" id="itemDomainTip"></span>
+                        <div class="card-tools">
+                            <input class="ipt sm" id="qItem" placeholder="条目代码 / 名称" onkeydown="if(event.keyCode===13)loadItem(1)">
+                            <select class="sel sm" id="qItemMap" onchange="loadItem(1)">
+                                <option value="">全部</option><option value="N">未对照</option><option value="Y">已对照</option>
+                            </select>
+                            <button class="btn sm danger-ghost" onclick="clearRelBatch()">批量清除勾选</button>
+                        </div>
+                    </div>
+                    <div class="tbl" id="tblItem"></div>
+                </div>
+            </div>
+
+            <!-- 右列: HIS 对照 + 当前对照 -->
+            <div class="col-r">
+                <div class="card pane-his">
+                    <div class="card-h">
+                        <b id="hisTitle">HIS 字典条目</b>
+                        <span class="tag gray" id="hisDictTag" style="display:none"></span>
+                        <div class="card-tools" id="hisTools" style="display:none">
+                            <div class="seg" id="hisMode">
+                                <a data-v="N" class="on">仅未对照</a><a data-v="A">全部</a><a data-v="M">仅已对照</a>
+                            </div>
+                            <input class="ipt sm" id="qHis" placeholder="HIS代码 / 描述" onkeydown="if(event.keyCode===13)loadHis(1)">
+                        </div>
+                    </div>
+                    <div class="empty" id="hisNoDomain">
+                        <div class="eico">🗂️</div>
+                        <h3>请先选择值域</h3>
+                        <p>在左侧列表点击任意值域, 开始对照维护</p>
+                    </div>
+                    <div class="empty" id="hisUnbind" style="display:none">
+                        <div class="eico">🔗</div>
+                        <h3>该值域未绑定 HIS 字典</h3>
+                        <p>绑定后即可在采集条目与 HIS 字典条目之间建立对照</p>
+                        <div class="ebtns">
+                            <button class="btn pri" onclick="openBindDlg('exist')">绑定已有字典</button>
+                            <button class="btn pri-ghost" onclick="openBindDlg('new')">＋ 新增字典并绑定</button>
+                        </div>
+                    </div>
+                    <div id="hisBody" style="display:none; flex:1; min-height:0; display:none; flex-direction:column">
+                        <div class="tbl" id="tblHis"></div>
+                    </div>
+                    <div class="card-f" id="hisFoot" style="display:none">
+                        <span class="tip" id="hisSelTip">已选 0 项</span>
+                        <div style="flex:1"></div>
+                        <span class="hint">保存为追加模式: 只新增勾选项, 冲突自动跳过</span>
+                        <button class="btn pri" onclick="saveDictRel()">保存对照</button>
+                        <button class="btn danger-ghost" onclick="clearRel()">清空对照</button>
+                    </div>
+                </div>
+                <div class="card pane-cur">
+                    <div class="card-h">
+                        <b>当前条目的对照关系</b><span class="cnt" id="curTip"></span>
+                        <div class="card-tools">
+                            <button class="btn sm" onclick="refreshDesc()">⟳ 刷新描述</button>
+                        </div>
+                    </div>
+                    <div class="tbl" id="tblCur"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= Tab2 对照关系查询 ================= -->
+    <section class="page" id="page1">
+        <div class="toolbar card">
+            <div class="field"><label>平台</label>
+                <select class="sel" id="rPlat" onchange="onRelPlatChange()"></select>
+            </div>
+            <div class="field"><label>值域</label>
+                <select class="sel" id="rDomainSel" onchange="onRDomainSelChange()"><option value="">—全部—</option></select>
+            </div>
+            <div class="field"><label>值域关键字</label>
+                <input class="ipt xs" id="rDomain" placeholder="与下拉互斥" oninput="onRDomainInput()" onkeydown="if(event.keyCode===13)loadRel(1)">
+            </div>
+            <div class="field"><label>采集代码/名称</label><input class="ipt xs" id="rItem" onkeydown="if(event.keyCode===13)loadRel(1)"></div>
+            <div class="field"><label>HIS代码/描述</label><input class="ipt xs" id="rHis" onkeydown="if(event.keyCode===13)loadRel(1)"></div>
+            <div class="field"><label>状态</label>
+                <select class="sel" id="rFlag"><option value="">全部</option><option value="Y">启用</option><option value="N">停用</option></select>
+            </div>
+            <button class="btn pri" onclick="loadRel(1)">查 询</button>
+            <button class="btn" onclick="resetRel()">重 置</button>
+        </div>
+        <div class="card fill">
+            <div class="card-h">
+                <b>对照关系</b><span class="cnt" id="relStat"></span>
+                <div class="card-tools">
+                    <button class="btn sm pri-ghost" onclick="batchFlag('Y')">批量启用</button>
+                    <button class="btn sm" onclick="batchFlag('N')">批量停用</button>
+                    <button class="btn sm danger-ghost" onclick="batchDelRel()">批量删除</button>
+                    <button class="btn sm" onclick="exportRel()">⬇ 导出 CSV</button>
+                </div>
+            </div>
+            <div class="tbl" id="tblRel"></div>
+        </div>
+    </section>
+
+    <!-- ================= Tab3 对照覆盖查询 ================= -->
+    <section class="page" id="page2">
+        <div class="toolbar card">
+            <div class="field"><label>平台</label>
+                <select class="sel" id="covPlat" onchange="onCovPlatChange()"></select>
+            </div>
+            <div class="field"><label>值域</label>
+                <select class="sel" id="covDomain" onchange="onCovDomainChange()"><option value="">—全部值域—</option></select>
+            </div>
+            <div class="field"><label>HIS 字典</label>
+                <select class="sel" id="covDict"><option value="">—请选择 HIS 字典—</option></select>
+            </div>
+            <div class="field"><label>筛选</label>
+                <div class="seg" id="covFilter">
+                    <a data-v="" class="on">全部</a><a data-v="U">只看未对照</a><a data-v="M">只看向已对照</a>
+                </div>
+            </div>
+            <button class="btn pri" onclick="loadCov()">查 询</button>
+            <button class="btn" onclick="resetCov()">重 置</button>
+            <div class="card-tools">
+                <button class="btn sm" onclick="exportCov()">⬇ 导出 CSV</button>
+            </div>
+        </div>
+        <div class="stats">
+            <div class="stat pri"><div class="k">HIS 字典条目总数</div><div class="v" id="covTotal">–</div></div>
+            <div class="stat ok"><div class="k">已对照</div><div class="v" id="covMapped">–</div></div>
+            <div class="stat dgr"><div class="k">未对照</div><div class="v" id="covUnmapped">–</div></div>
+            <div class="stat"><div class="k">覆盖率</div><div class="v" id="covRate">–</div>
+                <div class="bar"><i id="covBar" style="width:0%; background:linear-gradient(90deg,#4d83ff,#3167f6)"></i></div>
+            </div>
+        </div>
+        <div class="card fill">
+            <div class="card-h">
+                <b id="covTitle">对照覆盖明细</b>
+                <span class="cnt">以 HIS 字典为基准, 反查每条代码的对照情况</span>
+            </div>
+            <div class="tbl" id="tblCov"></div>
+        </div>
+    </section>
+
+    <!-- ================= Tab4 HIS 字典表注册 ================= -->
+    <section class="page" id="page3">
+        <div class="toolbar card">
+            <div class="field"><label>关键字</label>
+                <input class="ipt" id="dKeyword" placeholder="字典代码 / 名称" onkeydown="if(event.keyCode===13)loadDict(1)">
+            </div>
+            <div class="field"><label>状态</label>
+                <select class="sel" id="dFlag"><option value="">全部</option><option value="Y">启用</option><option value="N">停用</option></select>
+            </div>
+            <button class="btn pri" onclick="loadDict(1)">查 询</button>
+            <button class="btn" onclick="resetDict()">重 置</button>
+            <div class="card-tools">
+                <button class="btn pri" onclick="openDictDlg('add')">＋ 新增字典</button>
+            </div>
+        </div>
+        <div class="card fill">
+            <div class="card-h">
+                <b>HIS 字典表</b><span class="cnt" id="dictStat"></span>
+                <span class="hint">SQL 方式: 结果列须为 id / code / desc 三列(id 可省略) · 枚举方式: 每行 代码=名称</span>
+            </div>
+            <div class="tbl" id="tblDict"></div>
+        </div>
+    </section>
+
+    <!-- ================= Tab5 字典导入维护 ================= -->
+    <section class="page" id="page4">
+        <div class="card subplat">
+            <div class="card-h">
+                <b>采集平台维护</b><span class="cnt">平台启用后才可对照 / 导入</span>
+                <div class="card-tools">
+                    <button class="btn sm pri" onclick="openPlatDlg('add')">＋ 新增平台</button>
+                </div>
+            </div>
+            <div class="tbl" id="tblPlat"></div>
+        </div>
+
+        <div class="card subimp">
+            <div class="card-h"><b>采集值域 / 条目批量导入</b><span class="cnt">CSV 首行表头: 值域代码,值域名称,代码,名称,说明 · 支持逗号 / Tab 分隔</span></div>
+            <div class="imp-grid">
+                <div class="imp-block">
+                    <h4>① 上传本地 CSV 导入</h4>
+                    <div class="dropzone" id="dropzone" onclick="document.getElementById('impFile').click()">
+                        <div class="dz-ico">📄</div>
+                        <b id="dzName">点击选择 CSV 文件</b>
+                        <span>自动识别 UTF-8 / GBK 编码, 按每 3000 行分批导入</span>
+                    </div>
+                    <input type="file" id="impFile" accept=".csv,.txt,.tsv" style="display:none" onchange="onImpFileChange()">
+                    <label class="hint"><input type="checkbox" id="impClear" style="vertical-align:-2px"> 导入前清空该平台旧数据(值域 / 条目 / 对照)</label>
+                    <div><button class="btn pri" onclick="importUpload()">⬆ 上传导入</button></div>
+                </div>
+                <div class="imp-block">
+                    <h4>② 服务器路径导入</h4>
+                    <div class="field"><label>导入平台</label><select class="sel" id="impPlat"></select></div>
+                    <div class="field"><label>服务器文件</label>
+                        <input class="ipt" id="impPath" placeholder="/data/sanyi/通用值域导入.csv" style="flex:1">
+                    </div>
+                    <div><button class="btn pri" onclick="importServerPath()">读取并导入</button></div>
+                    <p class="hint">运维将 CSV 放置到服务器后, 直接按路径导入; 文件每 1000 行一批自动分批处理。</p>
+                </div>
+            </div>
+            <div class="imp-progress" id="impProgress"></div>
+            <div style="padding:0 16px 14px">
+                <p class="hint">导入规则: 值域不存在自动创建, 已存在覆盖名称; 条目按「值域代码 + 代码」覆盖写入。示例:
+                <code>GB/T 3304-1991,中国各民族名称罗马字母拼音写法和代码,01,汉族,</code></p>
+            </div>
+        </div>
+    </section>
+
+    </main>
+</div>
+
+<div id="toastWrap"></div>
+<div id="modalRoot"></div>
+<script type="text/javascript" src="sanyidictmap.js"></script>
+<script>
+
+/* ======================================================================
+   离线预览 · 模拟后端 (仅预览用, 不参与正式部署)
+   内存库结构对齐 ^YZSY("SYDictMap"): Platform/HisDict/Domain/Item/Rel/RelByHis
+   ====================================================================== */
+(function () {
+if (typeof window.jQuery === 'undefined') {
+    document.documentElement.innerHTML = '<body style="padding:40px;font-family:Microsoft Yahei">'
+        + '<h2 style="color:#3167f6">离线预览需要 jQuery</h2>'
+        + '<p>请联网后刷新本页(自动从 CDN 加载), 或把 jquery-1.11.3.min.js 放到本目录。</p></body>';
+    throw new Error('jQuery missing');
+}
+var MOCK = {"domains": [{"code": "GB/T 3304-1991", "name": "中国各民族名称罗马字母拼音写法和代码", "chap": "国家标准代码"}, {"code": "GB/T 16835-1997", "name": "高等学校本科、专科专业名称代码", "chap": "国家标准代码"}, {"code": "GB/T 2261.1-2003", "name": "性别代码", "chap": "国家标准代码"}, {"code": "GB/T 2261.2-2003", "name": "婚姻状况类别代码", "chap": "国家标准代码"}, {"code": "GB/T 2659-2000", "name": "国籍代码", "chap": "国家标准代码"}, {"code": "GB/T 4658-2006", "name": "学历代码", "chap": "国家标准代码"}, {"code": "GB/T 8561-2001", "name": "专业技术职务代码", "chap": "国家标准代码"}, {"code": "GB/T 12407-2008", "name": "职务级别代码", "chap": "国家标准代码"}, {"code": "GB/T 2260-2007", "name": "行政区划代码", "chap": "国家标准代码"}, {"code": "GB/T 4761-2008", "name": "联系人关系", "chap": "国家标准代码"}, {"code": "GB/T 12404-1997", "name": "单位隶属关系代码", "chap": "国家标准代码"}, {"code": "GBT6864_2003", "name": "学位代码", "chap": "国家标准代码"}, {"code": "GB/T 16751.3-2023", "name": "中医临床诊疗术语 第3部分：治法", "chap": "国家标准代码"}, {"code": "GB/T 6565-2015", "name": "职业类别代码", "chap": "国家标准代码"}, {"code": "CS03.01.026", "name": "剂型代码表", "chap": "行业标准代码"}, {"code": "CV02.01.202", "name": "患者职业代码表", "chap": "行业标准代码"}, {"code": "CV05.10.012", "name": "随访评价结果代码", "chap": "行业标准代码"}, {"code": "CV06.00.207", "name": "随访方式代码", "chap": "行业标准代码"}, {"code": "CV09.00.404", "name": "患者类型代码表", "chap": "行业标准代码"}, {"code": "CV04.01.007", "name": "疑似结核患者症状代码表", "chap": "行业标准代码"}, {"code": "CV04.01.009", "name": "精神症状代码表", "chap": "行业标准代码"}, {"code": "CV04.10.015", "name": "足背动脉搏动代码表", "chap": "行业标准代码"}, {"code": "CV07.10.003", "name": "医疗费用支付方式", "chap": "行业标准代码"}, {"code": "CV05.10.001", "name": "残疾情况代码表", "chap": "行业标准代码"}, {"code": "CV5101.27", "name": "症状代码(健康检查)", "chap": "行业标准代码"}, {"code": "CV04.01.013", "name": "老年人健康状态自我评估代码表", "chap": "行业标准代码"}, {"code": "CV04.01.014", "name": "老年人生活自理能力自我评估代码表", "chap": "行业标准代码"}, {"code": "CV06.00.101", "name": "中药使用类别代码表", "chap": "行业标准代码"}, {"code": "WS 218-2002", "name": "卫生机构（组织）分类与代码", "chap": "行业标准代码"}, {"code": "CV03.00.107", "name": "饮食习惯代码表", "chap": "行业标准代码"}, {"code": "CV06.00.226", "name": "离院方式代码表", "chap": "行业标准代码"}, {"code": "CV03.00.105", "name": "饮酒种类代码表", "chap": "行业标准代码"}, {"code": "CV04.10.007", "name": "口唇外观代码表", "chap": "行业标准代码"}, {"code": "CV04.10.010", "name": "齿列类别代码表", "chap": "行业标准代码"}, {"code": "CV04.10.004", "name": "皮肤检查结果代码表", "chap": "行业标准代码"}, {"code": "CV04.10.006", "name": "巩膜检查结果代码", "chap": "行业标准代码"}, {"code": "CV04.10.011", "name": "淋巴结检查结果代码", "chap": "行业标准代码"}, {"code": "CV04.10.014", "name": "下肢水肿检查结果代码", "chap": "行业标准代码"}, {"code": "CV04.10.013", "name": "肛门指诊检查结果代码表", "chap": "行业标准代码"}, {"code": "CV04.10.012", "name": "乳腺检查结果代码表", "chap": "行业标准代码"}, {"code": "CV04.50.005", "name": "ABO血型代码", "chap": "行业标准代码"}, {"code": "CV03.00.301", "name": "环境危险因素暴露类别代码表", "chap": "行业标准代码"}, {"code": "CV06.00.229", "name": "医嘱项目类型代码", "chap": "行业标准代码"}, {"code": "CV05.10.022", "name": "手术切口类别代码", "chap": "行业标准代码"}, {"code": "CV05.10.010", "name": "病情转归代码表", "chap": "行业标准代码"}, {"code": "CV06.00.227", "name": "操作部位代码表", "chap": "行业标准代码"}, {"code": "CV06.00.103", "name": "麻醉方法代码表", "chap": "行业标准代码"}, {"code": "CV02.01.102", "name": "出生(分娩)地点类别代码", "chap": "行业标准代码"}, {"code": "CV02.01.201", "name": "血缘关系代码", "chap": "行业标准代码"}, {"code": "CV5501.14", "name": "手术切口愈合等级", "chap": "行业标准代码"}, {"code": "CV04.50.019", "name": "阴道分泌物检查结果代码表", "chap": "行业标准代码"}, {"code": "CV04.50.010", "name": "阴道分泌物清洁度代码", "chap": "行业标准代码"}, {"code": "CV05.10.006", "name": "儿童生长发育评价结果代码", "chap": "行业标准代码"}, {"code": "CV04.10.021", "name": "可疑佝偻病症状代码", "chap": "行业标准代码"}, {"code": "CV06.00.217", "name": "儿童健康指导类别代码", "chap": "行业标准代码"}, {"code": "CV04.50.006", "name": "采血方式代码", "chap": "行业标准代码"}, {"code": "CV04.50.007", "name": "采血部位代码", "chap": "行业标准代码"}, {"code": "CV04.50.009", "name": "新生儿疾病筛查方法代码", "chap": "行业标准代码"}, {"code": "CV09.00.301", "name": "检查结果通知形式代码表", "chap": "行业标准代码"}, {"code": "CV05.01.039", "name": "5岁以下儿童死因分类代码", "chap": "行业标准代码"}, {"code": "CV5502.20", "name": "疾病诊断类别代码", "chap": "行业标准代码"}, {"code": "CV5502.21", "name": "中医疾病诊断类别代码", "chap": "行业标准代码"}, {"code": "CV08.10.004", "name": "主要致死疾病的最高诊断机构级别代码", "chap": "行业标准代码"}, {"code": "CV05.10.015", "name": "5岁以下儿童未治疗或未就医原因代码表", "chap": "行业标准代码"}, {"code": "CV05.01.037", "name": "死亡最高诊断依据类别代码", "chap": "行业标准代码"}, {"code": "CV04.10.001", "name": "附件检查结果代码", "chap": "行业标准代码"}, {"code": "CV04.10.003", "name": "妇科检查方式代码", "chap": "行业标准代码"}, {"code": "CV05.10.005", "name": "婚前医学检查结果代码", "chap": "行业标准代码"}, {"code": "CV06.00.210", "name": "婚检医学意见代码", "chap": "行业标准代码"}, {"code": "CV02.10.002", "name": "妊娠终止方式代码", "chap": "行业标准代码"}, {"code": "CV04.01.001", "name": "妇科及乳腺不适症状代码", "chap": "行业标准代码"}, {"code": "CV06.00.104", "name": "宫内节育器放置时期代码", "chap": "行业标准代码"}, {"code": "CV08.50.101", "name": "宫内节育器种类代码", "chap": "行业标准代码"}, {"code": "CV06.00.105", "name": "皮下埋植剂埋植时期代码", "chap": "行业标准代码"}, {"code": "CV06.00.106", "name": "输卵管结扎手术方式代码", "chap": "行业标准代码"}, {"code": "CV06.00.107", "name": "输卵管结扎部位代码", "chap": "行业标准代码"}, {"code": "CV04.10.002", "name": "子宫大小代码", "chap": "行业标准代码"}, {"code": "CV02.10.005", "name": "既往常见疾病种类代码表", "chap": "行业标准代码"}, {"code": "CV03.00.403", "name": "接触有害因素类别代码表", "chap": "行业标准代码"}, {"code": "CV05.01.007", "name": "胎方位代码表", "chap": "行业标准代码"}, {"code": "CV04.50.015", "name": "尿实验室定性检测结果代码", "chap": "行业标准代码"}, {"code": "CV06.00.219", "name": "孕产妇健康指导类别代码", "chap": "行业标准代码"}, {"code": "CV05.01.010", "name": "会阴裂伤情况代码表", "chap": "行业标准代码"}, {"code": "CV05.01.009", "name": "产时并发症代码表", "chap": "行业标准代码"}, {"code": "CV06.00.108", "name": "新生儿抢救方法代码", "chap": "行业标准代码"}, {"code": "CV05.01.013", "name": "新生儿并发症代码表", "chap": "行业标准代码"}, {"code": "CV05.01.011", "name": "伤口愈合状况代码表", "chap": "行业标准代码"}, {"code": "CV04.50.008", "name": "新生儿疾病筛查项目代码", "chap": "行业标准代码"}, {"code": "CV04.01.012", "name": "儿童大便性状代码", "chap": "行业标准代码"}, {"code": "CV04.10.008", "name": "儿童面色代码", "chap": "行业标准代码"}, {"code": "CV04.10.009", "name": "黄疸部位代码", "chap": "行业标准代码"}, {"code": "CV04.10.018", "name": "前囱张力代码表", "chap": "行业标准代码"}, {"code": "CV04.10.019", "name": "脐带检查结果代码", "chap": "行业标准代码"}, {"code": "CV03.00.401", "name": "孕早期服药类别代码", "chap": "行业标准代码"}, {"code": "CV02.10.001", "name": "家族近亲婚配者与本人关系代码", "chap": "行业标准代码"}, {"code": "CV08.30.004", "name": "助产人员类别代码表", "chap": "行业标准代码"}, {"code": "CV05.10.016", "name": "影响孕产妇死亡的主要因素代码表", "chap": "行业标准代码"}, {"code": "CV06.00.211", "name": "避孕方式代码", "chap": "行业标准代码"}, {"code": "CV03.00.104", "name": "饮酒频率代码表", "chap": "行业标准代码"}, {"code": "CV08.50.001", "name": "疫苗名称代码表", "chap": "行业标准代码"}, {"code": "CV02.10.003", "name": "分娩方式代码", "chap": "行业标准代码"}, {"code": "CV02.10.004", "name": "出生缺陷儿结局代码", "chap": "行业标准代码"}, {"code": "CV05.01.014", "name": "出生缺陷诊断依据代码表", "chap": "行业标准代码"}, {"code": "CV05.01.015", "name": "出生缺陷确诊时间类别代码表", "chap": "行业标准代码"}, {"code": "CV05.01.016", "name": "出生缺陷类别代码表", "chap": "行业标准代码"}, {"code": "CV05.01.005", "name": "中医体质分类代码表", "chap": "行业标准代码"}, {"code": "CV04.50.011", "name": "阴道细胞学诊断结果代码表", "chap": "行业标准代码"}, {"code": "CV04.10.020", "name": "儿童体格发育评价代码表", "chap": "行业标准代码"}, {"code": "CV04.10.022", "name": "可疑佝偻病体征代码", "chap": "行业标准代码"}, {"code": "CV05.10.007", "name": "儿童体弱原因类别代码表", "chap": "行业标准代码"}, {"code": "CV02.01.212", "name": "户籍类型代码表", "chap": "行业标准代码"}, {"code": "CV03.00.402", "name": "孕产期高危因素代码表", "chap": "行业标准代码"}, {"code": "CV02.01.203", "name": "家庭年人均收入代码表", "chap": "行业标准代码"}, {"code": "CV05.01.006", "name": "孕产妇死亡根本死因分类代码表", "chap": "行业标准代码"}, {"code": "CV04.30.109", "name": "宫颈组织病理学检查结果代码表", "chap": "行业标准代码"}, {"code": "CV5301.06", "name": "药物类型代码", "chap": "行业标准代码"}, {"code": "CV05.01.026", "name": "肿瘤临床分期代码表", "chap": "行业标准代码"}, {"code": "CV06.00.223", "name": "手术体位代码", "chap": "行业标准代码"}, {"code": "WS 445.5-2014", "name": "美国麻醉医师学会(ASA)分级标准代码表", "chap": "行业标准代码"}, {"code": "LY.00.1", "name": "消息类型", "chap": "自定义值域代码"}, {"code": "LY.00.2", "name": "发货类型", "chap": "自定义值域代码"}, {"code": "LY.00.3", "name": "药品分类代码", "chap": "自定义值域代码"}, {"code": "LY.00.4", "name": "监测点类型", "chap": "自定义值域代码"}, {"code": "LY.00.5", "name": "特殊药品标志", "chap": "自定义值域代码"}, {"code": "LY.00.6", "name": "收货类型", "chap": "自定义值域代码"}, {"code": "LY.00.12", "name": "中医药健康指导代码", "chap": "自定义值域代码"}, {"code": "LY.00.17", "name": "危害行为代码", "chap": "自定义值域代码"}, {"code": "LY.00.19", "name": "随访类型代码", "chap": "自定义值域代码"}, {"code": "LY.00.20", "name": "高危因素代码", "chap": "自定义值域代码"}, {"code": "LY.00.26", "name": "死亡原因", "chap": "自定义值域代码"}, {"code": "LY.00.31", "name": "本次随访分类编码", "chap": "自定义值域代码"}, {"code": "LY.00.36", "name": "妊娠期患病情况代码", "chap": "自定义值域代码"}, {"code": "LY.00.37", "name": "治疗效果", "chap": "自定义值域代码"}, {"code": "LY.00.38", "name": "出生地点", "chap": "自定义值域代码"}, {"code": "LY.00.39", "name": "医保区划数据来源", "chap": "自定义值域代码"}, {"code": "LY.00.40", "name": "公务员等级", "chap": "自定义值域代码"}, {"code": "LY.00.41", "name": "手术级别", "chap": "自定义值域代码"}, {"code": "LY.00.42", "name": "药物过敏史代码", "chap": "自定义值域代码"}, {"code": "LY.00.46", "name": "隶属关系", "chap": "自定义值域代码"}, {"code": "LY.00.47", "name": "所属行业", "chap": "自定义值域代码"}, {"code": "LY.00.48", "name": "计划生育类别", "chap": "自定义值域代码"}, {"code": "LY.00.49", "name": "生育类别", "chap": "自定义值域代码"}, {"code": "LY.00.50", "name": "药物使用频次代码表", "chap": "自定义值域代码"}, {"code": "LY.00.51", "name": "卫生监督诊疗科目代码", "chap": "自定义值域代码"}, {"code": "LY.00.52", "name": "二级清算类别", "chap": "自定义值域代码"}, {"code": "LY.00.53", "name": "药品剂型", "chap": "自定义值域代码"}, {"code": "LY.00.54", "name": "医疗收费项目类别", "chap": "自定义值域代码"}, {"code": "LY.00.55", "name": "医疗类别", "chap": "自定义值域代码"}, {"code": "LY.00.57", "name": "特殊人员类型等级", "chap": "自定义值域代码"}, {"code": "LY.00.58", "name": "包装材质", "chap": "自定义值域代码"}, {"code": "LY.00.59", "name": "包装规格", "chap": "自定义值域代码"}, {"code": "LY.00.60", "name": "医保人员类别", "chap": "自定义值域代码"}, {"code": "LY.00.61", "name": "药理分类", "chap": "自定义值域代码"}, {"code": "LY.00.62", "name": "基金支付类型", "chap": "自定义值域代码"}, {"code": "LY.00.63", "name": "险种类型", "chap": "自定义值域代码"}, {"code": "LY.00.64", "name": "最小包装单位", "chap": "自定义值域代码"}, {"code": "LY.00.65", "name": "最小计量单位", "chap": "自定义值域代码"}, {"code": "LY.00.66", "name": "服务项目类别", "chap": "自定义值域代码"}, {"code": "LY.00.67", "name": "医院等级", "chap": "自定义值域代码"}, {"code": "LY.00.68", "name": "经济类型", "chap": "自定义值域代码"}, {"code": "LY.00.69", "name": "单位管理类型", "chap": "自定义值域代码"}, {"code": "LY.00.70", "name": "医保单位类型", "chap": "自定义值域代码"}, {"code": "LY.00.71", "name": "院内人员类别", "chap": "自定义值域代码"}, {"code": "LY.00.72", "name": "目录特项标志", "chap": "自定义值域代码"}, {"code": "LY.00.73", "name": "目录类别", "chap": "自定义值域代码"}, {"code": "LY.00.75", "name": "医保区划级别", "chap": "自定义值域代码"}, {"code": "LY.00.76", "name": "代办人关系", "chap": "自定义值域代码"}, {"code": "LY.00.77", "name": "复核标志", "chap": "自定义值域代码"}, {"code": "LY.00.78", "name": "异地安置类别", "chap": "自定义值域代码"}, {"code": "LY.00.79", "name": "给药途径", "chap": "自定义值域代码"}, {"code": "LY.00.80", "name": "支付地点类别", "chap": "自定义值域代码"}, {"code": "LY.00.81", "name": "支付结果分类", "chap": "自定义值域代码"}, {"code": "LY.00.82", "name": "医疗机构等级", "chap": "自定义值域代码"}, {"code": "LY.00.83", "name": "信用等级", "chap": "自定义值域代码"}, {"code": "LY.00.84", "name": "申报来源", "chap": "自定义值域代码"}, {"code": "LY.00.85", "name": "起付线医院等级", "chap": "自定义值域代码"}, {"code": "LY.00.86", "name": "医保诊断类别", "chap": "自定义值域代码"}, {"code": "LY.00.87", "name": "病种类型代码", "chap": "自定义值域代码"}, {"code": "LY.00.88", "name": "企业性质", "chap": "自定义值域代码"}, {"code": "LY.00.89", "name": "企业类型", "chap": "自定义值域代码"}, {"code": "LY.00.90", "name": "医疗机构的机构性质", "chap": "自定义值域代码"}, {"code": "LY.00.91", "name": "医疗服务机构类型", "chap": "自定义值域代码"}, {"code": "LY.00.92", "name": "医师执业类别", "chap": "自定义值域代码"}, {"code": "LY.00.93", "name": "药师执业类别", "chap": "自定义值域代码"}, {"code": "LY.00.95", "name": "医师执业范围", "chap": "自定义值域代码"}, {"code": "LY.00.96", "name": "药师执业范围", "chap": "自定义值域代码"}, {"code": "LY.00.97", "name": "人员证件类型", "chap": "自定义值域代码"}, {"code": "LY.00.98", "name": "支付方式", "chap": "自定义值域代码"}, {"code": "LY.00.99", "name": "个人结算方式", "chap": "自定义值域代码"}, {"code": "LY.00.100", "name": "清算方式", "chap": "自定义值域代码"}, {"code": "LY.00.101", "name": "清算类别", "chap": "自定义值域代码"}, {"code": "LY.00.102", "name": "零星报销原因", "chap": "自定义值域代码"}, {"code": "LY.00.103", "name": "学校类型", "chap": "自定义值域代码"}, {"code": "LY.00.104", "name": "学校性质", "chap": "自定义值域代码"}, {"code": "LY.00.105", "name": "结算类型", "chap": "自定义值域代码"}, {"code": "LY.00.106", "name": "生产地类别", "chap": "自定义值域代码"}, {"code": "LY.00.107", "name": "检查类型", "chap": "自定义值域代码"}, {"code": "LY.00.108", "name": "医院医疗专业设备编码目录", "chap": "自定义值域代码"}, {"code": "LY.00.109", "name": "医嘱大类", "chap": "自定义值域代码"}, {"code": "LY.00.110", "name": "医嘱子类", "chap": "自定义值域代码"}, {"code": "LY.00.117", "name": "入院途径", "chap": "自定义值域代码"}, {"code": "LY.00.120", "name": "预约途径", "chap": "自定义值域代码"}, {"code": "LY.00.125", "name": "手术类型", "chap": "自定义值域代码"}, {"code": "LY.00.126", "name": "症状代码2", "chap": "自定义值域代码"}, {"code": "LY.00.133", "name": "治疗类别", "chap": "自定义值域代码"}, {"code": "LY.00.135", "name": "体质辨识情况", "chap": "自定义值域代码"}, {"code": "LY.00.144", "name": "肿块（右）大小编码", "chap": "自定义值域代码"}, {"code": "LY.00.146", "name": "肿块（右）活动度编码", "chap": "自定义值域代码"}, {"code": "LY.00.152", "name": "子宫临床表现代码", "chap": "自定义值域代码"}, {"code": "LY.00.153", "name": "组织病理学诊断代码", "chap": "自定义值域代码"}, {"code": "LY.00.154", "name": "调动情况代码", "chap": "自定义值域代码"}, {"code": "LY.00.156", "name": "行政/业务管理职务代码", "chap": "自定义值域代码"}, {"code": "LY.00.161", "name": "标本类型", "chap": "自定义值域代码"}, {"code": "LY.00.166", "name": "处方类别", "chap": "自定义值域代码"}, {"code": "LY.00.181", "name": "就诊类型", "chap": "自定义值域代码"}, {"code": "LY.00.182", "name": "就诊类型标志（用于区分就诊业务）", "chap": "自定义值域代码"}, {"code": "LY.00.183", "name": "就诊类型标志（用于区分住院就诊业务类型）", "chap": "自定义值域代码"}, {"code": "LY.00.198", "name": "妊娠结局类别代码", "chap": "自定义值域代码"}, {"code": "LY.00.200", "name": "压力类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.201", "name": "男科疾病类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.202", "name": "智力异常类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.203", "name": "睾丸检查结果类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.204", "name": "服用叶酸开始时间类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.205", "name": "停经后患有具体症状或疾病类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.206", "name": "确认早孕结果的机构类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.207", "name": "尿妊娠试验和B超检查结果类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.208", "name": "婴儿 42 天存活状况类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.209", "name": "孕早期患病情况类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.210", "name": "诊断出生缺陷儿级别的类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.211", "name": "麻醉精神类药品标志", "chap": "自定义值域代码"}, {"code": "LY.00.231", "name": "用药依从性代码", "chap": "自定义值域代码"}, {"code": "LY.00.233", "name": "糖尿病症状编码", "chap": "自定义值域代码"}, {"code": "LY.00.234", "name": "传染病代码", "chap": "自定义值域代码"}, {"code": "LY.00.235", "name": "处方类型", "chap": "自定义值域代码"}, {"code": "LY.00.236", "name": "标本代码", "chap": "自定义值域代码"}, {"code": "LY.00.237", "name": "报告单类别代码", "chap": "自定义值域代码"}, {"code": "LY.00.238", "name": "检查部位代码", "chap": "自定义值域代码"}, {"code": "LY.00.239", "name": "检验结果代码", "chap": "自定义值域代码"}, {"code": "LY.00.240", "name": "检验检查异常提示代码", "chap": "自定义值域代码"}, {"code": "LY.00.241", "name": "检验检查就诊卡类型代码", "chap": "自定义值域代码"}, {"code": "LY.00.242", "name": "外地标志", "chap": "自定义值域代码"}, {"code": "LY.00.243", "name": "急诊分级", "chap": "自定义值域代码"}, {"code": "LY.00.244", "name": "儿童营养性疾病因素类别代码表", "chap": "自定义值域代码"}, {"code": "LY.00.245", "name": "医疗卡类型", "chap": "自定义值域代码"}, {"code": "LY.00.246", "name": "急诊患者去向", "chap": "自定义值域代码"}, {"code": "LY.00.247", "name": "医学影像检查结果互认项目", "chap": "自定义值域代码"}, {"code": "LY.00.248", "name": "医院性质", "chap": "自定义值域代码"}, {"code": "LY.00.249", "name": "传染病疾病编码", "chap": "自定义值域代码"}, {"code": "LY.00.250", "name": "Rh血型", "chap": "自定义值域代码"}, {"code": "LY.00.252", "name": "法定传染病分类", "chap": "自定义值域代码"}, {"code": "LY.00.253", "name": "实施DRGs管理", "chap": "自定义值域代码"}, {"code": "LY.00.254", "name": "入院病情代码", "chap": "自定义值域代码"}, {"code": "LY.00.255", "name": "病例首页费用分类", "chap": "自定义值域代码"}, {"code": "LY.00.256", "name": "处方类型代码表", "chap": "自定义值域代码"}, {"code": "LY.00.257", "name": "医嘱项目类别代码", "chap": "自定义值域代码"}, {"code": "LY.00.258", "name": "中药煎煮法代码", "chap": "自定义值域代码"}, {"code": "LY.00.259", "name": "患者就诊来源", "chap": "自定义值域代码"}, {"code": "LY.00.260", "name": "医嘱状态代码", "chap": "自定义值域代码"}, {"code": "LY.00.261", "name": "执行周期时间单位代码", "chap": "自定义值域代码"}, {"code": "LY.00.262", "name": "药物分类代码", "chap": "自定义值域代码"}, {"code": "LY.00.263", "name": "不良事件类别代码", "chap": "自定义值域代码"}, {"code": "LY.00.264", "name": "事件发生等级代码（不良事件)", "chap": "自定义值域代码"}, {"code": "LY.00.265", "name": "临床研究分类代码（不良事件）", "chap": "自定义值域代码"}, {"code": "LY.00.266", "name": "SAE情况代码（不良事件）", "chap": "自定义值域代码"}, {"code": "LY.00.267", "name": "对试验用药采取的措施代码（不良事件）", "chap": "自定义值域代码"}, {"code": "LY.00.268", "name": "SAE与实验药的关系代码（不良事件）", "chap": "自定义值域代码"}, {"code": "LY.00.269", "name": "事件发生场所代码（不良事件）", "chap": "自定义值域代码"}, {"code": "LY.00.270", "name": "不良事件结果代码", "chap": "自定义值域代码"}, {"code": "LY.00.271", "name": "停药或减量后反应状态代码", "chap": "自定义值域代码"}, {"code": "LY.00.272", "name": "生产企业信息来源代码", "chap": "自定义值域代码"}, {"code": "LY.00.273", "name": "出入库方式", "chap": "自定义值域代码"}, {"code": "LY.00.274", "name": "处方点评状态", "chap": "自定义值域代码"}, {"code": "LY.00.275", "name": "挂号类别", "chap": "自定义值域代码"}, {"code": "LY.00.276", "name": "重症标识", "chap": "自定义值域代码"}, {"code": "LY.00.277", "name": "药物剂量单位代码", "chap": "自定义值域代码"}, {"code": "LY.00.278", "name": "检验定性结果", "chap": "自定义值域代码"}, {"code": "LY.00.279", "name": "密级", "chap": "自定义值域代码"}, {"code": "LY.00.280", "name": "预约状态", "chap": "自定义值域代码"}, {"code": "LY.00.281", "name": "支付状态", "chap": "自定义值域代码"}, {"code": "LY.00.282", "name": "麻醉反应标志", "chap": "自定义值域代码"}, {"code": "LY.00.283", "name": "治疗类型", "chap": "自定义值域代码"}, {"code": "LY.00.284", "name": "治疗状态", "chap": "自定义值域代码"}, {"code": "LY.00.285", "name": "治疗效果", "chap": "自定义值域代码"}, {"code": "LY.00.286", "name": "评估状态", "chap": "自定义值域代码"}, {"code": "LY.00.287", "name": "卒中治疗类型", "chap": "自定义值域代码"}, {"code": "LY.00.288", "name": "静脉溶栓药物", "chap": "自定义值域代码"}, {"code": "LY.00.289", "name": "溶栓并发症", "chap": "自定义值域代码"}, {"code": "LY.00.290", "name": "血管内开通方法", "chap": "自定义值域代码"}, {"code": "LY.00.291", "name": "血管内开通治疗手术并发症", "chap": "自定义值域代码"}, {"code": "LY.00.292", "name": "未溶栓原因", "chap": "自定义值域代码"}, {"code": "LY.00.293", "name": "开始静脉溶栓场所", "chap": "自定义值域代码"}, {"code": "LY.00.294", "name": "院前意识", "chap": "自定义值域代码"}, {"code": "LY.00.295", "name": "卒中出血部位", "chap": "自定义值域代码"}, {"code": "LY.00.296", "name": "来院方式", "chap": "自定义值域代码"}, {"code": "LY.00.297", "name": "胸痛-病情评估-详情", "chap": "自定义值域代码"}, {"code": "LY.00.298", "name": "护理等级", "chap": "自定义值域代码"}, {"code": "LY.00.299", "name": "饮食指导", "chap": "自定义值域代码"}, {"code": "LY.00.300", "name": "隔离种类", "chap": "自定义值域代码"}, {"code": "LY.00.301", "name": "输血品种代码", "chap": "自定义值域代码"}, {"code": "LY.00.302", "name": "输血反应类型", "chap": "自定义值域代码"}, {"code": "LY.00.303", "name": "发生区域", "chap": "自定义值域代码"}, {"code": "LY.00.304", "name": "相关因素类别", "chap": "自定义值域代码"}, {"code": "LY.00.305", "name": "分娩方式", "chap": "自定义值域代码"}, {"code": "LY.00.306", "name": "手术指征", "chap": "自定义值域代码"}, {"code": "LY.00.307", "name": "分娩结局", "chap": "自定义值域代码"}], "items": {"GB/T 3304-1991": [{"code": "01", "name": "汉族", "memo": ""}, {"code": "02", "name": "蒙古族", "memo": ""}, {"code": "03", "name": "回族", "memo": ""}, {"code": "04", "name": "藏族", "memo": ""}, {"code": "05", "name": "维吾尔族", "memo": ""}, {"code": "06", "name": "苗族", "memo": ""}, {"code": "07", "name": "彝族", "memo": ""}, {"code": "08", "name": "壮族", "memo": ""}, {"code": "09", "name": "布依族", "memo": ""}, {"code": "10", "name": "朝鲜族", "memo": ""}, {"code": "11", "name": "满族", "memo": ""}, {"code": "12", "name": "侗族", "memo": ""}, {"code": "13", "name": "瑶族", "memo": ""}, {"code": "14", "name": "白族", "memo": ""}, {"code": "15", "name": "土家族", "memo": ""}, {"code": "16", "name": "哈尼族", "memo": ""}, {"code": "17", "name": "哈萨克族", "memo": ""}, {"code": "18", "name": "傣族", "memo": ""}, {"code": "19", "name": "黎族", "memo": ""}, {"code": "20", "name": "傈僳族", "memo": ""}, {"code": "21", "name": "佤族", "memo": ""}, {"code": "22", "name": "畲族", "memo": ""}, {"code": "23", "name": "高山族", "memo": ""}, {"code": "24", "name": "拉祜族", "memo": ""}, {"code": "25", "name": "水族", "memo": ""}, {"code": "26", "name": "东乡族", "memo": ""}, {"code": "27", "name": "纳西族", "memo": ""}, {"code": "28", "name": "景颇族", "memo": ""}, {"code": "29", "name": "柯尔克孜族", "memo": ""}, {"code": "30", "name": "土族", "memo": ""}, {"code": "31", "name": "达斡尔族", "memo": ""}, {"code": "32", "name": "仫佬族", "memo": ""}, {"code": "33", "name": "羌族", "memo": ""}, {"code": "34", "name": "布朗族", "memo": ""}, {"code": "35", "name": "撒拉族", "memo": ""}, {"code": "36", "name": "毛南族", "memo": ""}, {"code": "37", "name": "仡佬族", "memo": ""}, {"code": "38", "name": "锡伯族", "memo": ""}, {"code": "39", "name": "阿昌族", "memo": ""}, {"code": "40", "name": "普米族", "memo": ""}, {"code": "41", "name": "塔吉克族", "memo": ""}, {"code": "42", "name": "怒族", "memo": ""}, {"code": "43", "name": "乌孜别克族", "memo": ""}, {"code": "44", "name": "俄罗斯族", "memo": ""}, {"code": "45", "name": "鄂温克族", "memo": ""}, {"code": "46", "name": "德昂族", "memo": ""}, {"code": "47", "name": "保安族", "memo": ""}, {"code": "48", "name": "裕固族", "memo": ""}, {"code": "49", "name": "京族", "memo": ""}, {"code": "50", "name": "塔塔尔族", "memo": ""}, {"code": "51", "name": "独龙族", "memo": ""}, {"code": "52", "name": "鄂伦春族", "memo": ""}, {"code": "53", "name": "赫哲族", "memo": ""}, {"code": "54", "name": "门巴族", "memo": ""}, {"code": "55", "name": "珞巴族", "memo": ""}, {"code": "56", "name": "基诺族", "memo": ""}, {"code": "99", "name": "未说明", "memo": ""}, {"code": "66", "name": "外籍人士", "memo": ""}], "GB/T 2261.1-2003": [{"code": "0", "name": "未知的性别", "memo": ""}, {"code": "1", "name": "男性", "memo": ""}, {"code": "2", "name": "女性", "memo": ""}, {"code": "9", "name": "未说明的性别", "memo": ""}], "GB/T 2261.2-2003": [{"code": "10", "name": "未婚", "memo": ""}, {"code": "20", "name": "已婚", "memo": ""}, {"code": "21", "name": "初婚", "memo": ""}, {"code": "22", "name": "再婚", "memo": ""}, {"code": "23", "name": "复婚", "memo": ""}, {"code": "30", "name": "丧偶", "memo": ""}, {"code": "40", "name": "离婚", "memo": ""}, {"code": "90", "name": "未说明的婚姻状况", "memo": ""}], "GB/T 4658-2006": [{"code": "10", "name": "研究生教育", "memo": ""}, {"code": "11", "name": "博士研究生毕业", "memo": ""}, {"code": "12", "name": "博士研究生结业", "memo": ""}, {"code": "13", "name": "博士研究生肄业", "memo": ""}, {"code": "14", "name": "硕士研究生毕业", "memo": ""}, {"code": "15", "name": "硕士研究生结业", "memo": ""}, {"code": "16", "name": "硕士研究生肄业", "memo": ""}, {"code": "17", "name": "研究生班毕业", "memo": ""}, {"code": "18", "name": "研究生班结业", "memo": ""}, {"code": "19", "name": "研究生班肄业", "memo": ""}, {"code": "20", "name": "大学本科", "memo": ""}, {"code": "21", "name": "大学本科毕业", "memo": ""}, {"code": "22", "name": "大学本科结业", "memo": ""}, {"code": "23", "name": "大学本科肄业", "memo": ""}, {"code": "28", "name": "大学普通班毕业", "memo": ""}, {"code": "30", "name": "专科教育", "memo": ""}, {"code": "31", "name": "大学专科毕业", "memo": ""}, {"code": "32", "name": "大学专科结业", "memo": ""}, {"code": "33", "name": "大学专科肄业", "memo": ""}, {"code": "40", "name": "中等职业教育", "memo": ""}, {"code": "41", "name": "中等专科毕业", "memo": ""}, {"code": "42", "name": "中等专科结业", "memo": ""}, {"code": "43", "name": "中等专科肄业", "memo": ""}, {"code": "44", "name": "职业高中毕业", "memo": ""}, {"code": "45", "name": "职业高中结业", "memo": ""}, {"code": "46", "name": "职业高中肄业", "memo": ""}, {"code": "47", "name": "技工学校毕业", "memo": ""}, {"code": "48", "name": "技工学校结业", "memo": ""}, {"code": "49", "name": "技工学校肄业", "memo": ""}, {"code": "60", "name": "普通高级中学教育", "memo": ""}, {"code": "61", "name": "普通高中毕业", "memo": ""}, {"code": "62", "name": "普通高中结业", "memo": ""}, {"code": "63", "name": "普通高中肄业", "memo": ""}, {"code": "70", "name": "初级中学教育", "memo": ""}, {"code": "71", "name": "初中毕业", "memo": ""}, {"code": "73", "name": "初中肄业", "memo": ""}, {"code": "80", "name": "小学教育", "memo": ""}, {"code": "81", "name": "小学毕业", "memo": ""}, {"code": "83", "name": "小学肄业", "memo": ""}, {"code": "90", "name": "其他", "memo": ""}], "CV02.01.202": [{"code": "1", "name": "幼托儿童", "memo": ""}, {"code": "2", "name": "散居儿童", "memo": ""}, {"code": "3", "name": "学生(大中小学)", "memo": ""}, {"code": "4", "name": "教室", "memo": ""}, {"code": "5", "name": "保育员及保姆", "memo": ""}, {"code": "6", "name": "餐饮食品业", "memo": ""}, {"code": "7", "name": "商业服务", "memo": ""}, {"code": "8", "name": "医务人员", "memo": ""}, {"code": "9", "name": "工人", "memo": ""}, {"code": "10", "name": "民工", "memo": ""}, {"code": "11", "name": "农民", "memo": ""}, {"code": "12", "name": "牧民", "memo": ""}, {"code": "13", "name": "渔（船）民", "memo": ""}, {"code": "14", "name": "干部职员", "memo": ""}, {"code": "15", "name": "离退人员", "memo": ""}, {"code": "16", "name": "家务及待业", "memo": ""}, {"code": "17", "name": "不详", "memo": ""}, {"code": "99", "name": "其他", "memo": ""}], "CV06.00.226": [{"code": "1", "name": "医嘱离院", "memo": ""}, {"code": "2", "name": "医嘱转院", "memo": ""}, {"code": "3", "name": "医嘱转社区卫生服务机构/乡镇卫生院", "memo": ""}, {"code": "4", "name": "非医嘱离院", "memo": ""}, {"code": "5", "name": "死亡", "memo": ""}, {"code": "9", "name": "其他", "memo": ""}], "CV05.10.022": [{"code": "1", "name": "0类切口", "memo": "有手术，但体表无切口或腔镜手术切口"}, {"code": "2", "name": "Ⅰ类切口", "memo": "无菌切口"}, {"code": "3", "name": "Ⅱ类切口", "memo": "沾染切口"}, {"code": "4", "name": "Ⅲ类切口", "memo": "感染切口"}], "CV06.00.217": [{"code": "1", "name": "科学喂养", "memo": "WS 364.12—2011"}, {"code": "2", "name": "合理膳食", "memo": "WS 364.12—2011"}, {"code": "3", "name": "生长发育", "memo": "WS 364.12—2011"}, {"code": "4", "name": "疾病预防", "memo": "WS 364.12—2011"}, {"code": "5", "name": "预防意外伤害", "memo": "WS 364.12—2011"}, {"code": "6", "name": "口腔保健", "memo": "WS 364.12—2011"}, {"code": "9", "name": "其他", "memo": "WS 364.12—2011"}], "LY.00.1": [{"code": "01", "name": "出库", "memo": ""}, {"code": "02", "name": "入库", "memo": ""}, {"code": "03", "name": "库存", "memo": ""}, {"code": "04", "name": "仓储", "memo": ""}, {"code": "05", "name": "冷链车/保温箱", "memo": ""}], "LY.00.2": [{"code": "01", "name": "销售出库", "memo": ""}, {"code": "02", "name": "供应出库", "memo": ""}, {"code": "03", "name": "盘亏出库", "memo": ""}, {"code": "04", "name": "退货出库", "memo": ""}, {"code": "05", "name": "抽检出库", "memo": ""}, {"code": "06", "name": "调拨出库", "memo": ""}, {"code": "07", "name": "销毁出库", "memo": ""}, {"code": "08", "name": "赠品出库", "memo": ""}, {"code": "09", "name": "使用出库", "memo": ""}, {"code": "10", "name": "召回出库", "memo": ""}, {"code": "11", "name": "损坏出库", "memo": ""}, {"code": "12", "name": "报废出库", "memo": ""}, {"code": "99", "name": "其他", "memo": ""}], "LY.00.41": [{"code": "01", "name": "一级", "memo": ""}, {"code": "02", "name": "二级", "memo": ""}, {"code": "03", "name": "三级", "memo": ""}, {"code": "04", "name": "四级", "memo": ""}, {"code": "05", "name": "未分级", "memo": ""}, {"code": "06", "name": "其它", "memo": ""}], "LY.00.63": [{"code": "3701", "name": "企业事业单位补充医疗保险", "memo": ""}, {"code": "39915", "name": "医疗照顾人员补充保险", "memo": ""}, {"code": "31001", "name": "城镇职工门诊基本医疗保险", "memo": ""}, {"code": "39001", "name": "城乡居民门诊基本医疗保险", "memo": ""}, {"code": "399", "name": "意外伤害医疗保险", "memo": ""}, {"code": "370", "name": "企业补充保险", "memo": ""}, {"code": "410", "name": "长期护理保险", "memo": ""}, {"code": "310", "name": "职工基本医疗保险", "memo": ""}, {"code": "320", "name": "公务员医疗补助", "memo": ""}, {"code": "330", "name": "大额医疗费用补助", "memo": ""}, {"code": "340", "name": "离休人员医疗保障", "memo": ""}, {"code": "350", "name": "一至六级残疾军人医疗补助", "memo": ""}, {"code": "390", "name": "城乡居民基本医疗保险", "memo": ""}, {"code": "510", "name": "生育保险", "memo": ""}, {"code": "610", "name": "贫困救助", "memo": "全民健康平台"}, {"code": "710", "name": "商业医疗保险", "memo": "全民健康平台"}, {"code": "810", "name": "全公费", "memo": "全民健康平台"}, {"code": "820", "name": "全自费", "memo": "全民健康平台"}, {"code": "99", "name": "其他", "memo": "全民健康平台"}, {"code": "39002", "name": "城乡居民大病医疗保险", "memo": "三医联动"}], "LY.00.181": [{"code": "1", "name": "急诊", "memo": ""}, {"code": "2", "name": "普通门诊", "memo": ""}, {"code": "3", "name": "特需门诊", "memo": ""}, {"code": "4", "name": "互联网诊疗", "memo": ""}, {"code": "5", "name": "MDT门诊", "memo": ""}, {"code": "9", "name": "其他", "memo": ""}], "LY.00.298": [{"code": "1", "name": "特级护理", "memo": ""}, {"code": "2", "name": "一级护理", "memo": ""}, {"code": "3", "name": "二级护理", "memo": ""}, {"code": "4", "name": "三级护理", "memo": ""}]}, "bound": {"GB/T 3304-1991": "CT_NATION", "LY.00.298": "CT_LOC", "LY.00.41": "CT_LOC", "LY.00.181": "CT_SEX"}};
+var DB = { Platform: {}, HisDict: {}, Domain: {}, Item: {}, Rel: {}, RelByHis: {} };
+var g = 'SY';   /* 单平台演示 */
+
+function esc(s) {
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+        .replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+}
+function ok(msg) { return '{"success":true,"msg":"' + (msg || '操作成功') + '"}'; }
+function err(msg) { return '{"success":false,"msg":"' + (msg || '操作失败') + '"}'; }
+function nowStr() {
+    var d = new Date(), p = function (n) { return (n < 10 ? '0' : '') + n; };
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+}
+function page(arr, pg, rows) {
+    pg = Math.max(1, +pg || 1); rows = Math.max(0, +rows || 20);
+    var start = (pg - 1) * rows;
+    return '{"total":' + arr.length + ',"rows":[' + arr.slice(start, start + rows).join(',') + ']}';
+}
+function pickTable(sql) {
+    var m = String(sql || '').match(/FROM\s+([A-Za-z_][\w.]*)/i);
+    return m ? m[1] : '';
+}
+function parseEnum(text) {
+    var out = [], lines = String(text || '').split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line || /^\s*#/.test(line)) { continue; }
+        var kv = line.split('=');
+        if (kv.length < 2) { continue; }
+        out.push({ c: kv.shift().replace(/^\s+|\s+$/g, ''), d: kv.join('=').replace(/^\s+|\s+$/g, '') });
+    }
+    return out;
+}
+function dictItems(dictCode, kw) {
+    var hd = DB.HisDict[dictCode];
+    if (!hd) { return { rows: [], msg: '字典表【' + dictCode + '】未注册' }; }
+    kw = String(kw || '').toLowerCase();
+    var all = [], i;
+    if (hd.mode === 'S') {
+        var t = pickTable(hd.sql);
+        var src = window.HISDATA[t] || window.HISDATA[t.toUpperCase()] || window.HISDATA[t.toLowerCase()] || [];
+        for (i = 0; i < src.length; i++) { all.push({ Code: src[i][0], Desc: src[i][1] }); }
+    } else {
+        var parsed = parseEnum(hd.sql);
+        for (i = 0; i < parsed.length; i++) { all.push({ Code: parsed[i].c, Desc: parsed[i].d }); }
+    }
+    var rows = [];
+    for (i = 0; i < all.length; i++) {
+        if (kw && String(all[i].Code).toLowerCase().indexOf(kw) < 0 && String(all[i].Desc).toLowerCase().indexOf(kw) < 0) { continue; }
+        rows.push(all[i]);
+    }
+    return { rows: rows, msg: '' };
+}
+function getHisDesc(dict, code) {
+    var di = dictItems(dict, '');
+    for (var i = 0; i < di.rows.length; i++) { if (String(di.rows[i].Code) === String(code)) { return di.rows[i].Desc; } }
+    return '';
+}
+function itemCount(dom) { var o = DB.Item[dom] || {}, n = 0; for (var k in o) { if (o.hasOwnProperty(k)) { n++; } } return n; }
+function relStat(dom) {
+    var o = DB.Item[dom] || {}, mapped = 0, rels = 0;
+    for (var k in o) {
+        if (!o.hasOwnProperty(k)) { continue; }
+        var r = (DB.Rel[dom] || {})[k] || {}, c = 0;
+        for (var h in r) { if (r.hasOwnProperty(h)) { c++; } }
+        if (c > 0) { mapped++; rels += c; }
+    }
+    return { mapped: mapped, rels: rels };
+}
+function syncRelByHis(dom, item, hc) {
+    DB.RelByHis[dom] = DB.RelByHis[dom] || {};
+    DB.RelByHis[dom][hc] = DB.RelByHis[dom][hc] || {};
+    var rel = (DB.Rel[dom][item] || {})[hc];
+    if (!rel) { delete DB.RelByHis[dom][hc][item]; return; }
+    var iname = ((DB.Item[dom] || {})[item] || {}).name || '';
+    DB.RelByHis[dom][hc][item] = rel.desc + '^' + rel.flag + '^^^demo^^^^' + iname + '^';
+}
+function killRelByHisItem(dom, item) {
+    var rbh = DB.RelByHis[dom] || {};
+    for (var hc in rbh) { if (rbh.hasOwnProperty(hc) && rbh[hc]) { delete rbh[hc][item]; } }
+}
+
+/* ---------------- 种子数据 ---------------- */
+(function seed() {
+    DB.Platform['SY'] = { name: '通用数据采集标准', ver: 'v1.6', flag: 'Y', memo: '演示数据' };
+    DB.Platform['HQMS'] = { name: 'HQMS医院质量监测系统', ver: '', flag: 'N', memo: '预留接入' };
+    DB.Platform['YL6'] = { name: '六医联动平台', ver: '', flag: 'N', memo: '预留接入' };
+
+    DB.HisDict['CT_LOC'] = { name: '科室字典', mode: 'S', flag: 'Y', memo: 'SQL 模式演示: FROM CT_Loc',
+        sql: 'SELECT CTLOC_RowID AS id, CTLOC_Code AS code, CTLOC_Desc AS desc FROM CT_Loc ORDER BY CTLOC_Code' };
+    DB.HisDict['CT_NATION'] = { name: '民族字典', mode: 'S', flag: 'Y', memo: 'SQL 模式演示: FROM CT_Nation',
+        sql: 'SELECT CTNAT_Code AS code, CTNAT_Desc AS desc FROM CT_Nation' };
+    DB.HisDict['CT_SEX'] = { name: '性别字典', mode: 'E', flag: 'Y', memo: '枚举模式演示',
+        sql: '1=男\n2=女\n9=未说明' };
+
+    window.HISDATA = {
+        'CT_LOC': [
+            ['1001', '心血管内科'], ['1002', '呼吸内科'], ['1003', '消化内科'], ['1004', '神经内科'],
+            ['1005', '普通外科'], ['1006', '骨科'], ['1007', '妇科'], ['1008', '儿科'],
+            ['1009', '急诊医学科'], ['1010', '重症医学科'], ['1011', '麻醉科'], ['1012', '医学影像科'],
+            ['1013', '医学检验科'], ['1014', '药剂科'], ['1015', '中医科'], ['1016', '康复医学科'],
+            ['1017', '眼科'], ['1018', '耳鼻咽喉科'], ['1019', '口腔科'], ['1020', '皮肤科']
+        ],
+        'CT_NATION': [
+            ['01', '汉族'], ['02', '蒙古族'], ['03', '回族'], ['04', '藏族'], ['05', '维吾尔族'],
+            ['06', '苗族'], ['07', '彝族'], ['08', '壮族'], ['09', '布依族'], ['10', '朝鲜族'],
+            ['11', '满族'], ['12', '侗族'], ['13', '瑶族'], ['14', '白族'], ['15', '土家族']
+        ]
+    };
+
+    for (var i = 0; i < MOCK.domains.length; i++) {
+        var d = MOCK.domains[i];
+        DB.Domain[d.code] = { name: d.name, his: MOCK.bound[d.code] || '', chap: d.chap, memo: '', flag: 'Y' };
+        var its = MOCK.items[d.code] || [];
+        DB.Item[d.code] = {};
+        for (var j = 0; j < its.length; j++) { DB.Item[d.code][its[j].code] = { name: its[j].name, memo: its[j].memo }; }
+    }
+    /* 预置对照: 民族(01→汉族 02→蒙古族) / 就诊科室 */
+    DB.Rel['GB/T 3304-1991'] = {
+        '01': { '01': { desc: '汉族', flag: 'Y' } },
+        '02': { '02': { desc: '蒙古族', flag: 'Y' } }
+    };
+    syncRelByHis('GB/T 3304-1991', '01', '01');
+    syncRelByHis('GB/T 3304-1991', '02', '02');
+    var its298 = DB.Item['LY.00.298'] ? Object.keys(DB.Item['LY.00.298']) : [];
+    if (its298.length) {
+        DB.Rel['LY.00.298'] = {};
+        DB.Rel['LY.00.298'][its298[0]] = { '1001': { desc: '心血管内科', flag: 'Y' }, '1009': { desc: '急诊医学科', flag: 'N' } };
+        syncRelByHis('LY.00.298', its298[0], '1001');
+        syncRelByHis('LY.00.298', its298[0], '1009');
+    }
+})();
+
+/* ---------------- $m 分发 ---------------- */
+window.$m = function (data, cb) {
+    setTimeout(function () {
+        var m = data.MethodName, out = err('未知接口: ' + m), k, i;
+        try {
+            if (m === 'QueryPlatform') {
+                var ap = [], kw = (data.Keyword || '').toUpperCase(), af = data.ActiveFlag || '';
+                for (k in DB.Platform) {
+                    if (!DB.Platform.hasOwnProperty(k)) { continue; }
+                    var p = DB.Platform[k];
+                    if (af && p.flag !== af) { continue; }
+                    if (kw && k.toUpperCase().indexOf(kw) < 0 && p.name.toUpperCase().indexOf(kw) < 0) { continue; }
+                    var dc = 0, ic = 0, rc = 0;
+                    for (var d2 in DB.Domain) {
+                        if (!DB.Domain.hasOwnProperty(d2)) { continue; }
+                        dc++; ic += itemCount(d2); rc += relStat(d2).rels;
+                    }
+                    ap.push('{"PlatCode":"' + esc(k) + '","PlatName":"' + esc(p.name) + '","Version":"' + esc(p.ver) + '","ActiveFlag":"' + p.flag + '","Memo":"' + esc(p.memo) + '","DomainCnt":' + dc + ',"ItemCnt":' + ic + ',"RelCnt":' + rc + '}');
+                }
+                out = page(ap, data.Page, data.Rows);
+            } else if (m === 'QueryDomain') {
+                var ad = [], kw2 = data.Keyword || '', mf = data.MapFlag || '';
+                for (k in DB.Domain) {
+                    if (!DB.Domain.hasOwnProperty(k)) { continue; }
+                    var dd = DB.Domain[k];
+                    if (kw2 && k.indexOf(kw2) < 0 && dd.name.indexOf(kw2) < 0) { continue; }
+                    if (mf === 'D' && !dd.his) { continue; }
+                    if (mf === 'M' && dd.his) { continue; }
+                    var st = relStat(k);
+                    ad.push('{"DomainCode":"' + esc(k) + '","DomainName":"' + esc(dd.name) + '","Chapter":"' + esc(dd.chap) + '","HisDictCode":"' + esc(dd.his) + '","HisDictName":"' + esc((DB.HisDict[dd.his] || {}).name || '') + '","MapMode":"' + (dd.his ? 'D' : 'M') + '","ActiveFlag":"' + dd.flag + '","Memo":"' + esc(dd.memo) + '","ItemCnt":' + itemCount(k) + ',"MappedCnt":' + st.mapped + ',"RelCnt":' + st.rels + '}');
+                }
+                out = page(ad, data.Page, data.Rows);
+            } else if (m === 'QueryDomainItem') {
+                var dom = data.DomainCode, it = DB.Item[dom] || {}, ai = [], kwi = data.Keyword || '', mfi = data.MapFlag || '';
+                for (k in it) {
+                    if (!it.hasOwnProperty(k)) { continue; }
+                    if (kwi && k.indexOf(kwi) < 0 && it[k].name.indexOf(kwi) < 0) { continue; }
+                    var rr = (DB.Rel[dom] || {})[k] || {}, hs = [], ds = [], c = 0;
+                    for (var h in rr) { if (rr.hasOwnProperty(h)) { c++; hs.push(h); ds.push(rr[h].desc); } }
+                    if (mfi === 'Y' && c === 0) { continue; }
+                    if (mfi === 'N' && c > 0) { continue; }
+                    ai.push('{"ItemCode":"' + esc(k) + '","ItemName":"' + esc(it[k].name) + '","Memo":"' + esc(it[k].memo || '') + '","RelCnt":' + c + ',"RelCodes":"' + esc(hs.join('/')) + '","RelDescs":"' + esc(ds.join('/')) + '"}');
+                }
+                out = page(ai, data.Page, data.Rows);
+            } else if (m === 'QueryItemRel') {
+                var rl = (DB.Rel[data.DomainCode] || {})[data.ItemCode] || {}, ar = [];
+                for (k in rl) {
+                    if (!rl.hasOwnProperty(k)) { continue; }
+                    ar.push('{"HisCode":"' + esc(k) + '","HisDesc":"' + esc(rl[k].desc) + '","ActiveFlag":"' + rl[k].flag + '","CreateUser":"demo","CreateTime":"2026-09-05 09:00","UpdateUser":"demo","UpdateTime":"' + nowStr() + '","Memo":""}');
+                }
+                out = '{"total":' + ar.length + ',"rows":[' + ar.join(',') + ']}';
+            } else if (m === 'QueryHisDictItem') {
+                var di = dictItems(data.DictCode, data.Keyword || '');
+                var mfh = (data.MappedFilter || 'N').toUpperCase();
+                var domH = data.DomainCode || '';
+                var mappedSet = {};
+                if (domH) {
+                    var rm = DB.Rel[domH] || {};
+                    for (var it2 in rm) {
+                        if (!rm.hasOwnProperty(it2)) { continue; }
+                        for (var hc2 in rm[it2]) { if (rm[it2].hasOwnProperty(hc2)) { mappedSet[hc2] = it2; } }
+                    }
+                }
+                var ah = [], mappedCnt = 0;
+                for (var mk in mappedSet) { if (mappedSet.hasOwnProperty(mk)) { mappedCnt++; } }
+                for (i = 0; i < di.rows.length; i++) {
+                    var code = String(di.rows[i].Code), isM = mappedSet[code] ? 1 : 0;
+                    if (mfh === 'N' && isM) { continue; }
+                    if (mfh === 'M' && !isM) { continue; }
+                    ah.push('{"Code":"' + esc(code) + '","Desc":"' + esc(di.rows[i].Desc) + '","isMapped":' + isM + '}');
+                }
+                out = '{"success":true,"msg":"' + esc(di.msg || '') + '","mappedCnt":' + mappedCnt + ',' + page(ah, data.Page, data.Rows).substr(1);
+            } else if (m === 'QueryRel') {
+                var arel = [];
+                var domF = data.DomainCode || '', ikw = data.ItemKeyword || '', hkw = data.HisKeyword || '', afR = data.ActiveFlag || '';
+                for (var d3 in DB.Rel) {
+                    if (!DB.Rel.hasOwnProperty(d3)) { continue; }
+                    if (domF && d3 !== domF) { continue; }
+                    var dd3 = DB.Domain[d3] || {};
+                    for (var it3 in DB.Rel[d3]) {
+                        if (!DB.Rel[d3].hasOwnProperty(it3)) { continue; }
+                        var iname3 = ((DB.Item[d3] || {})[it3] || {}).name || '';
+                        if (ikw && it3.indexOf(ikw) < 0 && iname3.indexOf(ikw) < 0) { continue; }
+                        for (var hc3 in DB.Rel[d3][it3]) {
+                            if (!DB.Rel[d3][it3].hasOwnProperty(hc3)) { continue; }
+                            var o3 = DB.Rel[d3][it3][hc3];
+                            if (hkw && hc3.indexOf(hkw) < 0 && o3.desc.indexOf(hkw) < 0) { continue; }
+                            if (afR && o3.flag !== afR) { continue; }
+                            arel.push('{"PlatCode":"' + g + '","DomainCode":"' + esc(d3) + '","DomainName":"' + esc(dd3.name || '') + '","ItemCode":"' + esc(it3) + '","ItemName":"' + esc(iname3) + '","HisCode":"' + esc(hc3) + '","HisDesc":"' + esc(o3.desc) + '","ActiveFlag":"' + o3.flag + '","CreateUser":"demo","CreateTime":"2026-09-05 09:00","UpdateUser":"demo","UpdateTime":"' + nowStr() + '","Memo":"","HisDictCode":"' + esc(dd3.his || '') + '","HisDictName":"' + esc((DB.HisDict[dd3.his] || {}).name || '') + '","MapMode":"' + (dd3.his ? 'D' : 'M') + '"}');
+                        }
+                    }
+                }
+                out = page(arel, data.Page, data.Rows);
+            } else if (m === 'QueryHisDict') {
+                var adct = [], kwd = data.Keyword || '', afd = data.ActiveFlag || '';
+                for (k in DB.HisDict) {
+                    if (!DB.HisDict.hasOwnProperty(k)) { continue; }
+                    var v6 = DB.HisDict[k];
+                    if (afd && v6.flag !== afd) { continue; }
+                    if (kwd && k.indexOf(kwd) < 0 && v6.name.indexOf(kwd) < 0) { continue; }
+                    adct.push('{"DictCode":"' + esc(k) + '","DictName":"' + esc(v6.name) + '","Type":"' + v6.mode + '","ActiveFlag":"' + v6.flag + '","Memo":"' + esc(v6.memo || '') + '","CreateUser":"demo","CreateTime":"2026-09-05 09:00","UpdateUser":"demo","UpdateTime":"' + nowStr() + '"}');
+                }
+                out = page(adct, data.Page, data.Rows);
+            } else if (m === 'SaveDictRel') {
+                var dom4 = data.DomainCode, itm4 = data.ItemCode;
+                var codes4 = (data.HisCodes || '').split('^'), add4 = 0, skip4 = 0, conf = [];
+                DB.Rel[dom4] = DB.Rel[dom4] || {};
+                DB.Rel[dom4][itm4] = DB.Rel[dom4][itm4] || {};
+                var hisDict4 = (DB.Domain[dom4] || {}).his || '';
+                for (i = 0; i < codes4.length; i++) {
+                    var hc4 = codes4[i];
+                    if (!hc4) { continue; }
+                    var owner = null;
+                    var rm4 = DB.Rel[dom4] || {};
+                    for (var it4 in rm4) {
+                        if (rm4.hasOwnProperty(it4) && rm4[it4] && rm4[it4][hc4] && it4 !== itm4) { owner = it4; break; }
+                    }
+                    if (owner) { skip4++; conf.push(hc4 + '(已被条目' + owner + '对照)'); continue; }
+                    var desc4 = hisDict4 ? getHisDesc(hisDict4, hc4) : hc4;
+                    DB.Rel[dom4][itm4][hc4] = { desc: desc4 || hc4, flag: 'Y' };
+                    syncRelByHis(dom4, itm4, hc4);
+                    add4++;
+                }
+                var msg4 = '保存成功' + add4 + '条';
+                if (skip4 > 0) { msg4 += ', 跳过' + skip4 + '条: ' + conf.join(';'); }
+                out = '{"success":true,"add":' + add4 + ',"skip":' + skip4 + ',"msg":"' + esc(msg4) + '"}';
+            } else if (m === 'UpdateRel') {
+                var o5 = ((DB.Rel[data.DomainCode] || {})[data.ItemCode] || {})[data.HisCode];
+                if (!o5) { out = err('对照记录不存在'); }
+                else {
+                    o5.desc = data.HisDesc; o5.flag = data.ActiveFlag;
+                    syncRelByHis(data.DomainCode, data.ItemCode, data.HisCode);
+                    out = ok('保存成功');
+                }
+            } else if (m === 'DeleteRel') {
+                var rm5 = (DB.Rel[data.DomainCode] || {})[data.ItemCode];
+                if (!rm5 || !rm5[data.HisCode]) { out = err('对照记录不存在'); }
+                else {
+                    delete rm5[data.HisCode];
+                    syncRelByHis(data.DomainCode, data.ItemCode, data.HisCode);
+                    out = ok('删除成功');
+                }
+            } else if (m === 'ClearRel') {
+                var rl6 = (DB.Rel[data.DomainCode] || {})[data.ItemCode] || {}, n6 = 0;
+                for (k in rl6) { if (rl6.hasOwnProperty(k)) { n6++; } }
+                DB.Rel[data.DomainCode][data.ItemCode] = {};
+                killRelByHisItem(data.DomainCode, data.ItemCode);
+                out = '{"success":true,"msg":"已清空' + n6 + '条对照"}';
+            } else if (m === 'ClearRelBatch') {
+                var items7 = (data.ItemList || '').split('^'), nR7 = 0, nI7 = 0;
+                DB.Rel[data.DomainCode] = DB.Rel[data.DomainCode] || {};
+                for (i = 0; i < items7.length; i++) {
+                    var ic7 = items7[i];
+                    if (!ic7) { continue; }
+                    var rc7 = DB.Rel[data.DomainCode][ic7] || {};
+                    for (k in rc7) { if (rc7.hasOwnProperty(k)) { nR7++; } }
+                    DB.Rel[data.DomainCode][ic7] = {};
+                    killRelByHisItem(data.DomainCode, ic7);
+                    nI7++;
+                }
+                out = '{"success":true,"items":' + nI7 + ',"rels":' + nR7 + ',"msg":"已处理' + nI7 + '个条目,共清空' + nR7 + '条对照"}';
+            } else if (m === 'RefreshRelDesc') {
+                var hisD8 = (DB.Domain[data.DomainCode] || {}).his || '';
+                if (!hisD8) { out = err('该值域未维护HIS字典表,无需刷新'); }
+                else {
+                    var upd8 = 0, miss8 = 0;
+                    var rm8 = DB.Rel[data.DomainCode] || {};
+                    for (var it8 in rm8) {
+                        if (!rm8.hasOwnProperty(it8)) { continue; }
+                        for (var hc8 in rm8[it8]) {
+                            if (!rm8[it8].hasOwnProperty(hc8)) { continue; }
+                            var d8 = getHisDesc(hisD8, hc8);
+                            if (d8 === '') { miss8++; } else { rm8[it8][hc8].desc = d8; syncRelByHis(data.DomainCode, it8, hc8); upd8++; }
+                        }
+                    }
+                    out = '{"success":true,"upd":' + upd8 + ',"miss":' + miss8 + ',"msg":"刷新' + upd8 + '条,字典中已不存在' + miss8 + '条"}';
+                }
+            } else if (m === 'SaveDomainHisDict') {
+                if (!DB.Domain[data.DomainCode]) { out = err('值域不存在'); }
+                else {
+                    var oldH = DB.Domain[data.DomainCode].his || '';
+                    var newH = data.HisDictCode || '';
+                    if (newH && !DB.HisDict[newH]) { out = err('HIS字典表[' + newH + ']未注册'); }
+                    else {
+                        var changed = (oldH !== newH), cleared = 0;
+                        DB.Domain[data.DomainCode].his = newH;
+                        if (changed && data.ClearMappings && data.ClearMappings !== 'N') {
+                            var rm9 = DB.Rel[data.DomainCode] || {};
+                            for (var it9 in rm9) {
+                                if (!rm9.hasOwnProperty(it9)) { continue; }
+                                for (var hc9 in rm9[it9]) { if (rm9[it9].hasOwnProperty(hc9)) { cleared++; } }
+                                rm9[it9] = {};
+                            }
+                            killRelByHisItem(data.DomainCode, '');
+                            var rbh9 = DB.RelByHis[data.DomainCode] || {};
+                            for (var hb9 in rbh9) { if (rbh9.hasOwnProperty(hb9)) { delete rbh9[hb9]; } }
+                        }
+                        out = '{"success":true,"changed":' + changed + ',"cleared":' + cleared + ',"msg":"保存成功"}';
+                    }
+                }
+            } else if (m === 'SaveHisDict') {
+                if (!data.DictCode) { out = err('字典代码不能为空'); }
+                else if (!data.DictName) { out = err('字典名称不能为空'); }
+                else {
+                    var tp = (data.Type || 'S').toUpperCase();
+                    if (tp !== 'S' && tp !== 'E') { out = err('类型只能为S(SQL)或E(枚举)'); }
+                    else if (tp === 'S' && !data.SqlText) { out = err('SQL语句不能为空'); }
+                    else if (tp === 'E' && !data.EnumText) { out = err('枚举内容不能为空'); }
+                    else {
+                        DB.HisDict[data.DictCode] = {
+                            name: data.DictName, mode: tp, flag: data.ActiveFlag || 'N',
+                            memo: data.Memo || '', sql: tp === 'S' ? data.SqlText : data.EnumText
+                        };
+                        out = ok('保存成功');
+                    }
+                }
+            } else if (m === 'DeleteHisDict') {
+                var boundBy = [];
+                for (k in DB.Domain) { if (DB.Domain.hasOwnProperty(k) && DB.Domain[k] && DB.Domain[k].his === data.DictCode) { boundBy.push(k); } }
+                if (boundBy.length) { out = err('该字典表已被值域[' + boundBy.join(',') + ']引用,不能删除'); }
+                else { delete DB.HisDict[data.DictCode]; out = ok('删除成功'); }
+            } else if (m === 'GetHisDict') {
+                var hd10 = DB.HisDict[data.DictCode] || {};
+                var sql10 = hd10.mode === 'S' ? (hd10.sql || '') : '';
+                var enum10 = hd10.mode === 'E' ? (hd10.sql || '') : '';
+                out = '{"success":' + (DB.HisDict[data.DictCode] ? 'true' : 'false') + ',"DictCode":"' + esc(data.DictCode) + '","DictName":"' + esc(hd10.name || '') + '","Type":"' + (hd10.mode || 'S') + '","ActiveFlag":"' + (hd10.flag || 'N') + '","Memo":"' + esc(hd10.memo || '') + '","SqlText":"' + esc(sql10) + '","EnumText":"' + esc(enum10) + '"}';
+            } else if (m === 'ProbeHisDict') {
+                var hd11 = DB.HisDict[data.DictCode];
+                if (!hd11) { out = err('字典表未注册'); }
+                else {
+                    var di11 = dictItems(data.DictCode, ''), smp = [];
+                    for (i = 0; i < di11.rows.length && i < 5; i++) {
+                        var raw = String(di11.rows[i].Code) + '^' + String(di11.rows[i].Desc);
+                        smp.push('{"id":"' + esc(di11.rows[i].Code) + '","code":"' + esc(di11.rows[i].Code) + '","desc":"' + esc(di11.rows[i].Desc) + '","raw":"' + esc(raw) + '"}');
+                    }
+                    var msg11 = '';
+                    if (!smp.length) { msg11 = hd11.mode === 'S' ? 'SQL未返回数据(演示环境: 请检查 FROM 表名)' : '枚举字典暂无数据'; }
+                    out = '{"success":true,"DictCode":"' + esc(data.DictCode) + '","Type":"' + hd11.mode + '","samples":[' + smp.join(',') + '],"msg":"' + esc(msg11) + '"}';
+                }
+            } else if (m === 'QueryRelCoverage') {
+                var dict12 = data.DictCode || '';
+                var hd12 = DB.HisDict[dict12];
+                if (!dict12) { out = err('请选择 HIS 字典'); }
+                else if (!hd12) { out = err('字典表未注册'); }
+                else {
+                    var dom12 = data.DomainCode || '';
+                    /* 值域内已对照集合: hc -> {item:1} */
+                    var covSet = {};
+                    var pushCov = function (d, code) {
+                        var rmC = DB.Rel[d] || {};
+                        for (var itC in rmC) {
+                            if (!rmC.hasOwnProperty(itC) || !rmC[itC]) { continue; }
+                            if (rmC[itC][code]) { covSet[code] = covSet[code] || {}; covSet[code][itC] = d; }
+                        }
+                    };
+                    if (dom12) { pushCov(dom12, null); }  /* placeholder, replaced below */
+                    covSet = {};
+                    var doms12 = dom12 ? [dom12] : Object.keys(DB.Domain);
+                    var allCodes = {};
+                    for (i = 0; i < doms12.length; i++) {
+                        var rm12 = DB.Rel[doms12[i]] || {};
+                        for (var it12 in rm12) {
+                            if (!rm12.hasOwnProperty(it12) || !rm12[it12]) { continue; }
+                            for (var hc12 in rm12[it12]) {
+                                if (!rm12[it12].hasOwnProperty(hc12)) { continue; }
+                                allCodes[hc12] = allCodes[hc12] || {};
+                                allCodes[hc12][it12] = doms12[i];
+                            }
+                        }
+                    }
+                    var di12 = dictItems(dict12, '');
+                    var acov = [], mapped12 = 0, unmapped12 = 0;
+                    for (i = 0; i < di12.rows.length; i++) {
+                        var code12 = String(di12.rows[i].Code);
+                        var owners = allCodes[code12] || {};
+                        var isM12 = false, icL = '', inL = '', cnt12 = 0;
+                        for (var ow in owners) {
+                            if (!owners.hasOwnProperty(ow)) { continue; }
+                            isM12 = true; cnt12++;
+                            var iN12 = ((DB.Item[owners[ow]] || {})[ow] || {}).name || '';
+                            if (cnt12 > 1) { icL += ' / '; inL += ' / '; }
+                            icL += ow; inL += iN12;
+                            if (cnt12 >= 5) { break; }
+                        }
+                        if (isM12) { mapped12++; } else { unmapped12++; }
+                        acov.push('{"HisCode":"' + esc(code12) + '","HisDesc":"' + esc(di12.rows[i].Desc) + '","MappedFlag":"' + (isM12 ? 'Y' : 'N') + '","ItemCode":"' + esc(icL) + '","ItemName":"' + esc(inL) + '","ItemCount":' + cnt12 + '}');
+                    }
+                    out = '{"success":true,"PlatCode":"' + esc(data.PlatCode || g) + '","DomainCode":"' + esc(dom12) + '","DictCode":"' + esc(dict12) + '","DictName":"' + esc(hd12.name) + '","total":' + acov.length + ',"mapped":' + mapped12 + ',"unmapped":' + unmapped12 + ',"rows":[' + acov.join(',') + ']}';
+                }
+            } else if (m === 'SetRelFlagBatch') {
+                var ids13 = (data.IdList || '').split('^'), n13 = 0;
+                for (i = 0; i < ids13.length; i++) {
+                    var p13 = ids13[i].split('|');
+                    var o13 = (DB.Rel[p13[0]] || {})[p13[1]];
+                    if (o13 && o13[p13[2]]) { o13[p13[2]].flag = data.ActiveFlag; n13++; }
+                }
+                out = '{"success":true,"ok":' + n13 + ',"err":0,"msg":"共处理' + n13 + '条"}';
+            } else if (m === 'DeleteRelBatch') {
+                var ids14 = (data.IdList || '').split('^'), n14 = 0;
+                for (i = 0; i < ids14.length; i++) {
+                    var p14 = ids14[i].split('|');
+                    var o14 = (DB.Rel[p14[0]] || {})[p14[1]];
+                    if (o14 && o14[p14[2]]) { delete o14[p14[2]]; n14++; }
+                }
+                out = '{"success":true,"ok":' + n14 + ',"err":0,"msg":"删除' + n14 + '条"}';
+            } else if (m === 'SavePlatform') {
+                if (!data.PlatCode) { out = err('平台代码不能为空'); }
+                else if (!data.PlatName) { out = err('平台名称不能为空'); }
+                else { DB.Platform[data.PlatCode] = { name: data.PlatName, ver: data.Version, flag: data.ActiveFlag, memo: data.Memo }; out = ok('保存成功'); }
+            } else if (m === 'DeletePlatform') {
+                if (!DB.Platform[data.PlatCode]) { out = err('平台不存在'); }
+                else {
+                    delete DB.Platform[data.PlatCode];
+                    DB.Domain = {}; DB.Item = {}; DB.Rel = {}; DB.RelByHis = {};
+                    out = ok('删除成功');
+                }
+            } else if (m === 'ExportRel') {
+                var csv15 = '平台代码,值域代码,值域名称,采集代码,采集名称,HIS代码,HIS描述,状态,录入方式,修改人,修改时间,备注\n';
+                var domF15 = data.DomainCode || '';
+                for (var d15 in DB.Rel) {
+                    if (!DB.Rel.hasOwnProperty(d15)) { continue; }
+                    if (domF15 && d15 !== domF15) { continue; }
+                    var dd15 = DB.Domain[d15] || {};
+                    for (var it15 in DB.Rel[d15]) {
+                        if (!DB.Rel[d15].hasOwnProperty(it15)) { continue; }
+                        var in15 = ((DB.Item[d15] || {})[it15] || {}).name || '';
+                        for (var hc15 in DB.Rel[d15][it15]) {
+                            if (!DB.Rel[d15][it15].hasOwnProperty(hc15)) { continue; }
+                            var o15 = DB.Rel[d15][it15][hc15];
+                            csv15 += [g, d15, dd15.name || '', it15, in15, hc15, o15.desc, o15.flag, dd15.his ? '字典对照' : '手工录入', 'demo', nowStr(), ''].join(',') + '\n';
+                        }
+                    }
+                }
+                out = csv15;
+            } else if (m === 'ImportDomainRows') {
+                var plat16 = data.PlatCode || g;
+                if (!DB.Platform[plat16]) { out = err('平台不存在,请先维护平台'); }
+                else {
+                    var arr16 = null;
+                    try { arr16 = JSON.parse(data.JsonText || '[]'); } catch (e16) { arr16 = null; }
+                    if (!arr16) { out = err('JSON解析失败'); }
+                    else {
+                        var nI16 = 0, nD16 = 0;
+                        if (String(data.ClearFlag || '').toUpperCase() === 'Y') {
+                            DB.Item = {}; DB.Rel = {}; DB.RelByHis = {};
+                            for (var c16 in DB.Domain) { if (DB.Domain.hasOwnProperty(c16)) { DB.Domain[c16].his = ''; } }
+                        }
+                        for (i = 0; i < arr16.length; i++) {
+                            var ro16 = arr16[i] || {};
+                            var dc16 = String(ro16.domCode == null ? '' : ro16.domCode).replace(/^\ufeff/, '').replace(/^\s+|\s+$/g, '');
+                            if (!dc16) { continue; }
+                            if (!DB.Domain[dc16]) { DB.Domain[dc16] = { name: String(ro16.domName || dc16), his: '', chap: '', memo: '', flag: 'Y' }; nD16++; }
+                            else if (ro16.domName) { DB.Domain[dc16].name = String(ro16.domName); }
+                            if (ro16.itemCode !== '' && ro16.itemCode != null) {
+                                DB.Item[dc16] = DB.Item[dc16] || {};
+                                DB.Item[dc16][String(ro16.itemCode)] = { name: String(ro16.itemName || ''), memo: String(ro16.memo || '') };
+                                nI16++;
+                            }
+                        }
+                        out = '{"success":true,"item":' + nI16 + ',"domain":' + nD16 + ',"err":0,"msg":"导入完成: 值域' + nD16 + '个, 条目' + nI16 + '条"}';
+                    }
+                }
+            } else if (m === 'ImportDomainFile') {
+                var fp17 = String(data.FilePath || ''), plat17 = data.PlatCode || g;
+                if (!DB.Platform[plat17]) { out = err('平台不存在,请先维护平台'); }
+                else if (!fp17) { out = err('文件路径不能为空'); }
+                else if (/notfound|不存在/i.test(fp17)) { out = err('文件打开失败'); }
+                else {
+                    var demo17 = [
+                        ['DEMO.FILE.001', '服务器路径导入演示值域', '1', '演示条目一', ''],
+                        ['DEMO.FILE.001', '服务器路径导入演示值域', '2', '演示条目二', ''],
+                        ['DEMO.FILE.001', '服务器路径导入演示值域', '3', '演示条目三', ''],
+                        ['DEMO.FILE.002', '路径导入第二个值域', 'A', '示例A', '']
+                    ];
+                    var nF17 = 0, nD17 = 0;
+                    if (String(data.ClearFlag || '').toUpperCase() === 'Y') {
+                        DB.Item = {}; DB.Rel = {}; DB.RelByHis = {};
+                        for (var c17 in DB.Domain) { if (DB.Domain.hasOwnProperty(c17)) { DB.Domain[c17].his = ''; } }
+                    }
+                    for (i = 0; i < demo17.length; i++) {
+                        var r17 = demo17[i];
+                        if (!DB.Domain[r17[0]]) { DB.Domain[r17[0]] = { name: r17[1], his: '', chap: '', memo: '', flag: 'Y' }; nD17++; }
+                        DB.Item[r17[0]] = DB.Item[r17[0]] || {};
+                        DB.Item[r17[0]][r17[2]] = { name: r17[3], memo: r17[4] };
+                        nF17++;
+                    }
+                    out = '{"success":true,"item":' + nF17 + ',"domain":' + nD17 + ',"msg":"（预览模拟）已读取 ' + esc(fp17) + ' : 值域' + nD17 + '个, 条目' + nF17 + '条"}';
+                }
+            }
+        } catch (ex) {
+            out = err('模拟后端异常: ' + (ex && ex.message));
+        }
+        if (cb) { cb(out); }
+    }, 30);
+};
+
+/* 预览提示条 */
+$(function () {
+    $('.appbar .sub').text('离线预览 · 内置演示数据(305 个真实值域 + 模拟 HIS 字典), 正式部署请使用 sanyidictmap.csp / sanyidictmap.js / web.YZSY.DHCSYDictMap.cls');
+});
+})();
+
+</script>
+</body>
+</html>
+

@@ -4,97 +4,129 @@
       "Bash(python3 -c ' *)",
       "Bash(netstat -ano)",
       "Bash(findstr \"LISTENING\")",
-      "Bash(findstr \"127.0.0.1\")"
+      "Bash(findstr \"127.0.0.1\")",
+      "Read(//c/Users/Admin/Desktop/IRIS2026/IRIS/**)",
+      "mcp__plan__get-plan-blocks",
+      "Read(//c/Users/Admin/.claude/skills/subagent-driven-development/**)",
+      "Read(//c/Users/Admin/.agents/skills/subagent-driven-development/**)",
+      "Bash(python -c ' *)"
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash -c 'input=$(cat); m=$(echo \"$input\"|jq -r \".model.display_name//empty\"); in=$(echo \"$input\"|jq -r \".context_window.current_usage.input_tokens//.context_window.total_input_tokens//0\"); out=$(echo \"$input\"|jq -r \".context_window.current_usage.output_tokens//.context_window.total_output_tokens//0\"); ctx=$(echo \"$input\"|jq -r \".context_window.used_percentage//empty\"); f5=$(echo \"$input\"|jq -r \".rate_limits.five_hour.used_percentage//empty\"); fmt(){ local n=$1; if [ \"$n\" -ge 1000000 ] 2>/dev/null; then awk -vn=\"$n\" \"BEGIN{printf \\\"%.1fM\\\",n/1000000}\"; elif [ \"$n\" -ge 1000 ] 2>/dev/null; then awk -vn=\"$n\" \"BEGIN{printf \\\"%.1fk\\\",n/1000}\"; else echo \"$n\"; fi; }; inf=$(fmt \"$in\"); outf=$(fmt \"$out\"); cost=\"\"; if [ \"$in\" -gt 0 ] 2>/dev/null; then ci=$(awk -vn=\"$in\" \"BEGIN{printf \\\"%.4f\\\",(n/1000000)*0.28}\"); co=$(awk -vn=\"$out\" \"BEGIN{printf \\\"%.4f\\\",(n/1000000)*1.68}\"); ct=$(awk -vci=\"$ci\" -vco=\"$co\" \"BEGIN{printf \\\"%.4f\\\",ci+co}\"); [ -n \"$ct\" ] && [ \"$ct\" != \"0.0000\" ] && [ \"$ct\" != \"0\" ] && cost=$(printf \" | \\044%.4f\" \"$ct\"); fi; s=\"\"; [ -n \"$m\" ] && s=\"$m\"; [ -n \"$inf\" ] && s=\"$s | In:${inf} Out:${outf}\"; [ -n \"$ctx\" ] && s=\"$s | $(printf \"%.0f\" \"$ctx\")%% ctx\"; [ -n \"$cost\" ] && s=\"$s$cost\"; [ -n \"$f5\" ] && s=\"$s | 5h:$(printf \"%.0f\" \"$f5\")%%\"; [ -z \"$s\" ] && s=\"-- waiting for API --\"; echo \"$s\"'"
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "memos": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "memo-mcp"
+      ]
+    }
   },
   "skills": [
     {
       "name": "iris-code-formatter",
-      "path": "skills/iris-code-formatter/SKILL.md"
+      "path": ".claude/skills/iris-code-formatter/SKILL.md"
     },
     {
       "name": "skill-creator",
-      "path": "skills/skill-creator/SKILL.md"
+      "path": ".claude/skills/skill-creator/SKILL.md"
     },
     {
       "name": "frontend-design",
-      "path": "skills/frontend-design/SKILL.md"
+      "path": ".claude/skills/frontend-design/SKILL.md"
     },
     {
       "name": "karpathy-guidelines",
-      "path": "skills/karpathy-guidelines/SKILL.md"
+      "path": ".claude/skills/karpathy-guidelines/SKILL.md"
     },
     {
       "name": "brainstorming",
-      "path": "skills/superpowers-skills/brainstorming/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/brainstorming/SKILL.md"
     },
     {
       "name": "dispatching-parallel-agents",
-      "path": "skills/superpowers-skills/dispatching-parallel-agents/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/dispatching-parallel-agents/SKILL.md"
     },
     {
       "name": "doc-reader-analyzer",
-      "path": "skills/superpowers-skills/doc-reader-analyzer/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/doc-reader-analyzer/SKILL.md"
     },
     {
       "name": "executing-plans",
-      "path": "skills/superpowers-skills/executing-plans/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/executing-plans/SKILL.md"
     },
     {
       "name": "finishing-a-development-branch",
-      "path": "skills/superpowers-skills/finishing-a-development-branch/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/finishing-a-development-branch/SKILL.md"
     },
     {
       "name": "iris-database-dev",
-      "path": "skills/superpowers-skills/iris-database-dev/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/iris-database-dev/SKILL.md"
     },
     {
       "name": "receiving-code-review",
-      "path": "skills/superpowers-skills/receiving-code-review/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/receiving-code-review/SKILL.md"
     },
     {
       "name": "requesting-code-review",
-      "path": "skills/superpowers-skills/requesting-code-review/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/requesting-code-review/SKILL.md"
     },
     {
       "name": "subagent-driven-development",
-      "path": "skills/superpowers-skills/subagent-driven-development/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/subagent-driven-development/SKILL.md"
     },
     {
       "name": "systematic-debugging",
-      "path": "skills/superpowers-skills/systematic-debugging/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/systematic-debugging/SKILL.md"
     },
     {
       "name": "test-driven-development",
-      "path": "skills/superpowers-skills/test-driven-development/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/test-driven-development/SKILL.md"
     },
     {
       "name": "using-git-worktrees",
-      "path": "skills/superpowers-skills/using-git-worktrees/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/using-git-worktrees/SKILL.md"
     },
     {
       "name": "using-superpowers",
-      "path": "skills/superpowers-skills/using-superpowers/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/using-superpowers/SKILL.md"
     },
     {
       "name": "verification-before-completion",
-      "path": "skills/superpowers-skills/verification-before-completion/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/verification-before-completion/SKILL.md"
     },
     {
       "name": "writing-plans",
-      "path": "skills/superpowers-skills/writing-plans/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/writing-plans/SKILL.md"
     },
     {
       "name": "writing-skills",
-      "path": "skills/superpowers-skills/writing-skills/SKILL.md"
+      "path": ".claude/skills/superpowers-skills/writing-skills/SKILL.md"
     },
     {
       "name": "imedical-dailyreport",
-      "path": "skills/imedical-dailyreport/SKILL.md"
+      "path": ".claude/skills/imedical-dailyreport/SKILL.md"
     },
     {
       "name": "imedical-weeklyreport",
-      "path": "skills/imedical-weeklyreport/SKILL.md"
+      "path": ".claude/skills/imedical-weeklyreport/SKILL.md"
     }
   ]
 }

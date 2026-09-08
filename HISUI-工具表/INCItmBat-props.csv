@@ -1,0 +1,7 @@
+propertyName,propertyNode,propertyDeli,propertyPiece,propertyType,propertyField,propertyColumn,propertyDesc,
+INCIBChildSub,,,,%Numeric,INCIB_ChildSub,2,INCIB ChildSub (New Key),
+INCIBExpDate,,"^",2,%Date,INCIB_ExpDate,9,Expiry Date,
+INCIBINCIParRef,,,,User.INCItm,INCIB_INCI_ParRef,,INCI Par Ref,
+INCIBNo,,"^",1,%String,INCIB_No,3,Manufactory Batch No,
+INCIBRecallFlag,,"^",3,%String,INCIB_RecallFlag,5,Recall Flag,
+INCIBRemarks,"REM",,,%String,INCIB_Remarks,6,Remarks,

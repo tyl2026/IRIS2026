@@ -1,0 +1,491 @@
+/// Description:国家医保两定接口药品进销存日志查询
+/// Creator:    hulihua
+/// CreateDate: 2024-12-06
+Class PHA.FACE.TPS.INSUTE.LogQuery Extends Com
+{
+
+ClassMethod GetDate()
+{
+    s date=+$h
+    q $zd(date,3)
+}
+
+/// d ##class(%ResultSet).RunQuery("PHA.FACE.TPS.INSUTE.LogQuery", "InsuDataLog", "2025-08-20^2025-08-20^^N^^^2^^1^^^^^^2")
+Query InsuDataLog(inputStr = "") As websys.Query(ROWSPEC = " RowId, Type, Pointer, Text, Active, CheckFlag, Batch, OperDateTime, OutText, DeleteType,TypeDesc,DeleteTypeDesc,HospId, TrdnFlag, SetlTypeDesc, InciDesc, InsuManfName, ScanCodeFlag, BusUserName, AdmTypeDesc, UpLoadTimes, InsuManfCode, BusLocName, PatNo, PatName") [ SqlProc ]
+{
+}
+
+ClassMethod InsuDataLogExecute(ByRef qHandle As %Binary, inputStr = "") As %Status
+{
+    s repid = $I(^CacheTemp)
+    s qHandle = $lb(0,repid,0)
+    s ind = 1
+    s pStartDate = $p(inputStr,"^",1)   
+    s pEndDate = $p(inputStr,"^",2)
+    q:((pStartDate = "") || (pEndDate = "")) $$$OK
+    if ($$$comMemberDefined("PHA.FACE.IN.Com", "m", "DateHtmlToLogical")) {
+        s pStartDate = ##class(PHA.FACE.IN.Com).DateHtmlToLogical(pStartDate)
+        s pEndDate = ##class(PHA.FACE.IN.Com).DateHtmlToLogical(pEndDate)
+    } elseif ($$$comMemberDefined("web.DHCSTInterfaceFromElse", "m", "DateHtmlToLogical")) {
+        s pStartDate = ##class(web.DHCSTInterfaceFromElse).DateHtmlToLogical(pStartDate)
+        s pEndDate = ##class(web.DHCSTInterfaceFromElse).DateHtmlToLogical(pEndDate)
+    } else {
+        if (pStartDate [ "-") {
+            s pStartDate = $zdh(pStartDate,3)
+        } elseif (pStartDate [ "/") {
+            s pStartDate = $zdh(pStartDate,4)
+        }
+        if (pEndDate [ "-") {
+            s pEndDate = $zdh(pEndDate,3)
+        } elseif (pEndDate [ "/") {
+            s pEndDate = $zdh(pEndDate,4)
+        }
+    }
+    s pMethType = $p(inputStr,"^",3)
+    if (pMethType '= "") {
+        s pMethType = $$ALPHAUP^SSUTIL4(pMethType)
+    }
+    s pChFlag = $p(inputStr,"^",4)
+    s pDelFlag = $p(inputStr,"^",5)
+    s pBatchno = $p(inputStr,"^",6)
+    s pHospId = $p(inputStr,"^",7)
+    s pInsuManf = $p(inputStr,"^",8)
+    s pSelType = $p(inputStr, "^", 9)
+    s pAdmType = $p(inputStr, "^", 10)
+    s pScanStatus = $p(inputStr, "^", 11)
+    s pPhaLocId = $p(inputStr, "^", 12)
+    s pIncidesc = $p(inputStr, "^", 13)
+    s pPatNo = $p(inputStr, "^", 14)
+    s pDateType = $p(inputStr, "^", 16)
+    
+    if (pDateType = 1) {
+    	for calcuDate = pStartDate : 1 : pEndDate {
+			s methodType = ""
+        	for {
+            	s methodType = $o(^BS.PHA.IN.InsuDataLogI("DATEType", calcuDate, methodType))
+            	q:(methodType = "")
+            	continue:((pMethType '= "") && (" "_pMethType '= methodType))
+            	s logId = ""
+            	for {
+               	 	s logId = $o(^BS.PHA.IN.InsuDataLogI("DATEType", calcuDate, methodType, logId)) q:(logId = "")
+                	d OutPutInsuDataLog   
+            	}
+        	}
+    	}
+    }else { // 按业务日期查
+    	// 查台账
+    	s intrTypeStr = "G^R^P^Y^F^H"
+    	for i=1:1:6{
+	   		s intrType = $p(intrTypeStr,"^",i)
+	   		for calcuDate = pStartDate : 1 : pEndDate {
+				s intr = 0
+				for {
+					s intr = $o(^DHCINTR(0,"TypeDate",intrType,calcuDate,intr))	q:(intr = "")
+					// b:intr=1136195  ;1
+					s logType = ""
+					for {
+						s logType = $o(^BS.PHA.IN.InsuDataLogI("TypePointer",logType))	q:(logType = "")
+						// b:intr=1136195  ;2
+						s logId = 0
+						for {
+							s logId = $o(^BS.PHA.IN.InsuDataLogI("TypePointer",logType," "_intr,logId))	q:(logId = "")
+							// b:intr=1136195  ;3
+							d OutPutInsuDataLog
+						}	
+					}
+				}
+	   		}
+    	}
+    	// 查盘点  	^DHCINST(0,"DATE",{INST_Date},{INST_RowId})
+    	for calcuDate = pStartDate : 1 : pEndDate {
+	    	s stkId = 0
+	    	for {
+		    	s stkId = $o(^DHCINST(0,"DATE",calcuDate,stkId))	q:(stkId = "")
+		    	s logId = 0
+		    	for {
+			    	s logId = $o(^BS.PHA.IN.InsuDataLogI("TypePointer",1," "_stkId,logId))	q:(logId = "")
+			    	d OutPutInsuDataLog
+			    }
+		    }
+	    }
+	}
+    s qHandle = $lb(0,repid,0)
+    q $$$OK
+
+OutPutInsuDataLog
+	s insuLogData = ^BS.PHA.IN.InsuDataLogD(logId)
+	s hospId = $lg(insuLogData, 13)
+	q:((pHospId '= "") && (pHospId '= hospId))  
+	s checkFlag = $lg(insuLogData, 7)
+	q:((pChFlag '= "") && (pChFlag '= checkFlag))
+	s bchNo = $lg(insuLogData, 8) 
+	q:((pBatchno '= "") && (pBatchno '= bchNo))
+	s deleteType = $lg(insuLogData, 12) 
+	q:((pDelFlag '= "")&&(pDelFlag '= deleteType))
+	s type = $lg(insuLogData, 2)
+	q:(type="Method3512")
+	s typeDesc = $case(type,
+		"Method3501" : "盘存上传", 
+		"Method3502" : "库存变更", 
+		"Method3503" : "采购", 
+		"Method3504" : "采购退货", 
+		"Method3505" : "销售", 
+		"Method3506" : "销售退货", 
+		"Method3512" : "批次查询",
+		: ""
+	)
+	s delTypeDesc = $case(deleteType,
+		"1" : "盘存信息", 
+		"2" : "库存变更信息", 
+		"3" : "采购信息", 
+		"4" : "销售信息", 
+		: ""
+	)    
+	s pointer = $lg(insuLogData, 4)
+	s busData = ..GetBusData(pointer) 
+	s busUserName = $p(busData, "^", 1)
+	s busLocId = $p(busData, "^", 2)
+	q:((pPhaLocId '= "")&&(pPhaLocId '= busLocId)) 
+	s busLocName = $p($g(^CTLOC(+busLocId)), "^", 2)
+	if ($F(busLocName, "-")) {
+		s busLocName = $p(busLocName, "-", 2)
+	}
+	s inText = $lg(insuLogData, 5) 
+	s active = $lg(insuLogData, 6) 
+	s operDate = $lg(insuLogData, 9)
+	if (operDate '= "") {
+		s operDate = $zd(operDate, 3)
+	} 
+	s operTime = $lg(insuLogData, 10)
+	if (operTime '= "") {
+		s operTime = $zt(operTime, 1)
+	}
+	s operDateTime = operDate_" "_operTime
+	s outText = $lg(insuLogData, 11) 
+	s insuManfCode = $lg(insuLogData, 14)
+	q:((pInsuManf '= "") && (pInsuManf '= insuManfCode))
+	s insuManfName = $case(insuManfCode, 1 : "国家医保", : "") 
+	s trdnFlag = $lg(insuLogData, 15)
+	s setlType = $lg(insuLogData, 3)
+	q:(pSelType '= "")&&(pSelType '= setlType)
+	s setlTypeDesc = $case(setlType, 1 : "医保结算", 2 : "自费结算", : "")
+	s inciId = $lg(insuLogData, 16)
+	s inciDesc = $p($g(^INCI(+inciId,1)),"^",2)
+	q:(pIncidesc '= "")&&(pIncidesc '= inciDesc)
+	s admId = $lg(insuLogData, 17)
+	s admType = $p($g(^PAADM(+admId)), "^", 2)
+	q:(pAdmType '= "")&&(pAdmType '= admType)
+	i admType = "I"  b
+	s admTypeDesc = $case(admType, "I" : "住院", "O" : "门诊", "E" : "急诊", "H" : "体检", : "")
+	s papmi = $lg(insuLogData, 18)
+	s patNo = $p($g(^PAPER(+papmi, "PAT", 1)), "^", 2)	
+	q:(pPatNo '= "")&&(patNo '= pPatNo)
+	s patName = $p($g(^PAPER(+papmi, "ALL")), "^", 1)
+	s scanCodeFlag = $lg(insuLogData, 19)
+	q:(pScanStatus '= "")&&(pScanStatus '= scanCodeFlag)
+	s upLoadTimes = +$lg(insuLogData, 20)
+	s data1 = $lb(logId, type, pointer, inText, active)
+	s data2 = $lb(checkFlag, bchNo, operDateTime, outText, deleteType)
+	s data3 = $lb(typeDesc, delTypeDesc, hospId, trdnFlag, setlTypeDesc)
+	s data4 = $lb(inciDesc, insuManfName, scanCodeFlag, busUserName, admTypeDesc)
+	s data5 = $lb(upLoadTimes, insuManfCode, busLocName, patNo, patName)
+	s ^CacheTemp(repid,ind) = data1_data2_data3_data4_data5
+	s ind = ind+1   
+	q
+}
+
+/// Description: 日志界面补传上传失败的数据
+/// Creator:     hulihua
+/// CreatDate:   2024-12-19
+/// Table:      
+/// Input:       FaceType-接口类型, Pointer-数据指针, HospId-院区ID, TrdnFlag-拆零标志, InsuManf-医保上传方
+/// Output:      
+/// Return:      成功：0，失败：-1^失败原因
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.LogQuery).SendRepairData("Method3505","20292708","2","0","1")
+ClassMethod SendRepairData(FaceType, Pointer, HospId, TrdnFlag, InsuManf) As %String [ ProcedureBlock = 0 ]
+{
+    n (FaceType, Pointer, HospId, TrdnFlag, InsuManf)
+    q:(FaceType = "") ..Error(-1, "所补传数据的接口类型不能为空！")
+    q:(Pointer = "") ..Error(-1, "所补传数据的Pointer不能为空！")
+    q:(HospId = "") ..Error(-1, "所属院区不能为空！")
+    s ret = ""
+    s paramStr = "^^^"_HospId
+	s configStr = ##class(PHA.FACE.TPS.INSUTE.Com).GetParamProp(paramStr)
+	s upLoadWay = $p(configStr, "^", 6)
+	if (upLoadWay = "1")&&(FaceType'["3501") {
+		s intrData = $g(^DHCINTR(Pointer))
+	    s intrPointer = $p(intrData,"^",9)
+	    s intrType = $p(intrData,"^",1)
+	    s busIdStr = (+intrPointer)_"^"_intrType
+	    s intrUser = $p(intrData,"^",11)
+    	s runMethodStr = "s ret = ##class(PHA.FACE.TPS.INSUTE.Upload)."_FaceType_"A("""_busIdStr_""", """_HospId_""", """_intrUser_""", """_InsuManf_""", ""Y"", """_Pointer_""")"
+	}else {
+    	s runMethodStr = "s ret = ##class(PHA.FACE.TPS.INSUTE.Upload)."_FaceType_"("""_Pointer_""", """_HospId_""", """_TrdnFlag_""", """_""_""", """_InsuManf_""", ""Y"")"
+	}
+    x runMethodStr
+    s retCode = $p(ret, "^", 1)
+    q ret
+}
+
+/// Description: 通过日志ID获取入参信息并将追溯码信息追加到日志入参中
+/// Creator:     hulihua
+/// CreatDate:   2024-12-23
+/// Table:       BS_PHA_IN.InsuDataLog
+/// Input:       LogId-日志ID
+/// Output:      
+/// Return:      入参值
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.LogQuery).GetLogInText("1100256")
+ClassMethod GetLogInText(LogId) As %String
+{
+    q:(LogId = "") ""
+    s insuLogData = ^BS.PHA.IN.InsuDataLogD(LogId)
+    s inText = $lg(insuLogData, 5)
+    s methodCode = $lg(insuLogData, 2)
+    s faceCode = +$replace(methodCode, "Method", "")
+    q:((faceCode = "3503") || (faceCode = "3504")) inText
+    s nodeSign = $p(..GetFaceNode(faceCode), "^", 1)
+    s nodeSignA = $p(..GetFaceNode(faceCode), "^", 2)
+    q:(nodeSign = "") inText
+    s objText = ##class(PHA.COM.Object).%FromJSON(inText)
+    s hospId = $lg(insuLogData, 13)
+    s paramStr = "^^^"_hospId
+	s configStr = ##class(PHA.FACE.TPS.INSUTE.Com).GetParamProp(paramStr)
+	s upLoadWay = $p(configStr, "^", 6)
+	s detialNodeSign = ""
+	if (upLoadWay = 1) {
+		s detialNodeSign = nodeSignA
+	}else {
+		s detialNodeSign = nodeSign
+	}
+	q:detialNodeSign="" inText
+    s hospProName = $lg(..GetHospAddress(hospId), 2)
+    i (hospProName [ "安徽") {
+        //兼容老版日志数据
+        i objText.arg0 '= "" {
+            s objText = objText.arg0
+        }
+    } 
+    s pointer = $lg(insuLogData, 4)
+    s retCodeObj = ##class(PHA.FACE.TPS.INSUTE.Data).GetTraceCode(pointer)
+    s trdnFlag = $lg(insuLogData, 15)
+    if (trdnFlag = 0) {
+        s drugTracInfo = retCodeObj.%Get("PTCode")
+    } else {
+        s drugTracInfo = retCodeObj.%Get("STCode")
+    }
+    if ((hospProName [ "陕西") || (hospProName [ "青海")) {
+        if ('$IsObject(objText.%Get("body"))) {
+            if (faceCode = "3505") {
+	            if (objText.%Get("input").%Get(detialNodeSign) '= "") {
+                	d objText.%Get("input").%Get(detialNodeSign).%Set("prsc_dr_name", "无权查看")
+	            }else {
+		           	d objText.%Get("input").%Get(nodeSign).%Set("prsc_dr_name", "无权查看")
+		        }
+            }
+            if (objText.%Get("input").%Get(detialNodeSign)'="") {
+            	d objText.%Get("input").%Get(detialNodeSign).%Set("drug_trac_info", drugTracInfo)
+            }else {
+		        d objText.%Get("input").%Get(nodeSign).%Set("drug_trac_info", drugTracInfo)
+		    }
+        }
+    } else {
+        if (faceCode = "3505") {
+	        if ((objText.%Get("input").%Get(detialNodeSign)) '= "") {
+            	d objText.%Get("input").%Get(detialNodeSign).%Set("prsc_dr_name", "无权查看")
+            }else {
+		    	d objText.%Get("input").%Get(nodeSign).%Set("prsc_dr_name", "无权查看")
+		    }
+        }
+        if ((objText.%Get("input").%Get(detialNodeSign)) '= "") {
+        	s tracCodeInfo = objText.%Get("input").%Get(detialNodeSign).%Get("drugtracinfo")
+        }else {
+	    	s tracCodeInfo = objText.%Get("input").%Get(nodeSign).%Get("drugtracinfo")
+	    }
+        if ((tracCodeInfo = "[]") || (tracCodeInfo = "") ) {
+	        if ((objText.%Get("input").%Get(detialNodeSign)) '= "") { 
+            	d objText.%Get("input").%Get(detialNodeSign).%Set("drugtracinfo", drugTracInfo)
+	        }else {
+		    	d objText.%Get("input").%Get(nodeSign).%Set("drugtracinfo", drugTracInfo)
+		    }
+        }
+    }
+    s inText = objText.%ToJSON()
+    q inText
+}
+
+/// Description: 获取日志对应的业务人和业务科室信息
+/// Creator:     hulihua
+/// CreatDate:   2024-12-23
+/// Table:       DHC_INTRANS、DHC_InStkTkItm
+/// Input:       Pointer-日志指针ID
+/// Output:      
+/// Return:      入参值
+/// Others:
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.LogQuery).GetBusData("1100256")
+ClassMethod GetBusData(Pointer)
+{
+    q:(Pointer = "")
+    q:('$d(^DHCINTR(Pointer))&&(Pointer'["||")) ""    
+    if (Pointer["||") {
+        s type = "AT"
+        s userId = $p($g(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2))), "^", 8)
+        s inclb = $p($g(^DHCINST(+Pointer, "STI", $p(Pointer, "||", 2))), "^", 1)
+    } else {
+        s type = $p(^DHCINTR(Pointer), "^", 1) 
+        s userId = $p(^DHCINTR(Pointer), "^", 11)
+        s trPointer = $p(^DHCINTR(Pointer), "^", 9)
+        if (userId = "") {
+            if (type = "T") {
+                s userId = $p($g(^DHCINIT(+trPointer)), "^", 11)
+            } elseif (type = "K") {
+                s userId = $p($g(^DHCINIT(+trPointer)), "^", 17)
+            } elseif (type = "P") {
+                s userId = $p($g(^DHCPHAC(+trPointer)), "^", 13)
+            }
+        }
+        s inclb = $p(^DHCINTR(Pointer), "^", 7)
+    }
+    q:((type = "K") && (userId = "")) "自动接收"
+    if (userId '= "") {
+        s userName = $p($g(^SSU("SSUSR", +userId)), "^", 2)
+    } else {
+	    if (type = "K") {
+		    s userName = "自动接收"
+		}
+    }
+    s phaLocId = $$LOC^ST01(inclb)
+    q $g(userName)_"^"_phaLocId
+}
+
+/// d ##class(%ResultSet).RunQuery("PHA.FACE.TPS.INSUTE.LogQuery", "QueryIngr", "2025-07-04^2025-07-04^^108^^2^")
+Query QueryIngr(inputStr = "") As websys.Query(ROWSPEC = "ingr,vendName,ingrLocDesc,ingrApproveNo,ingrMovement") [ SqlProc ]
+{
+}
+
+ClassMethod QueryIngrExecute(ByRef qHandle As %Binary, inputStr = "") As %Status
+{
+	s repid = $I(^CacheTemp)
+    s qHandle = $lb(0,repid,0)
+    s ind = 1
+    s pStartDate = $p(inputStr,"^",1)   
+    s pEndDate = $p(inputStr,"^",2)
+    q:((pStartDate = "") || (pEndDate = "")) $$$OK
+    if (pStartDate [ "-") {
+		s pStartDate = $zdh(pStartDate,3)
+	} elseif (pStartDate [ "/") {
+		s pStartDate = $zdh(pStartDate,4)
+	}
+	if (pEndDate [ "-") {
+		s pEndDate = $zdh(pEndDate,3)
+	} elseif (pEndDate [ "/") {
+		s pEndDate = $zdh(pEndDate,4)
+	}
+	s approveNo = $p(inputStr,"^",3)
+	s vendor = $p(inputStr,"^",4)
+	s loc = $p(inputStr,"^",5)
+	s hosp = $p(inputStr,"^",6)
+	s ingrStr = $p(inputStr,"^",7)
+	if (ingrStr '= "") {
+		s ingrLen = $l(ingrStr,"^")
+		for i = 1:1:ingrLen {
+			s ingr = $p(ingrStr,"^",i)
+			d QueryIngrOutPut(ingr)
+		}
+	}else {
+		if (approveNo'="")&&(vendor'="") {
+			s ingr = 0
+			for {
+				s ingr = $o(^DHCINGR(0,"APCVMApprovalNo",vendor,approveNo,ingr))	q:(ingr = "")
+				d QueryIngrOutPut(ingr)
+			}	
+		}else {
+			for date = pStartDate:1:pEndDate {
+				if (loc = "") {
+					s ingrLoc = 0
+					for {
+						s ingrLoc = $o(^DHCINGR(0,"CreateDate",date,ingrLoc)) q:(ingrLoc = "")
+						s ingr = 0
+						for {
+							s ingr = $o(^DHCINGR(0,"CreateDate",date,ingrLoc,ingr)) q:(ingr = "")
+							d QueryIngrOutPut(ingr)
+						}
+					}
+				}else {
+					s ingrLoc = loc
+					s ingr = 0
+					for {
+						s ingr = $o(^DHCINGR(0,"CreateDate",date,ingrLoc,ingr)) q:(ingr = "")
+						d QueryIngrOutPut(ingr)
+					}
+				}
+			}
+		}
+	}
+	s qHandle = $lb(0,repid,0)
+    q $$$OK
+QueryIngrOutPut(ingr)
+	s ingrData = $g(^DHCINGR(ingr))
+	s remark = $g(^DHCINGR(ingr,"REM",1))
+	q:remark'["3563"
+	s ingrApproveNo = $p(ingrData,"^",46)
+	q:(approveNo'="")&&(approveNo'=ingrApproveNo)
+	s ingrVendor = $p(ingrData,"^",3)
+	q:(vendor'="")&&(ingrVendor'=vendor)
+	s checkIngrLoc = $p(ingrData,"^",13)
+	q:(loc'="")&&(checkIngrLoc'=loc)
+	s vendName = $p(^APC("APCVM",ingrVendor),"^",3)
+	s ingrDate = $p(ingrData,"^",4)
+	s ingrTime = $p(ingrData,"^",9)
+	s ingrMovement = $zd(ingrDate,3) _" "_ $zt(ingrTime,3)
+	s ingrLocDesc = $p(^CTLOC(checkIngrLoc),"^",2)
+	s data = $lb(ingr,vendName,ingrLocDesc,ingrApproveNo,ingrMovement)
+	s ^CacheTemp(repid,ind) = data
+     s ind = ind+1
+}
+
+/// d ##class(%ResultSet).RunQuery("PHA.FACE.TPS.INSUTE.LogQuery", "QueryIngrDetail", "268")
+Query QueryIngrDetail(ingrStr = "") As websys.Query(ROWSPEC = "inci,incilb,intr,inciCode,inciDesc,manf,qty,uomDesc,rp,rpAmt,sp,spAmt,batNo,expDate,trceCodeNum") [ SqlProc ]
+{
+}
+
+ClassMethod QueryIngrDetailExecute(ByRef qHandle As %Binary, ingrStr = "") As %Status
+{
+	s repid = $I(^CacheTemp)
+    s qHandle = $lb(0,repid,0)
+    s ind = 1
+    s ingrLen = $l(ingrStr,"^")
+    for i = 1:1:ingrLen {
+		s ingr = $p(ingrStr,"^",i)
+		s ingrItm = 0
+		for {
+			s ingrItm = $o(^DHCINGR(ingr,"GRI",ingrItm))	q:(ingrItm = "")
+			s ingrItmData = $g(^DHCINGR(ingr,"GRI",ingrItm))
+			s inci = $p(ingrItmData,"^",25)
+			s inciCode = $p(^INCI(inci,1),"^",1)
+			s inciDesc = $p(^INCI(inci,1),"^",2)
+			s manf = $p(##class(PHA.FACE.TPS.INSUTE.Download).GetManfNew(inci),"^",2)
+			s qty = $p(ingrItmData,"^",4)
+			s uom = $p(ingrItmData,"^",10)
+			s uomDesc = $p(^CT("UOM",uom),"^",2)
+			s rp = $p(ingrItmData,"^",30)
+			s rpAmt = $p(ingrItmData,"^",31)
+			s sp = $p(ingrItmData,"^",32)
+			s spAmt = $p(ingrItmData,"^",50)
+			s incilb = $p(ingrItmData,"^",1)
+			s batNo = $p(ingrItmData,"^",13)
+			s expDate = $zd($p(ingrItmData,"^",9),3)
+			s intr = $o(^DHCINTR(0,"TypePointer","G",(ingr _"||"_ ingrItm),""),-1)
+			s trceCodeNum = ##class(PHA.DTC.Scan.Query).GetTraceCodeNum(intr,"G")
+			s data = $lb(inci,incilb,intr,inciCode,inciDesc,manf,qty,uomDesc,rp,rpAmt,sp,spAmt,batNo,expDate,trceCodeNum)
+			s ^CacheTemp(repid,ind) = data
+    		s ind = ind+1
+		}
+	}
+	
+    s qHandle = $lb(0,repid,0)
+    q $$$OK
+}
+
+}

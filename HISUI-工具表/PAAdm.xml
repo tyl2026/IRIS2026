@@ -1,0 +1,6206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:11:37">
+<Class name="User.PAAdm">
+<Description>
+Admission                (PAADM,83)</Description>
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlTableName>PA_Adm</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Persistent,User.Abstract</Super>
+<TimeChanged>65774,53762.957131</TimeChanged>
+<TimeCreated>61079,43954.568319</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="ChildPAAdmLab">
+<Type>PAAdmLab</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ALBPAADMParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildORAnaesthesia">
+<Type>ORAnaesthesia</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ANAPAADMParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmLeave">
+<Type>PAAdmLeave</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ADMLParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmBloodBags">
+<Type>PAAdmBloodBags</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>BLDParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmInsurance">
+<Type>PAAdmInsurance</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>INSParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmTransaction">
+<Type>PAAdmTransaction</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>TRANSParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmDietDetails">
+<Type>PAAdmDietDetails</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>DIETParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmDepartment">
+<Type>PAAdmDepartment</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>DEPParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmPriority">
+<Type>PAAdmPriority</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>PRIParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmDocument">
+<Type>PAAdmDocument</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>DOCParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmDrugApproval">
+<Type>PAAdmDrugApproval</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>DRUGParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmCopaymentCodes">
+<Type>PAAdmCopaymentCodes</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>COPCParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmAnaestComplications">
+<Type>PAAdmAnaestComplications</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ANCParREf</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmContactPerson">
+<Type>PAAdmContactPerson</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>CONTParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmReferralLocation">
+<Type>PAAdmReferralLocation</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>REFLOCParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmAugmentedCare">
+<Type>PAAdmAugmentedCare</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>AUGParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmReasonDelayDisch">
+<Type>PAAdmReasonDelayDisch</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>READELParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmMedFit">
+<Type>PAAdmMedFit</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>MFParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmEstDischargeHistory">
+<Type>PAAdmEstDischargeHistory</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ESTDISParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmCoding">
+<Type>PAAdmCoding</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>CODParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmRefDoc">
+<Type>PAAdmRefDoc</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>REFDParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmLoc">
+<Type>PAAdmLoc</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>LOCParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmSepRef">
+<Type>PAAdmSepRef</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>SEPREFParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmWardAttend">
+<Type>PAAdmWardAttend</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>WATParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmUnavailable">
+<Type>PAAdmUnavailable</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>UNAVParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmViewableBy">
+<Type>PAAdmViewableBy</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>VIEWParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmComments">
+<Type>PAAdmComments</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>CMTParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmSNAP">
+<Type>PAAdmSNAP</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>SNAPParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmContractedCare">
+<Type>PAAdmContractedCare</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>CONTCAREParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildPAAdmDocDetails">
+<Type>PAAdmDocDetails</Type>
+<Cardinality>children</Cardinality>
+<Inverse>AdmDocParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="PAADMADMNo">
+<Description>
+Admission No</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>PAADM_ADMNo</SqlFieldName>
+<Parameter name="COLLATION" value="AlphaUp"/>
+<Parameter name="MAXLEN" value="99"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPAPMIDR">
+<Description>
+Des Ref to PAPMI</Description>
+<Type>PAPatMas</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>PAADM_PAPMI_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPatTypeDR">
+<Description>
+Not Used Des Ref to CTPTC</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>PAADM_PatType_DR</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDepCodeDR">
+<Description>
+Des Ref to CTLOC</Description>
+<Type>CTLoc</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>PAADM_DepCode_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmCategDR">
+<Description>
+Des Ref to AdmCateg</Description>
+<Type>PACAdmCategory</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmCateg_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmDate">
+<Description>
+Admission Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmTime">
+<Description>
+Admission Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMType">
+<Description>
+Admission Type</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>PAADM_Type</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",In Patient,Out Patient,Emergency,New Born,Health Promotion"/>
+<Parameter name="MAXLEN" value="16"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",I,O,E,N,H"/>
+</Property>
+
+<Property name="PAADMAdmSrcDR">
+<Description>
+Adm Source</Description>
+<Type>PACAdmSource</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmSrc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMSpecialtyDR">
+<Description>
+Should the patient be charged for specialist</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>PAADM_Specialty_DR</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMAdmDocCodeDR">
+<Description>
+Des Ref to CTPCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmDocCodeDR</SqlFieldName>
+</Property>
+
+<Property name="PAADMSourceRefDR">
+<Description>
+Des Ref to PACAR</Description>
+<Type>PACAdmSourceRef</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>PAADM_SourceRef_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMExpAdmDate">
+<Description>
+Expected Admission Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>PAADM_ExpAdmDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMPreAdmitted">
+<Description>
+Pre - Admitted</Description>
+<Type>%String</Type>
+<Collection/>
+<InitialExpression>"N"</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>PAADM_PreAdmitted</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMRefDocCodeDR">
+<Description>
+Ref Doctor Text</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>PAADM_RefDocCodeDR</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDischgDate">
+<Description>
+Discharge Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>PAADM_DischgDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMDischgTime">
+<Description>
+Discharge Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>PAADM_DischgTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMDischgDocDR">
+<Description>
+Des Ref to CTPCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>PAADM_DischgDoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMVisitStatus">
+<Description>
+Visit Status</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>PAADM_VisitStatus</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Admit,Cancel,Discharged,Pre-Admission,Released,DNA"/>
+<Parameter name="MAXLEN" value="13"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",A,C,D,P,R,N"/>
+</Property>
+
+<Property name="PAADMDisposDR">
+<Description>
+Des Ref to CTDSP</Description>
+<Type>CTDisposit</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>PAADM_Dispos_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMHCRDR">
+<Description>
+Des Ref HCR</Description>
+<Type>CTHealthCareRegion</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>PAADM_HCR_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMTrafficAccidentDR">
+<Description>
+TrafficAccident_DR</Description>
+<Type>PATrafficAccident</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>PAADM_TrafficAccident_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMShowInFutureEpisode">
+<Description>
+Show In Future Episode</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>PAADM_ShowInFutureEpisode</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMConfidential">
+<Description>
+Confidential Flag</Description>
+<Type>%String</Type>
+<Collection/>
+<InitialExpression>"N"</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>PAADM_Confidential</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMExpLOS">
+<Description>
+Expected Length Of Stay </Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>68</SqlColumnNumber>
+<SqlFieldName>PAADM_ExpLOS</SqlFieldName>
+<Parameter name="MAXVAL" value="999"/>
+<Parameter name="MINVAL" value="0"/>
+</Property>
+
+<Property name="PAADMDischargeAppointDR">
+<Description>
+Discharge Appointment for in patients des ref</Description>
+<Type>RBAppointment</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>69</SqlColumnNumber>
+<SqlFieldName>PAADM_DischargeAppoint_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefClinicDR">
+<Description>
+Des Ref to CTRFC</Description>
+<Type>CTRefClin</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>70</SqlColumnNumber>
+<SqlFieldName>PAADM_RefClinic_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMInPatNo">
+<Description>
+In Patient Number</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>72</SqlColumnNumber>
+<SqlFieldName>PAADM_InPatNo</SqlFieldName>
+<Parameter name="COLLATION" value="AlphaUp"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMEmergencyNo">
+<Description>
+Emergency Number</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>74</SqlColumnNumber>
+<SqlFieldName>PAADM_EmergencyNo</SqlFieldName>
+<Parameter name="COLLATION" value="AlphaUp"/>
+<Parameter name="MAXLEN" value="10"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPreAdmNo">
+<Description>
+Pre Admission Number</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>76</SqlColumnNumber>
+<SqlFieldName>PAADM_PreAdmNo</SqlFieldName>
+<Parameter name="COLLATION" value="AlphaUp"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMConvertedFromOut">
+<Description>
+Converted From Out Patient Episode</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>77</SqlColumnNumber>
+<SqlFieldName>PAADM_ConvertedFromOut</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMPriorityDR">
+<Description>
+Que Priority</Description>
+<Type>CTAcuity</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>78</SqlColumnNumber>
+<SqlFieldName>PAADM_Priority_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPreAdmitDate">
+<Description>
+Pre Admit Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>79</SqlColumnNumber>
+<SqlFieldName>PAADM_PreAdmitDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMPreAdmitTime">
+<Description>
+Pre Admit Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>80</SqlColumnNumber>
+<SqlFieldName>PAADM_PreAdmitTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMIsolate">
+<Description>
+Isolate</Description>
+<Type>%String</Type>
+<Collection/>
+<InitialExpression>"N"</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>81</SqlColumnNumber>
+<SqlFieldName>PAADM_Isolate</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMEmergencyDate">
+<Description>
+Emergency Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>88</SqlColumnNumber>
+<SqlFieldName>PAADM_EmergencyDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMEmergencyTime">
+<Description>
+Emergency Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>89</SqlColumnNumber>
+<SqlFieldName>PAADM_EmergencyTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMPaidEmergencySurcharge">
+<Description>
+Has the emergency surcharge been paid</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>91</SqlColumnNumber>
+<SqlFieldName>PAADM_PaidEmergencySurcharge</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMOriginalAdmissionDR">
+<Description>
+Original Admission</Description>
+<Type>PAAdm</Type>
+<Collection/>
+<InitialExpression>$G(XFUNC("OP to IP"))</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>92</SqlColumnNumber>
+<SqlFieldName>PAADM_OriginalAdmissionDR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMealPreference">
+<Description>
+Meal Preference</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>93</SqlColumnNumber>
+<SqlFieldName>PAADM_MealPreference</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="40"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMOrder">
+<Description>
+Order</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>94</SqlColumnNumber>
+<SqlFieldName>PAADM_Order</SqlFieldName>
+<Transient>1</Transient>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMCreateDate">
+<Description>
+Create Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<InitialExpression>+$h</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>95</SqlColumnNumber>
+<SqlFieldName>PAADM_CreateDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMCreateTime">
+<Description>
+Create Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<InitialExpression>$p($h,",",2)</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>96</SqlColumnNumber>
+<SqlFieldName>PAADM_CreateTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMCreateUser">
+<Description>
+Create User</Description>
+<Type>SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>97</SqlColumnNumber>
+<SqlFieldName>PAADM_CreateUser</SqlFieldName>
+</Property>
+
+<Property name="PAADMRemark">
+<Description>
+Comment</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>98</SqlColumnNumber>
+<SqlFieldName>PAADM_Remark</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMCurrent">
+<Description>
+Current</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>99</SqlColumnNumber>
+<SqlComputeCode> s {PAADM_Current}=$S("RDC"[{PAADM_VisitStatus}:"N",1:"Y")
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlFieldName>PAADM_Current</SqlFieldName>
+<Transient>1</Transient>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMBillFlag">
+<Description>
+To indicate admission is financially dischag</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>100</SqlColumnNumber>
+<SqlFieldName>PAADM_BillFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMRefDate">
+<Description>
+Referral Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>136</SqlColumnNumber>
+<SqlFieldName>PAADM_RefDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefExpiryDate">
+<Description>
+Referral Expiry Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>137</SqlColumnNumber>
+<SqlFieldName>PAADM_RefExpiryDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefApprovNo">
+<Description>
+Referral Approval Number</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>138</SqlColumnNumber>
+<SqlFieldName>PAADM_RefApprovNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMTypeofPatientCalc">
+<Description>
+Type of Patient (Calculated)</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>139</SqlColumnNumber>
+<SqlFieldName>PAADM_Type_of_Patient_Calc</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMEstimDischargeDate">
+<Description>
+Estimated Discharge Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>140</SqlColumnNumber>
+<SqlFieldName>PAADM_EstimDischargeDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMEstimDischargeTime">
+<Description>
+Estimated Discharge Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>141</SqlColumnNumber>
+<SqlFieldName>PAADM_EstimDischargeTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMDischCondDR">
+<Description>
+Des Ref to PACDischCond</Description>
+<Type>PACDischCondit</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>142</SqlColumnNumber>
+<SqlFieldName>PAADM_DischCond_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOtherDischType">
+<Description>
+Other Discharge Type</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>143</SqlColumnNumber>
+<SqlFieldName>PAADM_OtherDischType</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMInfectDR">
+<Description>
+Des Ref to PACInfect</Description>
+<Type>PACInfectionType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>144</SqlColumnNumber>
+<SqlFieldName>PAADM_Infect_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOtherInfectType">
+<Description>
+Other Infection Type</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>145</SqlColumnNumber>
+<SqlFieldName>PAADM_OtherInfectType</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMEstimOperDate">
+<Description>
+Estimated Operation Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>146</SqlColumnNumber>
+<SqlFieldName>PAADM_EstimOperDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMOperDR">
+<Description>
+Des Ref to ORCOper</Description>
+<Type>ORCOperation</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>147</SqlColumnNumber>
+<SqlFieldName>PAADM_Oper_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMUrgent">
+<Description>
+Urgent</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>148</SqlColumnNumber>
+<SqlFieldName>PAADM_Urgent</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMAdmReadm">
+<Description>
+Admission/Readmission</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>149</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmReadm</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Admission,Readmission"/>
+<Parameter name="MAXLEN" value="11"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",A,R"/>
+</Property>
+
+<Property name="PAADMRoomTypeDR">
+<Description>
+Des Ref to PACRoomType</Description>
+<Type>PACRoomType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>150</SqlColumnNumber>
+<SqlFieldName>PAADM_RoomType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDietTypeDR">
+<Description>
+Des Ref to DTCDietType(order subcat)</Description>
+<Type>ARCItemCat</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>151</SqlColumnNumber>
+<SqlFieldName>PAADM_DietType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMainMRADMDR">
+<Description>
+Des Ref to MRADM (Main)</Description>
+<Type>MRAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>152</SqlColumnNumber>
+<SqlFieldName>PAADM_MainMRADM_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMStudentMRADMDR">
+<Description>
+Student Des Ref to MRADM</Description>
+<Type>MRAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>153</SqlColumnNumber>
+<SqlFieldName>PAADM_StudentMRADM_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMConfidentMessage">
+<Description>
+Confidential Message</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>157</SqlColumnNumber>
+<SqlFieldName>PAADM_ConfidentMessage</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMApptMethodDR">
+<Description>
+Des Ref to ApptMethod</Description>
+<Type>RBCAppointMethod</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>159</SqlColumnNumber>
+<SqlFieldName>PAADM_ApptMethod_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOrderTime">
+<Description>
+Order Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>160</SqlColumnNumber>
+<SqlFieldName>PAADM_OrderTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMReferralType">
+<Description>
+Referral Type</Description>
+<Type>PACReferralType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>161</SqlColumnNumber>
+<SqlFieldName>PAADM_ReferralType</SqlFieldName>
+</Property>
+
+<Property name="PAADMAppointDR">
+<Description>
+Des Ref RB_Appoint</Description>
+<Type>RBAppointment</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>162</SqlColumnNumber>
+<SqlFieldName>PAADM_Appoint_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCurrentRoomDR">
+<Description>
+Des Ref to Room</Description>
+<Type>PACRoom</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>163</SqlColumnNumber>
+<SqlFieldName>PAADM_CurrentRoom_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCurrentWardDR">
+<Description>
+Des Ref to Ward</Description>
+<Type>PACWard</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>164</SqlColumnNumber>
+<SqlFieldName>PAADM_CurrentWard_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefAdmDR">
+<Description>
+Des Ref to RefAdm</Description>
+<Type>PAAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>165</SqlColumnNumber>
+<SqlFieldName>PAADM_RefAdm_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMFirstOrReadmis">
+<Description>
+First Or Readmission flag</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>166</SqlColumnNumber>
+<SqlFieldName>PAADM_FirstOrReadmis</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",First Admission,Re-Admission"/>
+<Parameter name="MAXLEN" value="15"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",F,R"/>
+</Property>
+
+<Property name="PAADMCurrentBedDR">
+<Description>
+Des Ref PAC Bed</Description>
+<Type>PACBed</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>167</SqlColumnNumber>
+<SqlFieldName>PAADM_CurrentBed_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMTempLocDR">
+<Description>
+Des Ref CTLOC</Description>
+<Type>CTLoc</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>168</SqlColumnNumber>
+<SqlFieldName>PAADM_TempLoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMotherAdmDR">
+<Description>
+Des Ref MotherAdm_DR</Description>
+<Type>PAAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>169</SqlColumnNumber>
+<SqlFieldName>PAADM_MotherAdm_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMedicalDischarge">
+<Description>
+Medical Discharge</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>170</SqlColumnNumber>
+<SqlFieldName>PAADM_MedicalDischarge</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMConvertDate">
+<Description>
+Convert Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>171</SqlColumnNumber>
+<SqlFieldName>PAADM_ConvertDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMConvertTime">
+<Description>
+Convert Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>172</SqlColumnNumber>
+<SqlFieldName>PAADM_ConvertTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMMedDischDocDR">
+<Description>
+Des REf CTCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>173</SqlColumnNumber>
+<SqlFieldName>PAADM_MedDischDoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefDocListDR">
+<Description>
+Des Ref RefDocList</Description>
+<Type>PACRefDoctor</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>174</SqlColumnNumber>
+<SqlFieldName>PAADM_RefDocList_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMaritalStatusDR">
+<Description>
+Des Ref Marital Status</Description>
+<Type>CTMarital</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>175</SqlColumnNumber>
+<SqlFieldName>PAADM_MaritalStatus_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMHCADR">
+<Description>
+Des Ref HCA_DR</Description>
+<Type>CTHealthCareArea</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>176</SqlColumnNumber>
+<SqlFieldName>PAADM_HCA_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRegionDR">
+<Description>
+Des Ref Region</Description>
+<Type>CTRegion</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>177</SqlColumnNumber>
+<SqlFieldName>PAADM_Region_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCurrentProcessDR">
+<Description>
+Des Ref Process</Description>
+<Type>PAProcess</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>178</SqlColumnNumber>
+<SqlFieldName>PAADM_CurrentProcess_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPreviousProcessDR">
+<Description>
+Des Ref Process</Description>
+<Type>PAProcess</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>179</SqlColumnNumber>
+<SqlFieldName>PAADM_PreviousProcess_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMEpissubtypeDR">
+<Description>
+Des Ref EpisSubType</Description>
+<Type>PACEpisodeSubType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>180</SqlColumnNumber>
+<SqlFieldName>PAADM_Epissubtype_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmReasonDR">
+<Description>
+Des Ref AdmReason</Description>
+<Type>PACAdmReason</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>181</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmReason_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCauseInjDR">
+<Description>
+Des Ref CauseInj</Description>
+<Type>PACCauseOfInjury</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>182</SqlColumnNumber>
+<SqlFieldName>PAADM_CauseInj_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMEmergencyStatus">
+<Description>
+Emergency Status</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>183</SqlColumnNumber>
+<SqlFieldName>PAADM_EmergencyStatus</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Queue,Cubicle"/>
+<Parameter name="MAXLEN" value="7"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Q,C"/>
+</Property>
+
+<Property name="PAADMSeenDate">
+<Description>
+Seen Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>184</SqlColumnNumber>
+<SqlFieldName>PAADM_SeenDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMSeenTime">
+<Description>
+Seen Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>185</SqlColumnNumber>
+<SqlFieldName>PAADM_SeenTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMRegistrationFee">
+<Description>
+Registration Fee Flag</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>186</SqlColumnNumber>
+<SqlFieldName>PAADM_RegistrationFee</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMReasonNotRegFee">
+<Description>
+Reason For Not Collect Reg Fee</Description>
+<Type>BLCReasonNotRegFee</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>187</SqlColumnNumber>
+<SqlFieldName>PAADM_ReasonNotRegFee</SqlFieldName>
+</Property>
+
+<Property name="PAADMSpecialCategory">
+<Description>
+Special Category</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>188</SqlColumnNumber>
+<SqlFieldName>PAADM_SpecialCategory</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMSpecialDocument">
+<Description>
+Special Document</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>189</SqlColumnNumber>
+<SqlFieldName>PAADM_SpecialDocument</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMLabourAccidentDR">
+<Description>
+Des Ref LabourAccident</Description>
+<Type>PATrafficAccident</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>190</SqlColumnNumber>
+<SqlFieldName>PAADM_LabourAccident_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMFlaggedPatient">
+<Description>
+Flagged Patient</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>191</SqlColumnNumber>
+<SqlFieldName>PAADM_FlaggedPatient</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unknown"/>
+<Parameter name="MAXLEN" value="7"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMWaitListDR">
+<Description>
+Des Ref WaitList</Description>
+<Type>PAWaitingList</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>192</SqlColumnNumber>
+<SqlFieldName>PAADM_WaitList_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMFamilyDoctor">
+<Description>
+FamilyDoctor</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>193</SqlColumnNumber>
+<SqlFieldName>PAADM_FamilyDoctor</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMReadOnly">
+<Description>
+Read Only</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>194</SqlColumnNumber>
+<SqlFieldName>PAADM_ReadOnly</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMPersonResponsiblePayment">
+<Description>
+Des Ref Person Responsible Payment</Description>
+<Type>PAPerson</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>195</SqlColumnNumber>
+<SqlFieldName>PAADM_PersonResponsiblePayment</SqlFieldName>
+</Property>
+
+<Property name="PAADMVerified">
+<Description>
+Verified</Description>
+<Type>%String</Type>
+<Collection/>
+<InitialExpression>"N"</InitialExpression>
+<Relationship>0</Relationship>
+<SqlColumnNumber>196</SqlColumnNumber>
+<SqlFieldName>PAADM_Verified</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMCompleted">
+<Description>
+Completed</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>197</SqlColumnNumber>
+<SqlFieldName>PAADM_Completed</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMHCPDR">
+<Description>
+Des Ref HCP</Description>
+<Type>CTHealthCareProvider</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>198</SqlColumnNumber>
+<SqlFieldName>PAADM_HCP_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefClinToDR">
+<Description>
+Des Ref RefClinTo</Description>
+<Type>CTRefClin</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>199</SqlColumnNumber>
+<SqlFieldName>PAADM_RefClinTo_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmRef">
+<Description>
+Adm Reference</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>200</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmRef</SqlFieldName>
+<Parameter name="COLLATION" value="AlphaUp"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMSeriousDisease">
+<Description>
+PAADM_SeriousDisease</Description>
+<Type>MRCICDDx</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>201</SqlColumnNumber>
+<SqlFieldName>PAADM_SeriousDisease</SqlFieldName>
+</Property>
+
+<Property name="PAADMMedDischDate">
+<Description>
+MedDischDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>202</SqlColumnNumber>
+<SqlFieldName>PAADM_MedDischDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMMedDischTime">
+<Description>
+MedDischTime</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>203</SqlColumnNumber>
+<SqlFieldName>PAADM_MedDischTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMTriageDate">
+<Description>
+Triage Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>204</SqlColumnNumber>
+<SqlFieldName>PAADM_TriageDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMTriageTime">
+<Description>
+Triage Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>205</SqlColumnNumber>
+<SqlFieldName>PAADM_TriageTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMLikelihoodAdmit">
+<Description>
+Likelihood to Admit</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>206</SqlColumnNumber>
+<SqlFieldName>PAADM_LikelihoodAdmit</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unknown"/>
+<Parameter name="MAXLEN" value="7"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMHumanIntentDR">
+<Description>
+Des Ref Human Intent</Description>
+<Type>PACHumanIntent</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>207</SqlColumnNumber>
+<SqlFieldName>PAADM_HumanIntent_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPlaceOfInjDR">
+<Description>
+Des Ref PlaceOfInj</Description>
+<Type>PACPlaceOfInjury</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>208</SqlColumnNumber>
+<SqlFieldName>PAADM_PlaceOfInj_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMActivityInjuredDR">
+<Description>
+Des Ref Activity When Injured</Description>
+<Type>PACActivityWhenInjured</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>209</SqlColumnNumber>
+<SqlFieldName>PAADM_ActivityInjured_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOccupationDR">
+<Description>
+Des Ref Occupation</Description>
+<Type>CTOccupation</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>210</SqlColumnNumber>
+<SqlFieldName>PAADM_Occupation_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPersonRespPayment">
+<Description>
+Person Resp Payment</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>211</SqlColumnNumber>
+<SqlFieldName>PAADM_PersonRespPayment</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMRequestMR">
+<Description>
+Request MR</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>212</SqlColumnNumber>
+<SqlFieldName>PAADM_RequestMR</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMInpatBedReqDate">
+<Description>
+Inpat Bed Request Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>213</SqlColumnNumber>
+<SqlFieldName>PAADM_InpatBedReqDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMInpatBedReqTime">
+<Description>
+Inpat Bed Req Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>214</SqlColumnNumber>
+<SqlFieldName>PAADM_InpatBedReqTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMCClass">
+<Description>
+C Class</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>215</SqlColumnNumber>
+<SqlFieldName>PAADM_CClass</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMUpdateDate">
+<Description>
+UpdateDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>216</SqlColumnNumber>
+<SqlFieldName>PAADM_UpdateDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMUpdateTime">
+<Description>
+UpdateTime</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>217</SqlColumnNumber>
+<SqlFieldName>PAADM_UpdateTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMUpdateUserDR">
+<Description>
+Des Ref UpdateUser</Description>
+<Type>SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>218</SqlColumnNumber>
+<SqlFieldName>PAADM_UpdateUser_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefDocClinicDR">
+<Description>
+Des Ref RefDocClinic</Description>
+<Type>PACRefDoctorClinic</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>219</SqlColumnNumber>
+<SqlFieldName>PAADM_RefDocClinic_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCurrentResourceDR">
+<Description>
+Des Ref Current Resource</Description>
+<Type>RBResource</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>220</SqlColumnNumber>
+<SqlFieldName>PAADM_CurrentResource_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMConfirmReferral">
+<Description>
+Confirm Referral</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>221</SqlColumnNumber>
+<SqlFieldName>PAADM_ConfirmReferral</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMRefPeriodDR">
+<Description>
+Des Ref RefPeriod</Description>
+<Type>PACReferralPeriod</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>222</SqlColumnNumber>
+<SqlFieldName>PAADM_RefPeriod_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOSVisitStatusDR">
+<Description>
+Des Ref OSVisitStatus</Description>
+<Type>PACOSVisitorStatus</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>223</SqlColumnNumber>
+<SqlFieldName>PAADM_OSVisitStatus_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateRefDecision">
+<Description>
+Date of Decision to refer patient</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>224</SqlColumnNumber>
+<SqlFieldName>PAADM_DateRefDecision</SqlFieldName>
+</Property>
+
+<Property name="PAADMMethodRefDR">
+<Description>
+Des Ref MethodRef</Description>
+<Type>PACRefReceiptMethod</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>225</SqlColumnNumber>
+<SqlFieldName>PAADM_MethodRef_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMReferralPriorityDR">
+<Description>
+Des Ref Referral Priority</Description>
+<Type>PACReferralPriority</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>226</SqlColumnNumber>
+<SqlFieldName>PAADM_ReferralPriority_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMTumourSiteGroupDR">
+<Description>
+Des Ref TumourSiteGroup</Description>
+<Type>PACTumourSiteGroup</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>227</SqlColumnNumber>
+<SqlFieldName>PAADM_TumourSiteGroup_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMReasonDelDischDR">
+<Description>
+Des Ref ReasonDelDisch</Description>
+<Type>PACReasonDelayDischarge</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>228</SqlColumnNumber>
+<SqlFieldName>PAADM_ReasonDelDisch_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMHospChaplainVisitReq">
+<Description>
+Hosp Chaplain Visit Required</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>229</SqlColumnNumber>
+<SqlFieldName>PAADM_HospChaplainVisitReq</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMOwnMinisterIndicator">
+<Description>
+Own Minister Indicator</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>230</SqlColumnNumber>
+<SqlFieldName>PAADM_OwnMinisterIndicator</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMGuaranteeAdmDate">
+<Description>
+Guarantee Adm Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>231</SqlColumnNumber>
+<SqlFieldName>PAADM_GuaranteeAdmDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMAEArrivalModeDR">
+<Description>
+Des Ref AEArrivalMode</Description>
+<Type>PACAEArrivalMode</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>232</SqlColumnNumber>
+<SqlFieldName>PAADM_AEArrivalMode_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMInternalRefDocDR">
+<Description>
+Des Ref CTPCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>233</SqlColumnNumber>
+<SqlFieldName>PAADM_InternalRefDoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMHomerID">
+<Description>
+Homer ID</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>234</SqlColumnNumber>
+<SqlFieldName>PAADM_HomerID</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMRefDrConsent">
+<Description>
+Ref Dr Consent</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>235</SqlColumnNumber>
+<SqlFieldName>PAADM_RefDrConsent</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Maybe"/>
+<Parameter name="MAXLEN" value="5"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,M"/>
+</Property>
+
+<Property name="PAADMAdmMethodDR">
+<Description>
+Des Ref AdmMethod</Description>
+<Type>PACAdmissionMethod</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>236</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmMethod_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateHCPRequestSent">
+<Description>
+Date HCP Request Sent</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>237</SqlColumnNumber>
+<SqlFieldName>PAADM_DateHCPRequestSent</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateHCPreceived">
+<Description>
+DateHCPreceived</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>238</SqlColumnNumber>
+<SqlFieldName>PAADM_DateHCPreceived</SqlFieldName>
+</Property>
+
+<Property name="PAADMHCPPriorityDR">
+<Description>
+Des Ref HCPPriority</Description>
+<Type>PACHCPPriority</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>239</SqlColumnNumber>
+<SqlFieldName>PAADM_HCPPriority_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAppointTransportDR">
+<Description>
+Des Ref AppointTransport</Description>
+<Type>RBCAppointTransport</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>240</SqlColumnNumber>
+<SqlFieldName>PAADM_AppointTransport_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPoliceDivision">
+<Description>
+Police Division</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>241</SqlColumnNumber>
+<SqlFieldName>PAADM_PoliceDivision</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMSpecificLoc">
+<Description>
+Specific Location</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>242</SqlColumnNumber>
+<SqlFieldName>PAADM_SpecificLoc</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMChaplainName">
+<Description>
+Chaplain Name</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>243</SqlColumnNumber>
+<SqlFieldName>PAADM_ChaplainName</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMChaplainChurchAddress">
+<Description>
+ChaplainChurchAddress</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>244</SqlColumnNumber>
+<SqlFieldName>PAADM_ChaplainChurchAddress</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMChaplainPhone">
+<Description>
+Chaplain Phone</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>245</SqlColumnNumber>
+<SqlFieldName>PAADM_ChaplainPhone</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDateOfEntry">
+<Description>
+Date Of Entry</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>246</SqlColumnNumber>
+<SqlFieldName>PAADM_DateOfEntry</SqlFieldName>
+</Property>
+
+<Property name="PAADMInterviewedBy">
+<Description>
+Interviewed By</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>247</SqlColumnNumber>
+<SqlFieldName>PAADM_InterviewedBy</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDateOfInterview">
+<Description>
+Date Of Interview</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>248</SqlColumnNumber>
+<SqlFieldName>PAADM_DateOfInterview</SqlFieldName>
+</Property>
+
+<Property name="PAADMInterviewRec">
+<Description>
+Interview Rec</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>249</SqlColumnNumber>
+<SqlFieldName>PAADM_InterviewRec</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMOverseasVisitor">
+<Description>
+Overseas Visitor</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>250</SqlColumnNumber>
+<SqlFieldName>PAADM_OverseasVisitor</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unknown"/>
+<Parameter name="MAXLEN" value="7"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMOSVCountryFromDR">
+<Description>
+Des Ref OSVCountryFrom</Description>
+<Type>CTCountry</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>251</SqlColumnNumber>
+<SqlFieldName>PAADM_OSVCountryFrom_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOtherHospital">
+<Description>
+Other Hospital</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>252</SqlColumnNumber>
+<SqlFieldName>PAADM_OtherHospital</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPermanentResident">
+<Description>
+Permanent Resident</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>253</SqlColumnNumber>
+<SqlFieldName>PAADM_PermanentResident</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unknown"/>
+<Parameter name="MAXLEN" value="7"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMDateReceived">
+<Description>
+Date Received</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>254</SqlColumnNumber>
+<SqlFieldName>PAADM_DateReceived</SqlFieldName>
+</Property>
+
+<Property name="PAADMSourceOfAttendDR">
+<Description>
+Des Ref SourceOfAttend</Description>
+<Type>PACSourceOfAttendance</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>255</SqlColumnNumber>
+<SqlFieldName>PAADM_SourceOfAttend_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMMajorIncidentDR">
+<Description>
+Des Ref MajorIncident</Description>
+<Type>PAMajorIncident</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>256</SqlColumnNumber>
+<SqlFieldName>PAADM_MajorIncident_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMReportDate">
+<Description>
+Report Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>257</SqlColumnNumber>
+<SqlFieldName>PAADM_ReportDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMOESubCatDR">
+<Description>
+Des Ref OESubCat</Description>
+<Type>ARCItemCat</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>258</SqlColumnNumber>
+<SqlFieldName>PAADM_OESubCat_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefStatDR">
+<Description>
+Des Ref RefStat</Description>
+<Type>PACReferralStatus</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>259</SqlColumnNumber>
+<SqlFieldName>PAADM_RefStat_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPostDischStatusDR">
+<Description>
+Des Ref PostDischStatus</Description>
+<Type>RTCPostDischargeStatus</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>260</SqlColumnNumber>
+<SqlFieldName>PAADM_PostDischStatus_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDNAReason">
+<Description>
+Des Ref DNAReason</Description>
+<Type>PACWLReasonNotAvail</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>261</SqlColumnNumber>
+<SqlFieldName>PAADM_DNAReason</SqlFieldName>
+</Property>
+
+<Property name="PAADMNursingNotesFlag">
+<Description>
+Nursing Notes Flag</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>262</SqlColumnNumber>
+<SqlFieldName>PAADM_NursingNotesFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMCancelReasonDR">
+<Description>
+Des Ref CancelReason</Description>
+<Type>PACAdmCancelReason</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>263</SqlColumnNumber>
+<SqlFieldName>PAADM_CancelReason_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMConsentRecFundInfo">
+<Description>
+Consent to Receive Fundrising Information</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>264</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentRecFundInfo</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Maybe"/>
+<Parameter name="MAXLEN" value="5"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,M"/>
+</Property>
+
+<Property name="PAADMConsentPatSatisfSurve">
+<Description>
+Consent to undertake Pat Satisf Survey</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>265</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentPatSatisfSurve</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Maybe"/>
+<Parameter name="MAXLEN" value="5"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,M"/>
+</Property>
+
+<Property name="PAADMFrequentAdmissions">
+<Description>
+Frequent Admissions</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>266</SqlColumnNumber>
+<SqlFieldName>PAADM_FrequentAdmissions</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMDischComments">
+<Description>
+Discharge Comments</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>267</SqlColumnNumber>
+<SqlFieldName>PAADM_DischComments</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPatientContacted">
+<Description>
+PatientContacted</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>268</SqlColumnNumber>
+<SqlFieldName>PAADM_PatientContacted</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMLikelyTransICUDR">
+<Description>
+Des Ref LikelyTransICU</Description>
+<Type>PACLikelyTransferoutICU</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>269</SqlColumnNumber>
+<SqlFieldName>PAADM_LikelyTransICU_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMEstDischConfirmed">
+<Description>
+Estimated Discharge Confirmed</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>270</SqlColumnNumber>
+<SqlFieldName>PAADM_EstDischConfirmed</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMPatClassifDR">
+<Description>
+Des Ref PatClassif</Description>
+<Type>PACPatientClassification</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>271</SqlColumnNumber>
+<SqlFieldName>PAADM_PatClassif_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMConvertUserDR">
+<Description>
+Des Ref ConvertUser</Description>
+<Type>SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>272</SqlColumnNumber>
+<SqlFieldName>PAADM_ConvertUser_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMInPatAdmTypeDR">
+<Description>
+Des Ref InPatAdmType</Description>
+<Type>PACInPatAdmissionType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>273</SqlColumnNumber>
+<SqlFieldName>PAADM_InPatAdmType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMAdmissionFIM">
+<Description>
+Admission FIM</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>274</SqlColumnNumber>
+<SqlFieldName>PAADM_AdmissionFIM</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDischargeFIM">
+<Description>
+Discharge FIM</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>275</SqlColumnNumber>
+<SqlFieldName>PAADM_DischargeFIM</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMRelated">
+<Description>
+Related</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>276</SqlColumnNumber>
+<SqlFieldName>PAADM_Related</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMTreatingDrDR">
+<Description>
+Des Ref TreatingDr</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>277</SqlColumnNumber>
+<SqlFieldName>PAADM_TreatingDr_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMContractSpokeDR">
+<Description>
+Des Ref ContractSpoke</Description>
+<Type>PACContractSpokIdentifier</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>278</SqlColumnNumber>
+<SqlFieldName>PAADM_ContractSpoke_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMContractTypeDR">
+<Description>
+Des Ref ContractType</Description>
+<Type>PACContractType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>279</SqlColumnNumber>
+<SqlFieldName>PAADM_ContractType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMContractRoleDR">
+<Description>
+Des Ref ContractRole</Description>
+<Type>PACContractRole</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>280</SqlColumnNumber>
+<SqlFieldName>PAADM_ContractRole_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMFundingArrangementDR">
+<Description>
+Des Ref FundingArrangement</Description>
+<Type>PACFundingArrangement</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>281</SqlColumnNumber>
+<SqlFieldName>PAADM_FundingArrangement_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMBillingMethodDR">
+<Description>
+Des Ref BillingMethod</Description>
+<Type>PACBillingMethod</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>282</SqlColumnNumber>
+<SqlFieldName>PAADM_BillingMethod_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPalliativeCareDR">
+<Description>
+Des Ref Palliative Care</Description>
+<Type>PACPalliativeCareState</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>283</SqlColumnNumber>
+<SqlFieldName>PAADM_PalliativeCare_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMBedMobilityDR">
+<Description>
+Des Ref BedMobility</Description>
+<Type>PACBedMobility</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>284</SqlColumnNumber>
+<SqlFieldName>PAADM_BedMobility_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMToiletingDR">
+<Description>
+Des Ref Toileting</Description>
+<Type>PACToileting</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>285</SqlColumnNumber>
+<SqlFieldName>PAADM_Toileting_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMTransferDR">
+<Description>
+Des Ref Transfer</Description>
+<Type>PACTransferring</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>286</SqlColumnNumber>
+<SqlFieldName>PAADM_Transfer_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMEatingDR">
+<Description>
+Des Ref Eating</Description>
+<Type>PACEating</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>287</SqlColumnNumber>
+<SqlFieldName>PAADM_Eating_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRUGTotal">
+<Description>
+RUG Total</Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>288</SqlColumnNumber>
+<SqlFieldName>PAADM_RUGTotal</SqlFieldName>
+</Property>
+
+<Property name="PAADMBarthelScore">
+<Description>
+Barthel Score</Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>289</SqlColumnNumber>
+<SqlFieldName>PAADM_BarthelScore</SqlFieldName>
+</Property>
+
+<Property name="PAADMDischargeBarthelScore">
+<Description>
+Discharge Barthel Score</Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>290</SqlColumnNumber>
+<SqlFieldName>PAADM_DischargeBarthelScore</SqlFieldName>
+</Property>
+
+<Property name="PAADMClinicalSubProgramDR">
+<Description>
+Des Ref ClinicalSubProgram</Description>
+<Type>PACClinicalSubProgram</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>291</SqlColumnNumber>
+<SqlFieldName>PAADM_ClinicalSubProgram_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMReadmToRehabDR">
+<Description>
+Des Ref ReadmToRehab</Description>
+<Type>PACReAdmissionToRehab</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>292</SqlColumnNumber>
+<SqlFieldName>PAADM_ReadmToRehab_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMOnsetDate">
+<Description>
+Onset Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>293</SqlColumnNumber>
+<SqlFieldName>PAADM_OnsetDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMMiniMentalAssScore">
+<Description>
+Mini Mental Ass Score</Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>294</SqlColumnNumber>
+<SqlFieldName>PAADM_MiniMentalAssScore</SqlFieldName>
+</Property>
+
+<Property name="PAADMTriageNurseDR">
+<Description>
+Des Ref CTPCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>295</SqlColumnNumber>
+<SqlFieldName>PAADM_TriageNurse_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMStatePPPDR">
+<Description>
+Des Ref StatePPP</Description>
+<Type>PACStatePPP</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>296</SqlColumnNumber>
+<SqlFieldName>PAADM_StatePPP_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDaySurgeryType">
+<Description>
+Day Surgery Type</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>297</SqlColumnNumber>
+<SqlFieldName>PAADM_DaySurgeryType</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",DayOfSurgery,DayOfSurgeryAdmission,NonDayOfSurgeryAdmission"/>
+<Parameter name="MAXLEN" value="24"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",D,A,N"/>
+</Property>
+
+<Property name="PAADMTransferFacility">
+<Description>
+Transfer Facility</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>298</SqlColumnNumber>
+<SqlFieldName>PAADM_TransferFacility</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMAppointBookingSystemDR">
+<Description>
+Des Ref AppointBookingSystem</Description>
+<Type>PACApptBookingSystem</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>299</SqlColumnNumber>
+<SqlFieldName>PAADM_AppointBookingSystem_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMParentWardDR">
+<Description>
+Des Ref ParentWard</Description>
+<Type>PACWard</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>300</SqlColumnNumber>
+<SqlFieldName>PAADM_ParentWard_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPatAcuityDR">
+<Description>
+Des Ref PatAcuity</Description>
+<Type>PACPatAcuity</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>301</SqlColumnNumber>
+<SqlFieldName>PAADM_PatAcuity_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMSecondaryReasonDR">
+<Description>
+Des Ref SecondaryReason</Description>
+<Type>PACAdmReason</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>302</SqlColumnNumber>
+<SqlFieldName>PAADM_SecondaryReason_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateDischHosp">
+<Description>
+Date Disch Hosp</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>303</SqlColumnNumber>
+<SqlFieldName>PAADM_DateDischHosp</SqlFieldName>
+</Property>
+
+<Property name="PAADMCaseManagerDR">
+<Description>
+Des Ref CaseManager</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>304</SqlColumnNumber>
+<SqlFieldName>PAADM_CaseManager_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateFirstAppt">
+<Description>
+Date First Appt</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>305</SqlColumnNumber>
+<SqlFieldName>PAADM_DateFirstAppt</SqlFieldName>
+</Property>
+
+<Property name="PAADMLastContactFamily">
+<Description>
+Last Contact Family</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>306</SqlColumnNumber>
+<SqlFieldName>PAADM_LastContactFamily</SqlFieldName>
+</Property>
+
+<Property name="PAADMRejectionReason">
+<Description>
+Rejection Reason</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>307</SqlColumnNumber>
+<SqlFieldName>PAADM_RejectionReason</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="250"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMLongStay">
+<Description>
+Long Stay</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>308</SqlColumnNumber>
+<SqlFieldName>PAADM_LongStay</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMInternalRefLocDR">
+<Description>
+Des Ref InternalRefLoc</Description>
+<Type>CTLoc</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>309</SqlColumnNumber>
+<SqlFieldName>PAADM_InternalRefLoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMDatePatRefferedAssess">
+<Description>
+Date Pat Reffered for Assess</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>310</SqlColumnNumber>
+<SqlFieldName>PAADM_DatePatRefferedAssess</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateSocialWorkerAlloc">
+<Description>
+Date Social Worker Alloc</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>311</SqlColumnNumber>
+<SqlFieldName>PAADM_DateSocialWorkerAlloc</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateSocialWorkerCompleted">
+<Description>
+Date Social Worker Completed</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>312</SqlColumnNumber>
+<SqlFieldName>PAADM_DateSocialWorkerCompleted</SqlFieldName>
+</Property>
+
+<Property name="PAADMDateAssessmentCompleted">
+<Description>
+Date Assessment Completed</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>313</SqlColumnNumber>
+<SqlFieldName>PAADM_DateAssessmentCompleted</SqlFieldName>
+</Property>
+
+<Property name="PAADMSocialWorkerName">
+<Description>
+Social Worker Name</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>314</SqlColumnNumber>
+<SqlFieldName>PAADM_SocialWorkerName</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPatDestination">
+<Description>
+Pat Destination</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>315</SqlColumnNumber>
+<SqlFieldName>PAADM_PatDestination</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDelayReason">
+<Description>
+Delay Reason</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>316</SqlColumnNumber>
+<SqlFieldName>PAADM_DelayReason</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMHasCommunSocWorker">
+<Description>
+Has Commun Soc Worker</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>317</SqlColumnNumber>
+<SqlFieldName>PAADM_HasCommunSocWorker</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMHasFunding">
+<Description>
+Has Funding</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>318</SqlColumnNumber>
+<SqlFieldName>PAADM_HasFunding</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMAutocodeRequired">
+<Description>
+Autocode Required</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>319</SqlColumnNumber>
+<SqlFieldName>PAADM_AutocodeRequired</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMSocialWorkerCentreDR">
+<Description>
+Des Ref SocialWorkerCentre</Description>
+<Type>CTSocWorkerCentre</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>320</SqlColumnNumber>
+<SqlFieldName>PAADM_SocialWorkerCentre_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMLocalAuthorityDR">
+<Description>
+Des Ref LocalAuthority</Description>
+<Type>CTLocalAuthority</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>321</SqlColumnNumber>
+<SqlFieldName>PAADM_LocalAuthority_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMNonGovOrgDR">
+<Description>
+Des Ref NonGovOrg</Description>
+<Type>PACNonGovOrg</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>322</SqlColumnNumber>
+<SqlFieldName>PAADM_NonGovOrg_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMTempLocDate">
+<Description>
+TempLocDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>323</SqlColumnNumber>
+<SqlFieldName>PAADM_TempLocDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMTempLocTime">
+<Description>
+TempLocTime</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>324</SqlColumnNumber>
+<SqlFieldName>PAADM_TempLocTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMQualifStatusDR">
+<Description>
+Des Ref QualifStatus</Description>
+<Type>PACQualificationStatus</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>325</SqlColumnNumber>
+<SqlFieldName>PAADM_QualifStatus_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMSuspectCancerTypeDR">
+<Description>
+Des Ref SuspectCancerType</Description>
+<Type>PACSuspectCancerType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>326</SqlColumnNumber>
+<SqlFieldName>PAADM_SuspectCancerType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMPregnancyDR">
+<Description>
+Des Ref Pregnancy</Description>
+<Type>PAPregnancy</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>327</SqlColumnNumber>
+<SqlFieldName>PAADM_Pregnancy_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefToNonGovDR">
+<Description>
+Des Ref RefToNonGov</Description>
+<Type>PACNonGovOrg</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>328</SqlColumnNumber>
+<SqlFieldName>PAADM_RefToNonGov_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMRefToNGOContactName">
+<Description>
+Ref To NGO Contact Name</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>329</SqlColumnNumber>
+<SqlFieldName>PAADM_RefToNGOContactName</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMRefOrgAddress">
+<Description>
+RefOrgAddress</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>330</SqlColumnNumber>
+<SqlFieldName>PAADM_RefOrgAddress</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMDischgHospital">
+<Description>
+DischgHospital</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>331</SqlColumnNumber>
+<SqlFieldName>PAADM_DischgHospital</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMHospitalDR">
+<Description>
+Des Ref Hospital</Description>
+<Type>CTHospital</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>332</SqlColumnNumber>
+<SqlFieldName>PAADM_Hospital_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMViewablebyEpCareProv">
+<Description>
+Only Viewable by Episode CareProv</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>333</SqlColumnNumber>
+<SqlFieldName>PAADM_ViewablebyEpCareProv</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMMaternityVisTypeDR">
+<Description>
+Des Ref MaternityVisType</Description>
+<Type>PACMaternityVisitType</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>334</SqlColumnNumber>
+<SqlFieldName>PAADM_MaternityVisType_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMLabClinicalCondition">
+<Description>
+Lab Clinical Condition</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>335</SqlColumnNumber>
+<SqlFieldName>PAADM_LabClinicalCondition</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMTelephoneActive">
+<Description>
+Telephone Active</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>336</SqlColumnNumber>
+<SqlFieldName>PAADM_TelephoneActive</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMCodingUpdateDate">
+<Description>
+CodingUpdateDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>337</SqlColumnNumber>
+<SqlFieldName>PAADM_CodingUpdateDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMCodingUpdateTime">
+<Description>
+CodingUpdateTime</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>338</SqlColumnNumber>
+<SqlFieldName>PAADM_CodingUpdateTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMCodingUpdateUserDR">
+<Description>
+Des Ref CodingUpdateUser</Description>
+<Type>SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>339</SqlColumnNumber>
+<SqlFieldName>PAADM_CodingUpdateUser_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMCreatePreadmission">
+<Description>
+Create Preadmission</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>340</SqlColumnNumber>
+<SqlFieldName>PAADM_CreatePreadmission</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMBookLocReady">
+<Description>
+Book Loc Ready</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>341</SqlColumnNumber>
+<SqlFieldName>PAADM_BookLocReady</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMDaysCarriedForward">
+<Description>
+DaysCarriedForward</Description>
+<Type>%Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>342</SqlColumnNumber>
+<SqlFieldName>PAADM_DaysCarriedForward</SqlFieldName>
+</Property>
+
+<Property name="PAADMRBCCancelReasonDR">
+<Description>
+Des Ref RBCCancelReason</Description>
+<Type>RBCReasonForCancel</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>343</SqlColumnNumber>
+<SqlFieldName>PAADM_RBCCancelReason_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMUpdateUserHospitalDR">
+<Description>
+Des Ref Hospital</Description>
+<Type>CTHospital</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>344</SqlColumnNumber>
+<SqlFieldName>PAADM_UpdateUserHospital_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMConsentDVA">
+<Description>
+Consent DVA</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>346</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentDVA</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unable"/>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMConsentWorkCompens">
+<Description>
+Consent Work Compens</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>347</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentWorkCompens</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unable"/>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMConsentMotorVehicle">
+<Description>
+Consent Motor Vehicle</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>348</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentMotorVehicle</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unable"/>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMConsentDepOfDefence">
+<Description>
+Consent Dep Of Defence</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>349</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentDepOfDefence</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unable"/>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMConsentFeedback">
+<Description>
+Consent Feedback</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>350</SqlColumnNumber>
+<SqlFieldName>PAADM_ConsentFeedback</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No,Unable"/>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N,U"/>
+</Property>
+
+<Property name="PAADMPrevInPatAdmPalliativeCare">
+<Description>
+PrevInPatAdmPalliativeCare</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>351</SqlColumnNumber>
+<SqlFieldName>PAADM_PrevInPatAdmPalliativeCare</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMPrevNonInPatPalliativeCare">
+<Description>
+PrevNonInPatPalliativeCare</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>352</SqlColumnNumber>
+<SqlFieldName>PAADM_PrevNonInPatPalliativeCare</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMDoctorLetterNotes">
+<Description>
+Doctor Letter Notes</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>353</SqlColumnNumber>
+<SqlFieldName>PAADM_DoctorLetterNotes</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMPatientLetterNotes">
+<Description>
+PatientLetterNotes</Description>
+<Type>%String</Type>
+<Collection>list</Collection>
+<Relationship>0</Relationship>
+<SqlColumnNumber>354</SqlColumnNumber>
+<SqlFieldName>PAADM_PatientLetterNotes</SqlFieldName>
+<SqlListType>SUBNODE</SqlListType>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PAADMAuditLetterResponse">
+<Description>
+Audit Letter Response</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>355</SqlColumnNumber>
+<SqlFieldName>PAADM_AuditLetterResponse</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PAADMUsualAccomDR">
+<Description>
+Des Ref UsualAccom</Description>
+<Type>PACUsualAccomodation</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>356</SqlColumnNumber>
+<SqlFieldName>PAADM_UsualAccom_DR</SqlFieldName>
+</Property>
+
+<Property name="PAADMFinDischDate">
+<Description>
+FinDischDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>357</SqlColumnNumber>
+<SqlFieldName>PAADM_FinDischDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMFinDischTime">
+<Description>
+Fin Disch Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>358</SqlColumnNumber>
+<SqlFieldName>PAADM_FinDischTime</SqlFieldName>
+</Property>
+
+<Property name="PAADMInjuryIncidentDate">
+<Description>
+InjuryIncidentDate</Description>
+<Type>%Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>359</SqlColumnNumber>
+<SqlFieldName>PAADM_InjuryIncidentDate</SqlFieldName>
+</Property>
+
+<Property name="PAADMPAAdm2DR">
+<Description>
+Des Ref PAAdm2</Description>
+<Type>PAAdm2</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>360</SqlColumnNumber>
+<SqlComputeCode> s {PAADM_PAAdm2_DR}={PAADM_RowID}
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlFieldName>PAADM_PAAdm2_DR</SqlFieldName>
+<Transient>1</Transient>
+</Property>
+
+<Trigger name="TAfterIns">
+<Code> d ##Class(User.PAAdm).OnTrigger($g(%d(1)))
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnAfterInsert")
+ d updbill^at83d($g(%d(1)))
+ d Table^HL7Outbound("PAAdm",%d(1),"Insert")</Code>
+<Event>INSERT</Event>
+<Order>1</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TAfterUpd">
+<Code> d ##Class(User.PAAdm).OnTrigger($g(%d(1)))
+ d updbill^at83d($g(%d(1)))
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnAfterUpdate")
+ d Table^HL7Outbound("PAAdm",%d(1),"Update")
+ d ##Class(web.PAAdm).TAfterUpd()</Code>
+<Event>UPDATE</Event>
+<Order>2</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TBeforeDel">
+<Code> d ##Class(User.PAAdm).getOld($g(%d(1)))
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnBeforeDelete")</Code>
+<Event>DELETE</Event>
+<Order>3</Order>
+</Trigger>
+
+<Trigger name="TBeforeUpd">
+<Code> d ##Class(User.PAAdm).getOld($g(%d(1)))
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnBeforeUpdate")</Code>
+<Event>UPDATE</Event>
+<Order>2</Order>
+</Trigger>
+
+<Trigger name="TBeforeIns">
+<Code> d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnBeforeInsert")</Code>
+<Event>INSERT</Event>
+<Order>1</Order>
+</Trigger>
+
+<Trigger name="TAfterDel">
+<Code> d ##Class(User.PAAdm).OnTrigger($g(%d(1)))
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.PAAdm","OnAfterDelete")
+ d Table^HL7Outbound("PAAdm",%old(1),"Delete")</Code>
+<Event>DELETE</Event>
+<Order>3</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Parameter name="EXTENTSIZE">
+<Default>1000000</Default>
+</Parameter>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^PAADM(0))</SqlIdExpression>
+<SqlRowIdName>PAADM_RowID</SqlRowIdName>
+<StreamLocation>^User.PAAdmS</StreamLocation>
+<ExtentSize>1000000</ExtentSize>
+<SQLMap name="DataMasterMap">
+<Type>data</Type>
+<Global>^PAADM</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_RowID}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+<Data name="PAADM_ADMNo">
+<Delimiter>"^"</Delimiter>
+<Piece>81</Piece>
+</Data>
+<Data name="PAADM_AEArrivalMode_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>58</Piece>
+</Data>
+<Data name="PAADM_ActivityInjured_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>35</Piece>
+</Data>
+<Data name="PAADM_AdmCateg_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="PAADM_AdmDate">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="PAADM_AdmDocCodeDR">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="PAADM_AdmMethod_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>62</Piece>
+</Data>
+<Data name="PAADM_AdmReadm">
+<Delimiter>"^"</Delimiter>
+<Piece>56</Piece>
+</Data>
+<Data name="PAADM_AdmReason_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>7</Piece>
+</Data>
+<Data name="PAADM_AdmRef">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>26</Piece>
+</Data>
+<Data name="PAADM_AdmSrc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="PAADM_AdmTime">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="PAADM_AdmissionFIM">
+<Node>"ADMFIM"</Node>
+</Data>
+<Data name="PAADM_AppointBookingSystem_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>54</Piece>
+</Data>
+<Data name="PAADM_AppointTransport_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>66</Piece>
+</Data>
+<Data name="PAADM_Appoint_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>68</Piece>
+</Data>
+<Data name="PAADM_ApptMethod_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>64</Piece>
+</Data>
+<Data name="PAADM_AuditLetterResponse">
+<Delimiter>"^"</Delimiter>
+<Node>3</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="PAADM_AutocodeRequired">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>73</Piece>
+</Data>
+<Data name="PAADM_BarthelScore">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>44</Piece>
+</Data>
+<Data name="PAADM_BedMobility_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>39</Piece>
+</Data>
+<Data name="PAADM_BillFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>45</Piece>
+</Data>
+<Data name="PAADM_BillingMethod_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>37</Piece>
+</Data>
+<Data name="PAADM_BookLocReady">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>94</Piece>
+</Data>
+<Data name="PAADM_CClass">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>41</Piece>
+</Data>
+<Data name="PAADM_CancelReason_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>18</Piece>
+</Data>
+<Data name="PAADM_CaseManager_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>59</Piece>
+</Data>
+<Data name="PAADM_CauseInj_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>8</Piece>
+</Data>
+<Data name="PAADM_ChaplainChurchAddress">
+<Node>"CHADR"</Node>
+</Data>
+<Data name="PAADM_ChaplainName">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>69</Piece>
+</Data>
+<Data name="PAADM_ChaplainPhone">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>70</Piece>
+</Data>
+<Data name="PAADM_ClinicalSubProgram_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>46</Piece>
+</Data>
+<Data name="PAADM_CodingUpdateDate">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>90</Piece>
+</Data>
+<Data name="PAADM_CodingUpdateTime">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>91</Piece>
+</Data>
+<Data name="PAADM_CodingUpdateUser_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>92</Piece>
+</Data>
+<Data name="PAADM_Completed">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>23</Piece>
+</Data>
+<Data name="PAADM_ConfidentMessage">
+<Node>"CONF"</Node>
+</Data>
+<Data name="PAADM_Confidential">
+<Delimiter>"^"</Delimiter>
+<Piece>26</Piece>
+</Data>
+<Data name="PAADM_ConfirmReferral">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>47</Piece>
+</Data>
+<Data name="PAADM_ConsentDVA">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>99</Piece>
+</Data>
+<Data name="PAADM_ConsentDepOfDefence">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>102</Piece>
+</Data>
+<Data name="PAADM_ConsentFeedback">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>103</Piece>
+</Data>
+<Data name="PAADM_ConsentMotorVehicle">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>101</Piece>
+</Data>
+<Data name="PAADM_ConsentPatSatisfSurve">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>20</Piece>
+</Data>
+<Data name="PAADM_ConsentRecFundInfo">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>19</Piece>
+</Data>
+<Data name="PAADM_ConsentWorkCompens">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>100</Piece>
+</Data>
+<Data name="PAADM_ContractRole_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>35</Piece>
+</Data>
+<Data name="PAADM_ContractSpoke_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>33</Piece>
+</Data>
+<Data name="PAADM_ContractType_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>34</Piece>
+</Data>
+<Data name="PAADM_ConvertDate">
+<Delimiter>"^"</Delimiter>
+<Piece>77</Piece>
+</Data>
+<Data name="PAADM_ConvertTime">
+<Delimiter>"^"</Delimiter>
+<Piece>78</Piece>
+</Data>
+<Data name="PAADM_ConvertUser_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>27</Piece>
+</Data>
+<Data name="PAADM_ConvertedFromOut">
+<Delimiter>"^"</Delimiter>
+<Piece>80</Piece>
+</Data>
+<Data name="PAADM_CreateDate">
+<Delimiter>"^"</Delimiter>
+<Piece>41</Piece>
+</Data>
+<Data name="PAADM_CreatePreadmission">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>93</Piece>
+</Data>
+<Data name="PAADM_CreateTime">
+<Delimiter>"^"</Delimiter>
+<Piece>42</Piece>
+</Data>
+<Data name="PAADM_CreateUser">
+<Delimiter>"^"</Delimiter>
+<Piece>43</Piece>
+</Data>
+<Data name="PAADM_CurrentBed_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>73</Piece>
+</Data>
+<Data name="PAADM_CurrentProcess_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="PAADM_CurrentResource_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>46</Piece>
+</Data>
+<Data name="PAADM_CurrentRoom_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>69</Piece>
+</Data>
+<Data name="PAADM_CurrentWard_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>70</Piece>
+</Data>
+<Data name="PAADM_DNAReason">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>16</Piece>
+</Data>
+<Data name="PAADM_DateAssessmentCompleted">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>68</Piece>
+</Data>
+<Data name="PAADM_DateDischHosp">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>58</Piece>
+</Data>
+<Data name="PAADM_DateFirstAppt">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>60</Piece>
+</Data>
+<Data name="PAADM_DateHCPRequestSent">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>63</Piece>
+</Data>
+<Data name="PAADM_DateHCPreceived">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>64</Piece>
+</Data>
+<Data name="PAADM_DateOfEntry">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="PAADM_DateOfInterview">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="PAADM_DatePatRefferedAssess">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>65</Piece>
+</Data>
+<Data name="PAADM_DateReceived">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>9</Piece>
+</Data>
+<Data name="PAADM_DateRefDecision">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>50</Piece>
+</Data>
+<Data name="PAADM_DateSocialWorkerAlloc">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>66</Piece>
+</Data>
+<Data name="PAADM_DateSocialWorkerCompleted">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>67</Piece>
+</Data>
+<Data name="PAADM_DaySurgeryType">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>52</Piece>
+</Data>
+<Data name="PAADM_DaysCarriedForward">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>95</Piece>
+</Data>
+<Data name="PAADM_DelayReason">
+<Node>"DEL"</Node>
+</Data>
+<Data name="PAADM_DepCode_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="PAADM_DietType_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>58</Piece>
+</Data>
+<Data name="PAADM_DischComments">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>22</Piece>
+</Data>
+<Data name="PAADM_DischCond_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>49</Piece>
+</Data>
+<Data name="PAADM_DischargeAppoint_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="PAADM_DischargeBarthelScore">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>45</Piece>
+</Data>
+<Data name="PAADM_DischargeFIM">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>30</Piece>
+</Data>
+<Data name="PAADM_DischgDate">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="PAADM_DischgDoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="PAADM_DischgHospital">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>84</Piece>
+</Data>
+<Data name="PAADM_DischgTime">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="PAADM_Dispos_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>23</Piece>
+</Data>
+<Data name="PAADM_DoctorLetterNotes">
+<Node>"DLN"</Node>
+</Data>
+<Data name="PAADM_Eating_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>42</Piece>
+</Data>
+<Data name="PAADM_EmergencyDate">
+<Delimiter>"^"</Delimiter>
+<Piece>37</Piece>
+</Data>
+<Data name="PAADM_EmergencyNo">
+<Delimiter>"^"</Delimiter>
+<Piece>31</Piece>
+</Data>
+<Data name="PAADM_EmergencyStatus">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>9</Piece>
+</Data>
+<Data name="PAADM_EmergencyTime">
+<Delimiter>"^"</Delimiter>
+<Piece>38</Piece>
+</Data>
+<Data name="PAADM_Epissubtype_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>6</Piece>
+</Data>
+<Data name="PAADM_EstDischConfirmed">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>25</Piece>
+</Data>
+<Data name="PAADM_EstimDischargeDate">
+<Delimiter>"^"</Delimiter>
+<Piece>59</Piece>
+</Data>
+<Data name="PAADM_EstimDischargeTime">
+<Delimiter>"^"</Delimiter>
+<Piece>60</Piece>
+</Data>
+<Data name="PAADM_EstimOperDate">
+<Delimiter>"^"</Delimiter>
+<Piece>53</Piece>
+</Data>
+<Data name="PAADM_ExpAdmDate">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="PAADM_ExpLOS">
+<Delimiter>"^"</Delimiter>
+<Piece>27</Piece>
+</Data>
+<Data name="PAADM_FamilyDoctor">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>19</Piece>
+</Data>
+<Data name="PAADM_FinDischDate">
+<Delimiter>"^"</Delimiter>
+<Node>3</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="PAADM_FinDischTime">
+<Delimiter>"^"</Delimiter>
+<Node>3</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="PAADM_FirstOrReadmis">
+<Delimiter>"^"</Delimiter>
+<Piece>72</Piece>
+</Data>
+<Data name="PAADM_FlaggedPatient">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>17</Piece>
+</Data>
+<Data name="PAADM_FrequentAdmissions">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>21</Piece>
+</Data>
+<Data name="PAADM_FundingArrangement_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>36</Piece>
+</Data>
+<Data name="PAADM_GuaranteeAdmDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>57</Piece>
+</Data>
+<Data name="PAADM_HCA_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="PAADM_HCPPriority_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>65</Piece>
+</Data>
+<Data name="PAADM_HCP_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>24</Piece>
+</Data>
+<Data name="PAADM_HCR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>24</Piece>
+</Data>
+<Data name="PAADM_HasCommunSocWorker">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>71</Piece>
+</Data>
+<Data name="PAADM_HasFunding">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>72</Piece>
+</Data>
+<Data name="PAADM_HomerID">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>60</Piece>
+</Data>
+<Data name="PAADM_HospChaplainVisitReq">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>56</Piece>
+</Data>
+<Data name="PAADM_Hospital_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>85</Piece>
+</Data>
+<Data name="PAADM_HumanIntent_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>33</Piece>
+</Data>
+<Data name="PAADM_InPatAdmType_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>28</Piece>
+</Data>
+<Data name="PAADM_InPatNo">
+<Delimiter>"^"</Delimiter>
+<Piece>29</Piece>
+</Data>
+<Data name="PAADM_Infect_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>51</Piece>
+</Data>
+<Data name="PAADM_InjuryIncidentDate">
+<Delimiter>"^"</Delimiter>
+<Node>3</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="PAADM_InpatBedReqDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>39</Piece>
+</Data>
+<Data name="PAADM_InpatBedReqTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>40</Piece>
+</Data>
+<Data name="PAADM_InternalRefDoc_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>59</Piece>
+</Data>
+<Data name="PAADM_InternalRefLoc_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>64</Piece>
+</Data>
+<Data name="PAADM_InterviewRec">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="PAADM_InterviewedBy">
+<Node>"INTERV"</Node>
+</Data>
+<Data name="PAADM_Isolate">
+<Delimiter>"^"</Delimiter>
+<Piece>36</Piece>
+</Data>
+<Data name="PAADM_LabClinicalCondition">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>88</Piece>
+</Data>
+<Data name="PAADM_LabourAccident_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>16</Piece>
+</Data>
+<Data name="PAADM_LastContactFamily">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>61</Piece>
+</Data>
+<Data name="PAADM_LikelihoodAdmit">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>32</Piece>
+</Data>
+<Data name="PAADM_LikelyTransICU_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>24</Piece>
+</Data>
+<Data name="PAADM_LocalAuthority_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>75</Piece>
+</Data>
+<Data name="PAADM_LongStay">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>63</Piece>
+</Data>
+<Data name="PAADM_MainMRADM_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>61</Piece>
+</Data>
+<Data name="PAADM_MajorIncident_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>11</Piece>
+</Data>
+<Data name="PAADM_MaritalStatus_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="PAADM_MaternityVisType_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>87</Piece>
+</Data>
+<Data name="PAADM_MealPreference">
+<Delimiter>"^"</Delimiter>
+<Piece>40</Piece>
+</Data>
+<Data name="PAADM_MedDischDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>28</Piece>
+</Data>
+<Data name="PAADM_MedDischDoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>79</Piece>
+</Data>
+<Data name="PAADM_MedDischTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>29</Piece>
+</Data>
+<Data name="PAADM_MedicalDischarge">
+<Delimiter>"^"</Delimiter>
+<Piece>63</Piece>
+</Data>
+<Data name="PAADM_MethodRef_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>51</Piece>
+</Data>
+<Data name="PAADM_MiniMentalAssScore">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>49</Piece>
+</Data>
+<Data name="PAADM_MotherAdm_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>75</Piece>
+</Data>
+<Data name="PAADM_NonGovOrg_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>76</Piece>
+</Data>
+<Data name="PAADM_NursingNotesFlag">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>17</Piece>
+</Data>
+<Data name="PAADM_OESubCat_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>13</Piece>
+</Data>
+<Data name="PAADM_OSVCountryFrom_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>6</Piece>
+</Data>
+<Data name="PAADM_OSVisitStatus_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>49</Piece>
+</Data>
+<Data name="PAADM_Occupation_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>36</Piece>
+</Data>
+<Data name="PAADM_OnsetDate">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>48</Piece>
+</Data>
+<Data name="PAADM_Oper_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>54</Piece>
+</Data>
+<Data name="PAADM_OrderTime">
+<Delimiter>"^"</Delimiter>
+<Piece>66</Piece>
+</Data>
+<Data name="PAADM_OriginalAdmissionDR">
+<Delimiter>"^"</Delimiter>
+<Piece>39</Piece>
+</Data>
+<Data name="PAADM_OtherDischType">
+<Delimiter>"^"</Delimiter>
+<Piece>50</Piece>
+</Data>
+<Data name="PAADM_OtherHospital">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>7</Piece>
+</Data>
+<Data name="PAADM_OtherInfectType">
+<Delimiter>"^"</Delimiter>
+<Piece>52</Piece>
+</Data>
+<Data name="PAADM_OverseasVisitor">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="PAADM_OwnMinisterIndicator">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>55</Piece>
+</Data>
+<Data name="PAADM_PAPMI_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="PAADM_PaidEmergencySurcharge">
+<Delimiter>"^"</Delimiter>
+<Piece>76</Piece>
+</Data>
+<Data name="PAADM_PalliativeCare_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>38</Piece>
+</Data>
+<Data name="PAADM_ParentWard_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>55</Piece>
+</Data>
+<Data name="PAADM_PatAcuity_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>56</Piece>
+</Data>
+<Data name="PAADM_PatClassif_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>26</Piece>
+</Data>
+<Data name="PAADM_PatDestination">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>70</Piece>
+</Data>
+<Data name="PAADM_PatType_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="PAADM_PatientContacted">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>23</Piece>
+</Data>
+<Data name="PAADM_PatientLetterNotes">
+<Node>"PLN"</Node>
+</Data>
+<Data name="PAADM_PermanentResident">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>8</Piece>
+</Data>
+<Data name="PAADM_PersonRespPayment">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>37</Piece>
+</Data>
+<Data name="PAADM_PersonResponsiblePayment">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>21</Piece>
+</Data>
+<Data name="PAADM_PlaceOfInj_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>34</Piece>
+</Data>
+<Data name="PAADM_PoliceDivision">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>67</Piece>
+</Data>
+<Data name="PAADM_PostDischStatus_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>15</Piece>
+</Data>
+<Data name="PAADM_PreAdmNo">
+<Delimiter>"^"</Delimiter>
+<Piece>32</Piece>
+</Data>
+<Data name="PAADM_PreAdmitDate">
+<Delimiter>"^"</Delimiter>
+<Piece>34</Piece>
+</Data>
+<Data name="PAADM_PreAdmitTime">
+<Delimiter>"^"</Delimiter>
+<Piece>35</Piece>
+</Data>
+<Data name="PAADM_PreAdmitted">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="PAADM_Pregnancy_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>81</Piece>
+</Data>
+<Data name="PAADM_PrevInPatAdmPalliativeCare">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>104</Piece>
+</Data>
+<Data name="PAADM_PrevNonInPatPalliativeCare">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>105</Piece>
+</Data>
+<Data name="PAADM_PreviousProcess_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="PAADM_Priority_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>33</Piece>
+</Data>
+<Data name="PAADM_QualifStatus_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>79</Piece>
+</Data>
+<Data name="PAADM_RBCCancelReason_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>96</Piece>
+</Data>
+<Data name="PAADM_RUGTotal">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>43</Piece>
+</Data>
+<Data name="PAADM_ReadOnly">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>20</Piece>
+</Data>
+<Data name="PAADM_ReadmToRehab_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>47</Piece>
+</Data>
+<Data name="PAADM_ReasonDelDisch_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>54</Piece>
+</Data>
+<Data name="PAADM_ReasonNotRegFee">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>13</Piece>
+</Data>
+<Data name="PAADM_RefAdm_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>71</Piece>
+</Data>
+<Data name="PAADM_RefApprovNo">
+<Delimiter>"^"</Delimiter>
+<Piece>48</Piece>
+</Data>
+<Data name="PAADM_RefClinTo_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>25</Piece>
+</Data>
+<Data name="PAADM_RefClinic_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="PAADM_RefDate">
+<Delimiter>"^"</Delimiter>
+<Piece>46</Piece>
+</Data>
+<Data name="PAADM_RefDocClinic_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>45</Piece>
+</Data>
+<Data name="PAADM_RefDocCodeDR">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+<Data name="PAADM_RefDocList_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>82</Piece>
+</Data>
+<Data name="PAADM_RefDrConsent">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>61</Piece>
+</Data>
+<Data name="PAADM_RefExpiryDate">
+<Delimiter>"^"</Delimiter>
+<Piece>47</Piece>
+</Data>
+<Data name="PAADM_RefOrgAddress">
+<Node>"RAD"</Node>
+</Data>
+<Data name="PAADM_RefPeriod_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>48</Piece>
+</Data>
+<Data name="PAADM_RefStat_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>14</Piece>
+</Data>
+<Data name="PAADM_RefToNGOContactName">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>83</Piece>
+</Data>
+<Data name="PAADM_RefToNonGov_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>82</Piece>
+</Data>
+<Data name="PAADM_ReferralPriority_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>52</Piece>
+</Data>
+<Data name="PAADM_ReferralType">
+<Delimiter>"^"</Delimiter>
+<Piece>67</Piece>
+</Data>
+<Data name="PAADM_Region_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="PAADM_RegistrationFee">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>12</Piece>
+</Data>
+<Data name="PAADM_RejectionReason">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>62</Piece>
+</Data>
+<Data name="PAADM_Related">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>31</Piece>
+</Data>
+<Data name="PAADM_Remark">
+<Node>"CMT"</Node>
+</Data>
+<Data name="PAADM_ReportDate">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>12</Piece>
+</Data>
+<Data name="PAADM_RequestMR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>38</Piece>
+</Data>
+<Data name="PAADM_RoomType_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>57</Piece>
+</Data>
+<Data name="PAADM_SecondaryReason_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>57</Piece>
+</Data>
+<Data name="PAADM_SeenDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>10</Piece>
+</Data>
+<Data name="PAADM_SeenTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>11</Piece>
+</Data>
+<Data name="PAADM_SeriousDisease">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>27</Piece>
+</Data>
+<Data name="PAADM_ShowInFutureEpisode">
+<Delimiter>"^"</Delimiter>
+<Piece>28</Piece>
+</Data>
+<Data name="PAADM_SocialWorkerCentre_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>74</Piece>
+</Data>
+<Data name="PAADM_SocialWorkerName">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>69</Piece>
+</Data>
+<Data name="PAADM_SourceOfAttend_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>10</Piece>
+</Data>
+<Data name="PAADM_SourceRef_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="PAADM_SpecialCategory">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>14</Piece>
+</Data>
+<Data name="PAADM_SpecialDocument">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>15</Piece>
+</Data>
+<Data name="PAADM_Specialty_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="PAADM_SpecificLoc">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>68</Piece>
+</Data>
+<Data name="PAADM_StatePPP_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>51</Piece>
+</Data>
+<Data name="PAADM_StudentMRADM_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>62</Piece>
+</Data>
+<Data name="PAADM_SuspectCancerType_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>80</Piece>
+</Data>
+<Data name="PAADM_TelephoneActive">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>89</Piece>
+</Data>
+<Data name="PAADM_TempLocDate">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>77</Piece>
+</Data>
+<Data name="PAADM_TempLocTime">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>78</Piece>
+</Data>
+<Data name="PAADM_TempLoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>74</Piece>
+</Data>
+<Data name="PAADM_Toileting_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>40</Piece>
+</Data>
+<Data name="PAADM_TrafficAccident_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>25</Piece>
+</Data>
+<Data name="PAADM_TransferFacility">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>53</Piece>
+</Data>
+<Data name="PAADM_Transfer_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>41</Piece>
+</Data>
+<Data name="PAADM_TreatingDr_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>32</Piece>
+</Data>
+<Data name="PAADM_TriageDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>30</Piece>
+</Data>
+<Data name="PAADM_TriageNurse_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>50</Piece>
+</Data>
+<Data name="PAADM_TriageTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>31</Piece>
+</Data>
+<Data name="PAADM_TumourSiteGroup_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>53</Piece>
+</Data>
+<Data name="PAADM_Type">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="PAADM_Type_of_Patient_Calc">
+<Delimiter>"^"</Delimiter>
+<Piece>65</Piece>
+</Data>
+<Data name="PAADM_UpdateDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>42</Piece>
+</Data>
+<Data name="PAADM_UpdateTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>43</Piece>
+</Data>
+<Data name="PAADM_UpdateUserHospital_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>97</Piece>
+</Data>
+<Data name="PAADM_UpdateUser_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>44</Piece>
+</Data>
+<Data name="PAADM_Urgent">
+<Delimiter>"^"</Delimiter>
+<Piece>55</Piece>
+</Data>
+<Data name="PAADM_UsualAccom_DR">
+<Delimiter>"^"</Delimiter>
+<Node>3</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="PAADM_Verified">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>22</Piece>
+</Data>
+<Data name="PAADM_ViewablebyEpCareProv">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>86</Piece>
+</Data>
+<Data name="PAADM_VisitStatus">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="PAADM_WaitList_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>18</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexAdmCurrentPat">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_Type</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdmTypeCurr"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmDateCurrPat">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_AdmDate,PAADM_DischgDate,PAADM_VisitStatus</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>50</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdmDateCurr"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAADM_DateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmPrRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdPrRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_Priority_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmTypeCurrLoc">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_AdmDate,PAADM_AdmTime,PAADM_DepCode_DR</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdmTypeCurrLoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmissionDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAADM_AdmDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmissionType">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAADM_Type"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAdmref">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdmRef"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>$$ALPHAUP({PAADM_AdmRef})</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexAutocode">
+<Type>index</Type>
+<Condition>{PAADM_AutocodeRequired}["Y"</Condition>
+<ConditionFields>PAADM_AutocodeRequired,PAADM_AdmDate</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AutoCode"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexCodeDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"CODDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CodingUpdateDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexCurrLoc">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_AdmDate,PAADM_AdmTime,PAADM_DepCode_DR,PAADM_VisitStatus</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"CurrLoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexCurrTypeLocDoc">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_AdmDocCodeDR,PAADM_DepCode_DR,PAADM_AdmDate,PAADM_AdmTime</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"TypeLocDocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="7">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L7}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexCurrentWard">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_CurrentWard_DR,PAADM_CurrentRoom_DR</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>20</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"CurrWard"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentWard_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_CurrentRoom_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDSType">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DSType"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DaySurgeryType}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_VisitStatus}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDepDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DepDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDisDateDep">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DisDateDep"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DischgDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDischDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DischDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DischgDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDocDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAADM_DocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDocRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DocRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDocRfStDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DocRfStDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_RefStat_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDoctorCurrentPat">
+<Type>index</Type>
+<Condition>$$index^at83e({PAADM_VisitStatus})=1</Condition>
+<ConditionFields>PAADM_AdmDocCodeDR,PAADM_AdmDate,PAADM_AdmTime</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>50</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"AdmDocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexEpisSubTypeDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"SubTypeDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Epissubtype_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexEstimDischDate">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))'="D",{PAADM_DischgDate}="",{PAADM_EstimDischargeDate}'=""</Condition>
+<ConditionFields>PAADM_DischgDate,PAADM_EstimDischargeDate,PAADM_VisitStatus</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"EstDisch"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_EstimDischargeDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexEstimDischDateExt">
+<Type>index</Type>
+<Condition>{PAADM_EstimDischargeDate}'=""</Condition>
+<ConditionFields>PAADM_DischgDate,PAADM_EstimDischargeDate</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Subscript name="1">
+<Expression>"EstDischExt"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_EstimDischargeDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexExpAdmDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ExpAdmDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_ExpAdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexHCPPrRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"HCPrRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_HCPPriority_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexHospDischargeDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DischDateH"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Hospital_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DischgDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexIPDate">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="P"</Condition>
+<ConditionFields>PAADM_Type,PAADM_VisitStatus</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"IPDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexLocDateTime">
+<Type>index</Type>
+<Condition>$$index^at83e({PAADM_VisitStatus})=1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAADM_LocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexLocRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"LocRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexLocRfStDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"LocRfStDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_RefStat_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexMajorIncident">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"MajInc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_MajorIncident_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexMatVisType">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"MatVT"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_MaternityVisType_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexMother">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"Mother"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_MotherAdm_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNotCompleted">
+<Type>index</Type>
+<Condition>{PAADM_Completed}["N"</Condition>
+<ConditionFields>PAADM_Completed,PAADM_DepCode_DR,PAADM_Type</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NotCompl"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNotVerif1">
+<Type>index</Type>
+<Condition>{PAADM_Verified}["N"</Condition>
+<ConditionFields>PAADM_DepCode_DR,PAADM_Type,PAADM_Verified</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NotVerif1"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNotVerified">
+<Type>index</Type>
+<Condition>{PAADM_Verified}["N"</Condition>
+<ConditionFields>PAADM_Verified</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NotVerif"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L2}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNumber">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"No"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>$$ALPHAUP({PAADM_ADMNo})</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNursingNotes">
+<Type>index</Type>
+<Condition>{PAADM_NursingNotesFlag}'["Y"</Condition>
+<ConditionFields>PAADM_AdmDate,PAADM_DepCode_DR,PAADM_NursingNotesFlag</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NNLoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNursingNotesD">
+<Type>index</Type>
+<Condition>{PAADM_NursingNotesFlag}'["Y"</Condition>
+<ConditionFields>PAADM_AdmDate,PAADM_AdmDocCodeDR,PAADM_NursingNotesFlag</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NNDoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexNursingNotesType">
+<Type>index</Type>
+<Condition>{PAADM_NursingNotesFlag}'["Y"</Condition>
+<ConditionFields>PAADM_NursingNotesFlag,PAADM_AdmDate,PAADM_Type</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"NNType"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPAPMIDR">
+<Type>index</Type>
+<Global>^PAPERdr</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"ADM"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexParentWard">
+<Type>index</Type>
+<Condition>$p({PAADM_VisitStatus},$c(1))="A"</Condition>
+<ConditionFields>PAADM_ParentWard_DR,PAADM_VisitStatus</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>20</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ParentWard"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_ParentWard_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPatietProcess">
+<Type>index</Type>
+<Condition>{PAADM_CurrentProcess_DR}'=""</Condition>
+<ConditionFields>PAADM_CurrentProcess_DR,PAADM_PAPMI_DR</ConditionFields>
+<Global>^PAPRi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PAPMI"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_CurrentProcess_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPregnancy">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"Pregn"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Pregnancy_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPriority">
+<Type>index</Type>
+<Condition>$$index1^at83e({PAADM_VisitStatus},{PAADM_Type})=1</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_Type</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"Priority"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_Priority_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_AdmDate}_","_+{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPriorityDep">
+<Type>index</Type>
+<Condition>"A"[$p({PAADM_VisitStatus},$c(1)),{PAADM_CurrentWard_DR},'{PAADM_CurrentBed_DR}</Condition>
+<ConditionFields>PAADM_AdmDate,PAADM_AdmTime,PAADM_DepCode_DR,PAADM_CurrentBed_DR,PAADM_Type,PAADM_VisitStatus,PAADM_CurrentWard_DR</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"PriorDep"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_Priority_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>+{PAADM_AdmDate}_","_+{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexProcess">
+<Type>index</Type>
+<Global>^PAPRi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"Process"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentProcess_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRefDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRefDoc">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RefDoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDocList_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRefPrRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RefPrRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_ReferralPriority_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRefStatDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RfStDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_RefStat_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexResDateTime">
+<Type>index</Type>
+<Condition>$$index^at83e({PAADM_VisitStatus})=1</Condition>
+<ConditionFields>PAADM_VisitStatus,PAADM_AdmDate,PAADM_AdmTime,PAADM_CurrentResource_DR</ConditionFields>
+<Global>^PAADMi</Global>
+<PopulationPct>10</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ResDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentResource_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexResDocDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ResDocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentResource_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_AdmDocCodeDR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexResLocDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ResLocDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentResource_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexResRfStDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"ResRfStDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_CurrentResource_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>+{PAADM_RefStat_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRfStRefDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RfStRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_RefStat_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexSrcAttendRefDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"SrcAttendRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_SourceOfAttend_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexStatRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"StatRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_VisitStatus}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexSubType">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"SubTypeDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Epissubtype_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTempLoc">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"TempLoc"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_TempLoc_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypeDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationPct>20</PopulationPct>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"TypeDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypeDepDateTime">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"TDepDateTime"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DepCode_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_AdmDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PAADM_AdmTime}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypeDischdate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"DisDateT"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_Type}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_DischgDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexUpdateDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"UpdDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_UpdateDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexVisitStatus">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"PAADM_VisitStatus"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_VisitStatus}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexrefExpDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RefExpDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_RefExpiryDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexrefTypeRefDate">
+<Type>index</Type>
+<Condition>1</Condition>
+<Global>^PAADMi</Global>
+<PopulationType>conditional</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RfTpRefDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>+{PAADM_ReferralType}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RefDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexrepDate">
+<Type>index</Type>
+<Global>^PAADMi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>"RepDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PAADM_ReportDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PAADM_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PAADM_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+</Class>
+</Export>

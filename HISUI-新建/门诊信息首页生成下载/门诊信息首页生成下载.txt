@@ -1,0 +1,74 @@
+1.文件生成方法
+/// w ##class(web.HNYZDHCTYL7).ToExcel("测试","MA50^MA11^MA12C^MA13^MA21C^MA15C^MA19C^MA20N^MA20^MA26^MA35^MA51C^MA52^MA53C^MA54^MA02^MB39^MB41^MB42^MB46^MB47C^MB49N^MB50C^MB44C^MB43C^MB54C^MB45C^MB51C^MB52C^MB53^MC51^MC01C^MC02N^MC52x01C^MC52x01N^MC52x02C^MC52x02N^MC52x03C^MC52x03N^MC52x04C^MC52x04N^MC52x05C^MC52x05N^MC52x06C^MC52x06N^MC52x07C^MC52x07N^MC52x08C^MC52x08N^MC52x09C^MC52x09N^MC52x10C^MC52x10N^MC16x01^MC16x02^MC16x03^MC16x04^MC16x05^MC15x01N^MC15x02N^MC15x03N^MC15x04N^MC15x05N^MC14x01C^MC14x02C^MC14x03C^MC14x04C^MC14x05C^MC18x01N^MC18x02N^MC18x03N^MC18x04N^MC18x05N^MC22x01C^MC22x02C^MC22x03C^MC22x04C^MC22x05C^MC23x01^MC23x02^MC23x03^MC23x04^MC23x05^MC17x01^MC17x02^MC17x03^MC17x04^MC17x05^MD01^MD09^MD11^MD12^MD13^MD14^MD15^MD16^MD17^MD18^MD19^MD19x01^MD20^MD20x01^MD20x02^MD21^MD22^MD23^MD23x01^MD24^MD25^MD26^MD27^MD28^MD29^MD30^MD31^MD32^MD33^MD34","EMRservice.HISInterface.OEPInfoPageInterface","GetOutpatientList","2025-01-01","2025-01-01")
+ClassMethod ToExcel(ExcelName, ExcelTitle, ClassName, QueryName, SDate, EDate) As %String
+{
+	Set tmpspl=$c(94)	//^分割符
+	
+	Set CurrDate=$tr($zd(+$h,3),"-","")
+	Set CurrTime=$tr($zt($p($h,",",2),1),":","")
+	Set ExcelName=ExcelName_CurrDate_CurrTime
+	
+	//创建Excel文件
+	Set ExcelDir="/tmp/excel/"  //获取文件目录
+	Set:$l(ExcelName,".")=1 ExcelName=ExcelName_".cvs"  //处理文件名
+	Set File = ##class(%File).%New(ExcelDir_ExcelName)
+	Do File.Open("NWRS")
+	
+	//执行Query
+
+	Set rs=##class(%ResultSet).%New(ClassName_":"_QueryName)
+	s %sc = rs.Execute(SDate,EDate)
+	If $$$ISERR(%sc) Do DisplayError^%apiOBJ(%sc) Quit ""
+	Set Columns=rs.GetColumnCount()
+	
+	//导出表头
+	//Set ExcelTitle="序号^"_ExcelTitle
+	
+	Set ExcelTitle=ExcelTitle
+	Do File.WriteLine($tr(ExcelTitle,tmpspl,$c(9)))	//导出表头
+	
+	//导出内容
+	Set rowIndex=1
+	For {
+		Quit:rs.Next(.%sc)=0
+		If $$$ISOK(%sc) {
+			//Set rowData=rowIndex
+			Set rowData=""
+			For colIndex=1:1:Columns {
+				if rowData=""{
+					//Set rowData=$zcvt("'"_rs.GetData(colIndex),"O","JS")
+					Set rowData=rs.GetData(colIndex)
+					}
+				else{
+					//Set rowData=rowData_$c(9)_$zcvt("'"_rs.GetData(colIndex),"O","JS")	
+					Set rowData=rowData_$c(9)_rs.GetData(colIndex)	
+					}	
+			}
+			Do File.WriteLine(rowData)
+			Set rowIndex=rowIndex+1
+		} Else { Quit }
+	}
+	If $$$ISERR(%sc) Do $system.OBJ.DisplayError(%sc)
+	Do File.Flush()
+	Do File.%Save()
+	Do File.Close()
+	Set File=""
+	Set rs =""
+	//Set url="dhcma.util.download.csp?1=1&act=download&filename="_ExcelName_"&dirname="_ExcelDir_"&2=2"
+	//Quit url
+	
+	q 0
+}
+
+
+2.生成文件方法运行及输出
+w ##class(web.HNYZDHCTYL7).ToExcel("6yue","MA50^MA11^MA12C^MA13^MA21C^MA15C^MA19C^MA20N^MA20^MA26^MA35^MA51C^MA52^MA53C^MA54^MA02^MB39^MB41^MB42^MB46^MB47C^MB49N^MB50C^MB44C^MB43C^MB54C^MB45C^MB51C^MB52C^MB53^MC51^MC01C^MC02N^MC52x01C^MC52x01N^MC52x02C^MC52x02N^MC52x03C^MC52x03N^MC52x04C^MC52x04N^MC52x05C^MC52x05N^MC52x06C^MC52x06N^MC52x07C^MC52x07N^MC52x08C^MC52x08N^MC52x09C^MC52x09N^MC52x10C^MC52x10N^MC16x01^MC16x02^MC16x03^MC16x04^MC16x05^MC15x01N^MC15x02N^MC15x03N^MC15x04N^MC15x05N^MC14x01C^MC14x02C^MC14x03C^MC14x04C^MC14x05C^MC18x01N^MC18x02N^MC18x03N^MC18x04N^MC18x05N^MC22x01C^MC22x02C^MC22x03C^MC22x04C^MC22x05C^MC23x01^MC23x02^MC23x03^MC23x04^MC23x05^MC17x01^MC17x02^MC17x03^MC17x04^MC17x05^MD01^MD09^MD11^MD12^MD13^MD14^MD15^MD16^MD17^MD18^MD19^MD19x01^MD20^MD20x01^MD20x02^MD21^MD22^MD23^MD23x01^MD24^MD25^MD26^MD27^MD28^MD29^MD30^MD31^MD32^MD33^MD34","EMRservice.HISInterface.OEPInfoPageInterface","GetOutpatientList","2026-06-01","2026-06-30")，方法中 ExcelTitle, ClassName, QueryName为固定值，每次修改ExcelName, SDate, EDate三个参数，实现按月生成excel文件到后台
+
+linux系统后台文件：/tmp/excel/6yue20260709083143.cvs，文件命名需要改成年月命名的
+
+
+需求：需要生成一个HISUI界面，能选取取年月，自动在加载对应日期，生成对应时段的数据的csv文件到后台，文件名按年月命名，，界面能显示后台csv文件列表，选中文件能够下载到桌面
+
+
+
+

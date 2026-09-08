@@ -1,0 +1,916 @@
+/**
+ * 模块:     下载医保平台配送商订单（优化版）
+ * 编写日期:  20250616
+ * 编写人:    tanwenbin (original), optimized
+ * 变更说明:
+ *   - Download() 改为调用 ValidateOnly（下载+校验不入库）
+ *   - 新增 RenderValidation / InitValidationGrid（校验结果展示）
+ *   - 新增 ConfirmImport（用户确认后入库）
+ *   - 新增 ForcePassRow / ToggleAll / ResetValidation
+ *   - 新增 InitLogGrid / QueryLogs / ShowLogDetail（历史日志查询）
+ */
+var SessionLoc = session['LOGON.CTLOCID'];
+var HospId = session['LOGON.HOSPID'];
+var SessionUser = session['LOGON.USERID'];
+
+// 校验数据缓存
+var gValidationData = null;
+var gValidationPath = '';
+var gValidationLogId = '';
+var gIsEditMode = false;
+var gValidationRows = [];   // 全量校验行缓存（row 引用，含 rowIndex / _confirmed）
+
+$(function () {
+    InitDict();
+    InitGridInsu();
+    InitGridInsuDetail();
+    InitValidationGrid();
+    InitLogGrid();
+
+    $HUI.linkbutton('#btn-find', {
+        onClick: function () { Query(); }
+    });
+    $HUI.linkbutton('#btn-download', {
+        onClick: function () { Download(); }
+    });
+    $HUI.linkbutton('#btn-clear', {
+        onClick: function () { Clear(); }
+    });
+    $HUI.linkbutton('#btn-confirm', {
+        onClick: function () { ConfirmImport(); }
+    });
+    $HUI.linkbutton('#btn-allpass', {
+        onClick: function () { ToggleAll(true); }
+    });
+    $HUI.linkbutton('#btn-allcancel', {
+        onClick: function () { ToggleAll(false); }
+    });
+    $HUI.linkbutton('#btn-reset', {
+        onClick: function () { ResetValidation(); }
+    });
+    $HUI.linkbutton('#btn-export', {
+        onClick: function () { ExportValidation(); }
+    });
+    $HUI.linkbutton('#btn-save', {
+        onClick: function () { SaveBatch(); }
+    });
+
+    // 初始状态：校验摘要和按钮隐藏
+    $('#validation-summary').hide();
+    $('#validation-btns').hide();
+});
+
+// ============================================================
+// 字典初始化（保留原有逻辑，优化重复初始化问题）
+// ============================================================
+function InitDict() {
+    var retDate = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetDate');
+    $('#StartDate, #EndDate').datebox('setValue', retDate);
+    $('#logStartDate, #logEndDate').datebox('setValue', retDate);
+
+    $HUI.combobox('#cmbHospital', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=CTHospital',
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) { Query(); },
+        onLoadSuccess: function (row) {
+            var sel = '#cmbHospital';
+            $(sel).combobox("setValue", HospId);
+        }
+    });
+
+    $HUI.combobox('#downHospital', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=CTHospital',
+        valueField: 'RowId',
+        textField: 'Description',
+        onLoadSuccess: function (row) {
+            var sel = '#downHospital';
+            $(sel).combobox("setValue", HospId);
+        }
+    });
+
+    $HUI.combobox('#cmbPhaLocId', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=Pharmacy&HospId=' + HospId,
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) { Query(); },
+        onLoadSuccess: function (data) {
+            var sel = '#cmbPhaLocId';
+            // 查找RowId=118的记录并选中
+            var items = $(sel).combobox('getData');
+            for (var i = 0; i < items.length; i++) {
+                if (String(items[i].RowId) === '118') {
+                    $(sel).combobox('select', items[i].RowId);
+                    break;
+                }
+            }
+        }
+    });
+
+    $HUI.combobox('#comVendor', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Unit&QueryName=APCVendor&HospId=' + HospId,
+        valueField: 'RowId',
+        textField: 'Description'
+    });
+
+    $HUI.combobox('#comQueryVendor', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Unit&QueryName=APCVendor&HospId=' + HospId,
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) { Query(); }
+    });
+
+    // 校验日志查询：供应商
+    $HUI.combobox('#logVendor', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Unit&QueryName=APCVendor&HospId=' + HospId,
+        valueField: 'RowId',
+        textField: 'Description'
+    });
+}
+
+// ============================================================
+// 配送订单主列表
+// ============================================================
+function InitGridInsu() {
+    var columns = [[
+        { field: "GridLogSelect", title: "选择", checkbox: true, hidden: true },
+        { field: "ingr", title: 'ingr', hidden: true },
+        { field: "ingrApproveNo", title: '批次流水号', width: 120, halign: 'center', align: 'center' },
+        { field: "vendName", title: '供应商', width: 150, halign: 'center', align: 'center' },
+        { field: "ingrLocDesc", title: '入库科室', width: 70, halign: 'center', align: 'center' },
+        { field: "ingrMovement", title: '配送时间', width: 120, halign: 'center', align: 'center' }
+    ]];
+    DHCPHA_HUI_COM.Grid.Init("gridInsuData", {
+        url: $URL,
+        queryParams: { ClassName: "PHA.FACE.TPS.INSUTE.LogQuery", QueryName: "QueryIngr" },
+        toolbar: "#gridIncItmBar",
+        pageNumber: 1, pageSize: 100, pageList: [100, 300, 500, 1000],
+        fitColumns: false, fit: true, rownumbers: true, columns: columns,
+        onClickRow: function (rowIndex, rowData) {
+            $('#gridInsuDetailData').datagrid('query', { ingrStr: rowData.ingr });
+        },
+        singleSelect: true, selectOnCheck: true, checkOnSelect: true
+    });
+}
+
+// ============================================================
+// 明细数据列表
+// ============================================================
+function InitGridInsuDetail() {
+    var columns = [[
+        { field: "inci", title: 'inci', width: 60, hidden: true },
+        { field: "incilb", title: 'incilb', width: 60, hidden: true },
+        { field: "intr", title: 'intr', width: 60, hidden: true },
+        { field: "inciCode", title: '药品代码', width: 120, halign: 'center', align: 'center' },
+        { field: "inciDesc", title: '药品名称', width: 180, halign: 'center', align: 'left' },
+        { field: 'manf', title: '生产企业', width: 180, halign: 'center', align: 'left' },
+        { field: 'qty', title: '数量', width: 60, halign: 'center', align: 'center' },
+        { field: 'uomDesc', title: '单位', width: 60, halign: 'center', align: 'center' },
+        { field: 'rp', title: '进价', width: 75, sortable: true, align: 'right' },
+        { field: 'rpAmt', title: '进价金额', width: 75, sortable: true, align: 'right' },
+        { field: 'sp', title: '售价', width: 75, sortable: true, align: 'right' },
+        { field: 'spAmt', title: '售价金额', width: 75, sortable: true, align: 'right' },
+        { field: 'batNo', title: '批号', width: 100, sortable: true },
+        { field: 'expDate', title: '效期', width: 100, sortable: true, editor: PHA_GridEditor.DateBox({}) },
+        { field: 'trceCodeNum', title: '追溯码数量', width: 40, align: 'center' }
+    ]];
+    DHCPHA_HUI_COM.Grid.Init("gridInsuDetailData", {
+        url: $URL,
+        queryParams: { ClassName: "PHA.FACE.TPS.INSUTE.LogQuery", QueryName: "QueryIngrDetail" },
+        pageNumber: 1, pageSize: 100, pageList: [100, 300, 500, 1000],
+        fitColumns: false, fit: true, rownumbers: true, columns: columns,
+        singleSelect: false, selectOnCheck: true, checkOnSelect: true
+    });
+}
+
+// ============================================================
+// 新增：初始化校验详情 datagrid
+// ============================================================
+function InitValidationGrid() {
+    var columns = [[
+        { field: 'ck', title: '选择', width: 40, align: 'center',
+            formatter: function (value, row) {
+                return '<input type="checkbox" ' + (row._confirmed ? 'checked="checked"' : '')
+                    + ' onclick="toggleConfirmed(' + row.rowIndex + ', this.checked)" />';
+            }
+        },
+        { field: 'status', title: '状态', width: 40, align: 'center',
+            formatter: function (value, row) {
+                return row.allPass ? '<span style="color:green;font-weight:bold;">OK</span>'
+                    : '<span style="color:red;font-weight:bold;">X</span>';
+            }
+        },
+        { field: 'rowIndex', title: '#', width: 40, align: 'center' },
+        { field: 'errorMsg', title: '校验结果', width: 300,
+            formatter: function (value, row) {
+                if (!value || value === '') { return '<span style="color:green;">OK</span>'; }
+                return '<div style="color:red;white-space:normal;word-wrap:break-word;line-height:1.4;">' + value + '</div>';
+            }
+        },
+        { field: 'insuCode', title: '医保编码', width: 130, align: 'center' },
+        { field: 'insuName', title: '药品名称', width: 140, align: 'left' },
+        { field: 'spec', title: '规格', width: 100, align: 'center' },
+        { field: 'rp', title: '传输进价', width: 70, align: 'right',
+            editor: { type: 'numberbox', options: { precision: 4 } }
+        },
+        { field: 'sysRp', title: '系统进价', width: 70, align: 'right',
+            formatter: function (value, row) {
+                if (!row.allPass && row.validations && row.validations.priceMatch
+                    && !row.validations.priceMatch.pass) {
+                    return '<span style="color:red;">' + (value || '') + '</span>';
+                }
+                return value || '';
+            }
+        },
+        { field: 'qty', title: '数量', width: 60, align: 'center',
+            editor: { type: 'numberbox', options: { precision: 2 } }
+        },
+        { field: 'batNo', title: '批号', width: 80, editor: { type: 'validatebox' } },
+        { field: 'expDate', title: '效期', width: 80, editor: { type: 'datebox' } },
+        { field: 'btcCode', title: '大包装追溯码', width: 120, align: 'center' },
+        { field: 'mtcCode', title: '中包装追溯码', width: 120, align: 'center' },
+        { field: 'stcCode', title: '小包装追溯码', width: 120, align: 'center' },
+        { field: 'manfDesc', title: '生产厂商', width: 140, editor: { type: 'validatebox' } },
+        { field: 'actions', title: '操作', width: 70, align: 'center',
+            formatter: function (value, row) {
+                if (!row.allPass && !row._forcePass) {
+                    if (canForcePass(row)) {
+                        return '<a href="javascript:void(0)" onclick="ForcePassRow('
+                            + row.rowIndex + ')">强制通过</a>';
+                    }
+                    return '<span style="color:#999;">不可强制</span>';
+                }
+                if (row._forcePass) {
+                    return '<span style="color:orange;">已强制</span>';
+                }
+                return '';
+            }
+        }
+    ]];
+
+    $('#gridValidation').datagrid({
+        fitColumns: false,
+        fit: true,
+        rownumbers: false,
+        nowrap: false,
+        singleSelect: false,
+        selectOnCheck: true,
+        checkOnSelect: true,
+        columns: columns,
+        pagination: true,
+        pageNumber: 1,
+        pageSize: 20,
+        pageList: [10, 20, 50, 100],
+        loadFilter: function (data) {
+            if (data.total != null) { return data; }
+            var p = $('#gridValidation').datagrid('getPager');
+            p.pagination({
+                total: data.length,
+                pageSize: 20,
+                onSelectPage: function (pageNumber, pageSize) {
+                    var start = (pageNumber - 1) * pageSize;
+                    $('#gridValidation').datagrid('loadData', {
+                        total: gValidationRows.length,
+                        rows: gValidationRows.slice(start, start + pageSize)
+                    });
+                }
+            });
+            return { total: data.length, rows: data.slice(0, 20) };
+        },
+        detailFormatter: function (rowIndex, rowData) {
+            return renderValidationDetail(rowData);
+        },
+        onExpandRow: function (index, row) {
+            // 子表格已通过 detailFormatter 渲染
+        },
+        rowStyler: function (index, row) {
+            if (row._forcePass) {
+                return 'background-color: #FFF3E0;';
+            }
+            if (row.allPass) {
+                return 'background-color: #E8F5E9;';
+            }
+            return 'background-color: #FFEBEE;';
+        },
+        onBeginEdit: function (rowIndex, rowData) {
+            gIsEditMode = true;
+        },
+        onAfterEdit: function (rowIndex, rowData, changes) {
+            gIsEditMode = false;
+            // 记录 overrides
+            if (!rowData._overrides) { rowData._overrides = {}; }
+            for (var key in changes) {
+                if (changes.hasOwnProperty(key)) {
+                    rowData._overrides[key] = { from: changes[key].old || rowData[key], to: changes[key] };
+                }
+            }
+        }
+    });
+}
+
+// ============================================================
+// 渲染校验详情子表格
+// ============================================================
+function renderValidationDetail(row) {
+    if (!row.validations) { return '<div style="padding:10px;">无校验数据</div>'; }
+    var v = row.validations;
+    var checks = [
+        { name: '医保编码', key: 'inciCode', transKey: 'transInsuCode' },
+        { name: '库存项', key: 'inciMatch', transKey: null, sysLabel: 'sysInciDesc' },
+        { name: '单位', key: 'uomMatch', transKey: 'transUomDesc', sysLabel: 'sysUomDesc' },
+        { name: '包装单位', key: 'packUomMatch', transKey: 'transUomDesc', sysLabel: 'sysPackUomDesc' },
+        { name: '进价', key: 'priceMatch', transKey: 'transRp', sysLabel: 'sysRp' },
+        { name: '生产企业', key: 'manfMatch', transKey: 'transManfDesc', sysLabel: 'sysManfDesc' },
+        { name: '批号/效期', key: 'batExpValid', transKey: 'transExpDate', sysLabel: null }
+    ];
+
+    var html = '<div style="padding:5px 15px;"><table class="hisui-datagrid" style="width:100%;border-collapse:collapse;">';
+    html += '<tr style="background:#f5f5f5;"><th>校验项</th><th>传输值</th><th>系统值</th><th>结果</th><th>备注</th></tr>';
+
+    for (var i = 0; i < checks.length; i++) {
+        var c = checks[i];
+        var item = v[c.key];
+        if (!item) { continue; }
+        var passClass = item.pass ? 'color:green;' : 'color:red;font-weight:bold;';
+        var transVal = '';
+        if (c.transKey && item[c.transKey] !== undefined) {
+            transVal = item[c.transKey];
+        }
+        var sysVal = '';
+        if (c.sysLabel && item[c.sysLabel] !== undefined) {
+            sysVal = item[c.sysLabel];
+        }
+        html += '<tr>';
+        html += '<td style="font-weight:bold;">' + c.name + '</td>';
+        html += '<td>' + (transVal || '—') + '</td>';
+        html += '<td>' + (sysVal || '—') + '</td>';
+        html += '<td style="' + passClass + '">' + (item.pass ? 'OK' : 'X') + '</td>';
+        html += '<td style="color:red;">' + (item.msg || '') + '</td>';
+        html += '</tr>';
+    }
+    html += '</table></div>';
+    return html;
+}
+
+// ============================================================
+// 新增：初始化校验日志查询 datagrid
+// ============================================================
+function InitLogGrid() {
+    var columns = [[
+        { field: 'optDate', title: '日期', width: 90, align: 'center' },
+        { field: 'serialNo', title: '流水号', width: 140, align: 'center' },
+        { field: 'vendorName', title: '供应商', width: 120, align: 'center' },
+        { field: 'totalCnt', title: '总数', width: 50, align: 'center' },
+        { field: 'passCnt', title: '通过', width: 50, align: 'center' },
+        { field: 'userName', title: '操作人', width: 80, align: 'center' }
+    ]];
+
+    $('#gridLog').datagrid({
+        url: $URL,
+        queryParams: { ClassName: "PHA.FACE.TPS.INSUTE.LogQuery", QueryName: "QueryValidationLog" },
+        fitColumns: false, fit: true, rownumbers: true,
+        pageNumber: 1, pageSize: 50, pageList: [50, 100, 200],
+        singleSelect: true, columns: columns,
+        onClickRow: function (rowIndex, rowData) {
+            ShowLogDetail(rowData);
+        }
+    });
+}
+
+// ============================================================
+// 修改：下载 → 调用 ValidateOnly
+// ============================================================
+function Download() {
+    var vendor = $('#comVendor').combobox('getValue') || '';
+    var downLoadLoc = session["LOGON.CTLOCID"];
+    var serialNo = $('#downloadBatchno').val();
+    var IngrFlag = "Y";
+    var hospIdVal = $('#downHospital').combobox('getValue') || '';
+    var UserId = session["LOGON.USERID"];
+
+    if (!serialNo || serialNo === '') {
+        $.messager.alert("温馨提示", "请输入下载批次流水号！", 'info');
+        return;
+    }
+    if (!vendor || vendor === '') {
+        $.messager.alert("温馨提示", "请选择供应商！", 'info');
+        return;
+    }
+
+    $.messager.progress({ title: '请等待', msg: '正在下载并校验数据...' });
+
+    var ret = tkMakeServerCall('PHA.FACE.TPS.INSUTE.Download2', 'ValidateOnly',
+        serialNo, vendor, downLoadLoc, IngrFlag, hospIdVal, UserId);
+
+    $.messager.progress('close');
+
+    try {
+        var result = JSON.parse(ret);
+    } catch (e) {
+        $.messager.alert("温馨提示", "数据解析失败: " + ret, 'error');
+        return;
+    }
+
+    if (result.code < 0) {
+        // 拦截: Excel无数据 或 接口失败
+        $.messager.alert("温馨提示", result.msg, 'error');
+        return;
+    }
+
+    // dataSize > 0: 展示校验界面（全部通过/部分通过/全部未通过 均展示）
+    gValidationData = result;
+    gValidationPath = result.path;
+    gValidationLogId = result.logId;
+
+    RenderValidation(result);
+}
+
+// ============================================================
+// 渲染校验结果
+// ============================================================
+function RenderValidation(data) {
+    // 摘要
+    var summaryHtml = '<div style="padding:5px 10px;border:1px solid #ddd;margin:5px 0;background:#fafafa;">';
+    summaryHtml += '<b>批次流水号:</b> ' + data.serialNo + ' &nbsp; ';
+    summaryHtml += '<b>供应商:</b> ' + (data.vendorName || '') + '<br/>';
+    summaryHtml += '<span>总计: <b>' + data.summary.total + '</b> 条</span> &nbsp; ';
+    summaryHtml += '<span style="color:green;">通过: <b>' + data.summary.pass + '</b> 条</span> &nbsp; ';
+    summaryHtml += '<span style="color:red;">未通过: <b>' + data.summary.fail + '</b> 条</span>';
+    summaryHtml += '</div>';
+    $('#validation-summary').html(summaryHtml).show();
+
+    // 加载数据到校验表格
+    var rows = data.rows;
+    for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        r.sysRp = (r.validations && r.validations.priceMatch) ? r.validations.priceMatch.sysRp : '';
+        r._overrides = {};
+        r._forcePass = false;
+        r._forceReason = '';
+        r._confirmed = !!r.allPass;   // 通过的行默认勾选
+    }
+
+    gValidationRows = rows;
+    $('#gridValidation').datagrid('loadData', rows);
+
+    // 显示校验按钮并更新状态
+    $('#validation-btns').show();
+    updateConfirmBtnState();
+
+    // 切换到校验详情 tab
+    $('#tabs-right').tabs('select', '校验详情');
+}
+
+// ============================================================
+// 更新确认导入按钮状态
+// ============================================================
+function updateConfirmBtnState() {
+    // 仅西药库(118)可入库导入
+    if (SessionLoc !== '118') {
+        $('#btn-confirm').linkbutton('disable');
+        $('#btn-confirm').attr('title', '仅西药库(118)可入库导入');
+        return;
+    }
+    var checkedCount = getConfirmedCount();
+    if (checkedCount === 0) {
+        $('#btn-confirm').linkbutton('disable');
+    } else {
+        $('#btn-confirm').linkbutton('enable');
+    }
+    // 全部通过按钮：无可勾选行时置灰
+    var totalCheckable = getCheckableCount();
+    if (totalCheckable === 0) {
+        $('#btn-allpass').linkbutton('disable');
+    } else {
+        $('#btn-allpass').linkbutton('enable');
+    }
+}
+
+function getCheckableCount() {
+    var count = 0;
+    for (var i = 0; i < gValidationRows.length; i++) {
+        if (gValidationRows[i].allPass || canForcePass(gValidationRows[i])) {
+            count++;
+        }
+    }
+    return count;
+}
+
+function getConfirmedCount() {
+    var count = 0;
+    for (var i = 0; i < gValidationRows.length; i++) {
+        if (gValidationRows[i]._forcePass || gValidationRows[i]._confirmed) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// ============================================================
+// 判断是否可强制通过
+// ============================================================
+function canForcePass(row) {
+    var errMsg = row.errorMsg || '';
+    // 药品在系统中无法匹配时不允许强制通过
+    if (errMsg.indexOf('在系统中无法匹配到药品') !== -1) {
+        return false;
+    }
+    return true;
+}
+
+// ============================================================
+// 勾选切换（checkbox formatter 回调，状态存 row._confirmed，绕开内置跨页状态）
+// ============================================================
+function toggleConfirmed(rowIndex, checked) {
+    for (var i = 0; i < gValidationRows.length; i++) {
+        if (gValidationRows[i].rowIndex === rowIndex) {
+            gValidationRows[i]._confirmed = checked;
+            break;
+        }
+    }
+    updateConfirmBtnState();
+}
+
+// 刷新当前页 checkbox 显示（按 row._confirmed 重渲染 formatter）
+function refreshConfirmDisplay() {
+    var rows = $('#gridValidation').datagrid('getRows');
+    for (var i = 0; i < rows.length; i++) {
+        $('#gridValidation').datagrid('refreshRow', i);
+    }
+}
+
+// ============================================================
+// 强制通过某行
+// ============================================================
+function ForcePassRow(rowIndex) {
+    var row = null;
+    for (var i = 0; i < gValidationRows.length; i++) {
+        if (gValidationRows[i].rowIndex === rowIndex) { row = gValidationRows[i]; break; }
+    }
+    if (!row) { return; }
+    if (!canForcePass(row)) {
+        $.messager.alert('提示', '该药品在系统中无法匹配，不能强制通过，请先维护国家医保目录编码对照！', 'warning');
+        return;
+    }
+    $.messager.prompt('强制通过', '请输入强制通过原因（必填）：', function (reason) {
+        if (!reason || reason === '') {
+            $.messager.alert('提示', '请输入原因！', 'info');
+            return;
+        }
+        row._forcePass = true;
+        row._forceReason = reason;
+        row._confirmed = true;
+        row.allPass = true;  // 标记为通过以改变行颜色
+        var pageIdx = $('#gridValidation').datagrid('getRowIndex', row);
+        if (pageIdx >= 0) { $('#gridValidation').datagrid('refreshRow', pageIdx); }
+        updateConfirmBtnState();
+    });
+}
+
+// ============================================================
+// 确认导入
+// ============================================================
+function ConfirmImport() {
+    if (gIsEditMode) {
+        $.messager.alert("温馨提示", "请先完成当前编辑再导入！", 'info');
+        return;
+    }
+
+    var rows = gValidationRows;
+    if (!rows || rows.length === 0) {
+        $.messager.alert("温馨提示", "无校验数据！", 'info');
+        return;
+    }
+
+    // 结束时编辑
+    $('#gridValidation').datagrid('endEdit', $('#gridValidation').datagrid('getEditingRow'));
+
+    var confirmRows = [];
+    for (var j = 0; j < rows.length; j++) {
+        var r = rows[j];
+        var confirmed = (r._confirmed === true) || (r._forcePass === true);
+        var entry = { rowIndex: r.rowIndex, confirmed: confirmed };
+
+        if (r._forcePass) {
+            entry.forcePass = true;
+            entry.reason = r._forceReason;
+        }
+        if (r._overrides && Object.keys(r._overrides).length > 0) {
+            entry.overrides = r._overrides;
+        }
+        confirmRows.push(entry);
+    }
+
+    // 确认有数据
+    var hasConfirmed = false;
+    for (var k = 0; k < confirmRows.length; k++) {
+        if (confirmRows[k].confirmed) { hasConfirmed = true; break; }
+    }
+    if (!hasConfirmed) {
+        $.messager.alert("温馨提示", "请至少勾选一条数据再导入！", 'info');
+        return;
+    }
+
+    var vendor = $('#comVendor').combobox('getValue') || '';
+    var downLoadLoc = session["LOGON.CTLOCID"];
+    var hospIdVal = $('#downHospital').combobox('getValue') || '';
+    var UserId = session["LOGON.USERID"];
+
+    var payload = {
+        logId: gValidationLogId,
+        path: gValidationPath,
+        LocId: downLoadLoc,
+        vendorId: vendor,
+        IngrFlag: "Y",
+        HospId: hospIdVal,
+        UserId: UserId,
+        rows: confirmRows
+    };
+
+    $.messager.progress({ title: '请等待', msg: '正在入库...' });
+
+    var ret = tkMakeServerCall('PHA.FACE.TPS.INSUTE.Download2', 'ConfirmImport', JSON.stringify(payload));
+
+    $.messager.progress('close');
+
+    try {
+        var result = JSON.parse(ret);
+    } catch (e) {
+        $.messager.alert("导入失败", ret, 'error');
+        return;
+    }
+
+    if (result.code === 0) {
+        var msg = '导入成功！\n';
+        msg += '已导入: ' + result.summary.imported + ' 条\n';
+        msg += '已跳过: ' + result.summary.skipped + ' 条\n';
+        msg += '强制通过: ' + result.summary.forcePassed + ' 条';
+        $.messager.alert("导入结果", msg, 'info');
+
+        // 刷新左侧配送订单列表
+        Query(gValidationLogId);
+        // 清空校验区域
+        ResetValidation();
+    } else {
+        $.messager.alert("导入失败", result.msg, 'error');
+    }
+}
+
+// ============================================================
+// 全部通过 / 全部取消
+// ============================================================
+function ToggleAll(checked) {
+    for (var i = 0; i < gValidationRows.length; i++) {
+        var r = gValidationRows[i];
+        if (checked) {
+            // 全部通过：只勾选可强制通过的行（排除"无法匹配到药品"的行）
+            r._confirmed = (r.allPass || canForcePass(r));
+        } else {
+            r._confirmed = false;
+        }
+    }
+    refreshConfirmDisplay();
+    updateConfirmBtnState();
+}
+
+// ============================================================
+// 重置校验区域
+// ============================================================
+// ============================================================
+// 导出校验数据为 CSV
+// ============================================================
+function ExportValidation() {
+    var rows = gValidationRows;
+    if (!rows || rows.length === 0) {
+        $.messager.alert('提示', '无数据可导出！', 'info');
+        return;
+    }
+    // CSV 表头
+    var headers = [
+        '状态', '序号', '校验结果', '医保编码', '药品名称', '规格',
+        '传输进价', '系统进价', '数量', '批号', '效期',
+        '大包装追溯码', '中包装追溯码', '小包装追溯码', '生产厂商'
+    ];
+    var csv = headers.join(',') + '\n';
+    for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        var status = r.allPass ? '通过' : (r._forcePass ? '强制通过' : '未通过');
+        var errMsg = (r.errorMsg || '').replace(/"/g, '""').replace(/,/g, '，');
+        var cells = [
+            status,
+            r.rowIndex,
+            '"' + errMsg + '"',
+            r.insuCode || '',
+            '"' + (r.insuName || '') + '"',
+            '"' + (r.spec || '') + '"',
+            r.rp || '',
+            r.sysRp || '',
+            r.qty || '',
+            r.batNo || '',
+            r.expDate || '',
+            r.btcCode || '',
+            r.mtcCode || '',
+            r.stcCode || '',
+            '"' + (r.manfDesc || '') + '"'
+        ];
+        csv += cells.join(',') + '\n';
+    }
+    // IE11 兼容下载
+    var BOM = '﻿';
+    csv = BOM + csv;
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var fileName = '校验数据_' + getNowStr() + '.csv';
+    if (window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveOrOpenBlob(blob, fileName);
+    } else {
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// ============================================================
+// 保存批次数据到 User.DHCInsuDelivery 表
+// ============================================================
+function SaveBatch() {
+    var rows = gValidationRows;
+    if (!rows || rows.length === 0) {
+        $.messager.alert('提示', '无数据可保存，请先下载！', 'info');
+        return;
+    }
+
+    var serialNo = (gValidationData && gValidationData.serialNo) || $('#downloadBatchno').val() || '';
+    if (!serialNo) {
+        $.messager.alert('提示', '批次流水号为空，无法保存！', 'info');
+        return;
+    }
+
+    var batch = {
+        serialNo: serialNo,
+        vendorId: $('#comVendor').combobox('getValue') || '',
+        vendorName: (gValidationData && gValidationData.vendorName) || '',
+        hospId: $('#downHospital').combobox('getValue') || '',
+        locId: session["LOGON.CTLOCID"],
+        userId: session["LOGON.USERID"],
+        ingrFlag: 'Y'
+    };
+
+    // 只取明细字段，避免序列化 validations 等大对象
+    var cleanRows = [];
+    for (var i = 0; i < rows.length; i++) {
+        var r = rows[i];
+        cleanRows.push({
+            rowIndex: r.rowIndex,
+            downloadMovement: r.downloadMovement,
+            userName: r.userName,
+            ratio: r.ratio,
+            insuCode: r.insuCode,
+            insuName: r.insuName,
+            spec: r.spec,
+            rp: r.rp,
+            uomDesc: r.uomDesc,
+            manfDesc: r.manfDesc,
+            batNo: r.batNo,
+            expDate: r.expDate,
+            qty: r.qty,
+            btcCode: r.btcCode,
+            mtcCode: r.mtcCode,
+            stcCode: r.stcCode,
+            recvOrgCode: r.recvOrgCode,
+            recvOrgName: r.recvOrgName,
+            uploadStatus: r.uploadStatus,
+            uploadResult: r.uploadResult,
+            goodsName: r.goodsName,
+            dosageForm: r.dosageForm,
+            minPackQty: r.minPackQty,
+            minPrepUnit: r.minPrepUnit,
+            approvalNo: r.approvalNo,
+            produceDate: r.produceDate,
+            barcode: r.barcode,
+            rxFlag: r.rxFlag,
+            remark: r.remark
+        });
+    }
+
+    var payload = { batch: batch, rows: cleanRows };
+
+    $.messager.progress({ title: '请等待', msg: '正在保存...' });
+    var ret = tkMakeServerCall('PHA.FACE.TPS.INSUTE.Download2', 'SaveBatchData', JSON.stringify(payload));
+    $.messager.progress('close');
+
+    try {
+        var result = JSON.parse(ret);
+    } catch (e) {
+        $.messager.alert('保存失败', ret, 'error');
+        return;
+    }
+
+    if (result.code === 0) {
+        $.messager.alert('保存成功', '已保存 ' + result.savedCnt + ' 条数据！', 'info');
+    } else {
+        $.messager.alert('保存失败', result.msg, 'error');
+    }
+}
+
+function getNowStr() {
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    var h = d.getHours();
+    var min = d.getMinutes();
+    var s = d.getSeconds();
+    return y + (m < 10 ? '0' : '') + m + (day < 10 ? '0' : '') + day
+        + '_' + (h < 10 ? '0' : '') + h + (min < 10 ? '0' : '') + min + (s < 10 ? '0' : '') + s;
+}
+
+function ResetValidation() {
+    gValidationData = null;
+    gValidationPath = '';
+    gValidationLogId = '';
+    gValidationRows = [];
+    $('#gridValidation').datagrid('loadData', []);
+    $('#validation-summary').hide().html('');
+    $('#validation-btns').hide();
+}
+
+// ============================================================
+// 查询
+// ============================================================
+function Query(ingr) {
+    if (ingr == null) { ingr = ""; }
+    var startDate = $('#StartDate').datebox('getValue');
+    var endDate = $('#EndDate').datebox('getValue');
+    var batchNo = $('#txtbatchno').val();
+    var vendor = $('#comQueryVendor').combobox('getValue') || '';
+    var phaLocId = $('#cmbPhaLocId').combobox('getValue') || '';
+    var hospId = $('#cmbHospital').combobox('getValue') || '';
+    if ((startDate == "") && (endDate == "")) {
+        $.messager.alert("温馨提示", "日期范围为必填项！", 'info');
+        return;
+    }
+    if (((vendor == "") && (batchNo == "") && (phaLocId == ""))) {
+        $.messager.alert("温馨提示", "供应商,或者配送流水,或者药房不能全为空！", 'info');
+        return;
+    }
+    var params = startDate + '^' + endDate + '^' + batchNo + '^' + vendor + '^' + phaLocId
+        + '^' + hospId + '^' + ingr;
+    $('#gridInsuData').datagrid('query', { inputStr: params });
+}
+
+// ============================================================
+// 清屏
+// ============================================================
+function Clear() {
+    var retDate = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetDate');
+    $('#StartDate, #EndDate').datebox('setValue', retDate);
+    $('#cmbHospital').combobox('setValue', HospId);
+    $('#cmbPhaLocId').combobox('setValue', session["LOGON.CTLOCID"]);
+    $('#txtbatchno').val('');
+    $('#comQueryVendor').combobox('setValue', '');
+    $('#downHospital').combobox('setValue', HospId);
+    $('#comVendor').combobox('setValue', '');
+    $('#downloadBatchno').val('');
+    ResetValidation();
+}
+
+// ============================================================
+// 校验日志查询
+// ============================================================
+function QueryLogs() {
+    var startDate = $('#logStartDate').datebox('getValue') || '';
+    var endDate = $('#logEndDate').datebox('getValue') || '';
+    var serialNo = $('#logSerialNo').val() || '';
+    var vendor = $('#logVendor').combobox('getValue') || '';
+    $('#gridLog').datagrid('query', {
+        StartDate: startDate,
+        EndDate: endDate,
+        SerialNo: serialNo,
+        VendorId: vendor
+    });
+}
+
+// ============================================================
+// 查看历史日志详情
+// ============================================================
+function ShowLogDetail(rowData) {
+    var logId = rowData.RowId;
+    var value = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetLogInText', logId);
+    try {
+        var ret = JSON.stringify(JSON.parse(value), null, 4);
+    } catch (ex) {
+        var ret = value;
+    }
+    $("#info").html("<pre id='copyInfo'>" + ret + "</pre>");
+    $('#InfoWin').dialog("setTitle", "校验日志详情");
+    $('#InfoWin').dialog("open");
+}

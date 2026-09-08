@@ -130,8 +130,17 @@ async def do_one_week(page, week_date, desc):
     }""")
 
     if not btns['creat'] and not btns['reCreat']:
-        print("  无法确定状态，跳过")
-        return 'skip'
+        # 可能已有空记录被提交,检查是否还有 BtnSubmit 可见且有实际内容
+        if btns['submit']:
+            rows = await wait_for_datagrid(page)
+            if rows == 0:
+                print("  已有空记录,无数据行,跳过(避免重复提交空内容)")
+                return 'skip'
+            # 有数据行,继续提交
+            print(f"  已有记录({rows}行),直接进入提交流程")
+        else:
+            print("  无法确定状态(所有按钮不可见),跳过")
+            return 'skip'
 
     # ==== Step 1: 生成周报 ====
     if btns['creat']:
@@ -152,14 +161,53 @@ async def do_one_week(page, week_date, desc):
             if "已生成" in str(msg) or "exist" in str(msg).lower():
                 print("  已生成过")
                 await dismiss_dialog(page)
-                # Still try to submit
             else:
-                print(f"  生成异常: {msg}")
-                return 'fail'
+                print("  ERROR: No weekly report content generated!")
+                print("  Please submit daily reports first on 协同网.")
+                print("  Skipping this week.")
+                return 'skip'
     else:
         print("  周报已生成")
         rows = await wait_for_datagrid(page)
         print(f"  数据行数: {rows}")
+        if rows == 0:
+            print("  WARNING: Existing weekly report has no data rows.")
+            print("  Please submit daily reports first on 协同网.")
+            return 'skip'
+
+    # ==== 提交前校验: 内容非空 ====
+    content_check = await page.evaluate("""() => {
+        // 检查"本周已完成工作"和"下周工作计划"文本框是否有实际内容
+        function getText(id) {
+            var el = document.getElementById(id);
+            if (!el) return '';
+            // easyUI textbox: 实际值在隐藏的 input 或 textarea 中
+            var input = el.querySelector('input,textarea');
+            if (input) return (input.value || '').trim();
+            return (el.value || el.textContent || '').trim();
+        }
+        var done = getText('txtThisContent');
+        var plan = getText('txtNextContent');
+        // 也检查可能的内嵌 iframe
+        var iframes = document.querySelectorAll('iframe');
+        for (var i = 0; i < iframes.length; i++) {
+            try {
+                var doc = iframes[i].contentDocument || iframes[i].contentWindow.document;
+                var d = doc.getElementById('txtThisContent');
+                var p = doc.getElementById('txtNextContent');
+                if (d && (d.value || d.textContent || '').trim()) done = (d.value || d.textContent || '').trim();
+                if (p && (p.value || p.textContent || '').trim()) plan = (p.value || p.textContent || '').trim();
+            } catch(e) {}
+        }
+        return {done: done, plan: plan};
+    }""")
+    done_text = (content_check.get('done') or '').strip()
+    plan_text = (content_check.get('plan') or '').strip()
+    print(f"  内容校验: 已完成={len(done_text)}字, 计划={len(plan_text)}字")
+    if not done_text and not plan_text:
+        print("  SKIP: 周报内容为空,避免提交空记录")
+        print("  请先在协同网提交日报,或手动填写周报内容")
+        return 'skip'
 
     # ==== Step 2: 提交周报 (4步: 主页BtnSubmit→审批弹窗BtnSubmit→确认→完成) ====
     if btns['submit'] or btns['reCreat']:
@@ -276,6 +324,22 @@ async def do_one_week(page, week_date, desc):
         return 'fail'
 
 
+def get_month_weeks(year, month):
+    """获取指定年月的所有周一日期"""
+    first_day = date(year, month, 1)
+    if month == 12:
+        last_day = date(year + 1, 1, 1) - timedelta(days=1)
+    else:
+        last_day = date(year, month + 1, 1) - timedelta(days=1)
+    weeks = []
+    d = first_day
+    while d <= last_day:
+        if d.weekday() == 0:
+            weeks.append(d.isoformat())
+        d += timedelta(days=1)
+    return weeks
+
+
 def get_last_month_weeks():
     """获取上月所有周的周一日期"""
     today = date.today()
@@ -319,13 +383,30 @@ async def main():
     print("Weekly Report Backfill")
     print("=" * 40)
 
-    # 支持 --year 参数指定年份
+    # 参数: --date YYYY-MM-DD | --month YYYY-MM | --year YYYY | 默认上月
     args = _sys.argv[1:] if len(_sys.argv) > 1 else []
-    if '--year' in args:
+    if '--date' in args:
+        idx = args.index('--date')
+        d = args[idx + 1] if idx + 1 < len(args) else ""
+        dt = date.fromisoformat(d)
+        monday = dt - timedelta(days=dt.weekday())
+        weeks = [monday.isoformat()]
+        print(f"Single week: {weeks[0]}")
+    elif '--year' in args:
         idx = args.index('--year')
         year = int(args[idx + 1]) if idx + 1 < len(args) else date.today().year
         weeks = get_year_weeks(year)
         print(f"Year {year} weeks ({len(weeks)}): {weeks[0]} ~ {weeks[-1]}")
+    elif '--month' in args:
+        idx = args.index('--month')
+        month_str = args[idx + 1] if idx + 1 < len(args) else ""
+        parts = month_str.split('-')
+        if len(parts) == 2:
+            y, m = int(parts[0]), int(parts[1])
+        else:
+            y, m = date.today().year, int(parts[0])
+        weeks = get_month_weeks(y, m)
+        print(f"Month {y}-{m:02d} weeks ({len(weeks)}): {weeks[0] if weeks else 'none'} ~ {weeks[-1] if weeks else 'none'}")
     else:
         weeks = get_last_month_weeks()
         print(f"Last month weeks ({len(weeks)}): {weeks[0]} ~ {weeks[-1]}")

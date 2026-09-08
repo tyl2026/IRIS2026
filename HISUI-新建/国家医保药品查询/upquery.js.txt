@@ -1,0 +1,966 @@
+/**
+ * 模块:     国家医保上报数据查询
+ * 编写日期: 2024-08-27
+ * 编写人:   WangYaJun
+ */
+var hospId = session['LOGON.HOSPID'];
+var userId = session['LOGON.USERID'];
+var defDateStr = tkMakeServerCall("PHA.FACE.TPS.INSUTE.UpQuery", "GetDefDate");
+$(function () {
+    InitDict();
+    InitGrid3508();
+    InitGrid3509();
+    InitGrid3510();
+    InitGrid3511();
+    InitGrid3512();
+    InitGrid3513();
+    InitEvent();
+});
+///初始化表单
+function InitDict() {
+    SetDefDate();
+    //药品名称lookup
+    $("#cmbgridInci").lookup({
+        mode: 'remote',
+        url: $URL,
+        //width:300,
+        panelWidth: 500,
+        pagination: true,
+        queryParams: {
+            ClassName: "PHA.STORE.Drug",
+            QueryName: "INCItm"
+        },
+        onBeforeLoad: function (param) {
+            param.QText = param.q;
+        },
+        onSelect: function (rowIndex, rowData) {},
+        panelWidth: 400,
+        idField: "inciId",
+        textField: "inciCode",
+        columns: [
+            [{
+                    field: "inciCode",
+                    title: "代码",
+                    width: 100
+                }, {
+                    field: "inciDesc",
+                    title: "名称",
+                    width: 250
+                }, {
+                    field: "inciId",
+                    title: "inciId",
+                    width: 50,
+                    hidden: true
+                }
+            ]
+        ]
+    });
+    //医院
+    $HUI.combobox('#cmbHospital', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=CTHospital',
+        width: 200,
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) {},
+        onLoadSuccess: function (row) {
+            $(this).combobox("setValue", hospId);
+        }
+    });
+
+    // 医保对接方
+    $HUI.combobox('#cmbTypeManf', {
+        panelHeight: 'auto',
+        data: [{
+                value: '1',
+                text: '国家医保'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onLoadSuccess: function (row) {
+            $(this).combobox('setValue', '1');
+        },
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+}
+//事件初始化
+function InitEvent() {
+    $("#btnFind").on("click", Query);
+    $("#btnClear").on("click", Clear);
+}
+//初始化表格
+function InitGrid3508() {
+    var columns = [
+        [{
+                field: "expyEnd",
+                title: '有效期止',
+                align: 'center'
+            }, {
+                field: "medListCodg",
+                title: '医疗目录编码',
+                align: 'center'
+            }, {
+                field: "poolareaNo",
+                title: '统筹区编号',
+                align: 'center'
+            }, {
+                field: "crteOptinsNo",
+                title: '创建机构编号',
+                align: 'center'
+            }, {
+                field: "invCnt",
+                title: '库存数量',
+                align: 'center'
+            }, {
+                field: "medinsListCodg",
+                title: '医药机构目录编码',
+                align: 'center'
+            }, {
+                field: "memo",
+                title: '备注',
+                align: 'center'
+            }, {
+                field: "updtTime",
+                title: '数据更新时间',
+                align: 'center'
+            }, {
+                field: "manuDate",
+                title: '生产日期',
+                align: 'center'
+            }, {
+                field: "opterName",
+                title: '经办人姓名',
+                align: 'center'
+            }, {
+                field: "rid",
+                title: '数据唯一记录号',
+                align: 'center'
+            }, {
+                field: "crteTime",
+                title: '数据创建时间',
+                align: 'center'
+            }, {
+                field: "invdate",
+                title: '库存日期',
+                align: 'center'
+            }, {
+                field: "valiFlag",
+                title: '有效标志',
+                align: 'center'
+            }, {
+                field: "fixmedinsCode",
+                title: '定点医药机构编号',
+                align: 'center'
+            }, {
+                field: "rxFlag",
+                title: '处方药标志',
+                align: 'center'
+            }, {
+                field: "listSpItemFlag",
+                title: '目录特项标志',
+                align: 'center'
+            }, {
+                field: "fixmedinsBchno",
+                title: '定点医药机构批次流水号',
+                align: 'center'
+            }, {
+                field: "optTime",
+                title: '经办时间',
+                align: 'center'
+            }, {
+                field: "opterId",
+                title: '经办人ID',
+                align: 'center'
+            }, {
+                field: "manuLotnum",
+                title: '生产批号',
+                align: 'center'
+            }, {
+                field: "medinsListName",
+                title: '医药机构目录名称',
+                align: 'center'
+            }, {
+                field: "crterName",
+                title: '创建人姓名',
+                align: 'center'
+            }, {
+                field: "medinsProdInvNo",
+                title: '定点医药机构商品库存流水号',
+                align: 'center'
+            }, {
+                field: "crterId",
+                title: '创建人ID',
+                align: 'center'
+            }, {
+                field: "optinsNo",
+                title: '经办机构编号',
+                align: 'center'
+            }, {
+                field: "trdnFlag",
+                title: '拆零标志',
+                align: 'center'
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3508").datagrid(dataGridOption);
+}
+//初始化表格
+function InitGrid3509() {
+    var columns = [
+        [{
+                field: "invChgTime",
+                title: '库存变更时间',
+                align: 'center'
+            }, {
+                field: "medListCodg",
+                title: '医疗目录编码',
+                align: 'center'
+            }, {
+                field: "poolareaNo",
+                title: '统筹区编号',
+                align: 'center'
+            }, {
+                field: "invChgOpterName",
+                title: '库存变更经办人姓名',
+                align: 'center'
+            }, {
+                field: "crteOptinsNo",
+                title: '创建机构编号',
+                align: 'center'
+            }, {
+                field: "medinsListCodg",
+                title: '医药机构目录编码',
+                align: 'center'
+            }, {
+                field: "memo",
+                title: '备注',
+                align: 'center'
+            }, {
+                field: "updtTime",
+                title: '数据更新时间',
+                align: 'center'
+            }, {
+                field: "opterName",
+                title: '经办人姓名',
+                align: 'center'
+            }, {
+                field: "rid",
+                title: '数据唯一记录号',
+                align: 'center'
+            }, {
+                field: "crteTime",
+                title: '数据创建时间',
+                align: 'center'
+            }, {
+                field: "valiFlag",
+                title: '有效标志',
+                align: 'center'
+            }, {
+                field: "fixmedinsCode",
+                title: '定点医药机构编号',
+                align: 'center'
+            }, {
+                field: "invChgType",
+                title: '库存变更类型',
+                align: 'center'
+            }, {
+                field: "rxFlag",
+                title: '处方药标志',
+                align: 'center'
+            }, {
+                field: "medinsProdInvChgNo",
+                title: '定点医药机构商品库存变更流水号',
+                align: 'center'
+            }, {
+                field: "listSpItemFlag",
+                title: '目录特项标志',
+                align: 'center'
+            }, {
+                field: "fixmedinsBchno",
+                title: '定点医药机构批次流水号',
+                align: 'center'
+            }, {
+                field: "optTime",
+                title: '经办时间',
+                align: 'center'
+            }, {
+                field: "opterId",
+                title: '经办人ID',
+                align: 'center'
+            }, {
+                field: "medinsListName",
+                title: '医药机构目录名称',
+                align: 'center'
+            }, {
+                field: "cnt",
+                title: '数量',
+                align: 'center'
+            }, {
+                field: "pric",
+                title: '单价',
+                align: 'center'
+            }, {
+                field: "crterName",
+                title: '创建人姓名',
+                align: 'center'
+            }, {
+                field: "crterId",
+                title: '创建人ID',
+                align: 'center'
+            }, {
+                field: "optinsNo",
+                title: '经办机构编号',
+                align: 'center'
+            }, {
+                field: "trdnFlag",
+                title: '拆零标志',
+                align: 'center'
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3509").datagrid(dataGridOption);
+}
+//初始化表格
+function InitGrid3510() {
+    var columns = [
+        [{
+                field: "expyEnd",
+                title: "有效期止",
+                align: "center"
+            }, {
+                field: "medListCodg",
+                title: "医疗目录编码",
+                align: "center"
+            }, {
+                field: "poolareaNo",
+                title: "统筹区编号",
+                align: "center"
+            }, {
+                field: "crteOptinsNo",
+                title: "创建机构编号",
+                align: "center"
+            }, {
+                field: "medinsListCodg",
+                title: "医药机构目录编码",
+                align: "center"
+            }, {
+                field: "memo",
+                title: "备注",
+                align: "center"
+            }, {
+                field: "prodRetnFlag",
+                title: "商品退货标志",
+                align: "center"
+            }, {
+                field: "updtTime",
+                title: "数据更新时间",
+                align: "center"
+            }, {
+                field: "manuDate",
+                title: "生产日期",
+                align: "center"
+            }, {
+                field: "opterName",
+                title: "经办人姓名",
+                align: "center"
+            }, {
+                field: "rid",
+                title: "数据唯一记录号",
+                align: "center"
+            }, {
+                field: "crteTime",
+                title: "数据创建时间",
+                align: "center"
+            }, {
+                field: "prodentpName",
+                title: "生产企业名称",
+                align: "center"
+            }, {
+                field: "valiFlag",
+                title: "有效标志",
+                align: "center"
+            }, {
+                field: "aprvno",
+                title: "批准文号",
+                align: "center"
+            }, {
+                field: "fixmedinsCode",
+                title: "定点医药机构编号",
+                align: "center"
+            }, {
+                field: "medinsProdPurcNo",
+                title: "定点医药机构商品采购流水号",
+                align: "center"
+            }, {
+                field: "rxFlag",
+                title: "处方药标志",
+                align: "center"
+            }, {
+                field: "listSpItemFlag",
+                title: "目录特项标志",
+                align: "center"
+            }, {
+                field: "purcInvoNo",
+                title: "采购发票号",
+                align: "center"
+            }, {
+                field: "fixmedinsBchno",
+                title: "定点医药机构批次流水号",
+                align: "center"
+            }, {
+                field: "optTime",
+                title: "经办时间",
+                align: "center"
+            }, {
+                field: "opterId",
+                title: "经办人ID",
+                align: "center"
+            }, {
+                field: "purcRetnStoinTime",
+                title: "采购/退货入库时间",
+                align: "center"
+            }, {
+                field: "manuLotnum",
+                title: "生产批号",
+                align: "center"
+            }, {
+                field: "medinsListName",
+                title: "医药机构目录名称",
+                align: "center"
+            }, {
+                field: "splerName",
+                title: "供货商名称",
+                align: "center"
+            }, {
+                field: "prodGeayFlag",
+                title: "商品赠送标志",
+                align: "center"
+            }, {
+                field: "purcRetnOpterName",
+                title: "采购/退货经办人姓名",
+                align: "center"
+            }, {
+                field: "purcInvoCodg",
+                title: "采购发票编码",
+                align: "center"
+            }, {
+                field: "crterName",
+                title: "创建人姓名",
+                align: "center"
+            }, {
+                field: "crterId",
+                title: "创建人ID",
+                align: "center"
+            }, {
+                field: "optinsNo",
+                title: "经办机构编号",
+                align: "center"
+            }, {
+                field: "splerPmtno",
+                title: "供应商许可证号",
+                align: "center"
+            }, {
+                field: "finlTrnsPric",
+                title: "最终成交单价",
+                align: "center"
+            }, {
+                field: "purcRetnCnt",
+                title: "采购/退货数量",
+                align: "center"
+            }, {
+                field: "dyntNo",
+                title: "随货单号",
+                align: "center"
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3510").datagrid(dataGridOption);
+}
+//初始化表格
+function InitGrid3511() {
+    var columns = [
+        [{
+                field: "expyEnd",
+                title: "有效期止",
+                align: "center"
+            }, {
+                field: "pharCertType",
+                title: "药师证件类型",
+                align: "center"
+            }, {
+                field: "selRetnOpterName",
+                title: "销售/退货经办人姓名",
+                align: "center"
+            }, {
+                field: "medListCodg",
+                title: "医疗目录编码",
+                align: "center"
+            }, {
+                field: "poolareaNo",
+                title: "统筹区编号",
+                align: "center"
+            }, {
+                field: "setlId",
+                title: "结算ID",
+                align: "center"
+            }, {
+                field: "crteOptinsNo",
+                title: "创建机构编号",
+                align: "center"
+            }, {
+                field: "medinsListCodg",
+                title: "医药机构目录编码",
+                align: "center"
+            }, {
+                field: "memo",
+                title: "备注",
+                align: "center"
+            }, {
+                field: "updtTime",
+                title: "数据更新时间",
+                align: "center"
+            }, {
+                field: "hiFeesetlType",
+                title: "医保费用结算类型",
+                align: "center"
+            }, {
+                field: "manuDate",
+                title: "生产日期",
+                align: "center"
+            }, {
+                field: "opterName",
+                title: "经办人姓名",
+                align: "center"
+            }, {
+                field: "psnNo",
+                title: "人员编号",
+                align: "center"
+            }, {
+                field: "rid",
+                title: "数据唯一记录号",
+                align: "center"
+            }, {
+                field: "crteTime",
+                title: "数据创建时间",
+                align: "center"
+            }, {
+                field: "pharCertno",
+                title: "药师证件号码",
+                align: "center"
+            }, {
+                field: "valiFlag",
+                title: "有效标志",
+                align: "center"
+            }, {
+                field: "certno",
+                title: "证件号码",
+                align: "center"
+            }, {
+                field: "fixmedinsCode",
+                title: "定点医药机构编号",
+                align: "center"
+            }, {
+                field: "rxFlag",
+                title: "处方药标志",
+                align: "center"
+            }, {
+                field: "pharPracCertNo",
+                title: "药师执业资格证号",
+                align: "center"
+            }, {
+                field: "listSpItemFlag",
+                title: "目录特项标志",
+                align: "center"
+            }, {
+                field: "fixmedinsBchno",
+                title: "定点医药机构批次流水号",
+                align: "center"
+            }, {
+                field: "optTime",
+                title: "经办时间",
+                align: "center"
+            }, {
+                field: "psnName",
+                title: "人员姓名",
+                align: "center"
+            }, {
+                field: "elecSupnCodg",
+                title: "电子监管编码",
+                align: "center"
+            }, {
+                field: "bilgDrName",
+                title: "开单医师姓名",
+                align: "center"
+            }, {
+                field: "opterId",
+                title: "经办人ID",
+                align: "center"
+            }, {
+                field: "manuLotnum",
+                title: "生产批号",
+                align: "center"
+            }, {
+                field: "medinsListName",
+                title: "医药机构目录名称",
+                align: "center"
+            }, {
+                field: "psnCertType",
+                title: "人员证件类型",
+                align: "center"
+            }, {
+                field: "selRetnTime",
+                title: "销售/退货时间",
+                align: "center"
+            }, {
+                field: "selRetnCnt",
+                title: "销售/退货数量",
+                align: "center"
+            }, {
+                field: "crterName",
+                title: "创建人姓名",
+                align: "center"
+            }, {
+                field: "pharName",
+                title: "药师姓名",
+                align: "center"
+            }, {
+                field: "prscDrCertType",
+                title: "开单医师证件类型",
+                align: "center"
+            }, {
+                field: "crterId",
+                title: "创建人ID",
+                align: "center"
+            }, {
+                field: "prscDrCertno",
+                title: "开单医师证件号码",
+                align: "center"
+            }, {
+                field: "optinsNo",
+                title: "经办机构编号",
+                align: "center"
+            }, {
+                field: "trdnFlag",
+                title: "拆零标志",
+                align: "center"
+            }, {
+                field: "finlTrnsPric",
+                title: "最终成交单价",
+                align: "center"
+            }, {
+                field: "medinsProdSelNo",
+                title: "定点医药机构商品销售流水号",
+                align: "center"
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3511").datagrid(dataGridOption);
+}
+//初始化表格
+function InitGrid3512() {
+    var columns = [
+        [{
+                field: "fixmedinsCode",
+                title: "定点医药机构编号",
+                align: "center"
+            }, {
+                field: "medinsListCodg",
+                title: "医药机构目录编码",
+                align: "center"
+            }, {
+                field: "fixmedinsBchno",
+                title: "定点医药机构批次流水号",
+                align: "center"
+            }, {
+                field: "medinsListCodg",
+                title: "医药机构目录编码",
+                align: "center"
+            }, {
+                field: "medListCodg",
+                title: "医疗目录编码",
+                align: "center"
+            }, {
+                field: "medinsListName",
+                title: "医药机构目录名称",
+                align: "center"
+            }, {
+                field: "drugTracCodg",
+                title: "药品追溯码",
+                align: "center"
+            }, {
+                field: "valiFlag",
+                title: "有效标志",
+                align: "center"
+            }, {
+                field: "opterId",
+                title: "经办人ID",
+                align: "center"
+            }, {
+                field: "crterName",
+                title: "创建人姓名",
+                align: "center"
+            }, {
+                field: "crterId",
+                title: "创建人ID",
+                align: "center"
+            }, {
+                field: "optinsNo",
+                title: "经办机构编号",
+                align: "center"
+            }, {
+                field: "fixBlngAdmdvs",
+                title: "定点归属医保区划",
+                align: "center"
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3512").datagrid(dataGridOption);
+}
+//初始化表格
+function InitGrid3513() {
+    var columns = [
+        [{
+                field: "fixmedinsCode",
+                title: "定点医药机构编号",
+                align: "center"
+            }, {
+                field: "medListCodg",
+                title: "医疗目录编码",
+                align: "center"
+            }, {
+                field: "medinsListCodg",
+                title: "医药机构目录编码",
+                align: "center"
+            }, {
+                field: "medinsListName",
+                title: "医药机构目录名称",
+                align: "center"
+            }, {
+                field: "fixmedinsBchno",
+                title: "定点医药机构批次流水号",
+                align: "center"
+            }, {
+                field: "mdtrtId",
+                title: "就诊ID",
+                align: "center"
+            }, {
+                field: "mdtrtSetlType",
+                title: "就诊结算类型",
+                align: "center"
+            }, {
+                field: "bkkpSn",
+                title: "记账流水号",
+                align: "center"
+            }, {
+                field: "drugTracCodg",
+                title: "药品追溯码",
+                align: "center"
+            }, {
+                field: "psnNo",
+                title: "人员编号",
+                align: "center"
+            }, {
+                field: "psnCertType",
+                title: "人员证件类型",
+                align: "center"
+            }, {
+                field: "certno",
+                title: "证件号码",
+                align: "center"
+            }, {
+                field: "psnName",
+                title: "人员姓名",
+                align: "center"
+            }, {
+                field: "memo",
+                title: "备注",
+                align: "center"
+            }, {
+                field: "trdnFlag",
+                title: "拆零标志",
+                align: "center"
+            }, {
+                field: "updtTime",
+                title: "数据更新时间",
+                align: "center"
+            }, {
+                field: "opterName",
+                title: "经办人姓名",
+                align: "center"
+            }, {
+                field: "rid",
+                title: "数据唯一记录号",
+                align: "center"
+            }, {
+                field: "crteTime",
+                title: "数据创建时间",
+                align: "center"
+            }, {
+                field: "optTime",
+                title: "经办时间",
+                align: "center"
+            }, {
+                field: "opterId",
+                title: "经办人ID",
+                align: "center"
+            }, {
+                field: "crterName",
+                title: "创建人姓名",
+                align: "center"
+            }, {
+                field: "crterId",
+                title: "创建人ID",
+                align: "center"
+            }, {
+                field: "optinsNo",
+                title: "经办机构编号",
+                align: "center"
+            }, {
+                field: "fixBlngAdmdvs",
+                title: "定点归属医保区划",
+                align: "center"
+            }
+        ]
+    ]
+    var dataGridOption = {
+        url: "",
+        height: $(window).height() - 150,
+        rownumbers: false,
+        columns: columns,
+        singleSelect: true,
+        striped: false,
+        pagination: false
+    };
+    $("#gridInsu3513").datagrid(dataGridOption);
+}
+///查询发药汇总数据
+function Query() {
+    var selTabs = $('#mainTabs').tabs('getSelected');
+    var tabId = selTabs.attr('id');
+    var inciCode = $.trim($('#cmbgridInci').lookup('getText')) || '';
+    var batNo = $.trim($("#batNo").val());
+    if ((inciCode == "") && (batNo == "")) {
+        $.messager.alert("失败", "批次流水号和药品代码不能同时为空！", "warning");
+        return;
+    }
+    var startDate = $("#startDate").datebox("getValue");
+    if (startDate == "") {
+        $.messager.alert("失败", "开始日期不能为空！", "warning");
+        return;
+    }
+    var endDate = $("#endDate").datebox("getValue");
+    if (endDate == "") {
+        $.messager.alert("失败", "截止日期不能为空！", "warning");
+        return;
+    }
+    var selHospId = $("#cmbHospital").combobox("getValue");
+    if (selHospId == "") {
+        $.messager.alert("失败", "院区不能为空！", "warning");
+        return;
+    }
+    var typeManf = $('#cmbTypeManf').combobox('getValue');
+    var input = selHospId + "^" + tabId + "^" + userId + "^" + inciCode + "^" + batNo + "^" + startDate + "^" + endDate + "^" + typeManf;
+    $("#gridInsu" + tabId).datagrid("loadData", []);
+    $("#gridInsu" + tabId).datagrid("loading");
+    $("#gridInsu" + tabId).datagrid("options").url = $URL;
+    $m({
+        ClassName: "PHA.FACE.TPS.INSUTE.UpQuery",
+        MethodName: "GetFaceData",
+        Input: input
+    }, function (ret) {
+        if (ret != "") {
+            var retVal = ret.split("^")[0];
+            if (retVal < 0) {
+                var msg = ret.split("^")[1];
+                $.messager.alert("失败", msg, "error");
+            } else {
+                var retObj = JSON.parse(ret);
+                var retData = retObj.output;
+                if ((retData == null) || (retData == "")) {
+                    $.messager.popover({
+                        msg: '没有满足条件的数据',
+                        type: 'error'
+                    })
+                } else if (retData == "null") {
+                    $.messager.alert("提示", "请咨询医保中心，其返回值为空", "warning")
+                } else {
+                    $("#gridInsu" + tabId).datagrid("loadData", retData);
+                }
+            }
+            $("#gridInsu" + tabId).datagrid("loaded");
+        }
+
+    })
+}
+
+function SetDefDate() {
+    if ((defDateStr) && (defDateStr != "")) {
+        var defDateArr = defDateStr.split("^");
+        var defStDate = defDateArr[0];
+        var defEndDate = defDateArr[1];
+        $("#startDate").datebox("setValue", defStDate);
+        $("#endDate").datebox("setValue", defEndDate);
+        $("#cmbTypeManf").combobox('setValue', '1');
+    }
+}
+
+///界面清除
+function Clear() {
+    SetDefDate();
+    $('#cmbgridInci').lookup('setText', '');
+    $('#cmbgridInci').lookup('clear');
+    var tabs = $('#mainTabs').tabs("tabs");
+    for (i = 0; i < tabs.length; i++) {
+        var tabId = tabs[i].attr('id');
+        $("#gridInsu" + tabId).datagrid("loadData", [])
+    }
+}

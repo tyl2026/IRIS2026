@@ -1,0 +1,277 @@
+/// Description: 药品标识码-查询
+/// Creator:     hulihua
+/// CreateDate:  2025-02-19
+Class PHA.DTC.IDCode.Query Extends %RegisteredObject
+{
+
+/// Decription: 查询药品列表
+/// Creator:suiguoyang
+/// CreateDate:20240808
+/// Input:
+/// Output:
+/// Table:INC_Itm
+/// Debugger:
+/// d ##class(%ResultSet).RunQuery("PHA.DTC.IDCode.Query","QueryInci","lhn",2,"")
+Query QueryInci(QText = "", HospId = "", StkGrpId = "", MaintenState = "", ArcCatId = "", IDCode = "") As websys.Query(ROWSPEC = "inci, inciCode, inciDesc ,manfName, remarks,bUomDesc,pUomDesc,IDCodeStr")
+{
+}
+
+ClassMethod QueryInciExecute(ByRef qHandle As %Binary, QText = "", HospId = "", StkGrpId = "", MaintenState = "", ArcCatId = "", IDCode = "") As %Status
+{
+	
+	s repid = $I(^CacheTemp)
+	s qHandle = $lb(0,repid,0)
+	s ind = 1
+	
+	s ^tyl("QueryInci")=$lb(QText , HospId, StkGrpId, ArcCatId)
+	
+	s QText = $zcvt(QText,"U")
+	s IDCode = $zcvt(IDCode,"U")
+	i StkGrpId '= "" s StkGrpIdLb = $lfs(StkGrpId,",")
+	i ArcCatId '= "" s ArcCatIdLb = $lfs(ArcCatId,",")
+	s inci = 0
+	for{
+		s inci = $o(^INCI(inci)) q:(inci = "")
+		continue:(+inci = 0)
+		if ($$$comMemberDefined("PHA.FACE.IN.Method", "m", "GetShowDataFlag")) {
+			s flag = ##class(PHA.FACE.IN.Method).GetShowDataFlag("INC_Itm", inci, HospId)
+		} else {
+			s flag = ##class(PHA.DTC.COM.Method).CheckIncItmHosp(inci, HospId)
+		}
+		continue:(flag = "N")
+		s tmpstkgrp = ##class(web.DHCST.Common.DrugInfoCommon).GetIncStkCatGrp(inci)
+		s GrpType = $p(tmpstkgrp, "^", 3)
+		continue:(GrpType '= "G")
+		continue:(StkGrpId '= "")&&('$lf(StkGrpIdLb,$p(tmpstkgrp, "^", 5)))
+		if ((MaintenState = 1) || (MaintenState = 2)) {
+			s idCode = ..GetIDCodeStr(inci, "STC")
+		} elseif ((MaintenState = 3) || (MaintenState = 4)) {
+			s idCode = ..GetIDCodeStr(inci, "MTC")
+		} elseif ((MaintenState = 5) || (MaintenState = 6)) {
+			s idCode = ..GetIDCodeStr(inci, "BTC")
+		}
+		continue:((MaintenState = 1) || (MaintenState = 3) || (MaintenState = 5) && (idCode = ""))
+		continue:((MaintenState = 2) || (MaintenState = 4) || (MaintenState = 6) && (idCode '= ""))
+		s inciCode = $p(^INCI(inci, 1), "^", 1)
+		s inciDesc = $p(^INCI(inci,1), "^", 2)
+		s inciDescPY = ""
+		i QText '= "" s inciDescPY = ##class(ext.util.String).ToChineseSpell(inciDesc)
+		continue:(QText '= "")&&(inciDescPY '[ QText)&&(inciDesc '[ QText)&&(inciCode '[ QText)&&(..CheckIncAliasExist(inci, QText) '= 1)
+		s manfName = $p(##class(web.DHCST.Common.DrugInfoCommon).GetManf(inci),"^",3)
+		s remarks = ##class(web.DHCST.Common.DrugInfoCommon).GetInciRemark(inci)
+		s arccat = $p(##class(web.DHCST.Common.DrugInfoCommon).GetArcItemCat(inci),"^",1)
+		continue:(ArcCatId '= "")&&('$lf(ArcCatIdLb,arccat))
+		s (bUomDesc,pUomDesc) = ""
+		s bUomId = $p(^INCI(inci,1),"^",10)    // 基本单位
+	 	s pUomId = $p(^INCI(inci, 1), "^", 17)
+	 	if (pUomId = "") {
+			s pUomId = $p(^INCI(inci, 3), "^", 6)
+	 	}
+	 	s:bUomId'="" bUomDesc=$p($g(^CT("UOM",bUomId)),"^",2)
+	 	s:pUomId'="" pUomDesc=$p($g(^CT("UOM",pUomId)),"^",2)
+		s IDCodeStr = ..GetIDCodeStr(inci,"",",")		
+		continue:(IDCode '= "")&&($zcvt(IDCodeStr,"U") '[ IDCode)
+		s Data=$lb(inci, inciCode, inciDesc, manfName, remarks,bUomDesc,pUomDesc,IDCodeStr)
+		s ^CacheTemp(repid,ind)=Data    
+		s ind=ind+1
+	}
+	Quit $$$OK
+}
+
+/// Description:查询药品标识码
+/// Creator:	hulihua
+/// CreateDate:	2024-07-19
+/// Table:      CT_PHA_IN.IncIDCode
+/// Input:		InciId-库存项ID
+/// Output:		标识ID、标识码、标识类型ID、标识类型描述、启用标志
+/// Return：	
+/// Others: 	
+/// Debug:		d ##class(%ResultSet).RunQuery("PHA.DTC.IDCode.Query","InciIDCode","1")
+Query InciIDCode(InciId As %String) As websys.Query(ROWSPEC = "incIDCId,idCode,typeDr,typeDesc,activeFlag,createDT,creator,idRemark")
+{
+}
+
+ClassMethod InciIDCodeExecute(ByRef qHandle As %Binary, InciId As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s qHandle=$lb(0,repid,0)
+	s ind=1
+	q:(InciId="") $$$OK
+    s incIDCId = 0
+    for {
+	    s incIDCId = $o(^CT.PHA.IN.IncIDCodeI("Inci",InciId,incIDCId))
+	    q:(incIDCId = "")
+	    continue:('$d(^CT.PHA.IN.IncIDCodeD(incIDCId)))
+	    s incIDCData = ^CT.PHA.IN.IncIDCodeD(incIDCId)
+	    s idCode = $lg(incIDCData, 2)
+	    s typeDr = $lg(incIDCData, 3)
+	    s typeDesc = $p($g(^DHCSTSCDI(+typeDr)), "^", 2)
+	    s activeFlag = $lg(incIDCData, 4)
+	    s createDate = $lg(incIDCData, 5)
+	    if (createDate '= "") {
+		    s createDate = $zd(createDate, 3)
+		}
+	    s createTime = $lg(incIDCData, 6)
+	    if (createTime '= "") {
+		    s createTime = $zt(createTime, 1)
+		}
+		s createDT = createDate_" "_createTime
+	    s createUserId = $lg(incIDCData, 7)
+	    s creator = ""
+		if (createUserId '= "") {
+			s creator = $p($g(^SSU("SSUSR", createUserId)), "^", 2)
+		}
+	    s idRemark = $lg(incIDCData, 8)
+	    s data1 = $lb(incIDCId, idCode, typeDr, typeDesc, activeFlag)
+	    s data2 = $lb(createDT, creator, idRemark)
+		s ^CacheTemp(repid, ind) = data1_data2
+		s ind = ind+1
+	}
+	s qHandle = $lb(0, repid, 0)
+	q $$$OK
+}
+
+/// Description:查询药品标识码列表
+/// Creator:	hulihua
+/// CreateDate:	2024-07-17
+/// Table:      CT_PHA_IN.IncIDCode
+/// Input:		InciId-库存项ID
+/// Output:		
+/// Return：	标识ID、标识码、标识类型ID、标识类型描述、启用标志
+/// Others: 	
+/// Debug:		w ##class(PHA.DTC.IDCode.Query).Select("1")
+ClassMethod Select(InciId) As %Library.String
+{
+
+    q:InciId="" ##class(web.DHCSTEXTCOMMON).GetNoJson()
+    s json = ##class(Code.JsonObj).%New()
+    s Num=0
+    s incIDCId = 0
+    for {
+	    s incIDCId = $o(^CT.PHA.IN.IncIDCodeI("Inci",InciId,incIDCId))
+	    q:(incIDCId = "")
+	    continue:('$d(^CT.PHA.IN.IncIDCodeD(incIDCId)))
+	    s incIDCData = ^CT.PHA.IN.IncIDCodeD(incIDCId)
+	    s idCode = $lg(incIDCData, 2)
+	    s typeDr = $lg(incIDCData, 3)
+	    s typeDesc = $p($g(^DHCSTSCDI(+typeDr)), "^", 2)
+	    s activeFlag = $lg(incIDCData, 4)
+	    s createDate = $lg(incIDCData, 5)
+	    if (createDate '= "") {
+		    s createDate = $zd(createDate, 3)
+		}
+	    s createTime = $lg(incIDCData, 6)
+	    if (createTime '= "") {
+		    s createTime = $zt(createTime, 1)
+		}
+		s createDT = createDate_" "_createTime
+	    s createUserId = $lg(incIDCData, 7)
+	    s creator = ""
+		if (createUserId '= "") {
+			s creator = $p($g(^SSU("SSUSR", createUserId)), "^", 2)
+		}
+	    s idRemark = $lg(incIDCData, 8)
+	    s data = incIDCId_"^"_idCode_"^"_typeDr_"^"_typeDesc_"^"_activeFlag_"^"_createDT_"^"_creator_"^"_idRemark
+	    d json.InsertRowData(data)
+	    s Num = Num+1
+	}
+    s detailStr = json.getJsonData("IncIDCId^IdCode^TypeDr^TypeDesc^ActiveFlag^CreateDT^Creator^IDRemark",Num)
+    k json
+    q detailStr
+}
+
+/// Description:查询药品标识码串以"/"连接
+/// Creator:	hulihua
+/// CreateDate:	2024-07-17
+/// Table:      CT_PHA_IN.IncIDCode
+/// Input:		InciId-库存项ID，CodeType-码类型代码，Del-链接符
+/// Output:		
+/// Return：	标识码串
+/// Others: 	
+/// Debug:
+/// Debug:		w ##class(PHA.DTC.IDCode.Query).GetIDCodeStr("1")
+ClassMethod GetIDCodeStr(InciId, CodeType = "", Del = "/") As %Library.String
+{
+    q:InciId="" ""
+    s sCDIDr = ""
+    if (CodeType '= "") {
+    	s sCDIDr = $o(^DHCSTSCDI(0, "TYPECODE", $$ALPHAUP^SSUTIL4("CodeType"), CodeType, ""))
+    }
+    s idCodeStr=""
+    s incIDCId = 0
+    for {
+	    s incIDCId = $o(^CT.PHA.IN.IncIDCodeI("Inci",InciId,incIDCId))
+	    q:(incIDCId = "")
+	    continue:('$d(^CT.PHA.IN.IncIDCodeD(incIDCId)))
+	    s incIDCData = ^CT.PHA.IN.IncIDCodeD(incIDCId)
+	    s idCode = $lg(incIDCData, 2)
+	    s activeFlag = $lg(incIDCData, 4)
+	    continue:(activeFlag = $$$NO)
+	    s typeDr = $lg(incIDCData, 3)
+	    continue:(sCDIDr '= "")&&(sCDIDr '= typeDr)
+	    if (idCodeStr = "") {
+		    s idCodeStr = idCode
+		} else {
+			s idCodeStr = idCodeStr_Del_idCode
+		}
+	}
+    q idCodeStr
+}
+
+/// Description: 根据库存项ID+别名,匹配别名表
+/// Creator:	 panzhixiang
+/// CreateDate:	 2024-08-22
+/// Input：		 inci - 库存项ID, aliasDesc - 别名
+/// Return:      0 不存在, 1 - 存在
+/// w ##class(PHA.DTC.IDCode.Query).CheckIncAliasExist("858","114")
+ClassMethod CheckIncAliasExist(inci, inputAlias)
+{
+	s inputAlias = $zcvt(inputAlias,"U")
+	q:(inputAlias = "") 1
+	q:(inci = "") 0
+	s aliasId = 0, exist = 0
+	for {
+		s aliasId = $o(^INCALIAS(0, "INCI", inci, aliasId)) q:(+aliasId = 0)||(exist = 1)
+		continue:('$d(^INCALIAS(+aliasId)))
+		s aliasDesc = $p($g(^INCALIAS(+aliasId)), "^", 4)
+		s aliasDesc = $zcvt(aliasDesc, "U")
+		i aliasDesc [ inputAlias s exist = 1
+	}
+	
+	q exist
+}
+
+/// Description: 编辑加载
+/// Input:		 SessionStr(Hosp^Loc^Group^User)
+/// w ##class(PHA.DTC.IDCode.Query).SelectINCItm("1")
+ClassMethod SelectINCItm(InciId, SessionStr = "")
+{
+	s json=##class(PHA.COM.Object).%New()
+	s arr=##class(PHA.COM.Array).%New()
+	q:+InciId=0 arr.%Push(json).%ToJSON()
+	q:'$d(^INCI(InciId)) arr.%Push(json).%ToJSON()
+	/* 库存项信息 */
+	s inciObj=##class(User.INCItm).%OpenId(InciId,0)
+	s inciBUomId=inciObj.INCICTUOMDRGetObjectId()	
+	s json.inciCode=inciObj.INCICode								// 代码
+	s json.inciDesc=inciObj.INCIDesc								// 名称	
+	s json.inciBUom=inciBUomId 		// 基本单位	
+    s inciPMUomId=inciObj.INCICTUOMPackDRGetObjectId()
+    s json.inciPackUnit=inciPMUomId		// 整包装
+	s json.inciNoTraceCodeFlag=##class(PHA.DTC.COM.Method).GetIncitmPropValue(InciId,"NoTraceCode")					// 无码标识
+	s json.inciMinTCodeLev =  inciObj.INCIMinTCodeLevDRGetObjectId() 			// 最小码级别
+	/* 库存附加信息 */
+	s itmInfoId=$o(^DHCITMINFO(0,"INCI",InciId,""))
+	s itmInfoObj=##class(User.DHCItmAddionInfo).%OpenId(itmInfoId)
+	if $IsObject(itmInfoObj) d
+	.s json.inciPackUom=itmInfoObj.INFOPackUom						// 大包装单位
+	.s json.inciPackUomFac=itmInfoObj.INFOPackUomFactor				// 大包装系数
+
+	.s json.inciPackUomM=itmInfoObj.INFOPackUomM						// 中包装单位
+	.s json.inciPackUomMFac=itmInfoObj.INFOPackUomFactorM				// 中包装系数
+	d arr.%Push(json)
+
+	q arr.%ToJSON()
+}
+
+}

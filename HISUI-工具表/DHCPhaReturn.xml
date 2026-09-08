@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:33:02">
+<Class name="User.DHCPhaReturn">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>PHAR_Rowid</SqlRowIdName>
+<SqlTableName>DHC_PhaReturn</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent,User.Abstract</Super>
+<TimeChanged>65848,55208.326164</TimeChanged>
+<TimeCreated>62524,61146.351538</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="ChildDHCPhaReturnItm">
+<Type>User.DHCPhaReturnItm</Type>
+<Cardinality>children</Cardinality>
+<Inverse>PHARIPHARParref</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="PHARDate">
+<Description>
+PHAR_Date</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>PHAR_Date</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHARTime">
+<Description>
+PHAR_Time</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>PHAR_Time</SqlFieldName>
+</Property>
+
+<Property name="PHARSSUSRDR">
+<Description>
+PHAR_SSUSR_DR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>PHAR_SSUSR_DR</SqlFieldName>
+</Property>
+
+<Property name="PHARRETRQDR">
+<Description>
+PHAR_RETRQ_DR </Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>PHAR_RETRQ_DR</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="400"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHARRecLocDR">
+<Description>
+PHAR_RecLoc_DR</Description>
+<Type>User.CTLoc</Type>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>PHAR_RecLoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PHARDeptLocDR">
+<Description>
+PHAR_DeptLoc_DR</Description>
+<Type>User.CTLoc</Type>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>PHAR_DeptLoc_DR</SqlFieldName>
+</Property>
+
+<Property name="PHARRetNo">
+<Description>
+PHAR_RetNo</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>PHAR_RetNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHARAckStatus">
+<Description>
+PHAR_AckStatus</Description>
+<Type>%Library.String</Type>
+<InitialExpression>"N"</InitialExpression>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>PHAR_AckStatus</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PHARAckDate">
+<Description>
+PHAR_AckDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>PHAR_AckDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHARAckTime">
+<Description>
+PHAR_AckTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>PHAR_AckTime</SqlFieldName>
+</Property>
+
+<Property name="PHARAckUser">
+<Description>
+PHAR_AckUser</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>PHAR_AckUser</SqlFieldName>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^PHARET)</SqlIdExpression>
+<StreamLocation>^User.DHCPhaReturnS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="DataMasterPhaReturn">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^PHARET</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Rowid}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>PHAR_Rowid</Field>
+</RowIdSpec>
+<Data name="PHAR_AckDate">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="PHAR_AckStatus">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="PHAR_AckTime">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="PHAR_AckUser">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="PHAR_Date">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="PHAR_DeptLoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="PHAR_RETRQ_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="PHAR_RecLoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="PHAR_RetNo">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="PHAR_SSUSR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="PHAR_Time">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexRecLoc">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^PHARET</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"RECLOC"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_RecLoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Date}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Rowid}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PHAR_Rowid</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexRetNo">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^PHARET</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"NO"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_RetNo}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Rowid}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHAR_Rowid</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="Indexdate">
+<Type>index</Type>
+<Global>^PHARET</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"DATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHAR_Rowid}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHAR_Rowid</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="indexDeptLoc">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^PHARET</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"DEPTLOC"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{PHAR_RecLoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{PHAR_DeptLoc_DR}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>Sub</AccessType>
+<Expression>{PHAR_AckStatus}</Expression>
+</Subscript>
+<Subscript name="6">
+<AccessType>Sub</AccessType>
+<Expression>{PHAR_Rowid}</Expression>
+</Subscript>
+</SQLMap>
+<SQLMap name="indexLOCDEPT">
+<Type>index</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^PHARET</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"LOCDEPT"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHAR_RecLoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PHAR_DeptLoc_DR}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PHAR_Rowid}</Expression>
+</Subscript>
+</SQLMap>
+</Storage>
+</Class>
+</Export>

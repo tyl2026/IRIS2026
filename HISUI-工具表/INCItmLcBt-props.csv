@@ -1,0 +1,6 @@
+propertyName,propertyNode,propertyDeli,propertyPiece,propertyType,propertyField,propertyColumn,propertyDesc,
+INCLBChildSub,,,,%Numeric,INCLB_ChildSub,2,INCLB ChildSub (NewKey),
+INCLBDirtyQty,,"^",3,%Float,INCLB_DirtyQty,7,Dirty Qty,
+INCLBINCIBDR,,"^",1,User.INCItmBat,INCLB_INCIB_DR,6,Des Ref to INCIB,
+INCLBINCILParRef,,,,User.INCItmLoc,INCLB_INCIL_ParRef,,INCIL Par Ref,
+INCLBPhyQty,,"^",2,%Float,INCLB_PhyQty,3,Physical Quantity ,

@@ -1,0 +1,696 @@
+/**
+ * 模块:    国家医保上传日志
+ * 编写日期: 2022-07-28
+ * 编写人:  yanbingli
+ */
+var SessionLoc = session['LOGON.CTLOCID'];
+var HospId = session['LOGON.HOSPID'];
+var SessionUser = session['LOGON.USERID'];
+$(function () {
+    InitDict();
+    InitGridInsu();
+    $HUI.linkbutton('#btn-find', {
+        onClick: function () {
+            Query();
+        }
+    });
+    $HUI.linkbutton('#btn-send', {
+        onClick: function () {
+            Save();
+        }
+    });
+    $HUI.linkbutton('#btn-delete', {
+        onClick: function () {
+            Delete();
+        }
+    });
+    $HUI.linkbutton('#btn-clear', {
+        onClick: function () {
+            Clear();
+        }
+    });
+    $HUI.linkbutton('#btn-deleteSale', {
+    	onClick: function () {
+        	Delete3505();
+    	}
+	});
+
+    // 登记号回车事件
+    $('#txtPatNo').on('keypress', function (event) {
+        if (window.event.keyCode == '13') {
+            var patNo = $.trim($('#txtPatNo').val());
+            if (patNo != '') {
+                patNo = tkMakeServerCall('PHA.DTC.COM.Method', 'FullPatNo', patNo);
+                $('#txtPatNo').val(patNo);
+                Query();
+            }
+        }
+    });
+});
+
+function InitDict() {
+    var retDate = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetDate');
+    $('#StartDate, #EndDate').datebox('setValue', retDate);
+    $HUI.combobox('#cmbMethType', {
+        panelHeight: 'auto',
+        data: [{
+                value: '',
+                text: '全部',
+                'selected': true
+            }, {
+                value: 'Method3501',
+                text: '盘存上传'
+            }, {
+                value: 'Method3502',
+                text: '库存变更'
+            }, {
+                value: 'Method3503',
+                text: '采购'
+            }, {
+                value: 'Method3504',
+                text: '采购退货'
+            }, {
+                value: 'Method3505',
+                text: '销售'
+            }, {
+                value: 'Method3506',
+                text: '销售退货'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+    $HUI.combobox('#cmbChFlag', {
+        panelHeight: 'auto',
+        data: [{
+                value: '',
+                text: '全部'
+            }, {
+                value: 'N',
+                text: '未上传',
+                'selected': true
+            }, {
+                value: 'Y',
+                text: '已上传'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+    $HUI.combobox('#cmbDeleteType', {
+        panelHeight: 'auto',
+        data: [{
+                value: '',
+                text: '全部',
+                'selected': true
+            }, {
+                value: '1',
+                text: '盘存信息'
+            }, {
+                value: '2',
+                text: '库存变更信息'
+            }, {
+                value: '3',
+                text: '采购信息'
+            }, {
+                value: '4',
+                text: '销售信息'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+    $HUI.combobox('#cmbHospital', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=CTHospital',
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) {
+            Query();
+        },
+        onLoadSuccess: function (row) {
+            $(this).combobox("setValue", HospId);
+        }
+    });
+
+    $HUI.combobox('#cmbTypeManf', {
+        panelHeight: 'auto',
+        data: [{
+                value: '',
+                text: '全部',
+                'selected': true
+            }, {
+                value: '1',
+                text: '国家医保'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+    $HUI.combobox('#cmbSelType', {
+        panelHeight: 'auto',
+        data: [{
+                value: '1',
+                text: '医保结算'
+            }, {
+                value: '2',
+                text: '自费结算'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+    $HUI.combobox('#cmbScanStatus', {
+        panelHeight: 'auto',
+        data: [{
+                value: 'Y',
+                text: '已扫码'
+            }, {
+                value: 'N',
+                text: '未扫码'
+            }, {
+                value: 'C',
+                text: '无码药品'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+    $HUI.combobox('#cmbAdmType', {
+        panelHeight: 'auto',
+        data: [{
+                value: 'O',
+                text: '门诊'
+            }, {
+                value: 'E',
+                text: '急诊'
+            }, {
+                value: 'I',
+                text: '住院'
+            }, {
+                value: 'H',
+                text: '其它'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+	
+	$HUI.combobox('#cmbDateType', {
+        panelHeight: 'auto',
+        data: [{
+                value: '1',
+                text: '上传日期',
+                'selected': true
+            }, {
+                value: '2',
+                text: '业务日期'
+            }
+        ],
+        valueField: 'value',
+        textField: 'text',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+	
+    $HUI.combobox('#cmbPhaLocId', {
+        panelHeight: 'auto',
+        url: $URL + '?ResultSetType=Array&ClassName=PHA.STORE.Org&QueryName=Pharmacy&HospId=' + HospId,
+        valueField: 'RowId',
+        textField: 'Description',
+        onSelect: function (data) {
+            Query();
+        }
+    });
+
+    //药品名称lookup
+    $("#cmbgridInci").lookup({
+        mode: 'remote',
+        panelWidth: '600',
+        url: $URL,
+        pagination: true,
+        queryParams: {
+            ClassName: "PHA.STORE.Drug",
+            QueryName: "INCItm"
+        },
+        onBeforeLoad: function (param) {
+            param.QText = param.q;
+        },
+        onSelect: function (rowIndex, rowData) {},
+        idField: "inciId",
+        textField: "inciDesc",
+        columns: [
+            [{
+                    field: "inciCode",
+                    title: "代码",
+                    width: 150
+                }, {
+                    field: "inciDesc",
+                    title: "名称",
+                    width: 428
+                }, {
+                    field: "inciId",
+                    title: "inciId",
+                    width: 50,
+                    hidden: true
+                }
+            ]
+        ]
+    });
+}
+
+function InitGridInsu() {
+    var columns = [
+        [{
+                field: "GridLogSelect",
+                title: "选择",
+                checkbox: true
+            }, {
+                field: "RowId",
+                title: 'RowId',
+                hidden: true
+            }, {
+                field: "Type",
+                title: 'Type',
+                halign: 'center',
+                align: 'center',
+                hidden: true
+            }, {
+                field: "InsuManfName",
+                title: '医保对接',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "TypeDesc",
+                title: '接口类型',
+                width: 120,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "Pointer",
+                title: '数据指针',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'Batch',
+                title: '批次流水号',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "AdmTypeDesc",
+                title: '就诊类型',
+                width: 80,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "ScanCodeFlag",
+                title: '扫码状态',
+                width: 100,
+                halign: 'center',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    if (value == "N") {
+                        text = "未扫码";
+                        bgcolor = "#FF6565";
+                    } else if (value == "Y") {
+                        text = "已扫码";
+                        bgcolor = "#90EE90";
+                    } else if (value == "C") {
+                        text = "无码药品";
+                        bgcolor = "#A020F0";
+                    } else {
+                        text = "";
+                        bgcolor = "";
+                    }
+                    return ColStateHtml(bgcolor, text)
+                }
+            }, {
+                field: "CheckFlag",
+                title: '上传标识',
+                width: 80,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "TrdnFlag",
+                title: '拆零标志',
+                width: 80,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "SetlTypeDesc",
+                title: '结算类型',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "InciDesc",
+                title: '药品名称',
+                width: 330,
+                halign: 'left',
+                align: 'left'
+            }, {
+                field: "Text",
+                title: '入参',
+                width: 120,
+                align: 'center',
+                formatter: setInputInfoFormatter
+            }, {
+                field: 'OutText',
+                title: '出参',
+                width: 120,
+                align: 'center',
+                formatter: setOutputInfoFormatter
+            }, {
+                field: 'OperDateTime',
+                title: '上传时间',
+                width: 150,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "BusLocName",
+                title: '业务科室',
+                width: 150,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: "BusUserName",
+                title: '业务操作人',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'PatNo',
+                title: '登记号',
+                width: 120,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'PatName',
+                title: '患者姓名',
+                width: 100,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'UpLoadTimes',
+                title: '上传次数',
+                width: 80,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'DeleteType',
+                title: 'DeleteType',
+                halign: 'center',
+                align: 'center',
+                hidden: true
+            }, {
+                field: 'DeleteTypeDesc',
+                title: '删除类型',
+                width: 120,
+                halign: 'center',
+                align: 'center'
+            }, {
+                field: 'HospId',
+                title: '院区ID',
+                halign: 'center',
+                align: 'center',
+                hidden: true
+            }, {
+                field: 'InsuManfCode',
+                title: '对接医保代码',
+                halign: 'center',
+                align: 'center',
+                hidden: true
+            }
+        ]
+    ];
+    var dataGridOption = {
+        url: $URL,
+        queryParams: {
+            ClassName: "PHA.FACE.TPS.INSUTE.LogQuery",
+            QueryName: "InsuDataLog"
+        },
+        toolbar: "#gridIncItmBar", //保持不改变高度
+        pageNumber: 1,
+        pageSize: 100,
+        pageList: [100, 300, 500, 1000],
+        fitColumns: false,
+        fit: true,
+        rownumbers: true,
+        columns: columns,
+        onClickRow: function (rowIndex, rowData) {},
+        singleSelect: false,
+        selectOnCheck: true,
+        checkOnSelect: true,
+        onLoadSuccess: function () {}
+    };
+    DHCPHA_HUI_COM.Grid.Init("gridInsuData", dataGridOption);
+}
+
+//工具函数-以HTML的形式显示扫描状态
+function ColStateHtml(bgcolor, text) {
+    var stateHtml = "<div style='padding:1px;background-color:" + bgcolor + ";border-radius:3px;text-align:center;'>";
+    stateHtml += "	<label style='color:white;font-weight:600;'>" + text + "</label>";
+    stateHtml += "</div>";
+    return stateHtml;
+}
+
+/// 查询
+function Query() {
+    var startDate = $('#StartDate').datebox('getValue');
+    var endDate = $('#EndDate').datebox('getValue');
+    var methType = $('#cmbMethType').combobox('getValue');
+    var chFlag = $('#cmbChFlag').combobox('getValue');
+    var deleteType = $('#cmbDeleteType').combobox('getValue');
+    var batchno = $('#txtbatchno').val().trim();
+    var hospId = $('#cmbHospital').combobox('getValue');
+    var typeManf = $('#cmbTypeManf').combobox('getValue');
+    var selType = $('#cmbSelType').combobox('getValue') || '';
+    var admType = $('#cmbAdmType').combobox('getValue') || '';
+    var scanStatus = $('#cmbScanStatus').combobox('getValue') || '';
+    var phaLocId = $('#cmbPhaLocId').combobox('getValue') || '';
+    var incidesc = $.trim($('#cmbgridInci').lookup('getText')) || '';
+    var patNo = $('#txtPatNo').val();
+    var traceCode = $('#txtTraceCode').val();
+    var dateType = $('#cmbDateType').combobox('getValue');
+    var params = startDate + '^' + endDate + '^' + methType + '^' + chFlag + '^' + deleteType + '^' +
+        batchno + '^' + hospId + '^' + typeManf + '^' + selType + '^' + admType + '^' + scanStatus + '^' +
+        phaLocId + '^' + incidesc + '^' + patNo + '^' + traceCode + '^' + dateType;
+    $('#gridInsuData').datagrid('query', {
+        inputStr: params
+    });
+}
+
+/// 补传
+function Save() {
+    var gridLogChecked = $("#gridInsuData").datagrid("getChecked") || "";
+    if (gridLogChecked == "") {
+        $.messager.alert("温馨提示", "请勾选需要补传的数据", 'info');
+        return;
+    }
+    $.messager.progress({
+        title: "提示",
+        msg: '正在补传数据',
+        text: '补传中....'
+    });
+    setTimeout(function () {
+        var warnType = "";
+        for (var i = 0; i < gridLogChecked.length; i++) {
+            var checkedData = gridLogChecked[i];
+            var checkFlag = checkedData.CheckFlag;
+            if (checkFlag === "Y") {
+                warnType = "1";
+                continue;
+            }
+            var pOutRowId = checkedData.Pointer;
+            var pType = checkedData.Type;
+            var pHospId = checkedData.HospId;
+            var pTrdnFlag = checkedData.TrdnFlag;
+            var pInsuManf = checkedData.InsuManfCode;
+            var options = {
+                ClassName: "PHA.FACE.TPS.INSUTE.LogQuery",
+                MethodName: "SendRepairData",
+                FaceType: pType,
+                Pointer: pOutRowId,
+                HospId: pHospId,
+                TrdnFlag: pTrdnFlag,
+                InsuManf: pInsuManf
+            }
+            var ret = $m(options, false);
+        }
+        $.messager.progress("close");
+        if (warnType === "1") {
+            $.messager.alert("温馨提示", "已扫码且已经上传成功的数据不会再次补传", 'info');
+        }
+        Query();
+    }, 200);
+}
+
+/// 删除
+function Delete() {
+    var gridLogChecked = $("#gridInsuData").datagrid("getChecked") || "";
+    if (gridLogChecked == "") {
+        $.messager.alert("温馨提示", "请请勾选需要删除的数据", 'info');
+        return;
+    }
+    var warnType = "";
+    var batchArr = [];
+    for (var i = 0; i < gridLogChecked.length; i++) {
+        var checkedData = gridLogChecked[i];
+        var CheckFlag = checkedData.CheckFlag;
+        if (CheckFlag === "N") {
+            warnType = "1";
+            continue;
+        }
+        var Batch = checkedData.Batch;
+        var DeleteType = checkedData.DeleteType;
+        var InsuManf = checkedData.InsuManfCode;
+        var batchStr = Batch + "^" + DeleteType + "^" + InsuManf;
+        batchArr.push(batchStr);
+    }
+    if (warnType === "1") {
+        $.messager.alert("温馨提示", "上传失败的数据是不允许删除的", 'info');
+    }
+    var hospId = $('#cmbHospital').combobox('getValue');
+    var options = {
+        ClassName: "PHA.FACE.TPS.INSUTE.Upload",
+        MethodName: "DeleteData",
+        BatchStr: batchArr.join(","),
+        HospId: hospId
+    }
+    var ret = $m(options, false);
+    Query();
+}
+
+/// 清屏
+function Clear() {
+    var retDate = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetDate');
+    $('#StartDate, #EndDate').datebox('setValue', retDate);
+    $('#cmbHospital').combobox('setValue', HospId);
+    $('#cmbPhaLocId').combobox('setValue', '');
+    $('#cmbSelType').combobox('setValue', '');
+    $('#cmbMethType').combobox('setValue', '');
+    $('#cmbScanStatus').combobox('setValue', '');
+    $('#cmbAdmType').combobox('setValue', '');
+    $('#cmbTypeManf').combobox('setValue', '');
+    $('#cmbChFlag').combobox('setValue', 'N');
+    $('#cmbDeleteType').combobox('setValue', '');
+    $('#txtbatchno').val('');
+    $('#cmbgridInci').lookup('setText', '');
+    $('#cmbgridInci').lookup('clear');
+    $('#txtPatNo').val('');
+    $('#txtTraceCode').val('');
+    $('#gridInsuData').datagrid('loadData', []);
+}
+
+function setInputInfoFormatter(value, row, index) {
+    var nfhml = "<span class='linkinfo' onclick='showInputJson(" + index + ")'>入参详情</span>";
+    return nfhml;
+}
+
+function setOutputInfoFormatter(value, row, index) {
+    var nfhml = "<span class='linkinfo' onclick='showOutJson(" + index + ")'>出参详情</span>";
+    return nfhml;
+}
+
+function showInputJson(index) {
+    $("#info").html("");
+    var rowData = $('#gridInsuData').datagrid('getRows')[index];
+    var logId = rowData.RowId;
+    var value = tkMakeServerCall('PHA.FACE.TPS.INSUTE.LogQuery', 'GetLogInText', logId);
+    try {
+        var ret = JSON.stringify(JSON.parse(value), null, 4);
+    } catch (ex) {
+        var ret = rowData.Text;
+    }
+    $("#info").html("<pre id='copyInfo'>" + ret + "</pre>");
+    $('#InfoWin').dialog("setTitle", "入参");
+    $('#InfoWin').dialog("open");
+}
+
+function showOutJson(index) {
+    $("#info").html("");
+    var rowData = $('#gridInsuData').datagrid('getRows')[index];
+    var value = rowData.OutText;
+    try {
+        var ret = JSON.stringify(JSON.parse(value), null, 4);
+    } catch (ex) {
+        var ret = value;
+    }
+    $("#info").html("<pre id='copyInfo'>" + ret + "</pre>");
+    $('#InfoWin').dialog("setTitle", "出参");
+    $('#InfoWin').dialog("open");
+}
+
+/// 3505的删除 , 得调用3506A
+function Delete3505() {
+	var gridLogChecked = $("#gridInsuData").datagrid("getChecked") || "";
+    if (gridLogChecked == "") {
+        $.messager.alert("温馨提示", "请请勾选需要删除的数据", 'info');
+        return;
+    }
+    var warnType = "";
+    var logIdArr = [];
+    for (var i = 0; i < gridLogChecked.length; i++) {
+        var checkedData = gridLogChecked[i];
+        var CheckFlag = checkedData.CheckFlag;
+        if (CheckFlag === "N") {
+            warnType = "1";
+            continue;
+        }
+        var logType = checkedData.Type;
+        if ((logType != 'Method3505')&&(logType != 'Method3505A')) {
+	    	warnType = "1";
+            continue;
+	    }
+        var logId = checkedData.RowId;
+        logIdArr.push(logId);
+    }
+    if (warnType === "1") {
+        $.messager.alert("温馨提示", "上传失败或非销售数据无需删除", 'info');
+    }
+    $.messager.confirm('操作确认', '您确认删除当前选择的已上传销售数据吗？', function(r) {
+    	if (r) {
+        	var hospId = $('#cmbHospital').combobox('getValue');
+		    var options = {
+		        ClassName: "PHA.FACE.TPS.INSUTE.Upload",
+		        MethodName: "DeleteBy3506",
+		        LogStr: logIdArr.join(","),
+		        HospId: hospId,
+		        UserId: session['LOGON.USERID']
+		    }
+		    var ret = $m(options, false);
+		    Query();
+    	}else {
+	    	Query();
+	    }
+	});
+}

@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<!--追溯码发退药按结算日期扫码上传查询(独立页面)
+	csp:pha.tracecode.v2.settlequery.csp
+	js: scripts/pha/tracecode/v2/settlequery.js
+-->
+<csp:method name=OnPreHTTP arguments="" returntype=%Boolean>
+    i ##Class(websys.SessionEvents).SessionExpired() q 1 
+    q 1
+</csp:method>
+<HTML XMLNS=TRAK>
+
+<HEAD>
+    <title>
+        <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+    </title>
+    <TRAK:HEAD> </TRAK:HEAD>
+    <HISUI />
+    <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+    </link>
+    <style>
+        .panel-header-card-gray+.panel-body {
+            border-color: #cccccc;
+        }
+        .dhcpha-north-tbl td {
+            padding: 2px 5px;
+        }
+    </style>
+</HEAD>
+
+<body style="overflow:hidden;">
+    <div class="hisui-layout" fit="true" border="false">
+        <div data-options="region:'center'" class="dhcpha-hisui-container">
+            <div class="hisui-layout" fit="true" border="false">
+                <div data-options="region:'center',title:'发退药按结算日期扫码查询',split:true,headerCls:'panel-header-gray',iconCls:'icon-panel-drug'">
+                    <table id="gridInsuData"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="gridIncItmBar">
+        <table class="dhcpha-north-tbl" cellspacing=0 cellpadding=0>
+            <tr>
+                <td><label for="StartDate">开始日期</label></td>
+                <td><input id="StartDate" class="hisui-datebox dhcpha-date" type="text" data-options="width:150" /></td>
+                
+                <td><label for="EndDate">截止日期</label></td>
+                <td><input id="EndDate" class="hisui-datebox dhcpha-date" type="text" data-options="width:150" /></td>
+                
+                <td><label for="ChFlag">成功标志</label></td>
+                <td><input id="cmbChFlag" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                                
+                <td><label for="AdmType">就诊类型</label></td>
+                <td><input id="cmbAdmType" type="text" class="hisui-combobox" /></td>
+                
+                <td><a href="" class="hisui-linkbutton" id="btn-find" style="width:100px;" data-options="iconCls:'icon-w-find'">查询</a></td>
+                <td><a href="" class="hisui-linkbutton" id="btn-clear" style="width:100px;" data-options="iconCls:'icon-w-clean'">清屏</a></td>
+            </tr>
+            <tr>
+                <td><label for="Hospital">医院</label></td>
+                <td><input id="cmbHospital" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                
+                <td><label for="MdtrtSn">就医流水号</label></td>
+                <td><input id="txtMdtrtSn" type="text" class="hisui-validatebox" placeholder="就医流水号..." data-options="width:150" /></td>
+                
+                <td><label for="SetlId">结算ID</label></td>
+                <td><input id="txtSetld" type="text" class="hisui-validatebox" placeholder="结算ID..." data-options="width:150" /></td>
+                
+                <td><label for="ScanStatus">扫码状态</label></td>
+                <td><input id="cmbScanStatus" type="text" class="hisui-combobox" /></td>
+                
+                <td><label for="intrType">业务类型</label></td>
+                <td><input id="cmbIntrType" type="text" class="hisui-combobox" /></td>
+                
+                <td><a href="" class="hisui-linkbutton" id="btn-scancode" style="width:100px;" data-options="iconCls:'icon-w-save'">扫码</a></td>
+            </tr>
+            <tr>
+                <td><label for="SelType">结算类型</label></td>
+                <td><input id="cmbSelType" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                
+                <td><label for="BatchNo">批次流水号</label></td>
+                <td><input id="txtbatchno" class="hisui-validatebox" placeholder="批次流水号..." data-options="width:150" /></td>
+                
+                <td><label for="PatNo">登记号</label></td>
+                <td><input id="txtPatNo" class="hisui-validatebox" placeholder="登记号..." data-options="width:150" /></td>
+
+                <td><label for="PhaLocId">药房科室</label></td>
+                <td><input id="cmbPhaLocId" type="text" class="hisui-combobox" /></td>
+
+                <td><label for="InciDesc">药品名称</label></td>
+                <td ><input id="cmbgridInci" type="text" class="hisui-lookup" data-options="width:150" /></td>
+                
+                <td><label for="DspStatus">发药状态</label></td>
+                <td ><input id="cmbDspStatus" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                
+            </tr>
+        </table>
+    </div>
+    <div id="InfoWin" class="hisui-dialog" title="详细内容" style="width:700px;height:550px;" data-options="resizable:false,modal:true,closed:true">
+        <div id="info"></div>
+    </div>
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.extend.js"></script>
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.com.js"></script>
+    <script type="text/javascript" src="../scripts/pha/tracecode/v2/settlequery.js"></script>
+    <script type="text/javascript" src="../scripts/pha/tracecode/v2/api.js"></script>
+</body>
+
+</HTML>

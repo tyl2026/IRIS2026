@@ -1,0 +1,1063 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:03:53">
+<Class name="User.DHCPHACollected">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>DHC_PHACollect_RowID</SqlRowIdName>
+<SqlTableName>DHC_PHACollected</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent,User.Abstract</Super>
+<TimeChanged>66092,55727.521425</TimeChanged>
+<TimeCreated>62010,37329.346412</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="ChildDHCPHACollectItm">
+<Type>User.DHCPHACollectItm</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>PHACIPHACParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="DHCPHALocDR">
+<Description>
+Pharmacy</Description>
+<Type>User.CTLoc</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>DHC_PHALoc_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHACollectDate">
+<Description>
+Collect Date</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>DHC_PHACollectDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHACollectTime">
+<Description>
+Collect Time</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>DHC_PHACollectTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAWardDR">
+<Description>
+Wards</Description>
+<Type>User.PACWard</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>DHC_PHAWard_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAOperator">
+<Description>
+Operator</Description>
+<Type>User.SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOperator</SqlFieldName>
+</Property>
+
+<Property name="DHCPHACollectStatus">
+<Description>
+DHC_PHACollectStatus</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>DHC_PHACollectStatus</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHAPrintDate">
+<Description>
+DHC_PHAPrintDate</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrintDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAPrintTime">
+<Description>
+DHC_PHAPrintTime</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrintTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHACounts">
+<Description>
+DHC_PHACounts</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>DHC_PHACounts</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADateFrom">
+<Description>
+DHC_PHADateFrom</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>DHC_PHADateFrom</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHADateTo">
+<Description>
+DHC_PHADateTo</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>DHC_PHADateTo</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAOrdType">
+<Description>
+DHC_PHAOrdType</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOrdType</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHACollectUser">
+<Description>
+DHC_PHACollectUser</Description>
+<Type>User.SSUser</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>DHC_PHACollectUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADispNo">
+<Description>
+DHC_PHADispNo</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>DHC_PHADispNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCSendAutoFlag">
+<Description>
+DHC_SendAutoFlag</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>DHC_SendAutoFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHAPrintFlag">
+<Description>
+DHC_PHAPrintFlag</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrintFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHASendUser">
+<Description>
+DHC_PHASend_User</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>DHC_PHASendUser</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHAOperateDate">
+<Description>
+DHC_PHAOperateDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOperateDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAOperateTime">
+<Description>
+DHC_PHAOperateTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOperateTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAStkFlag">
+<Description>
+DHC_PHAStkFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>DHC_PHAStkFlag</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAUrgentFlag">
+<Description>
+DHC_PHAUrgentFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>DHC_PHAUrgentFlag</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADeliverymanDR">
+<Description>
+DHC_PHADeliveryman_DR</Description>
+<Type>User.DHCPhaDeliveryman</Type>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>DHC_PHADeliveryman_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHASendMedNum">
+<Description>
+摆药机发送次数</Description>
+<Type>%Library.Integer</Type>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>DHC_PHASendMedNum</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAAuditor">
+<Description>
+核对或者签收人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAuditor</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAAuditFlag">
+<Description>
+核对或者签收标志</Description>
+<Type>%String</Type>
+<InitialExpression>"N"</InitialExpression>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAuditFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="DHCPHAAuditDate">
+<Description>
+核对或者签收日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAuditDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAAuditTime">
+<Description>
+核对或者签收时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAuditTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAWardGroupDR">
+<Description>
+病区专业组</Description>
+<Type>User.DHCWardProGroup</Type>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>DHC_PHAWardGroup_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHACheckDate">
+<Description>
+复核日期(抓/包药完成日期)</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>30</SqlColumnNumber>
+<SqlFieldName>DHC_PHACheckDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHACheckTime">
+<Description>
+复核时间(抓/包药完成时间)</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>31</SqlColumnNumber>
+<SqlFieldName>DHC_PHACheckTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAChecker">
+<Description>
+复核人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>32</SqlColumnNumber>
+<SqlFieldName>DHC_PHAChecker</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAOthDispDate">
+<Description>
+非HIS系统发药日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>33</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOthDispDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAOthDispTime">
+<Description>
+非HIS系统发药时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOthDispTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAOthDispUser">
+<Description>
+非HIS系统发药人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>35</SqlColumnNumber>
+<SqlFieldName>DHC_PHAOthDispUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADataSource">
+<Description>
+数据来源</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>36</SqlColumnNumber>
+<SqlFieldName>DHC_PHADataSource</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAMachNo">
+<Description>
+第三方机器号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>37</SqlColumnNumber>
+<SqlFieldName>DHC_PHAMachNo</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAPrintNo">
+<Description>
+住院发药打印流水号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>38</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrintNo</SqlFieldName>
+</Property>
+
+<Property name="DHCPHATimeFrom">
+<Description>
+查询开始时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>39</SqlColumnNumber>
+<SqlFieldName>DHC_PHATimeFrom</SqlFieldName>
+</Property>
+
+<Property name="DHCPHATimeTo">
+<Description>
+查询开始时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>40</SqlColumnNumber>
+<SqlFieldName>DHC_PHATimeTo</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAPrescNo">
+<Description>
+处方号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>41</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrescNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHAAgreeRetFlag">
+<Description>
+可退药标志</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>42</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAgreeRetFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="DHCPHAAgreeRetUserDr">
+<Description>
+可退药操作人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>43</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAgreeRetUser_Dr</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAAgreeRetDate">
+<Description>
+可退药日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>44</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAgreeRetDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAAgreeRetTime">
+<Description>
+可退药时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>45</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAgreeRetTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAAgreeRetRemark">
+<Description>
+可退药备注</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>46</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAgreeRetRemark</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="80"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="DHCPHAAuditUser">
+<Description>
+第一配药审核人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>47</SqlColumnNumber>
+<SqlFieldName>DHC_PHAAuditUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAReAuditUser">
+<Description>
+第二配药审核人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>48</SqlColumnNumber>
+<SqlFieldName>DHC_PHAReAuditUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADefeatedUser">
+<Description>
+代煎人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>49</SqlColumnNumber>
+<SqlFieldName>DHC_PHADefeatedUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADocLocDR">
+<Description>
+科室</Description>
+<Type>User.CTLoc</Type>
+<SqlColumnNumber>50</SqlColumnNumber>
+<SqlFieldName>DHC_PHADocLoc_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAPrintUser">
+<Description>
+打印人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>51</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPrintUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHADrawDR">
+<Description>
+备药单ID</Description>
+<Type>User.DHCPHDraw</Type>
+<SqlColumnNumber>52</SqlColumnNumber>
+<SqlFieldName>DHC_PHADraw_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHASecOperator">
+<Description>
+第二配药人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>53</SqlColumnNumber>
+<SqlFieldName>DHC_PHASecOperator</SqlFieldName>
+</Property>
+
+<Property name="DHCPHACollateUser">
+<Description>
+点击发药的核对人, 双人核对</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>54</SqlColumnNumber>
+<SqlFieldName>DHC_PHACollateUser</SqlFieldName>
+</Property>
+
+<Property name="DHCPHABuildFloorDR">
+<Description>
+楼层</Description>
+<Type>User.CTLocBuildingFloor</Type>
+<SqlColumnNumber>55</SqlColumnNumber>
+<SqlFieldName>DHC_PHABuildFloor_DR</SqlFieldName>
+</Property>
+
+<Property name="DHCPHARemark">
+<Description>
+备注</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>56</SqlColumnNumber>
+<SqlFieldName>DHC_PHARemark</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAPatGetInfo">
+<Description>
+患者领药信息, 领药人身份证等</Description>
+<Type>%String</Type>
+<SqlColumnNumber>57</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPatGetInfo</SqlFieldName>
+</Property>
+
+<Property name="DHCPHAPatGetDate">
+<Description>
+患者领药日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>58</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPatGetDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHAPatGetTime">
+<Description>
+患者领药时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>59</SqlColumnNumber>
+<SqlFieldName>DHC_PHAPatGetTime</SqlFieldName>
+</Property>
+
+<Property name="DHCPHASendDate">
+<Description>
+配送交接日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>60</SqlColumnNumber>
+<SqlFieldName>DHC_PHASendDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="DHCPHASendTime">
+<Description>
+配送交接时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>61</SqlColumnNumber>
+<SqlFieldName>DHC_PHASendTime</SqlFieldName>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCPHAC)</SqlIdExpression>
+<StreamLocation>^User.DHCPHACollectedS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="DHCPHACollectMaster">
+<Type>data</Type>
+<Global>^DHCPHAC</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{DHC_PHACollect_RowID}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+<Data name="DHC_PHAAgreeRetDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="DHC_PHAAgreeRetFlag">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="DHC_PHAAgreeRetRemark">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>6</Piece>
+</Data>
+<Data name="DHC_PHAAgreeRetTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="DHC_PHAAgreeRetUser_Dr">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="DHC_PHAAuditDate">
+<Delimiter>"^"</Delimiter>
+<Piece>26</Piece>
+</Data>
+<Data name="DHC_PHAAuditFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>25</Piece>
+</Data>
+<Data name="DHC_PHAAuditTime">
+<Delimiter>"^"</Delimiter>
+<Piece>27</Piece>
+</Data>
+<Data name="DHC_PHAAuditUser">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>7</Piece>
+</Data>
+<Data name="DHC_PHAAuditor">
+<Delimiter>"^"</Delimiter>
+<Piece>24</Piece>
+</Data>
+<Data name="DHC_PHABuildFloor_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>15</Piece>
+</Data>
+<Data name="DHC_PHACheckDate">
+<Delimiter>"^"</Delimiter>
+<Piece>29</Piece>
+</Data>
+<Data name="DHC_PHACheckTime">
+<Delimiter>"^"</Delimiter>
+<Piece>30</Piece>
+</Data>
+<Data name="DHC_PHAChecker">
+<Delimiter>"^"</Delimiter>
+<Piece>31</Piece>
+</Data>
+<Data name="DHC_PHACollateUser">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>14</Piece>
+</Data>
+<Data name="DHC_PHACollectDate">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="DHC_PHACollectStatus">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="DHC_PHACollectTime">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="DHC_PHACollectUser">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="DHC_PHACounts">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="DHC_PHADataSource">
+<Delimiter>"^"</Delimiter>
+<Piece>35</Piece>
+</Data>
+<Data name="DHC_PHADateFrom">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="DHC_PHADateTo">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="DHC_PHADefeatedUser">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>9</Piece>
+</Data>
+<Data name="DHC_PHADeliveryman_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>22</Piece>
+</Data>
+<Data name="DHC_PHADispNo">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="DHC_PHADocLoc_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>10</Piece>
+</Data>
+<Data name="DHC_PHADraw_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>12</Piece>
+</Data>
+<Data name="DHC_PHALoc_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="DHC_PHAMachNo">
+<Delimiter>"^"</Delimiter>
+<Piece>36</Piece>
+</Data>
+<Data name="DHC_PHAOperateDate">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="DHC_PHAOperateTime">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="DHC_PHAOperator">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="DHC_PHAOrdType">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="DHC_PHAOthDispDate">
+<Delimiter>"^"</Delimiter>
+<Piece>32</Piece>
+</Data>
+<Data name="DHC_PHAOthDispTime">
+<Delimiter>"^"</Delimiter>
+<Piece>33</Piece>
+</Data>
+<Data name="DHC_PHAOthDispUser">
+<Delimiter>"^"</Delimiter>
+<Piece>34</Piece>
+</Data>
+<Data name="DHC_PHAPatGetDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>18</Piece>
+</Data>
+<Data name="DHC_PHAPatGetInfo">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>17</Piece>
+</Data>
+<Data name="DHC_PHAPatGetTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>19</Piece>
+</Data>
+<Data name="DHC_PHAPrescNo">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="DHC_PHAPrintDate">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="DHC_PHAPrintFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="DHC_PHAPrintNo">
+<Delimiter>"^"</Delimiter>
+<Piece>37</Piece>
+</Data>
+<Data name="DHC_PHAPrintTime">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="DHC_PHAPrintUser">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>11</Piece>
+</Data>
+<Data name="DHC_PHAReAuditUser">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>8</Piece>
+</Data>
+<Data name="DHC_PHARemark">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>16</Piece>
+</Data>
+<Data name="DHC_PHASecOperator">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>13</Piece>
+</Data>
+<Data name="DHC_PHASendDate">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>20</Piece>
+</Data>
+<Data name="DHC_PHASendMedNum">
+<Delimiter>"^"</Delimiter>
+<Piece>23</Piece>
+</Data>
+<Data name="DHC_PHASendTime">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>21</Piece>
+</Data>
+<Data name="DHC_PHASendUser">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="DHC_PHAStkFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="DHC_PHATimeFrom">
+<Delimiter>"^"</Delimiter>
+<Piece>38</Piece>
+</Data>
+<Data name="DHC_PHATimeTo">
+<Delimiter>"^"</Delimiter>
+<Piece>39</Piece>
+</Data>
+<Data name="DHC_PHAUrgentFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="DHC_PHAWardGroup_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>28</Piece>
+</Data>
+<Data name="DHC_PHAWard_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="DHC_SendAutoFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="INDEXPHACollectedDate">
+<Type>index</Type>
+<Global>^DHCPHAC</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"PHA"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{DHC_PHALoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>"DATE"</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{DHC_PHACollectDate}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="INDEXPHAPrintDate">
+<Type>index</Type>
+<Global>^DHCPHAC</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"PHP"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{DHC_PHALoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>"DATE"</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{DHC_PHAPrintDate}</Expression>
+</Subscript>
+<Subscript name="6">
+<AccessType>sub</AccessType>
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDateAuditFlag">
+<Type>index</Type>
+<Global>^DHCPHACi</Global>
+<Subscript name="1">
+<Expression>"DateAuditFlag"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{DHC_PHACollectDate}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{DHC_PHAAuditFlag}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDateWard">
+<Type>index</Type>
+<Global>^DHCPHAC</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"DATEWARD"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{DHC_PHALoc_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{DHC_PHAPrintDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{DHC_PHAWard_DR}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+</SQLMap>
+<SQLMap name="IndexNo">
+<Type>index</Type>
+<Global>^DHCPHAC</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"NO"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>$$ALPHAUP({DHC_PHADispNo})</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+</SQLMap>
+<SQLMap name="IndexPHALocOperDate">
+<Type>index</Type>
+<Global>^DHCPHACi</Global>
+<Subscript name="1">
+<Expression>"PHALocOperDate"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{DHC_PHALoc_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{DHC_PHAOperateDate}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPrescNo">
+<Type>index</Type>
+<Global>^DHCPHACi</Global>
+<Subscript name="1">
+<Expression>"PRESCNO"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{DHC_PHAPrescNo}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPrintNO">
+<Type>index</Type>
+<Global>^DHCPHAC</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"PrintNO"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>$$ALPHAUP({DHC_PHAPrintNo})</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>$$ALPHAUP({DHC_PHADispNo})</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{DHC_PHACollect_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>DHC_PHACollect_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCPHAC)
+	s oldI = +$g(^mdata("DHCPHACOLLECTED"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCPHAC = maxI
+	s ^mdata("DHCPHACOLLECTED") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

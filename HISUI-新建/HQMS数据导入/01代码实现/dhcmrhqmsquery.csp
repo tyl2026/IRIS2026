@@ -1,0 +1,70 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HQMS 数据自定义查询</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+html,body{height:100%}
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0;overflow:hidden;display:flex;flex-direction:column}
+.headbar{display:flex;align-items:center;padding:8px 14px;background:#E4F0FF;border-bottom:1px solid #95B8E7;flex:0 0 auto}
+.headbar .title{font-weight:700;font-size:14px;color:#15428b}
+.qbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7;flex:0 0 auto}
+.qbar label{font-size:13px;color:#15428b}
+#fieldGroups{border:1px solid #d0ddef;background:#fff;padding:6px;margin:8px 14px;flex:0 0 auto}
+#grpTabs a{margin-right:6px}
+#fieldList{height:150px;overflow:auto;border:1px solid #eee;background:#fbfdff;padding:4px}
+#fieldList label{display:inline-block;width:210px;margin:1px 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+#selTags{min-height:24px;max-height:46px;overflow:auto}
+#selTags .tag{display:inline-block;background:#e8f1ff;border:1px solid #95B8E7;color:#15428b;padding:1px 6px;margin:2px 3px;font-size:12px;border-radius:2px}
+#condRows{padding:4px 14px 6px;overflow:auto;max-height:96px;flex:0 0 auto}
+.condRow{display:flex;align-items:center;gap:6px;margin:3px 0}
+.condRow select{width:220px}
+.condRow input{width:180px;height:24px}
+.resArea{flex:1;min-height:0;padding:0 14px 8px;display:flex;flex-direction:column}
+.grow{flex:1;min-height:0;position:relative}
+#gridResult{width:100%;height:100%}
+</style>
+</head>
+<body>
+<div class="headbar"><span class="title">HQMS 数据自定义字段查询（User.YZSYHQMSData）</span></div>
+
+<div class="qbar">
+    <a id="btnQuery" class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="doQuery()">查询</a>
+    <a class="hisui-linkbutton" data-options="iconCls:'icon-undo'" onclick="resetQuery()">重置</a>
+    <a id="btnExport" class="hisui-linkbutton" data-options="iconCls:'icon-w-export'" onclick="doExport()">导出CSV</a>
+    <span style="color:#888;font-size:12px">说明：勾选左侧字段作为显示列；条件行可多组(AND)；导出为全部结果。</span>
+</div>
+
+<div id="fieldGroups">
+    <div style="margin-bottom:4px"><b style="color:#15428b">1. 选择显示字段：</b>
+        <span id="grpTabs"></span>
+        <a class="hisui-linkbutton" onclick="checkAllField(true)" data-options="plain:true">本组全选</a>
+        <a class="hisui-linkbutton" onclick="checkAllField(false)" data-options="plain:true">本组清空</a>
+        <a class="hisui-linkbutton" onclick="clearAllSel()" data-options="plain:true">清空已选</a>
+    </div>
+    <div id="fieldList"></div>
+    <div id="selTags" style="margin-top:4px"><b style="color:#15428b">已选：</b><span id="selTagInner"></span></div>
+</div>
+
+<div id="condRows">
+    <b style="color:#15428b">2. 查询条件（AND 组合）：</b>
+    <a class="hisui-linkbutton" onclick="addCond()" data-options="iconCls:'icon-add'">添加条件</a>
+</div>
+
+<div class="resArea">
+    <div class="grow"><table id="gridResult" class="hisui-datagrid"></table></div>
+</div>
+
+<script type="text/javascript" src="../scripts/dhcmrhqmsquery.js"></script>
+</body>
+</html>
+</csp:content>

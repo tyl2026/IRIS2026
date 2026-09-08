@@ -1,0 +1,618 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>通用数据采集字典与HIS字典对照维护</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+    :root {
+        --bg:        #cee4ff;
+        --surface:   #F9FBFF;
+        --titlebg:   #E4F0FF;
+        --heading:   #15428b;
+        --border:    #95B8E7;      /* HISUI 经典边框蓝 */
+        --accent:    #017bce;
+        --muted:     #666;
+        --radius:    0px;          /* easyui/HISUI 经典直边观感 */
+        --tablehead: #E0ECFF;      /* 表格表头蓝 */
+        --rowalt:    #FAFAFA;      /* 偶数行底色 */
+        --rowhover:  #eaf2ff;      /* 悬停行 */
+        --rowsel:    #FFE48D;      /* 选中行 */
+    }
+    * { box-sizing: border-box; }
+    body {
+        background: var(--bg);
+        font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        font-size: 14px; margin: 0; padding: 0; color: #333;
+    }
+    .f-spacer { flex: 1; }
+
+    #titleBar {
+        display: flex; align-items: center; gap: 10px;
+        padding: 6px 14px;
+        background: #F9FBFF;
+        border-bottom: 2px solid #95B8E7;
+    }
+    #titleBar h1 { color: #15428b; font-size: 16px; margin: 0; font-weight: 700; }
+    #titleBar .hint { color: #888; font-size: 12px; }
+    #titleBar select { width: 200px; height: 24px; background:#fff; color:#333; border: 1px solid #95B8E7; padding: 0 4px; }
+
+    /* ---------- Tabs ---------- */
+    #mainTabs { margin: 10px 12px 12px 12px; height: 100%; }
+    .tabWrap { padding: 10px; background: var(--surface); }
+    /* Tab2 对照关系查询: flex 纵向 + grow 网格区(站内 HQMS 页同款写法), 高度由 JS fillContainer 铺满 */
+    .tabWrap.tabFill { display: flex; flex-direction: column; }
+    .tabWrap.tabFill > .filterBar { flex: 0 0 auto; }
+    /* 网格弹性填充区: 包住 datagrid, fit:true 网格贴满该区域 */
+    .grow { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+    /* 通用分页条(成熟方案): 块底部固定一行, 左总条数, 右翻页控件; 与 fork 分页组件完全解耦。
+       height 固定 + box-sizing:border-box: 页面加载时即预留最终高度, 避免分页条内容晚于网格
+       初始化出现, 造成 paneBody 后期收缩、网格最后一行被裁 */
+    .my-pager {
+        flex: 0 0 auto;
+        height: 30px; box-sizing: border-box; overflow: hidden;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 3px 8px; border-top: 1px solid #e0e0e0;
+        background: #fafafa; font-size: 12px; color: #555;
+    }
+    .my-pager .mp-left { flex: 0 0 auto; }
+    .my-pager .mp-right { flex: 0 0 auto; display: flex; align-items: center; gap: 6px; }
+    .my-pager a {
+        display: inline-block; min-width: 46px; text-align: center;
+        padding: 1px 6px; border: 1px solid #d4d4d4; border-radius: 3px;
+        background: #fff; color: #333; text-decoration: none; cursor: pointer;
+    }
+    .my-pager a:hover { border-color: #017bce; color: #017bce; }
+    .my-pager a.mp-disabled { color: #bbb; border-color: #eee; cursor: not-allowed; pointer-events: none; }
+    .my-pager .mp-info { color: #666; }
+    .my-pager b { color: #15428b; }
+    .my-pager select { height: 22px; border: 1px solid #d4d4d4; border-radius: 3px; }
+    /* Tab 字典导入/字典注册: 总高 700px; 单 subBlock 时撑满整容器, 多 subBlock 按 subPlat/subImp 比例分 */
+    .tabWrap.fillFull { padding: 10px; background: var(--surface); height: 700px; box-sizing: border-box; display: flex; flex-direction: column; }
+    .tabWrap.fillFull > .subBlock { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .tabWrap.fillFull > .subBlock > .paneHead { flex: 0 0 auto; }
+    .tabWrap.fillFull > .subBlock > .impBox { flex: 0 0 auto; }
+    .tabWrap.fillFull > .subBlock > .doc   { flex: 0 0 auto; }
+    .tabWrap.fillFull > .subBlock.subPlat  { flex: 1 1 auto; min-height: 0; }
+    .tabWrap.fillFull > .subBlock.subDict  { flex: 1 1 0; min-height: 0; }
+    .tabWrap.fillFull > .subBlock.subImp   { flex: 0 0 auto; margin-top: 8px; }
+
+    /* ---------- 自绘 tab 头(JS 垫片输出 .mtabs-head/.mtab): 经典隆起页签 ---------- */
+    .mtabs-head {
+        display: flex; align-items: flex-end; user-select: none;
+        padding: 4px 4px 0 6px;
+        background: linear-gradient(to bottom, #F4F9FF, #E0ECFF);
+        border-bottom: 2px solid #95B8E7;
+    }
+    .mtabs-head .mtab {
+        display: inline-block; padding: 6px 20px; margin: 0 3px 0 0;
+        cursor: pointer; font-size: 13px; color: #0E2D5F; text-decoration: none;
+        border: 1px solid transparent; border-bottom: none;
+        border-radius: 4px 4px 0 0;
+    }
+    .mtabs-head .mtab:hover { color: #017bce; }
+    .mtabs-head .mtab.on {
+        background: #fff; color: #15428b; font-weight: bold;
+        border-color: #95B8E7; margin-bottom: -2px;
+    }
+
+    .filterBar {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px;
+        padding: 7px 10px; margin-bottom: 8px;
+        background: #fff; border: 1px solid #95B8E7;
+    }
+    .filterBar label { color: #15428b; font-size: 13px; }
+    .filterBar input, .filterBar select {
+        width: 150px; height: 24px; line-height: normal;
+        border: 1px solid #95B8E7; background: #fff; color: #333;
+        padding: 0 6px; font-size: 13px; outline: none;
+    }
+    .filterBar input:focus, .filterBar select:focus { border-color: #6b9cde; }
+    .filterBar select { width: 110px; }
+    .bar-hint { color: #999; font-size: 12px; }
+
+    /* 对照覆盖 datagrid 行高亮：未对照行红色字 + 浅红底 */
+    .cov-unmapped td { color: #d63031 !important; background: #fff5f5 !important; }
+
+    /* 危险按钮附加类(无 HISUI css 时的兜底文字色) */
+    .hisui-linkbutton.l-btn-red { color: #c0392b; }
+
+    /* ---------- 对照维护主体(四块并列) ---------- */
+    .mapBody { display: flex; gap: 10px; }
+    .pane {
+        flex: 1 1 0; min-width: 0;
+        background: #fff; border: 1px solid #95B8E7;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+    }
+
+    .paneHead {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px;
+        min-height: 28px; padding: 2px 10px;
+        background: #E4F0FF; color: #15428b;
+        font-size: 13px; font-weight: 600;
+        border-bottom: 1px solid #95B8E7;
+    }
+    .paneHead .mini { font-weight: 400; color: #666; font-size: 12px; }
+    .mini-tag {
+        font-weight: 400; font-size: 12px; padding: 1px 8px;
+        border-radius: 9px; border: 1px solid var(--border); background: #fff; color: var(--heading);
+    }
+    .mini-tag.warn { color: #c44; border-color: #c44; }
+
+    .miniBar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 10px; border-bottom: 1px solid #e6e6f0; background: #fcfcff;
+    }
+    /* 按钮条(HIS 字典区 保存对照/清空对照/刷新描述: 横向平铺, 窄时自动换行) */
+    .miniBar-flow { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px; padding-top: 2px; padding-bottom: 2px; }
+    .miniBar input { width: 150px; height: 24px; border: 1px solid var(--border); border-radius: var(--radius); padding: 0 6px; }
+    .miniBar .bar-hint { color: #999; font-size: 12px; }
+
+    .paneBody { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+
+    /* ---------- 未绑定 HIS 字典的引导 ---------- */
+    .bind-tip {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        padding: 20px; background: #fff8e8; text-align: center;
+        border-top: 1px solid #f0e0c4;
+    }
+    .bind-tip .big {
+        font-size: 16px; color: var(--heading); font-weight: 600; margin-bottom: 8px;
+    }
+    .bind-tip .desc { color: #666; font-size: 13px; max-width: 460px; line-height: 22px; }
+    .bind-tip .ops { margin-top: 18px; display: flex; gap: 10px; }
+    .bind-tip .ops a { padding: 6px 18px; }
+
+    /* ---------- 导入维护 ---------- */
+    .subBlock { margin-bottom: 12px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius); }
+    .impBox { padding: 12px; }
+    .imp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+    .imp-row input[type=file] { font-size: 13px; }
+    .imp-row input[type=text] { width: 320px; height: 24px; border: 1px solid #95B8E7; padding: 0 6px; }
+    #impProgress { color: var(--accent); font-size: 13px; }
+    .doc {
+        font-size: 12px; color: #666; line-height: 20px;
+        background: #fbfcfe; border: 1px solid #d9e2ee;
+        padding: 8px 10px; margin-top: 6px;
+    }
+    .doc b { color: var(--heading); }
+    .doc code { background: #eef2fa; padding: 0 4px; border-radius: 3px; color: var(--heading); }
+
+    /* ---------- 弹窗 ---------- */
+    .window-body { overflow: hidden !important; padding: 12px 16px !important; }
+    .panel-body.panel-body-dialog { overflow: hidden !important; padding: 0 !important; }
+    .dlg-inner { padding: 0; max-height: 460px; overflow: auto; }
+    .dl-row { margin-bottom: 12px; }
+    .dl-row label { display: block; margin-bottom: 4px; font-size: 13px; color: #555; font-weight: 500; }
+    .dl-row input, .dl-row select, .dl-row textarea {
+        width: 100%; padding: 6px 8px; box-sizing: border-box;
+        border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px;
+    }
+    .dl-row textarea { font-family: Consolas, "Courier New", monospace; }
+    .dl-row input[readonly] { background: #f0f0f0; color: #888; }
+    .dl-row .hint { font-size: 12px; color: #888; margin-top: 3px; }
+
+    .dl-2 { display: flex; gap: 12px; }
+    .dl-2 .dl-row { flex: 1; }
+    .dl-divider { font-size: 13px; color: var(--heading); font-weight: 600; margin: 12px 0 6px 0; padding-bottom: 4px; border-bottom: 1px dashed var(--border); }
+    .probe-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .probe-tbl th, .probe-tbl td { border: 1px solid #ddd; padding: 4px 6px; text-align: left; word-break: break-all; }
+    .probe-tbl th { background: #f2f6ff; color: var(--heading); }
+    .badge-enum { display: inline-block; padding: 1px 6px; border-radius: 3px; background: #e3f0ff; color: #017bce; font-size: 12px; }
+    .badge-sql  { display: inline-block; padding: 1px 6px; border-radius: 3px; background: #fff4e3; color: #d97700; font-size: 12px; }
+
+    /* ---------- 自绘弹窗(无 $.fn.dialog 时的回退路径): 经典 HISUI 直角蓝条窗 ---------- */
+    .win-fb {
+        background: #fff; border: 1px solid #95B8E7;
+        box-shadow: 2px 2px 10px rgba(30, 60, 110, .25);
+    }
+    .win-head-fb {
+        display: flex; align-items: center; justify-content: space-between;
+        background: #E4F0FF; color: #15428b;
+        font-weight: 700; font-size: 14px; padding: 7px 14px;
+        border-bottom: 1px solid #95B8E7;
+    }
+    .win-close-fb { cursor: pointer; color: #7a88a0; font-size: 18px; line-height: 1; padding: 0 4px; }
+    .win-close-fb:hover { color: #d03030; }
+    .win-body-fb { background: #fff; padding: 12px 14px; }
+    .win-btns-fb {
+        padding: 8px 12px; text-align: right;
+        background: #F9FBFF; border-top: 1px solid #dde3ec;
+    }
+    .lb-fb {
+        display: inline-block; margin-left: 8px; padding: 4px 16px;
+        cursor: pointer; font-size: 13px;
+        border: 1px solid #95B8E7; background: linear-gradient(to bottom, #ffffff, #eef3fb);
+        color: #15428b; text-decoration: none;
+    }
+    .lb-fb:hover { background: linear-gradient(to bottom, #eaf2ff, #d7e6f8); }
+
+    /* ---------- 弹框表单观感优化(纯样式, 不改功能/结构) ---------- */
+    .dlg-inner { font-size: 13px; color: #2f3b4f; }
+    .dl-row { margin-bottom: 12px; }
+    .dl-row label {
+        display: flex; align-items: center; gap: 3px;
+        font-size: 12.5px; color: #3f4f6b; font-weight: 600; margin-bottom: 6px;
+    }
+    .dl-row label code, .dlg-inner label code { font-size: 12px; color: #017bce; font-weight: 500; }
+    .dl-row input, .dl-row select, .dl-row textarea,
+    .dlg-inner input, .dlg-inner select, .dlg-inner textarea {
+        width: 100%; box-sizing: border-box;
+        border: 1px solid #c9d6ea; border-radius: 4px; background: #fff; color: #233446;
+        padding: 6px 8px; font-size: 13px; outline: none;
+        transition: border-color .15s, box-shadow .15s;
+    }
+    .dl-row input:focus, .dl-row select:focus, .dl-row textarea:focus,
+    .dlg-inner input:focus, .dlg-inner select:focus, .dlg-inner textarea:focus {
+        border-color: #6b9cde; box-shadow: 0 0 0 2px rgba(107, 156, 222, .16);
+    }
+    .dl-row input[readonly], .dlg-inner input[readonly] {
+        background: #f2f5fa; color: #7b8798; cursor: default; border-color: #dbe3ee;
+    }
+    .dl-row textarea, .dlg-inner textarea {
+        line-height: 1.6; font-family: Consolas, Menlo, monospace; resize: vertical;
+    }
+    .dl-row .hint, .dlg-inner .hint {
+        font-size: 12px; color: #8a97a8; margin-top: 4px; line-height: 1.6;
+    }
+    .dl-2 { display: flex; gap: 14px; align-items: flex-start; }
+    .dl-2 .dl-row { flex: 1 1 0; min-width: 0; }
+    .dl-divider {
+        display: flex; align-items: center; gap: 8px;
+        margin: 14px 0 10px; padding: 6px 0;
+        font-size: 13px; color: #15428b; border-bottom: 1px solid #e4ecf7;
+    }
+    .dl-divider::before {
+        content: ''; width: 3px; height: 14px;
+        background: #4d90d9; border-radius: 2px; flex: 0 0 auto;
+    }
+    .dlg-inner .dlg-tabs .panel-body, .dlg-inner .tabs-panels .panel-body { padding-top: 4px; }
+    /* 探测结果表 */
+    .probe-tbl { border-collapse: separate; border-spacing: 0; width: 100%; }
+    .probe-tbl th {
+        background: #eef3fb; color: #15428b; font-weight: 600;
+        padding: 6px 8px; border: 1px solid #cfe0f5; border-top: none;
+    }
+    .probe-tbl td { padding: 6px 8px; border: 1px solid #edf1f7; border-top: none; }
+    .probe-tbl tr:hover td { background: #f7faff; }
+    /* 自绘弹窗按钮条间距微调 */
+    .win-btns-fb .lb-fb { border-radius: 3px; }
+
+    /* ---------- 弹框布局微调2: 留白/行距/下拉行高/同行间距 ---------- */
+    .window-body { padding: 16px 18px !important; }
+    .win-body-fb { padding: 16px 18px; }
+    .win-btns-fb { padding: 10px 18px; }
+    .dl-row { margin-bottom: 14px; }
+    .dl-row label { margin-bottom: 6px; }
+    /* 下拉框: 高度充足, 文字不被裁, 箭头区留白 */
+    .dl-row input, .dl-row select, .dl-row textarea,
+    .dlg-inner input, .dlg-inner select, .dlg-inner textarea {
+        height: auto; min-height: 30px;
+    }
+    .dl-row select, .dlg-inner select {
+        padding: 4px 28px 4px 10px;   /* 右侧留出箭头位, 文字不贴边 */
+        line-height: 1.5;
+    }
+    .dl-row select option, .dlg-inner select option { font-size: 13px; padding: 3px 6px; }
+    /* 同行控件间距(同一 .dl-row 内连续多个控件时) */
+    .dl-row > input + input,
+    .dl-row > input + select,
+    .dl-row > select + input,
+    .dl-row > select + select,
+    .dl-row > textarea + input,
+    .dl-row > input + textarea { margin-left: 8px; }
+    .dl-2 { gap: 16px; }
+    .dl-2 .dl-row { flex: 1 1 0; min-width: 0; }
+    .dl-2 .dl-row + .dl-row { margin-left: 0; }
+
+    /* ---------- 按钮统一间距(flex gap 替代零散 margin) ---------- */
+    .win-btns-fb {
+        display: flex; justify-content: flex-end; align-items: center;
+        gap: 8px;
+    }
+    .win-btns-fb .lb-fb { margin: 0 !important; }
+    .filterBar, .miniBar, .paneHead, .imp-row, .bind-tip .ops { gap: 8px; }
+    .hisui-linkbutton { margin: 0; }
+
+    /* ---------- 按钮外边距统一 5px + 弹框元素间距再加大 ---------- */
+    .hisui-linkbutton { margin: 5px !important; }
+    .win-btns-fb .lb-fb { margin: 5px !important; }
+    /* 弹框内容与边框、元素之间间距加大 */
+    .window-body { padding: 20px 22px !important; }
+    .win-body-fb { padding: 20px 22px; }
+    .win-btns-fb { padding: 10px 16px 14px; }
+    .dlg-inner { padding: 2px; }
+    .dl-row { margin-bottom: 16px; }
+    .dl-row label { margin-bottom: 8px; }
+    .dl-row input, .dl-row select, .dl-row textarea,
+    .dlg-inner input, .dlg-inner select, .dlg-inner textarea { margin-top: 2px; }
+    .dl-2 { gap: 18px; }
+    .dl-divider { margin: 18px 0 12px; }
+    .dlg-inner .dlg-tabs .panel-body, .dlg-inner .tabs-panels .panel-body { padding: 12px 4px 4px; }
+
+    /* ---------- Tab1 四块并列随窗高自适应: 底部不露空白 ---------- */
+    .tab1grow {
+        display: flex; flex-direction: column;
+        height: calc(100vh - 150px);
+    }
+    .tab1grow > .filterBar { flex: 0 0 auto; }
+    .tab1grow > .mapBody { flex: 1 1 auto; height: auto; min-height: 560px; }
+    .tab1grow .pane { min-height: 0; }
+    .tab1grow .paneBody { flex: 1 1 auto; min-height: 60px; }
+</style>
+</head>
+<body>
+
+<div id="titleBar">
+    <h1>通用数据采集字典与HIS字典对照维护</h1>
+    <span class="hint">第三方采集标准值域 ←→ HIS 字典（先维护 HIS 字典表，再回此对照）</span>
+    <span class="f-spacer"></span>
+    <label>平台</label>
+    <select id="gPlat"></select>
+</div>
+
+<div id="mainTabs" class="hisui-tabs">
+
+    <!-- ================= Tab1 对照维护 ================= -->
+    <div title="字典对照维护">
+        <div class="tabWrap tab1grow">
+            <div class="filterBar">
+                <label>值域</label>
+                <input id="qDomain" class="hisui-textbox" placeholder="值域代码/名称">
+                <label>绑定状态</label>
+                <select id="qMapFlag">
+                    <option value="">全部</option>
+                    <option value="D">已绑定HIS字典</option>
+                    <option value="N">未绑定HIS字典</option>
+                </select>
+                <a id="btnQDomain" class="hisui-linkbutton" onclick="loadDomain(1)">查询</a>
+                <a id="btnRDomain" class="hisui-linkbutton" onclick="resetDomain()">重置</a>
+                <span class="f-spacer"></span>
+                <span id="domainStat" class="bar-hint"></span>
+            </div>
+
+            <div class="mapBody">
+                <div class="pane paneDomain">
+                        <div class="paneHead">
+                            <span>采集字典（值域）</span>
+                            <span id="domainTip" class="mini"></span>
+                            <span class="f-spacer"></span>
+                            <a id="btnBind" class="hisui-linkbutton" onclick="openBindDlg()">维护HIS字典</a>
+                        </div>
+                        <div class="paneBody"><table id="dgDomain"></table></div>
+                        <div class="my-pager" id="pagerDomain"></div>
+                    </div>
+                    <div class="pane paneItem">
+                        <div class="paneHead">
+                            <span>采集字典条目</span>
+                            <span id="itemTip" class="mini"></span>
+                            <span class="f-spacer"></span>
+                            <select id="qItemMapFlag" onchange="loadItem(1)">
+                                <option value="">全部</option>
+                                <option value="N">未对照</option>
+                                <option value="Y">已对照</option>
+                            </select>
+                            <input id="qItem" class="hisui-textbox" style="width:120px;height:22px;" placeholder="代码/名称">
+                            <a class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="loadItem(1)">查询</a>
+                            <a class="hisui-linkbutton l-btn-red" id="btnBatchClearRel" data-options="iconCls:'icon-cancel'" onclick="clearRelBatch()" style="margin-left:6px;">批量清除对照</a>
+                        </div>
+                        <div class="paneBody"><table id="dgItem"></table></div>
+                        <div class="my-pager" id="pagerItem"></div>
+                    </div>
+
+                    <div class="pane paneHis">
+                        <div class="paneHead">
+                            <span id="hisPaneTitle">HIS 字典</span>
+                            <span class="f-spacer"></span>
+                            <span id="hisModeTag" class="mini-tag">未选择值域</span>
+                            <a id="btnChangeBind" class="hisui-linkbutton" data-options="iconCls:'icon-bind'" onclick="changeBindDlg()" style="margin-left:6px;">维护HIS字典绑定</a>
+                        </div>
+
+                        <!-- 字典对照模式 -->
+                        <div id="hisDictBox" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+                            <div class="miniBar">
+                                <input id="qHis" placeholder="代码/描述关键字">
+                                <a class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="loadHis(1)">搜索</a>
+                                <label style="font-size:13px;color:#666;">显示</label>
+                                <select id="qHisShowMode" style="width:120px;height:24px;">
+                                    <option value="N" selected>仅未对照</option>
+                                    <option value="A">全部</option>
+                                    <option value="M">仅已对照</option>
+                                </select>
+                                <span class="f-spacer"></span>
+                                <span id="selTip" class="bar-hint">已选 0 项</span>
+                            </div>
+                            <div class="paneBody"><table id="dgHis"></table></div>
+                            <div class="my-pager" id="pagerHis"></div>
+                            <div class="miniBar miniBar-flow" style="border-bottom:0;border-top:1px solid #e6e6f0;">
+                                <a id="btnSaveRel" class="hisui-linkbutton" onclick="saveDictRel()">保存对照</a>
+                                <a class="hisui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="clearRel()">清空对照</a>
+                                <a class="hisui-linkbutton" data-options="iconCls:'icon-reload'" onclick="refreshDesc()">刷新描述</a>
+                                <span class="bar-hint">保存为追加新增，不清空原有对照；清空请点【清空对照】</span>
+                            </div>
+                        </div>
+
+                        <!-- 未绑定 HIS 字典的引导 -->
+                        <div id="unbindBox" class="bind-tip" style="display:none;">
+                            <div class="big">该值域尚未绑定 HIS 字典表</div>
+                            <div class="desc">
+                                对照前需要先准备一份 HIS 字典。可以从已有的 HIS 字典表中选一份绑定到这个值域，
+                                或者临时通过 <b>SQL 语句</b> 或 <b>直接枚举</b> 两种方式现场维护一份字典并立即绑定。
+                            </div>
+                            <div class="ops">
+                                <a class="hisui-linkbutton" data-options="iconCls:'icon-bind'" onclick="openBindDlg('pick')">选择已有字典并绑定</a>
+                                <a class="hisui-linkbutton" data-options="iconCls:'icon-add'"    onclick="openBindDlg('new')">就地新增字典并绑定</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pane paneRel">
+                        <div class="paneHead">
+                            <span>当前条目的对照关系</span>
+                            <span id="curRelTip" class="mini"></span>
+                        </div>
+                        <div class="paneBody"><table id="dgCurRel"></table></div>
+                        <div class="my-pager" id="pagerCurRel"></div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= Tab2 对照关系查询 ================= -->
+    <div title="对照关系查询">
+        <div class="tabWrap tabFill">
+            <div class="filterBar">
+                <label>平台</label>
+                <select id="rPlat"></select>
+                <label>值域</label>
+                <select id="rDomainSel" style="width:200px;"><option value="">全部</option></select>
+                <input id="rDomain" placeholder="值域代码/名称" style="width:140px;">
+                <label>采集代码/名称</label>
+                <input id="rItem" placeholder="关键字">
+                <label>HIS代码/描述</label>
+                <input id="rHis" placeholder="关键字">
+                <label>状态</label>
+                <select id="rFlag">
+                    <option value="">全部</option>
+                    <option value="Y">启用</option>
+                    <option value="N">停用</option>
+                </select>
+                <a id="btnQRel" class="hisui-linkbutton" onclick="loadRel(1)">查询</a>
+                <a class="hisui-linkbutton" onclick="resetRel()">重置</a>
+            </div>
+            <div class="filterBar" style="margin-top:-2px;">
+                <a id="btnOn" class="hisui-linkbutton" onclick="batchFlag('Y')">批量启用</a>
+                <a id="btnOff" class="hisui-linkbutton" onclick="batchFlag('N')">批量停用</a>
+                <a id="btnDel" class="hisui-linkbutton" onclick="batchDelete()">批量删除</a>
+                <a id="btnExp" class="hisui-linkbutton" onclick="exportRel()">导出CSV</a>
+                <span class="f-spacer"></span>
+                <span id="relStat" class="bar-hint"></span>
+            </div>
+            <div class="grow"><table id="dgRel"></table></div>
+        </div>
+    </div>
+
+    <!-- ================= Tab3 对照覆盖查询(独立页签) ================= -->
+    <div title="对照覆盖查询">
+        <div class="tabWrap tabFill">
+            <div class="filterBar">
+                <label>平台</label>
+                <select id="covPlat"></select>
+                <label>值域</label>
+                <select id="covDomain" style="width:220px;"><option value="">—全部—</option></select>
+                <label>HIS 字典</label>
+                <select id="covDict" style="width:220px;"><option value="">—全部—</option></select>
+                <a id="btnCovQ" class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="loadCov(1)">查询</a>
+                <a id="btnCovR" class="hisui-linkbutton" onclick="resetCov()">重置</a>
+                <a id="btnCovU" class="hisui-linkbutton" data-options="iconCls:'icon-reload'" onclick="loadCov()">刷新</a>
+                <a id="btnCovExp" class="hisui-linkbutton" data-options="iconCls:'icon-w-export'" onclick="exportCov()">导出CSV</a>
+                <span class="f-spacer"></span>
+                <span id="covStat" class="bar-hint"></span>
+            </div>
+            <div class="filterBar" style="margin-top:-2px;">
+                <a id="btnCovOnlyUn" class="hisui-linkbutton" onclick="loadCovWithFilter('U')">只看未对照</a>
+                <a id="btnCovOnlyMap" class="hisui-linkbutton" onclick="loadCovWithFilter('M')">只看向已对照</a>
+                <a id="btnCovAll" class="hisui-linkbutton" onclick="loadCovWithFilter('')">显示全部</a>
+                <span class="f-spacer"></span>
+                <span class="bar-hint" style="color:#888;">未对照 HIS 代码显示为红色高亮，便于一眼定位缺失项</span>
+            </div>
+            <div class="grow"><table id="dgCov"></table></div>
+        </div>
+    </div>
+
+    <!-- ================= Tab4 HIS 字典表注册 ================= -->
+    <div title="HIS 字典表注册">
+        <div class="tabWrap fillFull">
+
+            <div class="subBlock subDict">
+                <div class="paneHead">
+                    <span>HIS 字典表注册</span>
+                    <span class="mini">登记可被对照的 HIS 字典，SQL/枚举两种取数方式</span>
+                    <span class="f-spacer"></span>
+                    <a class="hisui-linkbutton" data-options="iconCls:'icon-w-add'" onclick="openDictDlg('add',null)">新增字典表</a>
+                    <a class="hisui-linkbutton" data-options="iconCls:'icon-reload'" onclick="loadDict()">刷新</a>
+                </div>
+                <div class="grow"><table id="dgDict"></table></div>
+                <div class="doc">
+                    <b>取数方式（两种任选其一）：</b><br>
+                    <b>1. <span class="badge-sql">SQL</span></b>
+                    适用于 HIS 已有标准 SQL 表（如 <code>CT_Loc</code>、<code>CT_Nation</code>）。
+                    在 <code>SQL 语句</code> 框填写完整的 SELECT 语句，结果集需包含 <b>三列且顺序固定</b>：
+                    <code>id</code>（隐藏主键，放最前）、<code>code</code>（对照代码）、<code>desc</code>（对照描述）。
+                    列名不固定，用 <code>AS</code> 指定别名即可；可用 <code>WHERE</code> 过滤、<code>TOP n</code> 限制。
+                    例：<code>SELECT CTLOC_RowID AS id, CTLOC_Code AS code, CTLOC_Desc AS desc FROM CT_Loc</code>
+                    <br><br>
+                    <b>2. <span class="badge-enum">枚举</span></b>
+                    适用于标准表还没有或临时枚举的情况。
+                    在 <code>枚举项</code> 框按行填写 <code>代码=名称</code>，例如
+                    <code>1=是</code> / <code>2=否</code>；空行和 <code>#</code> 开头行会被忽略。
+                    <br><br>
+                    <b>提示：</b>新增或调整后务必先点【探测】看样本数据，确认"描述"列取值正确后再启用。
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= Tab5 字典导入维护 ================= -->
+    <div title="字典导入维护">
+        <div class="tabWrap fillFull">
+
+            <div class="subBlock subPlat">
+                <div class="paneHead">
+                    <span>采集平台维护</span>
+                    <span class="mini">预留其他采集标准（HQMS / 六医联动等）接入入口</span>
+                    <span class="f-spacer"></span>
+                    <a class="hisui-linkbutton" data-options="iconCls:'icon-w-add'" onclick="openPlatDlg('add',null)">新增平台</a>
+                    <a class="hisui-linkbutton" data-options="iconCls:'icon-reload'" onclick="loadPlat()">刷新</a>
+                </div>
+                <div class="grow"><table id="dgPlat"></table></div>
+            </div>
+
+            <div class="subBlock subImp">
+                <div class="paneHead">
+                    <span>采集字典导入</span>
+                    <span class="mini">采集字典值域及条目批量导入（其他平台字典同用此入口）</span>
+                </div>
+                <div class="impBox">
+                    <div class="imp-row">
+                        <label>导入平台</label>
+                        <select id="impPlat" style="width:200px;height:26px;"></select>
+                        <input type="file" id="impFile" accept=".csv,.txt,.tsv">
+                        <a id="btnImpUpload" class="hisui-linkbutton" onclick="importUpload()">上传导入</a>
+                        <label style="font-size:13px;color:#666;">
+                            <input type="checkbox" id="impClear" style="width:auto;"> 导入前清空该平台旧数据
+                        </label>
+                    </div>
+                    <div class="imp-row">
+                        <label>服务器路径</label>
+                        <input type="text" id="impPath" placeholder="如 /data/通用值域明细.csv（文件需先放到 IRIS 服务器）">
+                        <a class="hisui-linkbutton" data-options="iconCls:'icon-w-import'" onclick="importServerPath()">按路径导入</a>
+                        <span id="impProgress"></span>
+                    </div>
+                    <div class="doc">
+                        <b>CSV 格式：</b>首行为表头，列顺序固定为 <code>值域代码,值域名称,代码,名称,说明</code>；支持逗号或 Tab 分隔（名称含逗号时请改用 Tab 或导出为 TSV）。<br>
+                        <b>说明：</b>大文件建议按每批 1000 行自动分批提交；值域不存在时会自动创建（第一列+第二列），条目按 值域代码+代码 覆盖写入。
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="../scripts/sanyidictmap.js"></script>
+</body>
+</html>
+</csp:content>

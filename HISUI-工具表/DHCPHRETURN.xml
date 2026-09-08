@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:33:25">
+<Class name="User.DHCPHRETURN">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>PHRET_ROWID</SqlRowIdName>
+<SqlTableName>DHC_PHRETURN</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent,User.Abstract</Super>
+<TimeChanged>65979,33874.200766579</TimeChanged>
+<TimeCreated>62299,32804.793277</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="ChildDHCPHRETITM">
+<Type>User.DHCPHRETITM</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>PHRTIPHRETPARREF</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="PHRETCODE">
+<Description>
+PHRET_CODE</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>PHRET_CODE</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHRETDATE">
+<Description>
+PHRET_DATE</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>PHRET_DATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHRETTIME">
+<Description>
+PHRET_TIME</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>PHRET_TIME</SqlFieldName>
+</Property>
+
+<Property name="PHRETPHLDR">
+<Description>
+PHRET_PHL_DR</Description>
+<Type>User.DHCPHLOC</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>PHRET_PHL_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETMONTH">
+<Description>
+PHRET_MONTH</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>PHRET_MONTH</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHRETPRTDR">
+<Description>
+PHRET_PRT_DR</Description>
+<Type>User.DHCINVPRT</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>PHRET_PRT_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETINV">
+<Description>
+PHRET_INV</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>PHRET_INV</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHRETTOTAL">
+<Description>
+PHRET_TOTAL</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>PHRET_TOTAL</SqlFieldName>
+</Property>
+
+<Property name="PHRETPHDDR">
+<Description>
+PHRET_PHD_DR</Description>
+<Type>User.DHCPHDISPEN</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>PHRET_PHD_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETPHPDR">
+<Description>
+PHRET_PHP_DR</Description>
+<Type>User.DHCPHPERSON</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>PHRET_PHP_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETTYCLFLAG">
+<Description>
+PHRET_TYCLFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>PHRET_TYCLFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHRETPAADMDR">
+<Description>
+PHRET_PAADM_DR</Description>
+<Type>User.PAAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>PHRET_PAADM_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETRFRDR">
+<Description>
+PHRET_RFR_DR</Description>
+<Type>User.DHCINVOPRefReason</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>PHRET_RFR_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETTYPE">
+<Description>
+PHRET_TYPE</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>PHRET_TYPE</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="phretctlocdoctor">
+<Description>
+phret_ctlocdoctor</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>phret_ctlocdoctor</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="50"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHRETNEWPRTDR">
+<Description>
+PHRET_NEWPRT_DR</Description>
+<Type>User.DHCINVPRT</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>PHRET_NEWPRT_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETREQDR">
+<Description>
+PHRET_REQ_DR</Description>
+<Type>User.DHCPHREQUEST</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>PHRET_REQ_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETACKPHPDR">
+<Description>
+PHRET_ACKPHP_DR</Description>
+<Type>User.DHCPHPERSON</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>PHRET_ACKPHP_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETRetClFlag">
+<Description>
+PHRET_RetClFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>PHRET_RetClFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHRETRetClDate">
+<Description>
+PHRET_RetClDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>PHRET_RetClDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHRETRetClTime">
+<Description>
+PHRET_RetClTime</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>PHRET_RetClTime</SqlFieldName>
+</Property>
+
+<Property name="PHRETRetClUserDR">
+<Description>
+PHRET_RetClUser_DR</Description>
+<Type>User.DHCPHPERSON</Type>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>PHRET_RetClUser_DR</SqlFieldName>
+</Property>
+
+<Property name="PHRETRetClReason">
+<Type>%Library.String</Type>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>PHRET_RetClReason</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCPHRET)</SqlIdExpression>
+<StreamLocation>^User.DHCPHRETURNS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="DATAMASTER">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCPHRET</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+<Data name="PHRET_ACKPHP_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="PHRET_CODE">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="PHRET_DATE">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="PHRET_INV">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="PHRET_MONTH">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="PHRET_NEWPRT_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="PHRET_PAADM_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="PHRET_PHD_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="PHRET_PHL_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="PHRET_PHP_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="PHRET_PRT_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="PHRET_REQ_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="PHRET_RFR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="PHRET_RetClDate">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="PHRET_RetClFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="PHRET_RetClReason">
+<Delimiter>"^"</Delimiter>
+<Piece>23</Piece>
+</Data>
+<Data name="PHRET_RetClTime">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="PHRET_RetClUser_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>22</Piece>
+</Data>
+<Data name="PHRET_TIME">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="PHRET_TOTAL">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="PHRET_TYCLFLAG">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="PHRET_TYPE">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="phret_ctlocdoctor">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="Indexdate">
+<Type>index</Type>
+<Global>^DHCPHRETi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_DATE}</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHRETINDEXLOC">
+<Type>index</Type>
+<Global>^DHCPHRETi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"CTLOC"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PRT_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHRETINDEXNEWPRT">
+<Type>index</Type>
+<Global>^DHCPHRETi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"NEWPRT"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_NEWPRT_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHRETINDEXPHD">
+<Type>index</Type>
+<Global>^DHCPHRETi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PHD_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="phretprt">
+<Type>index</Type>
+<Global>^DHCPHRETi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"PRT"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_PRT_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHRET_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHRET_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCPHRET)
+	s oldI = +$g(^mdata("DHCPHRETURN"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCPHRET = maxI
+	s ^mdata("DHCPHRETURN") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

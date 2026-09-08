@@ -444,13 +444,26 @@ w ##class(web.DHCSpecPat).ImportPatList("姓名	身份证号	类型代码", 1, "
 
 		#; 校验必填字段
 		if (name = "") || (credNo = "") || (typeCode = "") {
-			s reason = "必填字段缺失"
+			s missing = ""
+			s:(name="") missing = missing_$s(missing="":"",1:"、")_"患者姓名"
+			s:(credNo="") missing = missing_$s(missing="":"",1:"、")_"身份证号"
+			s:(typeCode="") missing = missing_$s(missing="":"",1:"、")_"患者类型代码"
+			s reason = "必填字段缺失："_missing
 			d result.errors.%Push({"row":(i),"reason":(reason)})
 			s result.skip = result.skip + 1
 			continue
 		}
 
-		#; 患者类型代码 → RowId（遍历查找，无 Code 索引）
+			#; 身份证号长度校验（15位或18位）
+			s credLen = $l(credNo)
+			if (credLen '= 15) && (credLen '= 18) {
+				s reason = "身份证号格式错误：长度"_credLen_"位，应为15或18位"
+				d result.errors.%Push({"row":(i),"reason":(reason)})
+				s result.skip = result.skip + 1
+				continue
+			}
+
+			#; 患者类型代码 → RowId
 		s typeDr = ""
 		s tmpId = 0
 		for {

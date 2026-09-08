@@ -1,0 +1,1232 @@
+/// Description:国家医保两定接口药品进销存下载
+/// Creator:    tanwenbin
+/// CreateDate: 20250621
+Class PHA.FACE.TPS.INSUTE.Download Extends (Data, Format, LogSave, Com)
+{
+
+///  w ##class(PHA.FACE.TPS.INSUTE.Download).Test()
+ClassMethod Test()
+{
+    Set json = {"infno":"3563","msgid":"H43310100004202507020957109317","insuplc_admdvs":"433199","mdtrtarea_admvs":"433199","recer_sys_code":"DHCC","dev_no":"","dev_safe_info":"","cainfo":"","signtype":"SM3","infver":"V1.0","opter_type":"1","opter":1,"opter_name":"Demo Group","inf_time":"2025-07-02 09:57:10","fixmedins_code":"H43310100004","fixmedins_name":"湖南省湘西土家族苗族自治州人民医院","sign_no":"8080296190","query_type":"json","input":{"data":{"delv_bchno":"798T25051604011066","fixmedins_code":"H43310100004","fixmedins_name":"湖南省湘西土家族苗族自治州人民医院","delventp_uscc":"91430000060130798T","delventp_name":"华润湖南瑞格医药有限公司"}}}
+    Set ExpStr = "00A^"_ "3563" _"^"_ "2" _"^"
+    Set stream = ##class(%GlobalCharacterStream).%New()
+    Do stream.Write(json.%ToJSON())
+    Set ret = ##class(INSU.OFFBIZ.BL.BIZ00A).INSUAPI(stream, ExpStr)
+    Quit ret
+}
+
+/// Description: 湖南3563医疗企业配送信息下载
+/// Creator:     tanwenbin
+/// CreatDate:   20250621
+/// Table:      
+/// Input:       vendorCode : 供应商信用代码;  HospId  :  院区ID
+/// Output:      
+/// Return:      成功：0，失败：非0^失败原因
+/// Others:      暂时没想好下载配送单不入库如何存数据,所以直接入库
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Download).Method3563("33449727", "127", "244","Y",2,1)
+/// Debug:       w ##class(PHA.FACE.TPS.INSUTE.Download).Method3563("3371041", "129", "575", "Y", 2, 1, "Y")
+ClassMethod Method3563(serialNo, vendorId, LocId, IngrFlag = "Y", HospId, UserId = "1", HandleFalg = "N") As %String
+{
+    Quit:(serialNo="") ..Error(-1, "配送批次流水号不能为空！")
+    Quit:(vendorId="") ..Error(-1, "供应商不能为空！")
+    Quit:'$DATA(^APC("APCVM",vendorId)) ..Error(-1, "供应商无明细数据！")
+    Quit:(HospId = "") ..Error(-1, "院区不能为空！")
+    Quit:(LocId = "") ..Error(-1, "下载科室不能为空！")
+    Set vendData = ^APC("APCVM",vendorId)
+    Set vendScityCode = $PIECE(vendData,"^",17) 
+    Quit:(vendScityCode="") ..Error(-1, "供应商社会信用信息不能为空！")
+    Set $ZT = "Method3563Error"
+    Set vendName = $PIECE(vendData,"^",3) 
+    Set ret = ""
+    /// 单独组织入参
+    Set insuTypeCode = ..GetInsuTypeCode()
+    Set inputObj = {}
+    Set inputObj.infno = "3563"
+    Set inputObj.msgid = ..GetInsuDictVal("InsuHospCode", HospId)_$ZDATE($HOROLOG,8)_$REPLACE($ZTIME($PIECE($HOROLOG,",",2)),":","")_$EXTRACT($PIECE($ZTIMESTAMP,".",2),1,4)
+    Set inputObj."insuplc_admdvs" = ..GetInsuDictVal("InsuCenterNo", HospId)
+    Set inputObj."mdtrtarea_admvs" = ..GetInsuDictVal("InsuCenterNo", HospId)
+    Set inputObj."recer_sys_code" = ..GetInsuDictVal("HisSysCode", HospId)
+    Set inputObj."dev_no" = ""
+    Set inputObj."dev_safe_info" = ""
+    Set inputObj."cainfo" = ..GetInsuDictVal("cainfo", HospId)
+    Set inputObj."signtype" = ..GetInsuDictVal("signtype", HospId)
+    Set inputObj."infver" = ..GetInsuDictVal("infver", HospId)
+    Set inputObj."opter_type" = ..GetInsuDictVal("optertype", HospId)
+    Set inputObj."opter" = UserId
+    Set inputObj."opter_name" = $PIECE($GET(^SSU("SSUSR",UserId)),"^",2)
+    Set inputObj."inf_time" = $ZDATETIME($HOROLOG,3)
+    Set fixmedinsCode = ..GetInsuDictVal("InsuHospCode", HospId)
+    Set fixmedinsName = ..GetInsuDictVal("InsuHospName", HospId)
+    Set inputObj."fixmedins_code" = fixmedinsCode
+    Set inputObj."fixmedins_name" = fixmedinsName
+    Set inputObj."sign_no" = $PIECE(##class(web.DHCINSUSSUserSgnCtl).GetSSUserSgnByUserDr(UserId,insuTypeCode,HospId,"^"),"^",15)
+    Set input = {}
+    Set data = {}
+    Set data."delv_bchno" = serialNo
+    Set data."fixmedins_code" = fixmedinsCode
+    Set data."fixmedins_name" = fixmedinsName
+    Set data."delventp_uscc" = vendScityCode
+    Set data."delventp_name" = vendName
+    Set data."query_type" = "file"
+    Set input.data = data
+    Set inputObj.input = input
+    Set insertRet = ..SaveLog("Method3563", inputObj.%ToJSON(), "", HospId, "") 
+    /* 调用医保接口 */
+    // Set retObj = ..SendToInsuFace(inputObj, HospId, "")   // 返回一个路径
+    Set ExpStr = "00A^"_ "3563" _"^"_ "2" _"^"
+    Set stream = ##class(%GlobalCharacterStream).%New()
+    Do stream.Write(inputObj.%ToJSON())
+    Set retObj = ##class(INSU.OFFBIZ.BL.BIZ00A).INSUAPI(stream, ExpStr)   //  20250702医保组改动,返回Json
+    Set path = ""
+    If (+retObj'=1) {  // 失败了,
+        Set outText = retObj
+        Do ..UpdateLog("Method3563", outText, serialNo, "", "N", "")
+        Quit "-1^失败: "_outText
+    }Else {
+        Set path = $PIECE(retObj,"^",2)
+        Set outText = path
+        Do ..UpdateLog("Method3563", outText, serialNo, "", "Y", "")
+        // 解析存入的excel
+        Set retExcelObj = ##class(PHA.COM.EXCELUtils).ToArrayOfObjects(path)
+        Quit:$$$ISERR(retExcelObj) "-2^下载成功,解析失败! 请去进销存日志查询界面根据出参路劲为:" _ path _ "的条目重新解析"   // 下载成功,解析失败
+        // 解析成功
+        Set ret = ..HandleHHimport(LocId,vendorId,UserId,retExcelObj,path,IngrFlag,HandleFalg)
+    }
+    Quit ret
+Method3563Error
+    s $ZT = ""
+    if ($tl > 0) {
+       tro 
+    }
+    s errorMsg = $$Error^DHCSTERROR()
+    q "-1^程序异常,错误代码："_errorMsg
+}
+
+/// 处理解析后入库
+ClassMethod HandleHHimport(LocId, vendorId, User, RetExcelObj As %Library.DynamicArray, Path, IngrFlag, HandleFalg = "N")
+{
+    Set dataSize = RetExcelObj.%Size()
+    Quit:dataSize=0 "-201^下载成功文件为空,请联系医保查因。提供销存日志查询界面入参.下载文件路劲为: " _ Path
+    Set pid = ..NewPid()
+    Set hospId = $PIECE(^CTLOC(LocId),"^",22)
+    Set errorInfo = "",mainNum = 0
+    Kill TraceCodeARRAY,MainDataArray
+    Kill ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "HandleHHimport",pid)
+    /// 整理明细数据
+    For i=0:1:(dataSize-1) {
+        Set row = RetExcelObj.%Get(i)
+        Set serialNo = row."配送批次流水号"
+        Set downloadMovement = row."配送日期"
+        Set downLoadDate = $PIECE(downloadMovement," ",1)
+        Set downLoadDateLogic = $ZDATEH(downLoadDate,3)
+        Set downLoadTime = $PIECE(downloadMovement," ",2)
+        Set downLoadTimeLogic = $ZTIMEH(downLoadTime,3)
+        Set userName = row."配送操作员"
+        Set ratio = row."比例"
+        Set insuCode = row."医疗目录编码"
+        Set insuName = row."注册名称" 
+        Set spec = row."药品规格"
+        Set tarId = ##class(web.DHCINSUPort).GetTarItmByInsuTarCode2(insuCode,"00A","",2)
+        Set dhcTarId = 0
+        Set:tarId'="" dhcTarId = +$ORDER(^DHCINCTARi("TAR",tarId,""))
+        If (dhcTarId=0) {
+            if (HandleFalg = "Y"){
+                s ^TMP("PHA","PHA.FACE.TPS.INSUTE.HandleData","HandleIngr3563","Detail",serialNo,insuCode) = errorInfo
+                continue
+            }else {
+	        	Set errorInfo = "医保编码为："_insuCode_"在系统中无法匹配到药品;请先检查规格为：" 
+                	_spec_ "药品:" _insuName_ "国家医保目录维护的唯一性,文件路径为:"_Path
+                Quit
+            }
+        }
+        Set inci = +$PIECE(^DHCINCTAR(dhcTarId),"^",1)
+        If (inci=0) {
+            if (HandleFalg = "Y"){
+                s ^TMP("PHA","PHA.FACE.TPS.INSUTE.HandleData","HandleIngr3563","Detail",serialNo,insuCode) = errorInfo
+                continue
+            }else {
+	           	Set errorInfo = "医保编码为："_insuCode_
+                	"在系统中无法匹配到药品收费项,但无库存项;请先检查规格为：" 
+                	_spec_ "药品:" _insuName_ "收费项与库存项关联,文件路径为:"_Path
+                Quit
+            }
+        }
+        Set rp = +(row."单价")
+        /*   湘西州要求,数量按行数计算,单位取HIS维护的包装单位
+        Set uomDesc = row."最小包装单位"
+        Set uom = +$ORDER(^CT("UOM",0,"Desc",$$UPPER^SSUTIL4(uomDesc),""),-1)
+        If (uom=0) {
+            Set errorInfo = "医保编码为："_insuCode_
+                "在系统中无法匹配到最小单位。请先检查规格为：" 
+                _spec_ "药品:" _insuName_ "单位与医保平台传输单位一致性"
+            Quit
+        }
+        Set packUom = $PIECE(^INCI(inci,1),"^",17)
+        if (uom'=packUom) {
+           Set errorInfo = "医保编码为："_insuCode_
+                "规格为："_spec_ "药品:" _insuName_ 
+                "当前系统最小包装单位:"_$p(^CT("UOM",packUom),"^",2)_"与医保平台传输单位:"_uomDesc_"不一致"
+            Quit
+        }
+        */
+        s uom = +$PIECE(^INCI(inci,1),"^",17)
+        If (uom=0)&&(HandleFalg '= "Y") {
+            Set errorInfo = "医保编码为："_insuCode_
+                "在系统中为维护包装单位。请先检查规格为：" 
+                _spec_ "药品:" _insuName_ "标识码独立维护界面的包装单位维护"
+            Quit
+        }
+        s scgInfo = ##class(web.DHCST.Common.DrugInfoCommon).GetIncStkCatGrp(inci)
+        Set bUom = $PIECE(^INCI(inci,1),"^",10)
+        Set pUom = $PIECE(^INCI(inci,3),"^",6)
+        Set fac = ..UomFac(uom,bUom)
+        Set pFac = ..UomFac(pUom,bUom)
+        Set nowRp = +(##class(web.DHCSTPRICE).GetRp(inci,+$HOROLOG,uom,hospId))
+        // 取价格模式
+        Set spriceRule = ##class(web.DHCSTCOMMPARA).GetRpRule(hospId,+$HOROLOG)
+        If (spriceRule'=3) {    // 非批次价
+            // 验证当前价格
+            If (rp '= nowRp)&&(HandleFalg '= "Y")  {
+                Set errorInfo = "医保编码为："_insuCode_
+                "传输价格与当前系统价格:" _nowRp_ "不一致。请先检查规格为：" 
+                _spec_ "药品:" _insuName_ "价格与医保平台传输价格:" _rp_ "一致性,文件路径为:"_Path
+                Quit
+            }
+        }Else {         // 批次价不去支持调价,按规则取当前价
+            Set rp = nowRp
+        }
+        /*
+        Set manfDesc = row."生产企业名称"
+        Set manf = +$ORDER(^PHMNF(0,"Name",$$ALPHAUP^SSUTIL4(manfDesc),""),-1)
+        If (manf=0) {
+            Set errorInfo = "医保编码为："_insuCode_
+            "药品传输厂商:" _manfDesc_ ",在系统中无法找到。请先检查规格为: " 
+            _spec_ ",药品:" _insuName_ "生产企业与医保平台传输生产企业一致性"
+            Quit
+        }
+        
+        If (manf'=inciManf) {
+            Set errorInfo = "医保编码为："_insuCode_
+            "药品传输厂商:" _manfDesc_ ",在系统中与当前不一致。请先检查规格为：" 
+            _spec_ "药品:" _insuName_ "生产企业与医保平台传输生产企业一致性"
+            Quit
+        }
+        */
+        Set inciManf = $PIECE(..GetManfNew(inci),"^",1)
+        Set batNo = row."药品/耗材生产批次号"
+        Set expDate = row."有效期止"
+        Set expDateLogic = $ZDATEH(expDate,3)
+        Set BTCCode = row."大包装溯源码"
+        Set MTCCode = row."中包装溯源码"
+        Set STCCode = row."小包装溯源码"
+        /* 湘西州要求,数量按行数计算,单位取HIS维护的包装单位
+        Set qty = row."数量"
+        Set qty = qty*fac
+        */
+        if (HandleFalg = "Y") {
+            s MTCCode = ""
+            s BTCCode = ""   
+        }
+        s qty = 1
+        s qty = qty*fac
+        Set rp = (rp*pFac)/fac
+        If '$DATA(MainDataArray(pid,"Main",serialNo,downLoadDateLogic,downLoadTimeLogic,userName)) {
+            Set mainNum = mainNum+1
+            Set ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                "HandleHHimport",pid,mainNum,"Main",serialNo,downLoadDateLogic,
+                downLoadTimeLogic,userName) = ""
+            Set MainDataArray(pid,"Main",serialNo,downLoadDateLogic,
+            downLoadTimeLogic,userName) = ""
+        }
+        If '$DATA(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "HandleHHimport",pid,mainNum,"Detail",inci,inciManf,batNo,expDateLogic,rp)) {
+                Set ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "HandleHHimport",pid,mainNum,"Detail",inci,inciManf,batNo,expDateLogic,rp) = qty
+        }else {
+            set nowQty = ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download","HandleHHimport",pid,mainNum,"Detail",inci,inciManf,batNo,expDateLogic,rp)
+            Set ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "HandleHHimport",pid,mainNum,"Detail",inci,inciManf,batNo,expDateLogic,rp) = nowQty + qty
+        }
+        // 码集合
+        If (BTCCode'="") {
+            If $DATA(TraceCodeARRAY(pid,mainNum,"BTC",inci,inciManf,batNo,expDateLogic,rp)) {
+                Set tempStr = TraceCodeARRAY(pid,mainNum,"BTC",inci,inciManf
+                ,batNo,expDateLogic,rp)
+                If ("^"_tempStr_"^")'[("^"_BTCCode_"^") {
+                    Set TraceCodeARRAY(pid,mainNum,"BTC",inci,inciManf
+                    ,batNo,expDateLogic,rp) = tempStr _"^"_ BTCCode
+                }
+            }Else {
+                Set TraceCodeARRAY(pid,mainNum,"BTC",inci,inciManf
+                ,batNo,expDateLogic,rp) = BTCCode
+            }
+        }
+        If (MTCCode'="") {
+            If $DATA(TraceCodeARRAY(pid,mainNum,"MTC",inci,inciManf,batNo,expDateLogic,rp)) {
+                Set tempStr = TraceCodeARRAY(pid,mainNum,"MTC",inci,inciManf
+                ,batNo,expDateLogic,rp)
+                If ("^"_tempStr_"^")'[("^" _MTCCode_ "^") {
+                    Set TraceCodeARRAY(pid,mainNum,"MTC",inci,inciManf
+                    ,batNo,expDateLogic,rp) = tempStr _"^"_ MTCCode
+                }
+            }Else {
+                Set TraceCodeARRAY(pid,mainNum,"MTC",inci,inciManf
+                ,batNo,expDateLogic,rp) = MTCCode
+            }
+        }
+        If (STCCode'="") {
+            If $DATA(TraceCodeARRAY(pid,mainNum,"STC",inci,inciManf,batNo,expDateLogic,rp)) {
+                Set tempStr = TraceCodeARRAY(pid,mainNum,"STC",inci,inciManf
+                ,batNo,expDateLogic,rp)
+                If ("^"_tempStr_"^")'[("^"_ STCCode _"^") {
+                    Set TraceCodeARRAY(pid,mainNum,"STC",inci,inciManf
+                    ,batNo,expDateLogic,rp) = tempStr _"^"_ STCCode
+                }
+            }Else {
+                Set TraceCodeARRAY(pid,mainNum,"STC",inci,inciManf
+                ,batNo,expDateLogic,rp) = STCCode
+            }
+        }
+    }
+    If (errorInfo'="") {
+        Kill TraceCodeARRAY,MainDataArray
+        Kill ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "HandleHHimport",pid)
+        Quit "-202^"_errorInfo
+    }
+    /// 存网络订单表  HHData-inpoid_"^"_locid_"^"_vendorid_"^"_purlocid_"^"_sciorderno
+    #Dim errmsg As %String
+    #Dim exit = 0
+    #Dim ingrStr As %String = ""
+    Set $ZTRAP = "HandleHHimportError"
+    k TraceCodePrefixArr
+    Tstart      /// 一个批次流水一个事务
+    Set num = 0
+    For {
+        Set num = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                "HandleHHimport",pid,num)) Quit:(num = "")||(exit=1)
+        Set hhSerialNo = ""
+        For {
+            Set hhSerialNo = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                "HandleHHimport",pid,num,"Main",hhSerialNo)) Quit:(hhSerialNo = "")||(exit=1)
+            Set hhDate = ""
+            For {
+                Set hhDate = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                    "HandleHHimport",pid,num,"Main",hhSerialNo,hhDate)) Quit:(hhDate = "")||(exit=1)
+                Set hhTime = ""
+                For {
+                    Set hhTime = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                        "HandleHHimport",pid,num,"Main",hhSerialNo,hhDate,hhTime)) Quit:(hhTime = "")||(exit=1)
+                    Set user = ""
+                    For {
+                        Set user =  $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+                            "HandleHHimport",pid,num,"Main",hhSerialNo,hhDate,hhTime,user)) Quit:(user = "")||(exit=1)
+                        ///主子表都成功了,进行入库
+                        Set ingr = +$ORDER(^DHCINGR(0,"APCVMApprovalNo",vendorId,hhSerialNo,""),-1)
+                        // b ; ingr
+                        if (ingr = 0)&&(HandleFalg '= "Y") { 
+	                        Set fileStr = hhSerialNo _"||"_ $ZDATE(hhDate,3) _"||"_ $ZTIME(hhTime,3) _"||"_ user
+	                        Set insertMain = "" _"^"_ LocId _"^"_ vendorId _"^"_ LocId _"^"_ fileStr _"^"_ User _"^"_ Path
+	                        Set main = ##class(web.DHCST.HHImport).InsertHHImport(insertMain,User)
+	                        If (+main)'>0 {
+	                            Set exit=1
+	                            Set errmsg="插入订单主表错误:"_$PIECE(main,"^",2)
+	                        }
+	                        If exit=1 {
+	                            Trollback
+	                        }
+	                        Quit:exit=1
+	                        /// 主表插入成功,插子表
+	                        Set ingInci = 0
+	                        For {
+	                            Set ingInci = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                "HandleHHimport",pid,num,"Detail",ingInci)) Quit:(ingInci = "")||(exit=1)
+	                            Set ingManf = 0
+	                            For {
+	                                Set ingManf = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                "HandleHHimport",pid,num,"Detail",ingInci,ingManf)) Quit:(ingManf = "")||(exit=1)
+	                                Set ingBatNo = ""
+	                                For {
+	                                    Set ingBatNo = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                        "HandleHHimport",pid,num,"Detail",ingInci,
+	                                        ingManf,ingBatNo))  Quit:(ingBatNo = "")||(exit=1)
+	                                    Set ingExpDate = ""
+	                                    For {
+	                                        Set ingExpDate = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                        "HandleHHimport",pid,num,"Detail",ingInci,
+	                                        ingManf,ingBatNo,ingExpDate))  Quit:(ingExpDate = "")||(exit=1)
+	                                        Set rp = 0
+	                                        For {
+	                                            Set rp = $ORDER(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                                "HandleHHimport",pid,num,"Detail",ingInci,
+	                                                ingManf,ingBatNo,ingExpDate,rp))  Quit:(rp = "")||(exit=1)
+	                                            Set qty = $GET(^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+	                                                "HandleHHimport",pid,num,"Detail",ingInci,
+	                                                ingManf,ingBatNo,ingExpDate,rp))
+	                                            Continue:+qty=0
+	                                            Set inciCode = $PIECE(^INCI(ingInci,1),"^",1)
+	                                            Set inciDesc = $PIECE(^INCI(ingInci,1),"^",2)
+	                                            Set spec = ##class(web.DHCST.Common.DrugInfoCommon).GetSpec("",inci)
+	                                            Set bUom = $PIECE(^INCI(ingInci,1),"^",10)
+	                                            Set pUom = $PIECE(^INCI(ingInci,3),"^",6)
+	                                            Set pFac = ..UomFac(pUom,bUom)
+	                                            Set pQty = (qty/pFac)
+	                                            If (pQty[".") {
+	                                                Set uom = bUom
+	                                                Set ingQty = qty
+	                                                Set ingRp = (rp/pFac)
+	                                            }Else {
+	                                                Set uom = pUom
+	                                                Set ingQty = pQty
+	                                                Set ingRp = rp
+	                                            }
+	                                            Set ingAmt = (ingRp*ingQty)
+	                                            Set manfDesc = $PIECE(^PHMNF(ingManf),"^",2)
+	                                            Set vendName = $PIECE(^APC("APCVM",vendorId),"^",3)
+	                                            Set itmdata = inciCode _"^"_ spec _"^"_ uom _"^"_ ingBatNo _"^"_ rp
+	                                            Set itmdata = itmdata _"^"_ 0 _"^"_ ingQty _"^"_ "" _"^"_ "" _"^"_ ""
+	                                            Set itmdata = itmdata _"^"_ $ZDATE(ingExpDate,3) _"^"_ ingAmt _"^"_ "" _"^"_ rp _"^"_ ""
+	                                            Set itmdata = itmdata _"^"_ ingManf _"^"_ manfDesc _"^"_ vendorId _"^"_ vendName _"^"_ ""
+	                                            Set itmdata = itmdata _"^^^^"
+	                                            Set itm = ..InsertHHitm(main,itmdata)
+	                                            If itm'=0 {
+	                                                Set exit=1
+	                                                Set errmsg= itm _"插入子表错误:"_ inciDesc
+	                                            }
+	                                            If exit=1 Trollback
+	                                            Quit:exit=1
+	                                        } 
+	                                    }
+	                                    
+	                                }
+	                            }
+	                        }
+                        }
+                        If (IngrFlag = "Y")&&(ingr = 0)&&(HandleFalg '= "Y") {
+                            If ($$$comMemberDefined("PHA.IN.REC.Api", "m", "HandleFinish")) {
+                                Set recObj = ..RecByHHMNew(main) //入库加库存
+                            }Else {
+                                Set recObj = ..RecByHHM(main)
+                            }
+                            Set data = recObj.data
+                            Set code = recObj.code
+                            Set msg = recObj.msg
+                            If (+code<0) {
+                                If (msg = "") {
+                                    Set msg = recObj.info    
+                                }
+                                Set exit=1,errmsg="入库失败:" _ msg
+                                Trollback
+                                Quit
+                            }
+                            /// 入库成功, 处理追溯码
+                            Set ingr = data
+                            If (ingrStr = "") {
+                                Set ingrStr = ingr
+                            }Else {
+                                Set ingrStr = ingrStr + "^" + ingr
+                            }
+                        }Else {
+                            Set ingrStr = ingr
+                        }
+                        Set itm = 0
+                        For {
+                            Set itm = $ORDER(^DHCINGR(ingr,"GRI",itm))    Quit:(itm = "")||(exit=1)
+                            Set ingrItm = ingr _"||"_ itm
+                            Set intr = +$ORDER(^DHCINTR(0,"TypePointer","G",ingrItm,0))
+                            Set inclb = $PIECE(^DHCINTR(intr),"^",7)
+                            Set rp = $PIECE(^DHCINTR(intr),"^",16)
+                            Set incib = $PIECE(^INCI(+inclb,"IL",$PIECE(inclb,"||",2),"LB",$PIECE(inclb,"||",3)),"^",1)
+                            Set intrBatNo = $PIECE(^INCI(+incib,"IB",$PIECE(incib,"||",2)),"^",1)
+                            Set intrExp = $PIECE(^INCI(+incib,"IB",$PIECE(incib,"||",2)),"^",2)
+                            Set inciManf = $PIECE(..GetManfNew(inci),"^",1)
+                            Set scgCat = $p(##Class(web.DHCST.Common.DrugInfoCommon).GetArcItemCat(inci),"^",2)
+                            // 取码存
+                            If $DATA(TraceCodeARRAY(pid,mainNum,"BTC",+inclb,inciManf,intrBatNo,intrExp,rp)) {
+                                    Set btcStr = TraceCodeARRAY(pid,mainNum,"BTC",+inclb,inciManf,
+                                    intrBatNo,intrExp,rp)
+                                    Set btcLen = $LENGTH(btcStr,"^")
+                                    For b = 1:1:btcLen {
+                                        Set tempBtc = $PIECE(btcStr,"^",b)
+                                        //b:tempBtc="87558700000881278564"  ; 12345
+                                        If ($$$comMemberDefined("PHA.DTC.Scan.Save", "m", "SaveTCode")) {
+                                            Set saveBtcRet = ##class(PHA.DTC.Scan.Save).SaveTCode(intr, tempBtc, "G", "BTC", User, "")
+                                        }Else {
+                                            Set saveBtcRet = ##class(PHA.IN.TraceCode.V2.Save).SaveTCode(intr, tempBtc, "G", "BTC", User, "")
+                                        }
+                                        Set saveCode = $PIECE(saveBtcRet,"^",1)
+                                        q:(saveCode < 0)
+                                    }
+                                    If (saveCode < 0) {
+                                        Set exit=1,errmsg="-301^保存追溯码大码失败，原因为:" _ $PIECE(saveBtcRet,"^",2) _",检查配送流水是否已入过库,清手动删除,文件路径为:"_Path
+                                        Trollback
+                                        Quit
+                                    }
+                            }
+                            If $DATA(TraceCodeARRAY(pid,mainNum,"MTC",+inclb,inciManf,intrBatNo,intrExp,rp)) {
+                                    Set mtcStr = TraceCodeARRAY(pid,mainNum,"MTC",+inclb,inciManf,intrBatNo,intrExp,rp)
+                                    Set mtcLen = $LENGTH(mtcStr,"^")
+                                    For m = 1:1:mtcLen {
+                                        Set tempMtc = $PIECE(mtcStr,"^",m)
+                                        //b:tempMtc="87558700000881278564"  ; 1234
+                                        If ($$$comMemberDefined("PHA.DTC.Scan.Save", "m", "SaveTCode")) {
+                                            Set saveBtcRet = ##class(PHA.DTC.Scan.Save).SaveTCode(intr, tempMtc, "G", "MTC", User, "")
+                                        }Else {
+                                            Set saveBtcRet = ##class(PHA.IN.TraceCode.V2.Save).SaveTCode(intr, tempMtc, "G", "MTC", User, "")
+                                        }
+                                        Set saveCode = $PIECE(saveBtcRet,"^",1)
+                                        q:(saveCode < 0)
+                                    }
+                                    If (saveCode < 0) {
+                                        Set exit=1,errmsg="-301^保存追溯码中码失败，原因为:" _ $PIECE(saveBtcRet,"^",2) _",检查配送流水是否已入过库,清手动删除,文件路径为:"_Path
+                                        Trollback
+                                        Quit
+                                    }
+                            }
+                            If $DATA(TraceCodeARRAY(pid,mainNum,"STC",+inclb,inciManf,intrBatNo,intrExp,rp)) {
+                                    Set stcStr = TraceCodeARRAY(pid,mainNum,"STC",+inclb,inciManf,
+                                    intrBatNo,intrExp,rp)
+                                    Set stcLen = $LENGTH(stcStr,"^")
+                                    For s = 1:1:stcLen {
+                                        Set tempStc = $PIECE(stcStr,"^",s)
+                                        Set tempStcBarId = +$o(^BS.PHA.IN.BarCodeI("BarCode", tempStc, ""),-1)
+                                        // b:tempStc="83023930157407567512"  
+                                        //b ; 1
+                                        continue:tempStcBarId'=0
+                                        /*                       ; 112
+                                        if (tempStcBarId '= 0) {
+                                            s comFlag = $lg(^BS.PHA.IN.BarCodeD(tempStcBarId),16)
+                                            continue:comFlag=1
+                                        }
+                                        */
+                                        If ($$$comMemberDefined("PHA.DTC.Scan.Save", "m", "SaveTCode")) {
+                                            Set saveBtcRet = ##class(PHA.DTC.Scan.Save).SaveTCode(intr, tempStc, "G", "STC", User, "")
+                                        }Else {
+                                            Set saveBtcRet = ##class(PHA.IN.TraceCode.V2.Save).SaveTCode(intr, tempStc, "G", "STC", User, "")
+                                        }
+                                        Set saveCode = $PIECE(saveBtcRet,"^",1) 
+                                        q:(saveCode < 0)
+                                        if (HandleFalg = "Y") { // 为了补码特殊处理标志.  录入成功,直接拆零
+                                            // 生成拆零流水
+                                            continue:tempStcBarId'=0       // 已经录入了的一定不要再处理
+                                            //b ; 122
+                                            s serialNo = ##class(web.DHCST.Common.AppCommon).GetAppNo("PHATRACECODE", "", LocId)
+                                            if (serialNo = "") {
+                                                s serialNo = 3563_"-"_LocId_"-"_+$h_$p($h,",",2)
+                                            }else {
+                                                s serialNo = 3563_"-"_serialNo
+                                            }
+                                            s serialBarId = +$o(^BS.PHA.IN.BarCodeI("BarCode", tempStc, ""),-1)
+                                            continue:serialBarId=0
+                                            if (scgCat [ "注射")||(scgCat [ "输液")||(scgCat [ "针剂") {
+                                            	s ret = ##class(PHA.DTC.Scan.Save).SplitByBarId(serialBarId,235,serialNo)
+                                            }else {
+	                                        	s ret = ##class(PHA.DTC.Scan.Save).SplitByBarId(serialBarId,121,serialNo)
+	                                        }
+                                        }
+                                    } 
+                                    If (saveCode < 0) {
+                                        Set exit=1,errmsg="-301^保存追溯码小码失败，原因为:" _ $PIECE(saveBtcRet,"^",2) _",检查配送流水是否已入过库,清手动删除,文件路径为:"_Path
+                                        Trollback
+                                        Quit
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    If exit=0 {
+        Tcommit
+        Quit ingrStr
+    }Else {
+        If $TLEVEL>0 Trollback
+        Quit errmsg
+    }
+HandleHHimportError
+    If $TLEVEL>0 Trollback
+    Set $ZTRAP="" 
+    Quit $ZERROR
+}
+
+ClassMethod InsertHHitm(rid, data)
+{
+    Quit:data="" -1
+    Kill PLIST
+    For i=0:1:20 Set PLIST(i)=""
+    Set PLIST(0)=+rid
+    Set PLIST(2)=$$NextCh(rid)
+    Set PLIST(3)=$PIECE(data,"^",1)
+    Set PLIST(4)=$PIECE(data,"^",2)
+    Set PLIST(5)=$PIECE(data,"^",3)
+    Set PLIST(6)=$PIECE(data,"^",4)
+    Set PLIST(7)=$PIECE(data,"^",5)     //进价
+    Set PLIST(8)=+$PIECE(data,"^",6)
+    Set PLIST(9)=+$PIECE(data,"^",7)
+    Set PLIST(10)=+$HOROLOG
+    Set PLIST(11)=$PIECE(data,"^",9)
+    Set invdate=$PIECE(data,"^",10)
+    If invdate'="" Set invdate=##class(web.DHCSTInterfaceFromElse).DateHtmlToLogical(invdate)   //$zdh(invdate,3)
+    Set PLIST(12)=invdate
+    Set expdate=$PIECE(data,"^",11)
+    If expdate'="" Set expdate=##class(web.DHCSTInterfaceFromElse).DateHtmlToLogical(expdate)   //$zdh(expdate,3)
+    Set PLIST(13)=expdate
+    Set PLIST(14)=+$PIECE(data,"^",12)  //发票金额
+    //s PLIST(15)=+$p(data,"^",13)  //批价
+    Set PLIST(16)=+$PIECE(data,"^",14)  //售价
+    Set PLIST(17)=+$PIECE(data,"^",15)  //折扣，空
+    Set PLIST(26)=$PIECE(data,"^",16)    // 厂商
+    Set PLIST(18)=$PIECE(data,"^",17)
+    Set PLIST(20)=$PIECE(data,"^",18)
+    Set PLIST(19)=$PIECE(data,"^",19)
+    Set produceDate=$PIECE(data,"^",21) 
+    If produceDate'="" Set produceDate=##class(web.DHCSTInterfaceFromElse).DateHtmlToLogical(produceDate)   //$zdh(expdate,3)
+    Set PLIST(21)=produceDate  // 生产日期
+    Set PLIST(38)=$PIECE(data,"^",22)  // 随行单号
+    Set PLIST(24) = $PIECE(data,"^",23) // 第三方ID
+    Set PLIST(30) = $PIECE(data,"^",24) // 第三方ID
+    
+    &sql(insert into sqlUser.DHC_HHYTImportItm values :PLIST())
+    
+    If SQLCODE'=0 {
+        Set ret=$$SqlErrorRecord^DHCSTERROR("InsertHHItmImport:DHC_HHYTImportItm",data,SQLCODE_":"_$GET(%msg)) 
+    }
+
+    Set P9=$GET(%ROWID)
+    Quit $GET(SQLCODE)
+
+NextCh(mrowid)
+    Set ch=$ORDER(^DHCHI(mrowid,"I",""),-1)
+    Quit ch+1
+}
+
+/// 平台调用插入HIS入库数据   
+/// DHIRowId:平台数据主ID
+/// w ##class(PHA.FACE.YXSRMYY.INTERFACE).RecByHHM(736).%ToJSON()
+ClassMethod RecByHHM(DHIRowId)
+{
+    #dim ret as %DynamicObject = {}
+    Set priceDiffFlag = ""
+    Set priceDiffStr = ""
+    Quit:'$DATA(^DHCHI(DHIRowId)) ""
+    Set hhData = $GET(^DHCHI(DHIRowId))
+    If (hhData="") {
+        Set ret.code = "-301"
+        Set ret.msg = "网络订单表无数据: id为 " _DHIRowId
+        Set ret.data = ""
+        Quit ret
+    }
+    Set file = $PIECE(hhData,"^",2)     ;798T25051604011066||2025-05-16||03:05:35AM||hrhnrgyyyxgs
+    Set serailNo = $PIECE(file,"||",1)
+    Set vendor = $PIECE(hhData,"^",5)
+    Set LocId = $PIECE(hhData,"^",6)    
+    Set user = $PIECE(hhData,"^",3)
+    Set inpono = ""  // $PIECE(file,"||",2)
+    Set trfloccode = "" 
+    Set VenId= vendor ;$ORDER(^APC("APCVM",0,"APCVM_Code",$$ALPHAUP^SSUTIL4(vendorcode),""))
+    ;s VenId=vendorcode   ;第三方传的ID
+    Set trfloc=""
+    /**
+        对一些流程用户操作值写死    (需求: 5621680)
+    */
+    Set ingrUser = user ;..#INGRUSER
+    Set ingrAuditUser = "" ;..#INGRAUDITUSER
+    Set ingrPurchUser = "" ;..#PURCHUSER
+    Set transUser = "" ;..#TRANUSER
+    Set transAuditUser = "" ;..#TRANAUDITUSER
+    Set transAckUser = ""  // ..getAckUser(LocId)
+    Set CreateUser=ingrUser //入库人员id  为空默认快速入库
+    Set PresentFlag="N"
+    Set ExchangeFlag=""
+    Set IngrTypeId=5 //快速入库  
+    Set PurUserId = ingrPurchUser   // 采购员
+    Set StkGrpId=""
+    Set hosp = $PIECE(^CTLOC(LocId),"^",2)
+    Set PoId=""
+    If inpono'="" Set PoId=$ORDER(^INPO(0,"No",$$ALPHAUP^SSUTIL4(inpono),""))
+    ;s MainInfo=VenId_"^"_LocId_"^"_CreateUser_"^"_PresentFlag_"^"_ExchangeFlag_"^"_IngrTypeId_"^"_PurUserId_"^"_StkGrpId_"^"_PoId_"^"_trfloc
+    Set MainInfo=VenId _"^"_ LocId _"^"_CreateUser_"^"_PresentFlag_"^"_ExchangeFlag_"^"_IngrTypeId_"^"_PurUserId_"^"_StkGrpId_"^"_PoId_"^"_""_"^"_""_"^"_""_"^"_trfloc
+    Set AppName=##class(web.DHCST.DHCINGdRec).%GetParameter("AppName")
+    Set IngrNo=##class(web.DHCST.Common.AppCommon).GetAppNo(AppName,"",LocId)
+    If (IngrNo = "") {
+        Set ret.code = "-301"
+        Set ret.msg = "生成入库单号失败"
+        Set ret.data = ""
+        Quit ret
+    }
+    Set Complete="Y"
+    Set ExchangeFlag="N"
+    Set PresentFlag="N"
+    Set IngrTypeId=1    //入库类型，需要手动填写
+    Set StkType="G"
+    Set PurUserId=""
+    Set StkGrpId=""
+    Set AuditFlag="N"
+    Set approvalNO = serailNo
+    Set h = +$HOROLOG
+    Set t = $PIECE($HOROLOG,",",2)
+    Set ingrRet = 0
+    &sql(insert into sqluser.dhc_ingdrec(INGR_APCVM_DR,INGR_Completed,INGR_CTCUR_DR,
+         INGR_ExRate,INGR_HandChg,INGR_No,INGR_Loc_Dr,INGR_CreateUser,
+         INGR_CreateDate,INGR_CreateTime,INGR_AdjCheque,INGR_GiftFlag,INGR_Type,
+         INGR_SSUSR_Purch_DR,INGR_SCG_DR,INGR_AuditFlag,INGR_StkType,INGR_ApprovalNO) 
+         values (:VenId,:Complete,1,1,0,:IngrNo,:LocId,:user,:h,:t,
+         :ExchangeFlag,:PresentFlag,:IngrTypeId,:user,:StkGrpId,:AuditFlag,:StkType,:approvalNO))
+    If SQLCODE'=0  {
+        Set ingrRet=-6   ;主表插入失败
+    }Else {
+        Set ingr = $GET(%ROWID)
+    }
+    If (ingrRet < 0) {
+        Set ret.code = "-301"
+        Set ret.msg = "入库主表插入失败:"_%msg
+        Set ret.data = ""
+        Quit ret
+    }
+    Set errorInfo = "",itmRet = 0
+    Set chl=""
+    For  {
+        Set chl=$ORDER(^DHCHI(DHIRowId,"I",chl)) 
+        Quit:chl=""  Do
+        Set itminfo=^DHCHI(DHIRowId,"I",chl)
+        Set Rowid=""
+        Set itmcode=$PIECE(itminfo,"^",1)
+        Continue:itmcode=""
+        Set IncId=$ORDER(^INCI(0,"Code",$$ALPHAUP^SSUTIL4(itmcode),""))
+        Quit:IncId=""
+        Set ingrChl = 1+$ORDER(^DHCINGR(ingr,"GRI",""),-1)
+        Set inciDesc = $PIECE(^INCI(IncId,1),"^",2)
+        Set BatNo=$PIECE(itminfo,"^",4)
+        Set ExpDate=$PIECE(itminfo,"^",11)
+        //Set:ExpDate'="" ExpDate=$ZDATE(ExpDate,3)
+        Set ManfId=""
+        Set manfDesc=$PIECE(itminfo,"^",16)
+        Set Manfid=$PIECE(itminfo,"^",16)  //第三方直接传字典上的厂商ID
+        ;s:Manfdesc'="" ManfId=$o(^PHMNF(0,"Code",$$ALPHAUP^SSUTIL4(Manfdesc),""))
+        Set YPManfid=""
+        Set ManfInfo=##class(web.DHCST.Common.DrugInfoCommon).GetManf(IncId)
+        Set YPManfid=$PIECE(ManfInfo,"^",1)  //系统字典厂商
+        If (YPManfid'="")&&(Manfid'=YPManfid)  Set Manfid=YPManfid  //接口传来的厂商与系统默认厂商不一致时，取系统默认厂商
+        Set:$DATA(^PHMNF(Manfid)) ManfId=Manfid
+        Set UomId=""
+        
+        Set UomId=$PIECE(itminfo,"^",3)
+        
+        //Set Uomdesc=$PIECE(itminfo,"^",3)
+        //Set:Uomdesc'="" UomId=$ORDER(^CT("UOM",0,"Desc",$$UPPER^SSUTIL4(Uomdesc),""))
+        Set Qty=$PIECE(itminfo,"^",7)
+        Set newRp=$PIECE(itminfo,"^",5)
+        Set NewSp = $PIECE(itminfo,"^",14) //##class(PHA.COM.Data.Price).GetSp(IncId, UomId, HospID, +$HOROLOG) 
+        Set:+NewSp=0 NewSp=newRp
+        
+        s Sp=NewSp
+        
+        Set rpAmt = (newRp * Qty)
+        Set spAmt = (NewSp * Qty)
+        Set SxNo=$PIECE(itminfo,"^",33)
+        Set InvNo=$PIECE(itminfo,"^",9)
+        Set produceDate = $PIECE(itminfo,"^",19)
+        Set:produceDate'="" produceDate=$ZDATE(produceDate,3)
+        Set InvDate= $PIECE(itminfo,"^",10) 
+        Set:InvDate'="" InvDate=$ZDATE(InvDate,3)
+        Set PoItmId=""
+        Set Remark="DHC_HHYTImportItm,"_DHIRowId_"||"_chl
+        Set Remarks="3563下载"
+        Set QualityNo=""
+        Set spec = $PIECE(itminfo,"^",2)
+        &sql(INSERT INTO sqluser.DHC_INGdRecItm(INGRI_INGR_ParRef,INGRI_ChildSub,INGRI_BatchNo,INGRI_CTLOC_DR, 
+            INGRI_CTUOM_DR,INGRI_ExpDate,INGRI_RecQty, INGRI_StkDesc,initm_INCI_DR, 
+            initm_invno, initm_phmnf_dr, initm_realprice,initm_realtotal, initm_saleprice, initm_invdate, 
+            initm_BatPrice, initm_sxno,initm_newSp, initm_newSpAmt,initm_SpAmt,initm_Remark,
+            INGRI_Remarks,initm_QualityNo,initm_ProduceDate)
+            VALUES(:ingr, :ingrChl, :BatNo, :LocId,:UomId,:ExpDate,:Qty,:inciDesc,
+            :IncId,:InvNo,:ManfId,:newRp,:rpAmt,:Sp,:InvDate,:newRp,:SxNo,:NewSp,:spAmt,:spAmt,
+            :Remark,:Remarks,:QualityNo,:produceDate))
+        If SQLCODE'=0 {
+            Set itmRet=-8  ;插入子表失败
+            Set errorInfo= %msg _" ingr"_ingr_" ingrChl"_ ingrChl _" BatNo"_ BatNo _" LocId"_ LocId _" UomId"_ UomId _" ExpDate"
+                    _ExpDate_" Qty"_ Qty _" inciDesc"_ inciDesc _" IncId"_ IncId _" InvNo"_ InvNo
+                    _" ManfId"_ ManfId_" newRp"_ newRp _" rpAmt"_ rpAmt _" Sp"_ Sp _" InvDate"_ InvDate
+                    _" newRp"_ newRp_" SxNo"_ SxNo _" NewSp"_ NewSp _" spAmt"_ spAmt _" spAmt"_ spAmt
+                    _" Remark"_ Remark_" Remarks"_ Remarks _" QualityNo"_ QualityNo _" produceDate"_ produceDate
+        } 
+        Quit:itmRet<0
+    }
+    If (itmRet < 0) {
+        Set ret.code = "-302"
+        Set ret.msg = "插入子表失败"_errorInfo
+        Set ret.data = ""
+        Quit ret
+    }
+    // 做审核入库
+    Set auditParam = "42"_LocId
+    Set auditRet = ##class(web.DHCST.DHCINGdRec).Audit(ingr,user,auditParam)
+    If (auditRet '= 0) {
+        Set ret.code = "-303"
+        Set ret.msg = "入库审核失败"
+        Set ret.data = ""
+        Quit ret
+    }Else {
+        Set ret.code = "0"
+        Set ret.msg = ""
+        Set ret.data = ingr
+        Quit ret
+    }
+}
+
+/// 平台调用插入HIS入库数据   
+/// DHIRowId:平台数据主ID
+/// w ##class(PHA.FACE.YXSRMYY.INTERFACE).RecByHHM(736).%ToJSON()
+ClassMethod RecByHHMNew(DHIRowId)
+{
+    #dim ret as %DynamicObject = {}
+    Set priceDiffFlag = ""
+    Set priceDiffStr = ""
+    Quit:'$DATA(^DHCHI(DHIRowId)) ""
+    Set hhData = $GET(^DHCHI(DHIRowId))
+    Quit:hhData="" "-301^网络订单表无数据: id为 " _DHIRowId
+    Set file = $PIECE(hhData,"^",2)     ;798T25051604011066||2025-05-16||03:05:35AM||hrhnrgyyyxgs
+    Set serailNo = $PIECE(file,"||",1)
+    Set vendor = $PIECE(hhData,"^",5)
+    Set LocId = $PIECE(hhData,"^",6)    
+    Set user = $PIECE(hhData,"^",3)
+    Set inpono = ""  // $PIECE(file,"||",2)
+    Set trfloccode = "" 
+    Set VenId= vendor ;$ORDER(^APC("APCVM",0,"APCVM_Code",$$ALPHAUP^SSUTIL4(vendorcode),""))
+    ;s VenId=vendorcode   ;第三方传的ID
+    Set trfloc=""
+    /**
+        对一些流程用户操作值写死    (需求: 5621680)
+    */
+    Set ingrUser = user ;..#INGRUSER
+    Set ingrAuditUser = "" ;..#INGRAUDITUSER
+    Set ingrPurchUser = "" ;..#PURCHUSER
+    Set transUser = "" ;..#TRANUSER
+    Set transAuditUser = "" ;..#TRANAUDITUSER
+    Set transAckUser = ""  // ..getAckUser(LocId)
+    Set CreateUser=ingrUser //入库人员id  为空默认快速入库
+    Set PresentFlag="N"
+    Set ExchangeFlag=""
+    Set IngrTypeId=5 //快速入库  
+    Set PurUserId = ingrPurchUser   // 采购员
+    Set StkGrpId=""
+    Set hosp = $PIECE(^CTLOC(LocId),"^",2)
+    Set PoId=""
+    If inpono'="" Set PoId=$ORDER(^INPO(0,"No",$$ALPHAUP^SSUTIL4(inpono),""))
+    ;s MainInfo=VenId_"^"_LocId_"^"_CreateUser_"^"_PresentFlag_"^"_ExchangeFlag_"^"_IngrTypeId_"^"_PurUserId_"^"_StkGrpId_"^"_PoId_"^"_trfloc
+    Set MainInfo=VenId_"^"_LocId_"^"_CreateUser_"^"_PresentFlag_"^"_ExchangeFlag_"^"_IngrTypeId_"^"_PurUserId_"^"_StkGrpId_"^"_PoId_"^"_""_"^"_""_"^"_""_"^"_trfloc
+    Set ingrInData={}
+    Set main = {}
+    Do main.%Set("loc",LocId)
+    Do main.%Set("operateType",5)
+    Do main.%Set("stkCatGrp","")
+    Do main.%Set("reqLoc",trfloc)
+    Do main.%Set("vendor",VenId)
+    Do main.%Set("purchUser","4")
+    Do main.%Set("remarks","3563接口插入")
+    Do main.%Set("dataLinkFrom","")
+    Do main.%Set("poID",PoId)
+    Do main.%Set("recID","")
+    Do main.%Set("mainRowID","")
+    Do main.%Set("statusCode","Finish")
+    Do main.%Set("logonUser",CreateUser)
+    Do main.%Set("logonLoc",LocId)
+    Do main.%Set("logonHosp",hosp)
+    Do main.%Set("logonGroup",42)
+    Do main.%Set("hhImportFlag","Y")
+    Do main.%Set("hhImportID",DHIRowId)
+    Do main.%Set("vbpFlag","false")
+    Do main.%Set("purchUser",ingrPurchUser)
+    Do main.%Set("serailNo",serailNo)
+    
+    Set rows = []
+    Set HospID=$PIECE(^CTLOC(LocId),"^",22)
+    Set ListData=""
+    Set chl=""
+    For  {
+        Set chl=$ORDER(^DHCHI(DHIRowId,"I",chl)) 
+        Quit:chl=""  Do
+        Set itminfo=^DHCHI(DHIRowId,"I",chl)
+        Set Rowid=""
+        Set itmcode=$PIECE(itminfo,"^",1)
+        Continue:itmcode=""
+        Set IncId=$ORDER(^INCI(0,"Code",$$ALPHAUP^SSUTIL4(itmcode),""))
+        Quit:IncId=""
+        Set inciDesc = $PIECE(^INCI(IncId,1),"^",2)
+        Set BatNo=$PIECE(itminfo,"^",4)
+        Set ExpDate=$PIECE(itminfo,"^",11)
+        Set:ExpDate'="" ExpDate=$ZDATE(ExpDate,3)
+        Set ManfId=""
+        Set manfDesc=$PIECE(itminfo,"^",16)
+        Set Manfid=$PIECE(itminfo,"^",16)  //第三方直接传字典上的厂商ID
+        ;s:Manfdesc'="" ManfId=$o(^PHMNF(0,"Code",$$ALPHAUP^SSUTIL4(Manfdesc),""))
+        Set YPManfid=""
+        Set ManfInfo=##class(web.DHCST.Common.DrugInfoCommon).GetManf(IncId)
+        Set YPManfid=$PIECE(ManfInfo,"^",1)  //系统字典厂商
+        If (YPManfid'="")&&(Manfid'=YPManfid)  Set Manfid=YPManfid  //接口传来的厂商与系统默认厂商不一致时，取系统默认厂商
+        Set:$DATA(^PHMNF(Manfid)) ManfId=Manfid
+        Set UomId = $PIECE(itminfo,"^",3)
+        ;Set Uomdesc=$PIECE(itminfo,"^",3)
+        ;Set:Uomdesc'="" UomId=$ORDER(^CT("UOM",0,"Desc",$$UPPER^SSUTIL4(Uomdesc),""))
+        Set Uomdesc = $PIECE(^CT("UOM",UomId),"^",2)
+        Set Qty=$PIECE(itminfo,"^",7)
+        Set newRp=$PIECE(itminfo,"^",5)
+        Set rp=##class(PHA.COM.Data.Price).GetRp(IncId, UomId, HospID, +$HOROLOG)
+        Set NewSp = $PIECE(itminfo,"^",14) //##class(PHA.COM.Data.Price).GetSp(IncId, UomId, HospID, +$HOROLOG) 
+        If (+rp'=+newRp) {
+            Set priceDiffFlag = 1
+            If (priceDiffStr="") {
+                Set priceDiffStr = inciDesc
+            }Else {
+                Set priceDiffStr = priceDiffStr_","_inciDesc    
+            }
+        }
+        Set:+NewSp=0 NewSp=newRp
+        Set SxNo=$PIECE(itminfo,"^",33)
+        Set InvNo=$PIECE(itminfo,"^",9)
+        Set produceDate = $PIECE(itminfo,"^",19)
+        Set InvDate= $PIECE(itminfo,"^",10) 
+        Set:InvDate'="" InvDate=$ZDATE(InvDate,3)
+        Set PoItmId=""
+        Set Remark="DHC_HHYTImportItm,"_DHIRowId_"||"_chl
+        Set Remarks=""
+        Set QualityNo=""
+        Set spec = $PIECE(itminfo,"^",2)
+        Set detail = {}
+        Do detail.%Set("inci",IncId)
+        Do detail.%Set("inciDesc",inciDesc)
+        Do detail.%Set("inciCode",itmcode)
+        Do detail.%Set("spec",spec)
+        Do detail.%Set("rp",newRp)
+        Do detail.%Set("sp",NewSp)
+        Do detail.%Set("uom",UomId)
+        Do detail.%Set("uomDesc",Uomdesc)
+        Do detail.%Set("manf",ManfId)
+        Do detail.%Set("manfDesc",manfDesc)
+        Do detail.%Set("expDate",ExpDate)
+        Do detail.%Set("batNo",BatNo)
+        Do detail.%Set("invDate",InvDate)
+        Do detail.%Set("zeroMarginFlag",0)
+        Do detail.%Set("rpAmt",rp*Qty)
+        Do detail.%Set("spAmt",NewSp*Qty)
+        Do detail.%Set("qty",Qty)
+        Do detail.%Set("produceDate",produceDate)
+        Do detail.%Set("sxNo",SxNo)
+        Do detail.%Set("invNo",InvNo)
+        Do detail.%Set("invCode","")
+        Do detail.%Set("invAmt","")
+        Do detail.%Set("origin","")
+        Do detail.%Set("checkRemark",$PIECE(itminfo,"^",28))
+        Do detail.%Set("checkPort","")
+        Do detail.%Set("checkRepNo","")
+        Do detail.%Set("checkRepDate","")
+        Do detail.%Set("checkAdmNo","")
+        Do detail.%Set("checkAdmExpDate","")
+        Do detail.%Set("originDesc","")
+        Do rows.%Push(detail)
+        
+        Set str1=Rowid_"^"_IncId_"^"_BatNo_"^"_ExpDate_"^"_ManfId
+        Set str2=UomId_"^"_Qty_"^"_rp_"^"_NewSp_"^"_SxNo
+        Set str3=InvNo_"^"_InvDate_"^"_PoItmId_"^"_Remark_"^"_Remarks
+        Set str4=QualityNo_"^"_""_"^"_produceDate
+        Set str=str1_"^"_str2_"^"_str3_"^"_str4
+        // b ; str
+        If ListData="" {
+            Set ListData=str
+        }Else  {
+            Set ListData=ListData_$CHAR(1)_str
+        }
+    }
+    Set Err=0
+    
+    If ListData="" Set Err=-1
+    Quit:Err<0 Err
+    
+    Do ingrInData.%Set("main",main)
+    Do ingrInData.%Set("rows",rows)
+    Set ingdret= ##class(PHA.IN.REC.Api).HandleFinish(ingrInData) // ##class(web.DHCST.DHCINGdRec).Save("",MainInfo,ListData)
+    If (ingdret.code '= 0) {
+        Set ret.code = ingdret.code
+        Set ret.info = "-2^"_$PIECE(ingdret.msg,"^",2)
+        Quit ret
+    }
+    Set recID = ingdret.data
+    // 自动审核
+    Set auditObj = {}
+    Set auditObj.recID = recID
+    Set auditObj.statusReason = ""
+    Set auditObj.statusCode = "AUDIT"
+    Set auditObj.logonUser = ingrAuditUser
+    Set auditObj.logonLoc = LocId
+    Set auditObj.logonHosp = hosp
+    Set auditObj.logonGroup = 42
+    Set retsult = ##class(PHA.IN.REC.Api).HandleAudit(auditObj)
+    Set resultCode = retsult.code
+    If (resultCode'=0) {
+        Set ret.code = resultCode
+        Set ret.info = "-2^自动审核失败"_$PIECE(retsult.msg,"^",2)
+        Quit ret
+    }
+    /// 需求固定验收过程
+    /*
+    Set checkObj = {}
+    Set checkObjMain = {}
+    Set checkObjMain.recID = recID
+    Set checkObjMain.logonUser = ""
+    Set checkObjMain.logonLoc = LocId
+    Set checkObjMain.logonHosp = hosp
+    Set checkObjMain.logonGroup = 42
+    Set row = []
+    Set checkObj.main = checkObjMain
+    Set checkObj.rows = row
+    Set retsult = ##class(PHA.IN.REC.Api).HandleCheckIn(checkObj)
+    Set resultCode = retsult.code
+    If (resultCode'=0) {
+        Set ret.code = resultCode
+        Set ret.info = "-2^自动验收失败"_retsult.msg
+        Quit ret
+    }
+    */
+    If (trfloc'="") {       // 得走转移流程
+        /*
+        走自动转移,走标版依据入库单转移
+        */
+        // 依据入库单制单
+        Set autoReqObj = {}
+        Set autoReqObj.recId = recID
+        Set autoReqObj.recLocId = trfloc    //请求科室
+        Set autoReqObj.hospId = hosp
+        Set autoReqObj.userId = transUser 
+        Set autoReqObj.ctlocId = trfloc
+        Set autoReqObj.groupId = 42
+        Set retsult = ##class(PHA.IN.TRANS.Api).CreateByRec(autoReqObj)
+        Set resultCode = retsult.code
+        ;b ; 入库明细全部失败  3
+        If (resultCode'=0) {
+            Set ret.code = resultCode
+            Set ret.info = "-3^依据入库单转移失败"_$GET(retsult.msg)
+            Quit ret
+        }
+        ;b ; 入库明细全部失败  1
+        Set initId = retsult.data
+        //  完成制单
+        Set compInit = {}
+        Set compInit.initId = initId
+        Set compInit.userId = transUser
+        Set compInit.hospId = hosp
+        Set compInit.ctlocId = LocId
+        Set compInit.groupId = 42
+        Set retsult = ##class(PHA.IN.TRANS.Api).CompInit(compInit)
+        Set resultCode = retsult.code
+        If (resultCode'=0) {
+            Set ret.code = resultCode
+            Set ret.info = "-3^依据入库单转移,完成制单失败"_$GET(retsult.msg)
+            Quit ret
+        }
+        //  审核制单
+        Set auditInit = {}
+        Set auditInit.initId = initId
+        Set auditInit.nextStatusCode = "OUTAUDIT"
+        Set auditInit.hospId = hosp
+        Set auditInit.userId = transAuditUser 
+        Set auditInit.ctlocId = LocId
+        Set auditInit.groupId = 42
+        Set retsult = ##class(PHA.IN.TRANS.Api).Audit(auditInit)
+        Set resultCode = retsult.code
+        ;b ; 入库明细全部失败  4
+        If (resultCode'=0) {
+            Set ret.code = resultCode
+            Set ret.info = "-3^依据入库单转移,完成制单失败"_$GET(retsult.msg)
+            Quit ret
+        }
+        /*
+        转移制单接收
+        */
+        Set autoRecepObj = {}
+        Set autoRecepObj.initId = initId
+        Set autoRecepObj.nextStatusCode = "INAUDIT"
+        Set autoRecepObj.userId = transAckUser   // trflocUser
+        Set autoRecepObj.hospId = 43
+        Set autoRecepObj.ackCheckId = ""
+        Set initToLocId = trfloc
+        Set initToLocDesc = $PIECE(^CTLOC(initToLocId),"^",2)
+        Set groupId = ""
+        If (initToLocDesc["草药") {
+            Set groupId = 246
+        }
+        If (groupId="") {
+            // 优先判断住院药房安全组
+            Set dhcPhaLoc = $ORDER(^DHCPL(0,"Loc",initToLocId,""))
+            Set:dhcPhaLoc'="" groupId = 38
+            If (groupId="") {
+                Set dhcPhLoc = $ORDER(^DHCPHLOCi("LOC",initToLocId,""))
+                Set:dhcPhLoc'="" groupId = 34
+            }
+        }
+        Set:groupId="" groupId = 38
+        Set autoRecepObj.ctlocId = initToLocId
+        Set autoRecepObj.groupId = groupId
+        Set retsult = ##class(PHA.IN.TRANS.Api).AuditForIn(autoRecepObj)
+        ;b ; 入库明细全部失败  5
+        Set resultCode = retsult.code
+        If (resultCode'=0) {
+            Set ret.code = resultCode
+            Set ret.info = "-4^自动接收失败"_$GET(retsult.msg)
+            Quit ret
+        }
+    }
+    If (ret.code)>=0 {
+        /// 更新订单表
+        &sql(UPDATE SQLUser.DHC_HHImport
+            SET DHI_flag = 'Y',
+            DHI_Vend_DR = :VenId,
+            DHI_RecLoc_DR = :trfloc
+            WHERE DHI_RowID = :DHIRowId)
+        Quit:SQLCODE<0 SQLCODE_"^"_%msg
+        Quit ingdret
+    }
+    If (priceDiffStr'="") {
+        Set ret.info = priceDiffStr_"药品价格与当前系统价格不一致，请检查！"
+    }
+    Quit ret
+}
+
+ClassMethod GetManfNew(IncId)
+{
+    Quit:IncId="" ""
+    Set itmAddId=$ORDER(^DHCITMINFO(0,"INCI",IncId,""))
+    Quit:itmAddId="" "" 
+    Set PHMNFDR=$PIECE($GET(^DHCITMINFO(itmAddId)),"^",48)
+    Set Manf=""
+    Quit:PHMNFDR="" ""
+    If $DATA(^PHMNF(PHMNFDR)) {
+        Set Manf=$PIECE(^PHMNF(PHMNFDR),"^",2)
+    }
+    Quit $GET(PHMNFDR)_"^"_$GET(Manf)
+}
+
+/// Description:生成追溯码关联关系表数据
+/// Creator:    hulihua
+/// CreateDate: 2026-05-13
+/// Table:      BS_PHA_IN.BarCodeRela
+/// Input:      tracecode-追溯码，inputLB-信息链表, parentId-父表ID
+/// Output:
+/// Return:     失败:-1^失败原因，成功:码关联关系表ID
+/// Others:     信息链表(码等级、批准文号、批号、效期、生产日期)
+/// Debug:      w ##class(PHA.FACE.TPS.INSUTE.Download).InsertBarCodeRela()
+ClassMethod InsertBarCodeRela(tracecode, inputLB, parentId = "") As %String
+{
+    s bcrId = +$o(^BS.PHA.IN.BarCodeRelaI("codeIndex", tracecode, 0))
+    q:(bcrId > 0) bcrId
+    s expDate = $lg(inputLB, 4)
+    if (expDate '= "") {
+        if ($F(expDate, "-")) {
+            s expDate = $zdh(expDate, 3)
+        } else {
+            s expDate = $zdh(expDate, 8)
+        }
+    }
+    s producedate = $lg(inputLB, 5)
+    if (producedate '= "") {
+        if ($F(producedate, "-")) {
+            s producedate = $zdh(producedate, 3)
+        } else {
+            s producedate = $zdh(producedate, 8)
+        }
+    }
+    s barCodeRelaObj = ##class(BS.PHA.IN.BarCodeRela).%New()
+    s barCodeRelaObj.barcode = tracecode
+    s barCodeRelaObj.codeLevel = $lg(inputLB, 1)
+    s barCodeRelaObj.approvNo = $lg(inputLB, 2)
+    s barCodeRelaObj.batNo = $lg(inputLB, 3)
+    s barCodeRelaObj.expDate = expDate
+    s barCodeRelaObj.produceDate = producedate
+    d barCodeRelaObj.parentDrSetObjectId(parentId)
+    s sc = barCodeRelaObj.%Save()
+    if ($$$ISERR(sc)) {
+        s errinfo = $System.Status.GetErrorText(sc)
+        q "-1^"_errinfo
+    }
+    q barCodeRelaObj.%Id()
+}
+
+/// 保存3563Excel数据中的码关系
+/// Debug:      w ##class(PHA.FACE.TPS.INSUTE.Download).SaveCodeRelaBy3563Excel(RetExcelObj)
+ClassMethod SaveCodeRelaBy3563Excel(RetExcelObj, ingr) As %Status
+{
+	Quit:(ingr = "") ..Error(-1, "下载入库单ID不能为空！")
+	s dataSize = RetExcelObj.%Size()
+    q:dataSize=0 $$$ERROR($$$GeneralError, "无数据")
+    s pid = ..NewPid()
+    k ^||CacheTemp("PHA","PHA.FACE.TPS.INSUTE.Download",
+            "SaveCodeRelaBy3563Excel",pid)
+    /// 整理明细数据
+    f i=0:1:(dataSize-1) {
+        s row = RetExcelObj.%Get(i)
+        s insuCode = row."医疗目录编码"
+        s tarId = +##class(web.DHCINSUPort).GetTarItmByInsuTarCode2(insuCode,"00A","",2)
+        i tarId=0 {
+	        ///医保码不对也先把追溯码下下来
+	        continue:+ingr=0
+	        s tarId=+##class(PHA.FACE.TPS.INSUTE.Download2).getTarByINGR(ingr)
+	        s ingrData = $g(^DHCINGR(ingr))
+            s approvalNo = $p(ingrData,"^",46)
+            s ingrNo = $p(ingrData,"^",1)
+            s ^YZSY("SaveCodeRelaBy3563Excel",ingr)=tarId_"^"_ingrNo_"^"_approvalNo_"^"_insuCode_"^"_ $ZD(+$H,3)  //无法通过医保码匹配的，通过子表药品(只有一个药品)匹配的数据存日志
+	        }
+        
+        continue:(tarId = 0)
+        s dhcTarId = +$ORDER(^DHCINCTARi("TAR",tarId,""))
+        continue:(dhcTarId = 0)
+        s inci = +$PIECE(^DHCINCTAR(dhcTarId),"^",1)
+        continue:(inci = 0)
+        s approveNo = row."批准文号"
+        s batNo = row."药品/耗材生产批次号"
+        s expDate = row."有效期止"
+        s produceDate = row."生产日期"
+        s BTCCode = row."大包装溯源码"
+        s MTCCode = row."中包装溯源码"
+        s STCCode = row."小包装溯源码"
+        s codePackLevel = ""   // 码等级(1、2、3, 代表小码、中码、大码)
+        s traceCodeList = $lb(codePackLevel, approveNo, batNo, expDate, produceDate)
+        s parentBcrId = ""
+        //保存大码关系
+        s traceCode = BTCCode
+        if (traceCode'=STCCode) {
+	        d SaveRela("BTC")
+        }
+        //保存中码关系
+        s traceCode = MTCCode
+        if (traceCode'=STCCode) {
+	        d SaveRela("MTC")
+        }
+        //保存小码关系
+        s traceCode = STCCode
+        if (traceCode '= ""){
+	        d SaveRela("STC")
+        }
+    }
+    q $$$OK
+    
+SaveRela(codeType)
+	q:($l(traceCode)< 20) 
+	s codePackLevel = $case(codeType, "BTC":3, "MTC":2, "STC":1, :"")
+	q:(codePackLevel = "")
+	s $list(traceCodeList, 1) = codePackLevel
+    s parentBcrId = ..InsertBarCodeRela(traceCode, traceCodeList, parentBcrId)
+    //保存标识
+	s isDrugTCode = ##Class(PHA.DTC.COM.Method).IsDrugTCode(inci, codeType, traceCode)
+	if ('isDrugTCode){
+		s idCode = ##class(PHA.DTC.COM.Method).GetIDCodeByTCode(traceCode)
+		s sCDIDr = $o(^DHCSTSCDI(0, "TYPECODE", "CODETYPE", $$ALPHAUP^SSUTIL4(codeType), ""))
+		
+		Q:($d(^CT.PHA.IN.IncIDCodeI("TypeActIncCode",sCDIDr,1,inci,idCode)))
+		s dataStr = idCode_"^"_sCDIDr_"^"_"Y"
+		//s ^PHADEBEBUG("20260814",$zts,inci,dataStr) = $zdt($h, 3)
+		d ##class(PHA.DTC.IDCode.Save).Save(inci, "", dataStr,2) 
+	}
+}
+
+}

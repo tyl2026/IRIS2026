@@ -1,0 +1,926 @@
+/// 国家医保接口平台数据采集上传接口类
+Class INSU.BL.Interface.DataRpUp Extends %RegisteredObject
+{
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-29
+/// Description:  4101-医疗保障基金结算清单信息上传(setlinfo)
+/// Input：		 AdmDr 			就诊号
+/// 				 ExpDataAry		共同数组
+/// 			 PrtDr 			发票表id
+/// 			 PBDDr			医保登记表id
+/// Output：	 4201 文档结果输出
+/// Others：	 其它说明
+/// w ##class(web.DHCINSUSetlInfo).GetSetlInfo(128245,"",55222)
+ClassMethod GetSetlInfo(AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As %ArrayOfDataTypes
+{
+	
+	s setlinfo=##class(%ArrayOfDataTypes).%New()
+	q:InsuDivDr="" setlinfo
+	s:AdmDr="" AdmDr=$p($g(^DHCINDIV(InsuDivDr)),"^",1)
+	q:AdmDr="" setlinfo
+	
+	
+	s billDr=$p($g(^DHCINDIV(InsuDivDr)),"^",3)
+	s PrtDr=$p($g(^DHCINDIV(InsuDivDr)),"^",4)
+	s admType=$p(^PAADM(AdmDr),"^",2)			//就诊类型
+	i admType="I" d
+	.q:billDr=""
+	.s PrtDr=$o(^DHCINVPRTZY(0,"AR",billDr,""),-1)  
+	q:PrtDr="" setlinfo							//未财务结算退出
+	
+	//获取共同参数数组信息
+	s ExpDataAry=""
+	s rtnFlag=..GetInsuReportInfoCom(AdmDr,.ExpDataAry,PrtDr,InsuDivDr)
+	q:rtnFlag'="0" setlinfo
+	//将共同参数数据赋给结算清单数组
+	if ($IsObject(ExpDataAry)){
+		f i=1:1:ExpDataAry.Count() {
+			do ExpDataAry.GetNext(.key)
+			s value=ExpDataAry.GetAt(key)
+			d setlinfo.SetAt(value,key)
+		}
+    }
+    
+    
+	s insuDate=$p($g(^DHCINDIV(InsuDivDr)),"^",16)
+	s insuTime=$p($g(^DHCINDIV(InsuDivDr)),"^",17)
+	s dclatime=$zd(insuDate,3)_" "_$zt(insuTime) 
+	d setlinfo.SetAt(dclatime,"dcla_time")				;结算清单上报时间 
+	
+	
+	//1.方式一：取病案首页上的信息，证据类型写死取身份证证件号码取病案首页身份证号
+	//2.方式二：医生站提供接口，取HIS中的证件类型和证件号
+	//标准版使用方式一，项目根据情况跟医院确认
+	s patncerttype="1"		
+	d setlinfo.SetAt(patncerttype,"patn_cert_type")		;患者证件类别
+	s insuplc=setlinfo.GetAt("insu_admdvs")			
+	d setlinfo.SetAt(insuplc,"insuplc")					;参保地
+	s sppsntype=""
+	d setlinfo.SetAt(sppsntype,"sp_psn_type")			;特殊人员类型(1:特困人员,2:城乡低保对象,3:农村建档立卡贫困人口,4:贫困重度残疾人,9:其他)
+	s opspdiagcaty=""
+	d setlinfo.SetAt(opspdiagcaty,"opsp_diag_caty")		;门诊慢特病诊断科别
+	s opspmdtrtdate=$p(^PAADM(AdmDr),"^",6)
+	s:opspmdtrtdate'="" opspmdtrtdate=$zd(opspmdtrtdate,3)
+	d setlinfo.SetAt(opspmdtrtdate,"opsp_mdtrt_date")	;门诊慢特病就诊日期
+	
+	b ;1
+	
+	//获取电子病历术语集数据H开头
+	s EMSetlInfo=##class(%ArrayOfDataTypes).%New()
+	s EMSetlInfo=##class(EMRservice.BL.Interface.RecordInfoToINSU).setlinfo4101(AdmDr)
+	b ;00
+	if ($IsObject(EMSetlInfo)){
+		f i=1:1:EMSetlInfo.Count() {
+			do EMSetlInfo.GetNext(.emkey)
+			s value=EMSetlInfo.GetAt(emkey)
+			d setlinfo.SetAt(value,"H"_emkey)
+		}
+    }
+    b ;2
+	
+	//获取病案编目数据P开头
+	s rset=##class(%ResultSet).%New("MA.IPMR.IO.Insurance.For4101:Qrysetinfo")
+	d rset.Execute(AdmDr)
+	s columns = rset.GetColumnCount()
+	f i=1:1:columns d
+	.//s Columnkey=rset.ColIndex(i)
+	.s Columnkey=rset.GetColumnName(i)
+	.s value=rset.GetDataByName(Columnkey)
+	.d setlinfo.SetAt(value,"P"_Columnkey)
+	b ;3
+	
+    //其他产品组接口---------------
+	
+	q setlinfo
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-22
+/// Description: 4101-医疗保障基金结算清单信息上传-表 149 -基金支付信息（payinfo） -
+/// Table：  	 医保结算表(Insu_divide)
+/// Input：		 EpisodeID		就诊号
+/// 			 InsuDivID		医保结算表id
+/// 			 InsuAdmDr		医保登记表id
+/// Output：	 基金支付类型，基金支付金额
+/// Others：	 其它说明
+/// d ##class(%ResultSet).RunQuery("web.DHCINSUSetlInfo","PatPayInfoQuery","","","61527")
+Query PatPayInfoQuery(AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As websys.Query(ROWSPEC = "fund_pay_type:%String,fund_payamt:%Double") [ SqlProc ]
+{
+}
+
+ClassMethod PatPayInfoQueryExecute(ByRef qHandle As %Binary, AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	s qHandle=$lb(0,repid,0)
+	
+	if (InsuDivDr="") Set qHandle=$lb(0,repid,0) Quit $$$OK
+    //ExpDataAry获取部分参数示例
+    s (fundpaytype,fundpayamt)=""
+    
+    s DivInfo=$p($g(^DHCINDIV(InsuDivDr)),"^",51)	//基金支付信息串
+	q:DivInfo="" $$$OK
+	;310100|||4170.09|城镇职工基本医疗保险统筹基金|$310200|||620.43|城镇职工基本医疗保险个人账户基金|
+	f i=1:1:$l(DivInfo,"$") d
+	.s single=$p(DivInfo,"$",i)
+	.q:single=""
+	.s fundpaytype=$p(single,"|",1)
+	.q:fundpaytype=""
+	.s fundpayamt=$p(single,"|",4)
+	.d BuildPayInfo
+	
+	Quit $$$OK
+BuildPayInfo	
+	set Data=$lb(fundpaytype,fundpayamt)
+ 	Set ^CacheTemp(repid,ind)=Data
+ 	Set ind=ind+1
+ 	q
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-22
+/// Description: 4101-医疗保障基金结算清单信息上传-表 152 -收费项目信息（iteminfo）
+/// Table：  	 医保结算表(Insu_dividesub)
+/// Input：		 EpisodeID		就诊号
+/// 			 InsuDivID		医保结算表id
+/// 			 InsuAdmDr		医保登记表id
+/// Output：	 医疗收费项目,金额,甲类费用合计,乙类金额,全自费金额,其他金额
+/// Others：	 其它说明
+/// d ##class(%ResultSet).RunQuery("web.DHCINSUSetlInfo","PatFeeItemInfoQuery","","","62061")
+Query PatFeeItemInfoQuery(AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As websys.Query(ROWSPEC = "med_chrgitm:%String,amt:%Double,claa_sumfee:%Double,clab_amt:%Double,fulamt_ownpay_amt:%Double,oth_amt:%Double") [ SqlProc ]
+{
+}
+
+ClassMethod PatFeeItemInfoQueryExecute(ByRef qHandle As %Binary, AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	s qHandle=$lb(0,repid,0)
+	
+	if (InsuDivDr="") Set qHandle=$lb(0,repid,0) Quit $$$OK
+	
+	k Sort("InsuIteminfo",InsuDivDr)
+	
+    if '$d(^DHCINDIS("0","DivideDr",InsuDivDr))	d
+    .s PBDr=$p($g(^DHCINDIV(InsuDivDr)),"^",3)		//账单号
+    .i PBDr="" d
+    ..s DhcInvPrtDr=$p($g(^DHCINDIV(InsuDivDr)),"^",3)	//门诊发票ID
+    ..q:'$d(^DHCBCI(0,"INV",DhcInvPrtDr)) 
+    ..s BCInvDr=""
+	..f  s BCInvDr=$o(^DHCBCI(0,"INV",DhcInvPrtDr,BCInvDr)) q:BCInvDr=""  d
+	...s PBDr=$p(^DHCBCI(BCInvDr),"^",2)  				;账单号
+	...q:PBDr=""
+	...d GetDivSubIDByPBDr(PBDr)
+	.d GetDivSubIDByPBDr(PBDr)
+	e  d
+	.d GetDivSubIDByDivDr(InsuDivDr) 
+	
+	s (AmtSum,ClaaSumfeeSum,ClabAmtSum,OwnpayAmtSum,OthAmtSum)=0
+	s MedChrgitm=""
+	f  s MedChrgitm=$o(Sort("InsuIteminfo",InsuDivDr,MedChrgitm)) q:MedChrgitm=""  d
+	.s AmtSum=$p(Sort("InsuIteminfo",InsuDivDr,MedChrgitm),"^",2)
+	.s ClaaSumfeeSum=$p(Sort("InsuIteminfo",InsuDivDr,MedChrgitm),"^",3)
+	.s ClabAmtSum=$p(Sort("InsuIteminfo",InsuDivDr,MedChrgitm),"^",4)
+	.s OwnpayAmtSum=$p(Sort("InsuIteminfo",InsuDivDr,MedChrgitm),"^",5)
+	.s OthAmtSum=$p(Sort("InsuIteminfo",InsuDivDr,MedChrgitm),"^",6)
+    .d BuildFeeItemInfo
+    
+    Quit $$$OK
+    
+    //通过账单获取费用明细上传数据
+GetDivSubIDByPBDr(PBDr)
+	s InsuDivSubID=""
+	f  s InsuDivSubID=$o(^DHCINDIS("0","PBDr",PBDr,InsuDivSubID)) q:InsuDivSubID=""  d	
+	.d GetFeeItemInfo(InsuDivSubID)
+	
+	//通过医保结算表id获取费用明细上传数据
+GetDivSubIDByDivDr(InsuDivID)	
+	s InsuDivSubID=""
+    f  s InsuDivSubID=$o(^DHCINDIS("0","DivideDr",InsuDivDr,InsuDivSubID)) q:InsuDivSubID=""  d
+    .d GetFeeItemInfo(InsuDivSubID)
+    
+GetFeeItemInfo(InsuDivSubID)
+	
+	//其他金额默认，需根据项目核实确定
+	s (ClaaSumfee,ClabAmt,OwnpayAmt,OthAmt)=0
+	i InsuDivSubID=""  b ;12
+	s InsuDivSubInfo=$g(^DHCINDIS(InsuDivSubID))
+	q:InsuDivSubInfo=""
+	s Flag=$p(InsuDivSubInfo,"^",18)
+	q:Flag'="N"   //未上传数据不统计      ---此处根据项目情况暂定
+	s INDISINSUXMLB=$p(InsuDivSubInfo,"^",10)			;甲乙丙
+	s INDISAmount=+$p(InsuDivSubInfo,"^",13)
+	s INDISScale=$p(InsuDivSubInfo,"^",15)	;自付比例
+	s INDISFund=$p(InsuDivSubInfo,"^",16)
+	s INDISSelf=+$p(InsuDivSubInfo,"^",17)	;先行自付
+	s INDISDemo1=+$p(InsuDivSubInfo,"^",26)	;全自费
+	s INDISDemo2=+$p(InsuDivSubInfo,"^",27)	;符合范围
+	s INDISDemo3=+$p(InsuDivSubInfo,"^",28)	;超限
+	s INDISDemo4=$p(InsuDivSubInfo,"^",29)	;医疗收费项目   ;根据当地当地程序修改
+    i (INDISINSUXMLB="01")||(INDISINSUXMLB="甲类") d
+	.s ClaaSumfee=INDISAmount	; 甲类费用        
+	e  i (INDISINSUXMLB="02")||(INDISINSUXMLB="乙类") d
+	.s ClabAmt=INDISAmount	    ; 乙类费用        
+	e   d
+	.s OwnpayAmt=INDISAmount    ;全自费金额                    
+    ;s OwnpayAmt=OwnpayAmt+INDISDemo3	;全自费金额=全自费金额+超限价金额
+    
+    i $d(Sort("InsuIteminfo",InsuDivDr,INDISDemo4))=0 d
+    .s Sort("InsuIteminfo",InsuDivDr,INDISDemo4)=INDISDemo4_"^"_INDISAmount_"^"_ClaaSumfee_"^"_ClabAmt_"^"_OwnpayAmt_"^"_OthAmt
+	e  d
+	.s $p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",2)=+$p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",2)+INDISAmount
+	.s $p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",3)=+$p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",3)+ClaaSumfee
+	.s $p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",4)=+$p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",4)+ClabAmt
+	.s $p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",5)=+$p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",5)+OwnpayAmt
+	.s $p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",6)=+$p(Sort("InsuIteminfo",InsuDivDr,INDISDemo4),"^",6)+OthAmt
+	
+    Quit $$$OK
+BuildFeeItemInfo	
+	set Data=$lb(MedChrgitm,AmtSum,ClaaSumfeeSum,ClabAmtSum,OwnpayAmtSum,OthAmtSum)
+ 	Set ^CacheTemp(repid,ind)=Data
+ 	Set ind=ind+1
+ 	q
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-24
+/// Description: 4101-医疗保障基金结算清单信息上传-表 150 -门诊慢特病诊断信息（opspdiseinfo）
+/// Input：		 EpisodeID		就诊号
+/// 			 InsuDivID		医保结算表id
+/// 			 InsuAdmDr		医保登记表id
+/// Output：	 基金支付类型，基金支付金额
+/// Others：	 其它说明
+/// d ##class(%ResultSet).RunQuery("web.DHCINSUSetlInfo","PatOPSpeDiseInfoQuery","","","62739")
+Query PatOPSpeDiseInfoQuery(AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As websys.Query(ROWSPEC = "diag_name:%String,diag_code:%String,oprn_oprt_name:%String,oprn_oprt_code:%String,maindiag_flag:%String") [ SqlProc ]
+{
+}
+
+ClassMethod PatOPSpeDiseInfoQueryExecute(ByRef qHandle As %Binary, AdmDr As %String, InsuAdmDr As %String, InsuDivDr As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	s qHandle=$lb(0,repid,0)
+	
+	if (InsuDivDr="") Set qHandle=$lb(0,repid,0) Quit $$$OK
+	
+    s HospDr=$p($g(^DHCINDIV(InsuDivDr)),"^",71)	;院区
+    s AdmInfoDr=$p($g(^DHCINDIV(InsuDivDr)),"^",2)	//基金支付信息串
+	q:AdmInfoDr="" $$$OK
+	s (diagname,diagcode,oprnoprtname,oprnoprtcode,maindiagflag)=""
+	
+	s INADMAdmType=$p($g(^DHCINADM(AdmInfoDr)),"^",14)  		//医疗类别
+	
+	//正式使用时，此处需要根据项目情况改造，此处走字典配置
+	s DicSpeDiseType=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","SpeDiseType",4,HospDr)
+	s:DicSpeDiseType="" DicSpeDiseType="|14|1401|"		;测试使用
+	q:DicSpeDiseType'[("|"_INADMAdmType_"|") $$$OK   //非门诊慢病的退出         --最好改成配置，配置门诊慢病类型
+	
+	s MBDiagInfo=$p($g(^DHCINADM(AdmInfoDr)),"^",38) 		//病种编码|病种名称
+	s diagname=$p(MBDiagInfo,"|",2)    
+	s diagcode=$p(MBDiagInfo,"|",1) 
+	i (diagcode="")||(diagname="") d
+	.s diagcode=$p($g(^DHCINADM(AdmInfoDr)),"^",26) 		//病种编码
+	.s diagname=$p($g(^DHCINADM(AdmInfoDr)),"^",27) 		//病种名称
+	
+	s oprnoprtname="-"
+	s oprnoprtcode="-"
+	s maindiagflag="1"      //主诊断标识（0	否	1	是）
+	
+	d BuildSpeDiseInfo
+	
+	Quit $$$OK
+BuildSpeDiseInfo	
+	set Data=$lb(diagname,diagcode,oprnoprtname,oprnoprtcode,maindiagflag)
+ 	Set ^CacheTemp(repid,ind)=Data
+ 	Set ind=ind+1
+ 	q
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-22
+/// Description: 4201-自费病人费用明细信息上传(feedetail)
+/// Input：		 AdmDr 			就诊号
+/// 			 PrtDr 			发票表id
+/// 			 PBDDr			医保登记表id
+/// Output：	 4201 文档结果输出
+/// Others：	 其它说明
+/// d ##class(%ResultSet).RunQuery("web.DHCINSUSetlInfo","OwnPatFeeDetailInfo","157357","7713","325925||1||1")
+Query OwnPatFeeDetailInfo(AdmDr As %String, PrtDr As %String, PBDDr As %String) As websys.Query(ROWSPEC = "mdtrt_sn,ipt_otp_no,med_type,chrg_bchno,feedetl_sn,psn_cert_type,certno,psn_name,fee_ocur_time,cnt,pric,det_item_fee_sumamt,med_list_codg,medins_list_codg,medins_list_name,med_chrgitm_type,prodname,bilg_dept_codg,bilg_dept_name,bilg_dr_codg,bilg_dr_name,acord_dept_codg,acord_dept_name,orders_dr_code,orders_dr_name,tcmdrug_used_way,etip_flag,etip_hosp_code,dscg_tkdrug_flag,memo") [ SqlProc ]
+{
+}
+
+ClassMethod OwnPatFeeDetailInfoExecute(ByRef qHandle As %Binary, AdmDr As %String, PrtDr As %String, PBDDr As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s ind=1
+	s qHandle=$lb(0,repid,0)
+	
+	if (AdmDr="")||(PrtDr="")||(PBDDr="") Set qHandle=$lb(0,repid,0) Quit $$$OK
+   	
+   	//体检结算数据上传待确定？？？？？
+   	
+	s admType=$p(^PAADM(AdmDr),"^",2)			//就诊类型
+	s admType=$case(admType,"I":"IP",:"OP")
+	
+	i (admType="OP") d
+	.s InvPrtInfo=$g(^DHCINVPRT(PrtDr)) 
+	.s AdmReasonDR=$p(InvPrtInfo,"^",9) 
+	e  d
+	.s InvPrtInfo=$g(^DHCINVPRTZY(PrtDr)) 
+	.s InvBill=$p(InvPrtInfo,"^",5)              ;账单号
+	.q:InvBill=""
+	.s AdmReasonDR=$p($g(^DHCPB(+InvBill)),"^",4)   ;费别ID
+	
+	;s AdmReasonDR=$p(^PAADM(AdmDr,1),"^",7) //病人计费类别
+	s papmi=$p($g(^PAADM(AdmDr)),"^",1)		;病人id
+	s HospDr=##class(web.UDHCHospitalGroup).GetHospitalByAdm(AdmDr) //+ DingSH 20200526
+	q:AdmReasonDR="" $$$OK
+	s InsuDLLType=##class(web.DHCINSUPort).GetDicByCodeAndInd("AdmReasonDrToDLLType",AdmReasonDR,6,HospDr)
+	q:InsuDLLType'="" $$$OK
+	
+	s InsuType=##class(web.DHCINSUPort).GetDicByCodeAndInd("AdmReasonDrToTariType",AdmReasonDR,6,HospDr)
+	s:InsuType="" InsuType="00A"
+	s DocID=$p(^PAADM(AdmDr),"^",9)
+	q:DocID="" $$$OK
+	s DocCode=$p(^CTPCP(DocID,1),"^",1) //医生号
+	s DocDesc=$p(^CTPCP(DocID,1),"^",2) //医生
+	s DocUnit=$p(^CTPCP(DocID,2),"^",8)  //医生资格证书号 20180712 DingSH		add by xubaobao 2021 03 05 国家医保新增
+	//上传国家医生代码此处需要获取国家医生码
+	s DocDesc=$replace(DocDesc,"[","【")
+	s DocDesc=$replace(DocDesc,"]","】")
+	
+	s DepID=$p(^PAADM(AdmDr),"^",4)
+	q:DepID="" $$$OK
+	s Depcode=$p($g(^CTLOC(DepID)),"^",1) //科室编号
+	s DepDesc=$p($g(^CTLOC(DepID)),"^",2) //科室
+	
+	//4201结果输出列
+	s mdtrtsn=AdmDr									;就医流水号		--->就诊id（机构生成内唯一就诊流水）
+	s iptotpno=$p(^PAPER(papmi,"PAT",1),"^",2)		;住院/门诊号	--->登记号
+	s medtype=""									;医疗类别	
+	s chrgbchno=admType_PrtDr					    ;收费批次号		--->业务类型+发票id (同一收费批次号病种编号必须一致)
+	s psncerttype="1"								;人员证件类型
+	s certno=$p(^PAPER(papmi,"ALL"),"^",9)			;证件号码
+	s psnname=$p(^PAPER(papmi,"ALL"),"^",1)			;人员姓名
+	
+	// 取账单明细信息
+	s BillDr=$p(PBDDr,"||",1)
+	s PBOSub=$p(PBDDr,"||",2)
+	s PBDSub=$p(PBDDr,"||",3)
+	q:('$d(^DHCPB(BillDr,"O",PBOSub)))||($d(^DHCPB(BillDr,"O",PBOSub))=10)
+	//取每一条医嘱的PBO_Arcim_Dr
+	s PBOARCIMDR=$p($g(^DHCPB(BillDr,"O",PBOSub)),"^",3)
+	//取每一条医嘱的PBO_OEORI_Dr
+	s PBOOEORIDR=$p($g(^DHCPB(BillDr,"O",PBOSub)),"^",4)
+	s PBOOrdExecDr=$p($g(^DHCPB(BillDr,"O",PBOSub)),"^",20)	//执行记录的rowid
+	s OEORDInfo=$$GetOEORDInfo^DHCINSUFacade(PBOOEORIDR,HospDr)
+	;s OEORDInfoExt=$$GetOEORDInfoExt^DHCINSUFacade(PBOOEORIDR,PBOOrdExecDr)
+	s bilgdeptcodg=$p(OEORDInfo,"",16)					   ;开单科室编码
+	s bilgdeptname=$p(OEORDInfo,"",17)					   ;开单科室名称
+	s ccorddeptcodg=$p(OEORDInfo,"",19)						;受单科室编码
+	s ccorddeptname=$p(OEORDInfo,"",20)						;受单科室名称
+	i bilgdeptcodg="" d
+	.s bilgdeptcodg=Depcode
+	.s bilgdeptname=DepDesc
+	s bilgdeptcodg=##CLASS(web.DHCINSUPort).GetDicByCodeAndInd("deptCon00A",bilgdeptcodg,6,HospDr)
+	s:ccorddeptcodg'="" ccorddeptcodg=##CLASS(web.DHCINSUPort).GetDicByCodeAndInd("deptCon00A",ccorddeptcodg,6,HospDr)
+	s bilgdrcodg=$p(OEORDInfo,"",4)						   ;开单医生编码
+	s bilgdrname=$p(OEORDInfo,"",5)						   ;开单医师姓名
+	s bilgdrname=$replace(bilgdrname,"[","【")
+	s bilgdrname=$replace(bilgdrname,"]","】")
+	i bilgdrcodg="" d
+	.s bilgdrcodg=DocCode
+	.s bilgdrname=DocDesc				   
+	s ordersdrcodg=bilgdrcodg					   	   ;受单医生编码
+	s ordersdrname=bilgdrname						   ;受单医师姓名
+	s PatBillDetailsInfo=$g(^DHCPB(BillDr,"O",PBOSub,"D",PBDSub))
+	;s feedetlsn=PBDDr
+	s BillDate=$zd($p(PatBillDetailsInfo,"^",11),3)	
+    s BillTime=$zt($p(PatBillDetailsInfo,"^",12))
+    s feeocurtime=BillDate_" "_BillTime  
+    s PBDTarDr=$p(PatBillDetailsInfo,"^",3)				;收费项id
+    s pric=$p(PatBillDetailsInfo,"^",4)						;单价
+	s cnt=$p(PatBillDetailsInfo,"^",5)						;数量
+	s detitemfeesumamt=$p(PatBillDetailsInfo,"^",7)						;金额
+	s TariInsuFlag=$p($$QueryByCode^DHCINSUDicData("TariInsuFlag",InsuType,HospDr),"^",6)   //取收费项是否与其他收费项关联的标志  add by lilizhi 2013-03-05
+ 	s TarItemInsuInfo=$$GetConInfo^DHCINSUTarContrast(PBDTarDr,InsuType,BillDate,TariInsuFlag,HospDr)
+ 	s medlistcodg=$p(TarItemInsuInfo,"^",3)					   ;医疗目录编码
+ 	s medinslistcodg=$p($g(^DHCTARI(PBDTarDr)),"^",1)              ;医药机构目录编码
+	s medinslistname=$p($g(^DHCTARI(PBDTarDr)),"^",2)              ;医药机构目录名称
+	s medinslistname=$replace(medinslistname,"[","【")
+	s medinslistname=$replace(medinslistname,"]","】")
+	s medchrgitmtype=$p(TarItemInsuInfo,"^",1)					   ;医疗收费项目类别
+	s prodname=$p(TarItemInsuInfo,"^",4)						   ;商品名
+	s FF=$p(OEORDInfo,"",22)
+	s tcmdrugusedway=$Case(FF,"1":"1",:"2")						   ;中药使用方式(1	复方	2	单方)
+	s etipflag=""						   	   ;外检标志
+	s etiphospcode=""						   ;外检医院编码
+	s dscgtkdrugflag=$p(OEORDInfo,"",7)		   ;出院带药标志
+	s memo=""						   		   ;备注
+	d BuildOwnFeeDetail
+
+	Quit $$$OK
+BuildOwnFeeDetail	
+	set Data=$lb(mdtrtsn,iptotpno,medtype,chrgbchno,PBDDr,psncerttype,certno,psnname,feeocurtime,cnt,pric,detitemfeesumamt,medlistcodg,
+	medinslistcodg,medinslistname,medchrgitmtype,prodname,bilgdeptcodg,bilgdeptname,bilgdrcodg,bilgdrname,ccorddeptcodg,ccorddeptname,
+	ordersdrcodg,ordersdrname,tcmdrugusedway,etipflag,etiphospcode,dscgtkdrugflag,memo)
+ 	Set ^CacheTemp(repid,ind)=Data
+ 	Set ind=ind+1
+ 	q
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-28
+/// Description: 医保数据上报给其他产品组提供的共同参数接口，返回数组
+/// Input：		 AdmDr 			就诊号
+///              ExpDataAry     共同参数数组
+/// Output：	 
+/// Others：	 其它说明
+/// 调用示例：
+/// #dim  ExpDataAry As %ArrayOfDataTypes
+/// s flag=##class(web.DHCINSUSetlInfo).GetInsuReportInfoCom(AdmDr,.ExpDataAry)
+/// if ($IsObject(ExpDataAry))
+///    {
+/// 	   //注意key变量命名规则：请遵循国家医保接口文档规定的参数代码命名
+/// 	   s mdtrtId=ExpDataAry.GetAt("mdtrt_id")                   //mdtrt_id	        就诊ID  
+/// 	   s setlId = ExpDataAry.GetAt("setl_id")                   //setl_id	        结算ID
+///    s psnno = ExpDataAry.GetAt("psn_no")                     //psn_no	        人员编号
+/// 	   s fixmedinsName = ExpDataAry.GetAt("fixmedins_name")     //fixmedins_name	定点医药机构名称	
+/// 	   s fixmedinsCode = ExpDataAry.GetAt("fixmedins_code")     //fixmedins_code	定点医药机构编号
+/// 	   s hiSetlLv = ExpDataAry.GetAt("hi_setl_lv")              //hi_setl_lv	    医保结算等级
+/// 	   s hiNo = ExpDataAry.GetAt("hi_no")                       //hi_no	            医保编号	
+/// 	   s insutype = ExpDataAry.GetAt("insutype")                //insutype	        险种类型  
+/// 	   s insuAdmdvs = ExpDataAry.GetAt("insu_admdvs")           //insu_admdvs	    参保所属医保区划
+/// 	   s mdtrtareaAdmvs = ExpDataAry.GetAt("mdtrtarea_admvs")   //mdtrtarea_admvs	就医地医保区划	
+/// 	 }
+/// 
+/// w ##class(INSU.BL.Interface.DataRpUp).GetInsuReportInfoCom(5375051,"")
+ClassMethod GetInsuReportInfoCom(AdmDr As %String, ByRef ExpDataAry As %ArrayOfDataTypes = "", PrtDr As %String = "", InsuDivDr As %String = "") As %String
+{
+	if ('$IsObject(ExpDataAry)){
+	    s ExpDataAry=##class(%ArrayOfDataTypes).%New()
+    }
+	q:AdmDr="" "-1"
+	
+	s admType=$p(^PAADM(AdmDr),"^",2)			//就诊类型
+	s admType=$case(admType,"I":"IP",:"OP")
+	
+	s HospDr=##class(web.UDHCHospitalGroup).GetHospitalByAdm(AdmDr) //+ DingSH 20200526
+	s InsuHospCode=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuHospCode",4,HospDr)	//医疗机构编号
+	s InsuHospName=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuHospName",4,HospDr)	//医疗机构名称
+	s InsuCenterNo=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuCenterNo",4,HospDr)	//就医地区划
+	s hisetllv=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuSetllv",4,HospDr)			//医保结算等级
+	s hsorg=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuHsorg",4,HospDr)		//医保机构
+	s hsorgopter=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuHsorgOpter",4,HospDr)  //医保机构经办人
+	s medinsfilldept=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuMedinsFillDept",4,HospDr)		//医疗机构填报部门
+	s medinsfillpsn=##class(web.DHCINSUPort).GetDicByCodeAndInd("HISPROPerty00A","InsuMedinsFillPsn",4,HospDr)  //医疗机构填报人
+	
+	s (mdtrtid,psnno,insuadmdvs,insutype,hino)=""
+	i $d(^DHCINADM("0","ADM",AdmDr)) d
+	.s InsuAdmDr=$o(^DHCINADM("0","ADM",AdmDr,""),-1)
+	.q:InsuAdmDr=""
+	.s mdtrtid=$p($g(^DHCINADM(InsuAdmDr)),"^",10)	;医保就诊id
+	.s psnno=$p($g(^DHCINADM(InsuAdmDr)),"^",2)		;人员编号
+	.s insuadmdvs=$p($g(^DHCINADM(InsuAdmDr)),"^",8)		;参保所属医保区划
+	.s insutype=$p($g(^DHCINADM(InsuAdmDr)),"^",36)		;险种类型  
+	.s hino=psnno		;医保编号		???需核实医保编号是否传个人编号？？？
+
+	
+	;s (hifpaywayname,hifpaywaycode,medfeepaymtdname,medfeepaymtdcode)=""
+	;s (selfpayamt,medfeesumamt,ordnmedservfee,ordntrtoprtfee,nursfee,commedservothfee,palgdiagfee,labdiagfee,rdhydiagfee)=""
+	;s (clncdisefee,nsrgtrtitemfee,clncphystrtfee,rgtrttrtfee,anstfee,oprnfee,rhabfee,tcmtrtfee,wmfee,abtlmednfee,tcmpatfee)=""
+	;s (tcmherbfee,blofee,albufee,glonfee,clotfacfee,cykifee,examdspomatlfee,trtdspomatlfee,oprndspomatlfee,othfee)=""
+	
+	//取医保结算信息
+	s InsuDivInfo=""
+	s setlid=""
+	i InsuDivDr'="" d
+	.s InsuDivInfo=$g(^DHCINDIV(InsuDivDr))
+	e   d
+	.i $d(^DHCINDIV("0","Paadm",AdmDr)) d
+	..s InsuDivDrTmp=$o(^DHCINDIV("0","Paadm",AdmDr,""),-1)
+	..s InsuDivInfo=$g(^DHCINDIV(InsuDivDrTmp))
+	s setlid=$p(InsuDivInfo,"^",8)		//医保结算id
+	s psnownpay=+$p(InsuDivInfo,"^",52)+(+$p(InsuDivInfo,"^",54))			//个人自费
+	s acctpay=+$p(InsuDivInfo,"^",28)		//个人账户
+	s psncashpay=+$p(InsuDivInfo,"^",15)		//个人现金
+	s psnselfpay=psncashpay+acctpay-psnownpay		//个人自付 (个人现金+个人账户-个人自费)？？？ 需核实
+	s hipaymtd=""							//医保支付方式  ???带确认取值？？？？？？（1按项目,2单病种,3按病种分值,4基本诊断相关分组(DRG),5按床日,6按人次,7按定额,9其他）
+	
+	//取账单信息
+	s (pbDateFrom,pbDateTo,billcode,billno,bizsn)=""
+	i PrtDr'="" d
+	.i admType="IP" d
+	..s InvPrtInfo=$g(^DHCINVPRTZY(PrtDr)) 
+	..s PBRowID=$p(InvPrtInfo,"^",5)              ;账单号
+	.e  d
+	..s InvPrtInfo=$g(^DHCINVPRT(PrtDr))
+	..s BCInvDr=$o(^DHCBCI(0,"INV",PrtDr,""),-1)
+	..s PBRowID=$p(^DHCBCI(BCInvDr),"^",2)  		
+	.q:PBRowID=""
+	.s pbDateFrom=$p($g(^DHCPB(PBRowID)),"^",6)				;结算开始时间
+	.s:pbDateFrom'="" pbDateFrom=$zd(pbDateFrom,3)
+	.s pbDateTo=$p($g(^DHCPB(PBRowID)),"^",7)				;结算结束时间
+	.s:pbDateTo'="" pbDateTo=$zd(pbDateTo,3)
+	.//获取电子票据信息
+	.s EInvPrtInfo=..GetEInvBillNoStr(admType,PrtDr)
+	.s billcode=$p(EInvPrtInfo,"^",1)			//票据代码
+	.s billno=$p(EInvPrtInfo,"^",2)				//票据号码
+	.s bizsn=$p(EInvPrtInfo,"^",5)				//业务流水号
+
+	
+	//共同参数组织
+	s mdtrtsn=InsuHospCode_AdmDr		;mdtrt_sn	就医流水号	字符型	30		Y	格式：定点医药机构编号+院内唯一流水号
+
+	d ExpDataAry.SetAt(mdtrtsn,"mdtrt_sn")
+
+	s mdtrtsn=mdtrtid					;mdtrt_id	就诊ID	字符型	30			医保病人必填
+	d ExpDataAry.SetAt(mdtrtid,"mdtrt_id")
+	s mdtrtsn=psnno						;psn_no	人员编号	字符型	30			医保病人必填
+	d ExpDataAry.SetAt(psnno,"psn_no")
+	
+	s acpmedinscode=InsuHospCode		;acp_medins_code	拟接收医疗机构代码	字符型	50		;接口流程未定，跟项目确认
+	d ExpDataAry.SetAt(acpmedinscode,"acp_medins_code")
+	d ExpDataAry.SetAt(acpmedinscode,"acp_optins_code")
+	s acpmedinsname=InsuHospName		;acp_medins_name	拟接收医疗机构名称	字符型	500		;接口流程未定，跟项目确认
+	d ExpDataAry.SetAt(acpmedinsname,"acp_medins_name")
+	s medinsorgcode=InsuHospCode		;medins_orgcode	医疗机构组织机构代码	字符型	50
+	d ExpDataAry.SetAt(medinsorgcode,"medins_orgcode")
+	d ExpDataAry.SetAt(InsuHospCode,"fixmedins_code")			;fixmedins_code	定点医药机构编号	字符型	12
+	s medfeepaymtdcode=""										;????????怎么获取
+	d ExpDataAry.SetAt(medfeepaymtdcode,"medfee_paymtd_code")		;medfee_paymtd_code	医疗费用支付方式代码	字符型	3	Y
+	d ExpDataAry.SetAt(setlid,"setl_id")					;医保中心结算id
+
+	d ExpDataAry.SetAt(InsuCenterNo,"mdtrtarea_admvs")		;就医地区划
+	d ExpDataAry.SetAt(insuadmdvs,"insu_admdvs")			;参保所属医保区划
+	d ExpDataAry.SetAt(insuadmdvs,"insuplc")			;参保所属医保区划
+	d ExpDataAry.SetAt(insuadmdvs,"insuplc_admdvs")
+	
+	d ExpDataAry.SetAt(hisetllv,"hi_setl_lv")				;医保结算等级
+	d ExpDataAry.SetAt(insutype,"insutype")					;险种类型
+	d ExpDataAry.SetAt(hino,"hi_no")						;医保编号
+	d ExpDataAry.SetAt(insutype,"hi_type")					;医保类型
+
+	d ExpDataAry.SetAt(pbDateFrom,"setl_begn_date")			;结算开始时间
+	d ExpDataAry.SetAt(pbDateTo,"setl_end_date")			;结算结束时间
+	d ExpDataAry.SetAt(billcode,"bill_code")				;票据代码
+	d ExpDataAry.SetAt(billno,"bill_no")					;票据号码
+	d ExpDataAry.SetAt(bizsn,"biz_sn")						;业务流水号
+
+	d ExpDataAry.SetAt(psnselfpay,"psn_selfpay")				;个人自付
+	d ExpDataAry.SetAt(psnownpay,"psn_ownpay")					;个人自费
+	d ExpDataAry.SetAt(acctpay,"acct_pay")						;个人账户
+	d ExpDataAry.SetAt(psncashpay,"psn_cashpay")				;个人现金
+
+	d ExpDataAry.SetAt(hipaymtd,"hi_paymtd")				;医保支付方式
+	d ExpDataAry.SetAt(hsorg,"hsorg")						;医保机构
+	d ExpDataAry.SetAt(hsorgopter,"hsorg_opter")			;医保机构经办人
+	d ExpDataAry.SetAt(medinsfilldept,"medins_fill_dept")	;医疗机构填报部门
+	d ExpDataAry.SetAt(medinsfillpsn,"medins_fill_psn")		;医疗机构填报人
+
+	q "0"
+}
+
+/// Creator：    徐保保
+/// CreatDate：  2021-12-29
+/// Description: 获取电子票据信息
+/// Input：		 PayAdmType		业务类型
+///              HISPrtRowID    发票id
+/// Output：	 票据代码^票据号码^校验码^票据代码+票据号码^业务流水号
+/// Others：	 其它说明
+ClassMethod GetEInvBillNoStr(PayAdmType As %String, HISPrtRowID As %String, IUDPrintType As %String = "E") As %String
+{
+	q:(PayAdmType="")||(HISPrtRowID="")||(IUDPrintType="") ""
+	q:'$d(^BILL.EINV.PO.InvUpDetailsI("IDataKey", PayAdmType)) ""
+	
+	s ID=$o(^BILL.EINV.PO.InvUpDetailsI("IDataKey", PayAdmType, HISPrtRowID, IUDPrintType, ""),-1)
+	q:ID="" ""
+	s objUpDetail=##class(BILL.EINV.PO.InvUpDetails).%OpenId(ID)
+	s EInvFlg=objUpDetail.EInvFlg
+	q:EInvFlg="" ""
+	s BillBatchCode=objUpDetail.IUDBillBatchCode			;票据代码
+	s BillNo=objUpDetail.IUDBillBatchNo						;票据号码
+	s Random=objUpDetail.IUDCheckCode						;校验码
+	s EInvNo=objUpDetail.EinvprtNo
+	s BillBusNo=objUpDetail.IUDBusNo						;业务流水号
+	s EInvStr=BillBatchCode_"^"_BillNo_"^"_Random_"^"_EInvNo_"^"_BillBusNo
+	q EInvStr
+}
+
+/// Description:
+/// 			5401  项目互认信息查询
+/// 			5402  报告明细信息查询
+/// 			9604  远程查床任务查询
+///       Input 传参规范：就诊id^院区id^操作员id^医保类型^报告单号^医药机构编码^开始日期^结束日期
+/// w ##class(INSU.BL.Interface.DataRpUp).InsuInfoUpload("^2^1^00A^^^2022-06-01^2022-06-30","9604","")
+/// w ##class(INSU.BL.Interface.DataRpUp).InsuInfoUpload("322^2^1^00A^^^^","5401","")
+ClassMethod InsuInfoUpload(Input As %String = "", InterType As %String = "", InsuType As %String = "") As %String
+{
+	s EpisodeID=$p(Input,"^",1)		
+	s HospID=$p(Input,"^",2)	
+	s UserID=$p(Input,"^",3)
+	s Hitype=$p(Input,"^",4)
+	s ReportNo=$p(Input,"^",5)
+	s medinscode=$p(Input,"^",6)
+	s stdate=$p(Input,"^",7)
+	s enddate=$p(Input,"^",8)
+	
+	s ret=""
+	
+	if ("^5401^5402^")[("^"_InterType_"^"){
+		s InputInfo=Hitype_"^"_InterType_"^"_HospID_"^"_UserID_"^0^102^1^"_EpisodeID_"^"_""
+	}elseif InterType="9604" {
+		s InputInfo=Hitype_"^"_InterType_"^"_HospID_"^"_UserID_"^0^102^1^"_medinscode_"^"_stdate_"^"_enddate
+	}	
+	
+	s InArgType="STR"
+	s OutArgType="JSON"
+	
+	if InterType="5401" {
+		s Param=..GetParamObj(EpisodeID,"",InputInfo)
+		s DataObj=..Get5401Data(EpisodeID)
+		s dataInputArgArr=##class(%ArrayOfDataTypes).%New()
+		d dataInputArgArr.SetAt(DataObj,"bilgiteminfo")	
+		s Ret=##class(INSU.OFFBIZ.BL.BIZ00A).InsuDocDetailedAuditService(Param,dataInputArgArr)
+	}
+	elseif InterType="5402" {
+		s Param=..GetParamObj(EpisodeID,"",InputInfo)
+		s DataObj=..Get5402Data(EpisodeID,ReportNo)
+		s dataInputArgArr=##class(%ArrayOfDataTypes).%New()
+		d dataInputArgArr.SetAt(DataObj,"rptdetailinfo")	
+		s Ret=##class(INSU.OFFBIZ.BL.BIZ00A).InsuDocDetailedAuditService(Param,dataInputArgArr)
+	}elseif InterType="9604" {
+		s Param=..GetParamObj(EpisodeID,"",InputInfo)
+		 
+		s DataObj=..Get9604Data(InputInfo)
+		s dataInputArgArr=##class(%ArrayOfDataTypes).%New()
+		d dataInputArgArr.SetAt(DataObj,"data")	
+		s Ret=##class(INSU.OFFBIZ.BL.BIZ00A).InsuDocDetailedAuditService(Param,dataInputArgArr)
+	}
+	
+	q Ret
+}
+
+/// debugger: w ##Class(DHCDoc.Interface.YiBaoJianGuan.Business).GetParamObj(7275037,"3101",41,1)
+ClassMethod GetParamObj(EpisodeID As %String, Json As %String = "", InputInfo As %String = "") As %ArrayOfDataTypes
+{
+	s Obj=##class(%ArrayOfDataTypes).%New()
+	
+	s InsuType=$p(InputInfo,"^",1)
+	s Type=$p(InputInfo,"^",2)
+	s HospitalId=$p(InputInfo,"^",3)
+	s UserId=$p(InputInfo,"^",4)
+
+	i (HospitalId="")&&(EpisodeID'=""){
+		s HospitalId=##class(web.DHCINSUBase).GetHOSPID(EpisodeID,"AdmDr")	
+	}
+	
+	s InsuPlcAdmDvs=""
+	i EpisodeID'="" {
+		s InsuPlcAdmDvs=$p(##class(web.DHCINSUAdmInfoCtl).GetInfoByAdm(EpisodeID),"^",8)
+	}	
+		
+	s ParamObj=##class(%ArrayOfDataTypes).%New()
+	d ParamObj.SetAt(Type,"INFNO")
+	d ParamObj.SetAt(EpisodeID,"EpisodeID")
+	d ParamObj.SetAt(HospitalId,"HOSPID")
+	d ParamObj.SetAt(UserId,"UserId")
+	d ParamObj.SetAt(InsuType,"InsuType")
+	d ParamObj.SetAt(InsuType,"HI_TYPE")
+	d ParamObj.SetAt($p(InputInfo,"^",5),"TYPE")
+	d ParamObj.SetAt(InsuPlcAdmDvs,"insuplc_admdvs")
+	i Json=1{
+		s JsonStream=##Class(DHCDoc.Util.FromXML).Arr2Json(ParamObj)
+		s JsonStr=JsonStream.Read()
+		q JsonStr
+	}
+
+	q ParamObj
+}
+
+/// Description：获取5401数据
+/// w ##class(web.NationInsuInfoUpload).Get5401Data("9049035")
+ClassMethod Get5401Data(EpisodeID As %String = "", ArcimID As %String = "") As %ArrayOfDataTypes
+{
+	s ArrayObj=##class(%ArrayOfDataTypes).%New()
+	s HospDr=##class(web.DHCINSUBase).GetHOSPID(EpisodeID,"AdmDr")	
+	s psnno=$p(##class(web.DHCINSUPort).GetInsuAdmInfoByAdmDr(EpisodeID),"^",2)			                                //	人员编号
+	s psnno=$p(##class(web.DHCINSUAdmInfoCtl).GetInfoByAdm(EpisodeID),"^",3)
+	s examorgcode=##class(web.INSUDicDataCom).GetDicByCodeAndInd("HISPROPerty00A","InsuHospCode",4,HospDr)		        // 检查机构代码
+	s examorgname=##class(web.INSUDicDataCom).GetDicByCodeAndInd("HISPROPerty00A","InsuHospName",4,HospDr)				// 检查机构名称
+	
+	s examitemcode=""		                                            // 检查-项目代码
+	s examitemname=""		                                            // 检查-项目名称
+	i ArcimID'="" {
+		s ArcimRowID=$p(ArcimID,"||",1)
+		s ArcimSub=$p(ArcimID,"||",2)
+		s examitemcode=$p($g(^ARCIM(ArcimRowID,ArcimSub,9)),"^",34)		// 检查-项目代码
+		s examitemname=$p($g(^ARCIM(ArcimRowID,ArcimSub,9)),"^",36)		// 检查-项目名称
+	}
+	
+	d ArrayObj.SetAt(psnno,"psn_no")		            //	人员编号
+	d ArrayObj.SetAt(examorgcode,"exam_org_code")		//	检查机构代码
+	d ArrayObj.SetAt(examorgname,"exam_org_name")		//	检查机构名称
+	d ArrayObj.SetAt(examitemcode,"exam_item_code")		//	检查-项目代码
+	d ArrayObj.SetAt(examitemname,"exam_item_name")		//	检查-项目名称
+	q ArrayObj
+}
+
+/// Description：获取5402数据
+/// w ##class(web.NationInsuInfoUpload).Get5402Data("9049035","154")
+ClassMethod Get5402Data(EpisodeID As %String = "", ReportNo As %String = "") As %ArrayOfDataTypes
+{
+	s ArrayObj=##class(%ArrayOfDataTypes).%New()
+	s HospDr=##class(web.DHCINSUBase).GetHOSPID(EpisodeID,"AdmDr")	
+	s psnno=$p(##class(web.DHCINSUPort).GetInsuAdmInfoByAdmDr(EpisodeID),"^",2)			                            //	人员编号
+	s fixmedinscode=##class(web.INSUDicDataCom).GetDicByCodeAndInd("HISPROPerty00A","InsuHospCode",4,HospDr)		// 检查机构代码
+	
+	d ArrayObj.SetAt(psnno,"psn_no")		                //	人员编号
+	d ArrayObj.SetAt(ReportNo,"rpotc_no")		            //	报告单号
+	d ArrayObj.SetAt(fixmedinscode,"fixmedins_code")		//	机构编号
+	q ArrayObj
+}
+
+ClassMethod Get9604Data(Input As %String) As %ArrayOfDataTypes
+{
+	s ArrayObj=##class(%ArrayOfDataTypes).%New()
+	
+	s medinscode=$p(Input,"^",8)
+	s begndate=$p(Input,"^",9)
+	s enddate=$p(Input,"^",10)
+	 
+	i medinscode="" {
+		s HiType=$p(Input,"^",1)
+		s HospDr=$p(Input,"^",3)
+		s medinscode=##class(web.INSUDicDataCom).GetDicByCodeAndInd("HISPROPerty"_HiType,"InsuHospCode",4,HospDr)
+	}
+		
+	d ArrayObj.SetAt(medinscode,"medins_code")
+	d ArrayObj.SetAt(medinscode,"fixmedins_code")		                
+	d ArrayObj.SetAt(begndate,"begndate")		            
+	d ArrayObj.SetAt(enddate,"enddate")		
+	q ArrayObj
+}
+
+/// w ##class(INSU.BL.Interface.DataRpUp).GetAdmAge(5317582,"","4401")
+ClassMethod GetAdmAge(adm As %String, arg1 As %String = "", arg2 As %String = "") As %String
+{
+	q:adm="" ""
+	s papmidr=$p(^PAADM(adm),"^",1)
+	s agestr=##class(web.DHCBillInterface).GetPapmiAge(papmidr,adm)
+	q agestr
+}
+
+/// 根据医嘱获取医保相关信息（药房药库调用）
+///  DingSH 2022-04-22
+///  w ##class(INSU.BL.Interface.DataRpUp).GetInsuInfoByOeoriDr("1758||2")
+///  w ##class(INSU.BL.Interface.DataRpUp).GetInsuInfoByOeoriDr("909||20")
+///  医保费用结算类型^结算ID^就医流水号(机构生成内唯一就诊流水)^人员编号
+///  注意
+///  每个项目需要与开发进行确认+改造 
+///  就医流水号(机构生成内唯一就诊流水):$P(INSU_AdmInfo.XString12,"|",1)    
+///  需要项目和医保开发一起确认，入院记录 2401 入参  ipt_no    住院号   ，2201 门诊挂号 ipt_otp_no    住院/门诊号
+ClassMethod GetInsuInfoByOeoriDr(OeoriDr As %String) As %String
+{
+    s $zt="GetInsuInfoByOeoriDrEx"
+    s RtnStr=""
+    s hiFeesetlType="0"     // hi_feesetl_type 医保费用结算类型  0:非医疗保险结算; 1:本地医疗保险结算; 2:异地医疗保险结算;    
+    s setlId=""            // setl_id  结算ID        　    医保病人必填
+    s mdtrtSn=""           // mdtrt_sn    就医流水号    机构生成内唯一就诊流水
+    s psnNo=""             // psn_no    人员编号    
+    s PBRowId=""
+    s PBRowId=$O(^DHCPBi(0,"OEORI",OeoriDr,""),-1)
+    //b ;000
+    q:PBRowId="" "0^^^" 
+    //s:$d(^||TEMPINSU(PBRowId))=0 ^||TEMPINSU(PBRowId)=0
+    i '$d(^||TEMPINSU(PBRowId)) d
+    .s AdmDr=$P(^DHCPB(PBRowId),"^",1)
+    .s AdmType=$P(^PAADM(AdmDr),"^",2)
+    .s mdtrtSn=AdmDr     //自费患者
+    .s InAdmDr="",InDivDr=""
+    .s InDivDr=$O(^DHCINDIV("0","DHCPB",PBRowId,""),-1) //住院情况：根据账单取医保结算表ID
+    .i InDivDr="" d //门诊情况
+    ..s DHCBCIRowid=""
+    ..s DHCBCIRowid=$O(^DHCBCI(0,"Bill",PBRowId,""),-1)
+    ..s InvDr=""
+    ..s:+DHCBCIRowid>0 InvDr=$P(^DHCBCI(DHCBCIRowid),"^",1)
+    ..s:+InvDr>0 InDivDr=$O(^DHCINDIV("0","DHCInvPrt",InvDr,""),-1) //根据账单取医保结算表ID
+    .i InDivDr>0 d
+    ..s InAdmDr=$P(^DHCINDIV(InDivDr),"^",2)
+    ..s setlId=$P(^DHCINDIV(InDivDr),"^",8)
+    ..s mdtrtSn=$p(^DHCINADM(InAdmDr),"^",10)
+    ..s psnNo=$P(^DHCINDIV(InDivDr),"^",18)
+    .//e  d
+    .//.s InAdmDr=$O(^DHCINADM("0","ADM",AdmDr,""),-1)
+    .i InAdmDr>0 d
+    ..s psnNo=$P(^DHCINADM(InAdmDr),"^",2)
+    ..//s mdtrtSn=$P($P(^DHCINADM(InAdmDr),"^",41),"|",1)  //住院/门诊号|病历号|联系人姓名|联系人电话
+    ..s mdtrtSn=$P(^DHCINADM(InAdmDr),"^",10)
+    ..s insuplcAdmdvs=$P(^DHCINADM(InAdmDr),"^",8)   //参保地区划
+    ..s HospDr=""
+    ..i InDivDr'="" s HospDr=$P($g(^DHCINDIV(InDivDr)),"^",71)     //upt 20241120 Jins
+    ..s:$g(HospDr)="" HospDr=##class(web.UDHCHospitalGroup).GetHospitalByAdm(AdmDr)
+    ..s mdtrtareaAdmvs=##class(web.INSUDicDataCom).GetDicByCodeAndInd("HISPROPerty00A","InsuCenterNo",4,HospDr) //就医地区划
+    ..s hiFeesetlType=""
+    ..//i $e(mdtrtareaAdmvs,1,4)= $e(insuplcAdmdvs,1,4) d
+    ..i $e(mdtrtareaAdmvs,1,2)= $e(insuplcAdmdvs,1,2) d
+    ...s hiFeesetlType=1
+    ..e  d
+    ...s hiFeesetlType=2
+    .s ^||TEMPINSU(PBRowId,"hi_feesetl_type") =hiFeesetlType
+    .s ^||TEMPINSU(PBRowId,"setl_id")=setlId
+    .s ^||TEMPINSU(PBRowId,"mdtrt_sn")=mdtrtSn 
+    .s ^||TEMPINSU(PBRowId,"psn_no")=psnNo
+    e   d
+    .s hiFeesetlType= ^||TEMPINSU(PBRowId,"hi_feesetl_type")
+    .s setlId= ^||TEMPINSU(PBRowId,"setl_id")
+    .s mdtrtSn= ^||TEMPINSU(PBRowId,"mdtrt_sn")
+    .s psnNo= ^||TEMPINSU(PBRowId,"psn_no")
+    s RtnStr=hiFeesetlType_"^"_setlId_"^"_mdtrtSn_"^"_psnNo
+    q RtnStr
+    
+GetInsuInfoByOeoriDrEx
+  s $zt=""
+  b ;异常 GetInsuInfoByOeoriDrEx
+  q "-1^"_$ze
+}
+
+/// 根据医嘱id判断是否为医保结算（药房药库调用）
+/// 入参：  医嘱id
+/// 出参： Y:医保,N:非医保
+/// 使用场景：根据医嘱id来判断该医嘱是否为医保结算。入参门诊为医嘱id OEORIId、住院为医嘱执行表id OEOREId，出参为医保标志
+/// +靳帅1010 20221209 upt 靳帅1010 20230404
+/// 门诊-OE_Order-Pa_Adm-OE_OrdItem-DHC_PatientBill-DHC_BillConINV-DHC_INVPRT-INSU_Divide-判断：医保结算状态I为医保结算
+/// 住院-OE_Order-Pa_Adm-OE_OrdExec-DHC_PatientBill-INSU_Divide-判断：医保结算状态I为医保结算
+/// w ##class(INSU.BL.Interface.DataRpUp).GetIsInsuPayByOEORDId("7||4","17||1||1") 
+ClassMethod GetIsInsuPayByOEORDId(OEORIId As %String, OEOREId As %String) As %String
+{
+   s $zt="GetIsInsuPayByOEORDIdEx"
+   q:(OEORIId="")&&(OEOREId="") "-1^医嘱ID和执行记录ID不能同时为空"
+   s InsuFlag="N"     
+   s OEOrdRowId=$P(OEORIId,"||",1)
+   s:OEOrdRowId="" OEOrdRowId=$P(OEOREId,"||",1)
+   s PaadmDr=$p($g(^OEORD(OEOrdRowId)),"^",1) //就诊Dr
+   s PaadmInfo=$g(^PAADM(PaadmDr))
+   s PaadmType=$p(PaadmInfo,"^",2)   //就诊类型
+   //如果就诊类型不为"I"(住院)或"P"(预住院) 为门诊医嘱
+   i (PaadmType'="I")&&(PaadmType'="P")
+      {
+          d OpGetIsInsuPay   //门诊医嘱查询该医嘱对应的医保结算状态
+      }                
+   else
+      {                           
+          d IPGetIsInsuPay   //住院医嘱查询医保结算状态
+      }
+   q InsuFlag
+OpGetIsInsuPay
+   s PatBillId=""
+   s PatBillId=$o(^DHCPBi(0,"OEORI",OEORIId,PatBillId),-1)
+   q:PatBillId="" 
+   s PbInfo=$g(^DHCPB(PatBillId))
+   s BillConINVId="" 
+   s BillConINVId=$o(^DHCBCI(0,"Bill",PatBillId,BillConINVId),-1)
+   q:BillConINVId=""  
+   s BillConINVInfo=$g(^DHCBCI(BillConINVId))
+   s DHCINVPRTDr=$p(BillConINVInfo,"^",1)  //发票表ID
+   s DivideDr=""
+   s DivideDr=$O(^DHCINDIV("0","DHCInvPrt",DHCINVPRTDr,DivideDr),-1)
+   //当根据索引，取到DivideDr为空时,不为医保结算，退出
+   q:DivideDr=""
+   s DivideInfo=$g(^DHCINDIV(DivideDr))
+   s INPAYFlag=$p(DivideInfo,"^",5)    //医保结算状态
+   //当医保结算状态未为"I"(正常)时，正常结算数据
+   i (INPAYFlag="I")   
+        {
+            s InsuFlag="Y" 
+        }          
+   q
+IPGetIsInsuPay
+   s IpPatBillId=""
+   s IpPatBillId=$o(^DHCPB(0,"OEEXC",OEOREId,IpPatBillId),-1) 
+   q:IpPatBillId="" 
+   s IpPbInfo=$g(^DHCPB(IpPatBillId))
+   s IPPayedFlag=$p(IpPbInfo,"^",16)      //计费状态(Paid,Bill)
+   //当账单计费状态为"P"时是已经结算账单
+   i (IPPayedFlag="P")
+     {
+        s DivideDr=""
+        s DivideDr=$O(^DHCINDIV("0","DHCPB",IpPatBillId,DivideDr),-1)
+        //当根据索引，取到DivideDr为空时，不为医保结算，退出
+        q:DivideDr=""
+        s DivideInfo=$g(^DHCINDIV(DivideDr))
+        s INPAYFlag=$p(DivideInfo,"^",5)    //医保结算状态
+        //当医保结算状态未为"I"时，正常结算数据
+        i (INPAYFlag="I")  
+            {
+                s InsuFlag="Y"
+            }                
+     }
+   q
+GetIsInsuPayByOEORDIdEx
+   s $zt=""
+   q "-99^程序异常："_$ze
+}
+
+}

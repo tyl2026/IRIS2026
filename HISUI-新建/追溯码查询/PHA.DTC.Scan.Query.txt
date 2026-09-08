@@ -1,0 +1,926 @@
+Class PHA.DTC.Scan.Query Extends %RegisteredObject
+{
+
+/// Description:获取业务所对应的台账信息
+/// Creator:	suiguyang
+/// CreateDate:	20240608
+/// Table:      DHC_INTRANS
+/// Input:      qBsIdStr-业务表ID字符串, qBsType-业务类型(对应台账类型) 盘点类型取"AT"，qBsShowFlag-标识码为空的是否显示，qCodeType-码类型，qOeoreStr-执行记录串(以^分割)
+/// Output:     
+/// Return： 
+/// Others:     
+/// Debug:      d ##class(%ResultSet).RunQuery("PHA.DTC.Scan.Query","GetBsInfo","1853879","F","N","STC")
+Query GetBsInfo(qBsIdStr As %String, qBsType As %String, qBsShowFlag As %String, qCodeType As %String, qOeoreStr As %String) As websys.Query(ROWSPEC = "intrStr, inciCode, inciDesc, spec, tQty, pUom, alrPTCNum, alrBTCNum, traceCodeNum, group, needPTCNum, needBTCNum, needTCNum, drugCompleteFlag, traceCodePrefix, inci, tQtyUom, manfName") [ SqlProc ]
+{
+}
+
+ClassMethod GetBsInfoExecute(ByRef qHandle As %Binary, qBsIdStr As %String, qBsType As %String, qBsShowFlag As %String, qCodeType As %String, qOeoreStr As %String) As %Status
+{
+	s repid=$I(^CacheTemp)
+	s qHandle=$lb(0,repid,0)
+	s ind=1
+	q:(qBsIdStr = "")&&(qOeoreStr = "") $$$OK
+	q:(qBsType = "") $$$OK
+	s pid = ..NewPid()
+	k GetBsInfo("PHA", $CLASSNAME(), pid) 
+	//按执行记录查询
+	i (qBsIdStr = "")&&(qOeoreStr '= "") {
+		d ##class(PHA.DTC.Nurse.Query).GetDrugInfo(qOeoreStr, qBsShowFlag, qCodeType, pid, .GetBsInfo, qBsType)
+	}
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{		
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		//获取对应业务的台账pointer集合
+		s pointerArr = ##class(PHA.COM.Array).%New()
+		s pointerNum = 
+			$CASE(qBsType,
+	              "F"  : ..GetFPointerArr(bsId, .pointerArr),   // 门诊发药
+	              "H"  : ..GetHPointerArr(bsId, .pointerArr),   // 门诊退药
+	              "P"  : ..GetPPointerArr(bsId, .pointerArr),   // 住院发药
+	              "Y"  : ..GetYPointerArr(bsId, .pointerArr),   // 住院退药
+	              "G"  : ..GetGPointerArr(bsId, .pointerArr),   // 入库
+	              "R"  : ..GetRPointerArr(bsId, .pointerArr),   // 退货
+	              "A"  : ..GetAPointerArr(bsId, .pointerArr),   // 库存调整
+	              "AT" : ..GetATPointerArr(bsId, .pointerArr),  // 盘点       
+	              :"0"
+	        )
+	    continue:(pointerNum = "0")
+	    
+	    //获取分组信息
+	    s group = 
+	    	$CASE(qBsType,
+	              "F"  : ..GetFGroupInfo(bsId),   // 门诊发药
+	              "H"  : ..GetHGroupInfo(bsId),   // 门诊退药
+	              "P"  : ..GetPGroupInfo(bsId),   // 住院发药
+	              "Y"  : ..GetYGroupInfo(bsId),   // 住院退药
+	              "G"  : ..GetGGroupInfo(bsId),   // 入库
+	              "R"  : ..GetRGroupInfo(bsId),   // 退货
+	              "A"  : ..GetAGroupInfo(bsId),   // 库存调整
+	              "AT" : ..GetATGroupInfo(bsId),  // 盘点
+	              :""
+	        )
+	  
+	    //利用pointer获取到对应的数据返回前台展示
+	    s pointerArrLen=pointerArr.%Size()
+		for i = 0 : 1 : (pointerArrLen - 1) {
+			s pointer = pointerArr.%Get(i)
+			if (qBsType '= "AT") {
+				s intr = $o(^DHCINTR(0,"TypePointer", qBsType, pointer, "0"))
+				s intrData = ^DHCINTR(intr)
+				s inclb = $p(intrData, "^", 7)
+				s inci = +inclb
+                s traceCodePrefix = ##class(PHA.DTC.COM.Method).GetInciIDCode(inci, qCodeType)
+				continue:(qBsShowFlag = "Y")&&(traceCodePrefix = "")
+			    s Incib = $P(^INCI(inci,"IL", $p(inclb,"||",2), "LB", $p(inclb,"||",3)), "^", 1)
+				s VendManf = ##class(web.DHCST.Common.DrugStkCommon).VendManfByIncIb(Incib) //查找批次供应商及厂家
+				s vendor = $p(VendManf, "^", 2)
+				s manf = $p(VendManf, "^", 4)
+				s tQty = $p(intrData, "^", 6)
+				s:tQty<0 tQty = tQty * (-1)
+				s intrUomId = $p(intrData, "^", 10)	//台账单位
+				s bUomId = $p(^INCI(inci,1), "^", 10)
+				s intrFac = ##class(PHA.DTC.COM.Method).UomFac(intrUomId,bUomId)
+				s tQty = tQty * intrFac
+				s traceCodeBQtyNum = ##class(PHA.DTC.COM.Method).GetRecordBQty(intr,qBsType)  //已绑定的基本单位数量
+				d GroupData
+			}else{
+			
+				s insti = $p(pointer, "||", 2)
+				s inst = $p(pointer, "||", 1)
+				s instiData = $g(^DHCINST(inst,"STI",insti))
+				s inclb = $p(instiData,"^",1)
+				s inci = +inclb
+                s traceCodePrefix = ##class(PHA.DTC.COM.Method).GetInciIDCode(inci, qCodeType)
+				continue:(qBsShowFlag = "Y")&&(traceCodePrefix = "")
+				s incib = $p(^INCI($p(inclb,"||",1),"IL",$p(inclb,"||",2),"LB",$p(inclb,"||",3)),"^",1)
+				s VendManf = ##class(web.DHCST.Common.DrugStkCommon).VendManfByIncIb(incib) //查找批次供应商及厂家
+				s vendor = $p(VendManf, "^", 2)
+				s manf = $p(VendManf, "^", 4)
+				s tQty = $p(instiData,"^",2)
+				s:tQty<0 tQty = tQty * (-1)
+				s intrUomId = $p(instiData, "^", 17)	// 盘点单位
+				s bUomId = $p(^INCI(inci,1), "^", 10)
+				s intrFac = ##class(PHA.DTC.COM.Method).UomFac(intrUomId,bUomId)
+				s tQty = tQty * intrFac
+				s intr = bsId_"||"_insti
+				s traceCodeBQtyNum = ##class(PHA.DTC.COM.Method).GetRecordBQty(intr,qBsType)  //已绑定的基本单位数量
+				d GroupData
+			}
+			
+			
+		}	
+	}
+	s outIndex=""
+	for{
+		s outIndex=$o(GetBsInfo("PHA", $CLASSNAME(), pid, outIndex)) q:(outIndex = "")
+		s outData= GetBsInfo("PHA", $CLASSNAME(), pid, outIndex)
+		s inci = $p(outData, "^", 1)
+        s bQty = $p(outData, "^", 2)
+		s group = $p(outData, "^", 4)
+		s inciCode = $p(^INCI(inci,1), "^", 1)
+	    s inciDesc = $p(^INCI(inci,1), "^", 2)
+	    s spec = ##class(web.DHCST.Common.DrugInfoCommon).GetSpec("", inci)
+	    s bUomId = $p(^INCI(inci,1), "^", 10)
+	    s pUomId = $p(^INCI(inci,1), "^", 17)
+	    if (pUomId = "") {
+			s pUomId = $p(^INCI(inci,3), "^", 6)
+	    }
+		s pUom = $p(^CT("UOM",pUomId),"^",2)
+		s inciFac = ##class(PHA.DTC.COM.Method).UomFac(pUomId, bUomId) 
+        s retFac = ##class(PHA.DTC.COM.Method).GetPackFac(inci, qCodeType)
+        s tQty = $fn(bQty / inciFac, "", 2)
+        s tQtyUom = ##class(PHA.DTC.COM.Method).ToQtyWithUom(inci, bQty)
+        s needQty = bQty / retFac		// 需扫数量
+        s needPTCNum = +##class(PHA.DTC.COM.Util).MathFloor(needQty)
+        s needBTCNum = +$s(+$p(needQty, ".", 2) > 0 : 1, 1 : 0)
+        
+        s needTCNum = needPTCNum + needBTCNum
+        s alrBQty = $p(outData, "^", 3)
+        s alrQty = alrBQty / retFac
+        s alrPTCNum = +##class(PHA.DTC.COM.Util).MathFloor(alrQty)   	// 已扫数量
+        s alrBTCNum = +$s(+$p(alrQty, ".", 2) > 0 : 1, 1 : 0)
+        s traceCodeNum = alrPTCNum + alrBTCNum
+		s traceCodePrefix=$p(outData, "^", 5)
+		s intrStr = GetBsInfo("PHA", $CLASSNAME(), pid, outIndex, "intrStr")
+		
+		s drugCompleteFlag = ##class(PHA.DTC.COM.Method).IsScanComp(intrStr, qBsType)
+		s noTraceCodeFlag = ##class(PHA.DTC.COM.Method).GetIncitmPropValue(inci, "NoTraceCode")
+		if (noTraceCodeFlag = "Y") {
+			s drugCompleteFlag = "C"
+		}
+		s manfName = $p(##class(web.DHCST.Common.DrugInfoCommon).GetManf(inci), "^", 3)
+		s data = $lb(intrStr, inciCode, inciDesc, spec, tQty, pUom, alrPTCNum, alrBTCNum, traceCodeNum, group ,needPTCNum, needBTCNum, needTCNum, drugCompleteFlag, traceCodePrefix, inci, tQtyUom, manfName)
+		s ^CacheTemp(repid,ind) = data
+		s ind = ind+1
+	}
+	k GetBsInfo("PHA", $CLASSNAME(), pid)
+	s qHandle=$lb(0,repid,0)
+	q $$$OK
+GroupData
+	s index=group_"^"_inci
+	if ('$d(GetBsInfo("PHA", $CLASSNAME(), pid, index))){
+		s GetBsInfo("PHA", $CLASSNAME(), pid, index)=inci_"^"_tQty_"^"_traceCodeBQtyNum_"^"_group_"^"_traceCodePrefix
+	}else{
+		s $p(GetBsInfo("PHA", $CLASSNAME(),pid,index), "^", 2)=tQty + $p(GetBsInfo("PHA", $CLASSNAME(),pid,index), "^", 2)
+		s $p(GetBsInfo("PHA", $CLASSNAME(),pid,index), "^", 3)=traceCodeBQtyNum + $p(GetBsInfo("PHA", $CLASSNAME(),pid,index), "^", 3)
+		
+	}
+	if ('$d(GetBsInfo("PHA", $CLASSNAME(), pid, index, "intrStr"))){
+		s GetBsInfo("PHA", $CLASSNAME(), pid, index, "intrStr") = intr
+	}else{
+		s GetBsInfo("PHA", $CLASSNAME(), pid, index, "intrStr") = GetBsInfo("PHA", $CLASSNAME(), pid, index, "intrStr")_"@"_intr
+	}
+}
+
+/// Description:获取台账对应的追溯码信息
+/// Creator:	suiguyang
+/// CreateDate:	20240608
+/// Table:      DHC_IntrBatPack
+/// Input:		qPointer-台账ID
+/// Output:		
+/// Return：	
+/// Others: 	
+/// Debug:		d ##class(%ResultSet).RunQuery("PHA.DTC.Scan.Query","GetTraceCodeInfo","1208")
+Query GetTraceCodeInfo(qPointerStr As %String, qCodeType As %String) As websys.Query(ROWSPEC = "tpdId,traceCode,codeTypeDesc,scanUserName,trdnFlag,serialNo,matchFlag") [ SqlProc ]
+{
+}
+
+ClassMethod GetTraceCodeInfoExecute(ByRef qHandle As %Binary, qPointerStr As %String, qCodeType As %String = "") As %Status
+{
+    s repid=$I(^CacheTemp)
+    s qHandle=$lb(0,repid,0)
+    s ind=1 
+    q:(qPointerStr = "") $$$OK
+    s qPointerLen = $l(qPointerStr,"@")
+    for qPointeri = 1:1:qPointerLen{
+        s qPointer = $p(qPointerStr, "@", qPointeri)
+        s tpdId=""
+        for {
+            s tpdId = $o(^INCTBP("Pointer",qPointer,tpdId),-1) q:(tpdId = "") 
+            s tpdData = ^INCTBP(tpdId)
+            s traceCode = $p(tpdData,"^",9)
+            s scanUserId = $p(tpdData,"^",10)
+            s scanUserName = ""
+            if (scanUserId '= "") {
+                s scanUserName = $p($g(^SSU("SSUSR", +scanUserId)), "^", 2)
+            }
+            s sCDIDr = $p(tpdData,"^",11)
+            s codeTypeCode = $p($g(^DHCSTSCDI(+sCDIDr)), "^", 1)
+            continue:(qCodeType '= "")&&(qCodeType '= codeTypeCode)
+            s codeTypeDesc = $p($g(^DHCSTSCDI(+sCDIDr)), "^", 2)
+            s trdnFlag = $p(tpdData,"^",12)
+            s trdnFlag = $s(trdnFlag = "1" : "Y", 1 : "N")
+            s barCodeId = $o(^BS.PHA.IN.BarCodeI("BarCode", traceCode, ""))
+            s serialNo = $lg($g(^BS.PHA.IN.BarCodeD(+barCodeId)), 18)
+            s intrType = $p($G(^DHCINTR(qPointer)),"^",1)
+            s matchFlag = ##class(PHA.DTC.COM.Method).IsScanComp(qPointer, intrType)
+            s data = $lb(tpdId, traceCode, codeTypeDesc, scanUserName, trdnFlag, serialNo,matchFlag)
+            s ^CacheTemp(repid,ind) = data
+            s ind = ind+1
+        }
+    }
+    
+    s qHandle=$lb(0,repid,0)
+    q $$$OK
+}
+
+/// Description:获取门诊发药对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetFPointerArr()
+ClassMethod GetFPointerArr(phdId, pointerArr)
+{
+	q:(phdId="") pointerArr
+	s num = 0
+	s phdChl = ""
+	for{
+		s phdChl = $o(^DHCPHDI(phdId,"PHDI",phdChl)) q:phdChl=""
+		s phdSub = ""
+		for{
+			s phdSub = $o(^DHCPHDI(phdId,"PHDI",phdChl,"INCLB",phdSub)) q:phdSub=""
+			s phdSubId = phdId_"||"_phdChl_"||"_phdSub
+			d pointerArr.%Push(phdSubId)
+			s num=num+1
+			}
+		}
+	q num
+}
+
+/// Description:获取门诊退药对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetHPointerArr()
+ClassMethod GetHPointerArr(phdRetId, pointerArr)
+{
+	q:(phdRetId="") pointerArr
+	s num = 0
+	s phdRetChl = ""
+	for{
+		s phdRetChl = $o(^DHCPHRTI(phdRetId,"RTI",phdRetChl)) q:phdRetChl=""
+		s phdRetSub = phdRetId_"||"_phdRetChl
+		d pointerArr.%Push(phdRetSub)
+		s num=num+1
+	}
+	q num
+}
+
+/// Description:获取住院发药对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetPPointerArr()
+ClassMethod GetPPointerArr(phaCollId, pointerArr)
+{
+	q:(phaCollId="") pointerArr
+	s num = 0
+	s phaCollChl = ""
+	for{
+		s phaCollChl = $o(^DHCPHAC(phaCollId,"I",phaCollChl)) q:phaCollChl=""
+		s phaCollSub = ""
+		for{
+			s phaCollSub = $o(^DHCPHAC(phaCollId,"I",phaCollChl,"B",phaCollSub)) q:phaCollSub=""
+			s phaCollSubId = phaCollId_"||"_phaCollChl_"||"_phaCollSub
+			d pointerArr.%Push(phaCollSubId)
+			s num=num+1
+			}
+		}
+	q num
+}
+
+/// Description:获取住院退药对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetYPointerArr()
+ClassMethod GetYPointerArr(phaRetId, pointerArr)
+{
+	
+	q:(phaRetId="") pointerArr
+	s num = 0
+	s phaRetChl = ""
+	for{
+		s phaRetChl = $o(^PHARET(phaRetId,"I",phaRetChl)) q:phaRetChl=""
+		s phaRetSub = ""
+		for{
+			s phaRetSub = $o(^PHARET(phaRetId,"I",phaRetChl,"B",phaRetSub)) q:phaRetSub=""
+			s phaRetSubId = phaRetId_"||"_phaRetChl_"||"_phaRetSub
+			d pointerArr.%Push(phaRetSubId)
+			s num=num+1
+			}
+		}
+	q num
+}
+
+/// Description:获取入库对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetGPointerArr()
+ClassMethod GetGPointerArr(IngdRecId, pointerArr)
+{
+	
+	q:(IngdRecId="") pointerArr
+	s num = 0
+	s ingdRecCh = ""
+	for {
+		s ingdRecCh = $o(^DHCINGR(IngdRecId, "GRI", ingdRecCh))
+		q:(ingdRecCh = "")
+		continue:'$d(^DHCINGR(IngdRecId, "GRI", ingdRecCh))
+		s ingdRecItmId = IngdRecId_"||"_ingdRecCh
+		d pointerArr.%Push(ingdRecItmId)
+		s num=num+1
+	}
+	q num
+}
+
+/// Description:获取退货对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetRPointerArr()
+ClassMethod GetRPointerArr(ingrtId, pointerArr)
+{
+	
+	q:(ingrtId="") pointerArr
+	s num = 0
+	s ingrti = ""
+	
+	for{
+		s ingrti = $o(^INGRT(ingrtId,"DHCGRR",ingrti)) q:ingrti=""
+		continue:'$d(^INGRT(ingrtId, "DHCGRR", ingrti))
+		d pointerArr.%Push(ingrtId_"||"_ingrti)
+		s num=num+1
+	}
+		
+	q num
+}
+
+/// Description:获取库存调整对应的台账表pointer集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetAPointerArr()
+ClassMethod GetAPointerArr(InAdjId, pointerArr)
+{
+	
+	q:(InAdjId="") pointerArr
+	s num = 0
+	s inAdjCh = ""
+	for {
+		s inAdjCh = $o(^DHCINAD(InAdjId,"ADI",inAdjCh))
+		q:(inAdjCh = "")
+		continue:'$d(^DHCINAD(InAdjId,"ADI",inAdjCh))
+		s inAdjItmId = InAdjId_"||"_inAdjCh
+		d pointerArr.%Push(inAdjItmId)
+		s num=num+1
+	}
+	q num
+}
+
+/// Description:获取盘点对应的明细ID集合
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetATPointerArr()
+ClassMethod GetATPointerArr(inst, pointerArr)
+{
+	
+	q:(inst="") pointerArr
+	s num = 0
+	s insti = 0
+	for{
+		s insti = $o(^DHCINST(inst,"STI",insti)) q:insti=""
+		d pointerArr.%Push(inst_"||"_insti)
+		s num=num+1
+	}	
+	q num
+}
+
+/// Description:获取门诊发药分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetFGroupInfo("")
+ClassMethod GetFGroupInfo(phdId)
+{
+	q:(phdId = "") ""
+	s papmi = $p(^DHCPHDISP(phdId), "^", 7)
+	s patNo = $p(^PAPER(papmi, "PAT",1), "^", 2)                                                         //登记号
+    s patName = $p(^PAPER(papmi, "ALL"), "^", 1)                                                         //姓名
+	s prescNo = $p(^DHCPHDISP(phdId, 2), "^", 1)
+	q patNo_"/"_patName   //_"/"_prescNo
+}
+
+/// Description:获取门诊退药分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetHGroupInfo("52")
+ClassMethod GetHGroupInfo(phdRetId)
+{
+	q:(phdRetId = "") ""
+	s papmi=""
+	s paadm = $p(^DHCPHRET(phdRetId),"^",5)
+	if (paadm '= ""){
+		s papmi = $p(^PAADM(paadm),"^",1)
+		}
+	else{
+		s phdId = $p(^DHCPHRET(phdRetId),"^",6)   //兼容8.0版本门诊退药表结构
+		s papmi = $p(^DHCPHDISP(phdId),"^",7)
+		}
+	q:(papmi = "") ""
+	s patNo = $p(^PAPER(papmi, "PAT",1), "^", 2)                                                         //登记号
+    s patName = $p(^PAPER(papmi, "ALL"), "^", 1)                                                         //姓名
+	q patNo_"/"_patName
+}
+
+/// Description:获取住院发药分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetPGroupInfo("")
+ClassMethod GetPGroupInfo(phaCollId)
+{
+	q:(phaCollId = "") ""
+	s phaCollDispNo = $p(^DHCPHAC(phaCollId),"^",14)
+	q phaCollDispNo
+}
+
+/// Description:获取住院退药分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetYGroupInfo("")
+ClassMethod GetYGroupInfo(phaRetId)
+{
+	q:(phaRetId = "") ""
+	s phaRetNo = $p(^PHARET(phaRetId),"^",7)
+	q phaRetNo
+}
+
+/// Description:获取入库分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetGGroupInfo("")
+ClassMethod GetGGroupInfo(InGdRecId)
+{
+	q:(InGdRecId = "") ""
+	s ingdLocId = $p(^DHCINGR(InGdRecId), "^", 13)
+	s ingdLoc = $p(^CTLOC(ingdLocId), "^", 2)
+	q ingdLoc
+}
+
+/// Description:获取退货分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetRGroupInfo("")
+ClassMethod GetRGroupInfo(ingrtId)
+{
+	q:(ingrtId = "") ""
+	s ingrtLocId = $p(^INGRT(ingrtId), "^", 7)
+	s ingrtLoc = $p(^CTLOC(ingrtLocId), "^", 2)
+	q ingrtLoc
+}
+
+/// Description:获取库存调整分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetAGroupInfo("")
+ClassMethod GetAGroupInfo(InAdjId)
+{
+	q:(InAdjId = "") ""
+	s inAdjNo = $p(^DHCINAD(InAdjId), "^", 1)
+	q inAdjNo
+}
+
+/// Description:获取盘点分组信息
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).GetATGroupInfo("")
+ClassMethod GetATGroupInfo(inst)
+{
+	q:(inst = "") ""
+	s instNo = $p(^DHCINST(inst),"^",1)
+	q instNo
+}
+
+/// Description:通过业务指针获取已记录的追溯码个数
+/// Creator:	suiguoyang
+/// CreateDate:	20240608
+/// Table:      
+/// Input:		Pointer-台账表ID
+/// Output:		
+/// Return：	已记录的追溯码数量
+/// Others:
+/// Debug:		w ##class(PHA.DTC.Scan.Query).GetTraceCodeNum("1208") 	
+ClassMethod GetTraceCodeNum(Pointer, qBsType) As %Integer
+{
+	q:(Pointer = "") ""
+	s traceCodeNum=0	
+	
+	s str = ""
+	s traceArr = ##class(PHA.COM.Array).%New()
+	s tbpId = ""
+	for {
+		s tbpId = $o(^INCTBPi("TypePointer",qBsType,Pointer,tbpId))
+		q:(tbpId = "")
+		continue:('$d(^INCTBP(tbpId)))
+		s codeObj = ##class(PHA.COM.Object).%New()
+		s barCode = $p(^INCTBP(tbpId), "^", 9)
+		s traceCodeNum = traceCodeNum + 1
+	}
+	q traceCodeNum
+}
+
+/// Description:检测某个业务数据是否存在已维护追溯码前缀的库存项
+/// Creator:	suiguoyang
+/// CreateDate:	20240612
+/// Table:      
+/// Input:		qBsIdStr-业务表ID字符串，qBsType-业务类型(对应台账类型)，qBsCodeType-码类型
+/// Output:		
+/// Return：	
+/// Others: 	
+/// Debug:		w ##class(PHA.DTC.Scan.Query).ChkBsTypePrefix("139^140^141^142","F")
+/// 
+ClassMethod ChkBsTypePrefix(qBsIdStr As %String, qBsType As %String, qBsCodeType As %String)
+{
+	s flag = 
+		$CASE(qBsType,
+	          "F" : ..ChkOPDisp(qBsIdStr, qBsCodeType),   	// 门诊发药
+	          "H" : ..ChkOPRet(qBsIdStr, qBsCodeType),   	// 门诊退药
+	          "P" : ..ChkIPDisp(qBsIdStr, qBsCodeType),   	// 住院发药
+	          "Y" : ..ChkIPRet(qBsIdStr, qBsCodeType),   	// 住院退药
+	          "G" : ..ChkInGdRec(qBsIdStr, qBsCodeType),   	// 入库
+	          "R" : ..ChkInGdRet(qBsIdStr, qBsCodeType),   	// 退货
+	          "A" : ..ChkInAdj(qBsIdStr, qBsCodeType),   	// 库存调整
+	          "AT" : ..ChkInst(qBsIdStr, qBsCodeType),   	// 盘点
+	          :"0")
+	q flag
+}
+
+/// Description:检查门诊发药是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkOPDisp("")
+ClassMethod ChkOPDisp(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s phdId = bsId
+		s phdCh = ""
+		for {
+			s phdCh = $o(^DHCPHDI(phdId,"PHDI",phdCh))
+			q:(phdCh = "")||(traceCodeFlag = 1)
+			continue:'$d(^DHCPHDI(phdId,"PHDI",phdCh))
+			s phdSub = ""
+			for {
+				s phdSub = $o(^DHCPHDI(phdId,"PHDI",phdCh,"INCLB",phdSub))
+				q:(phdSub = "")||(traceCodeFlag = 1)
+				continue:'$d(^DHCPHDI(phdId,"PHDI",phdCh,"INCLB",phdSub))
+				s phdData = ^DHCPHDI(phdId,"PHDI",phdCh,"INCLB",phdSub)
+				s inciId = +$p(phdData,"^",3)
+                s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+				if (prefixBar '= "") {
+					s traceCodeFlag = 1
+				}
+				
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查门诊退药是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkOPRet("")
+ClassMethod ChkOPRet(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s PhRetId = bsId
+		s phRetCh = ""
+		for {
+			s phRetCh = $o(^DHCPHRTI(PhRetId,"RTI",phRetCh))
+			q:(phRetCh = "")||(traceCodeFlag = 1)
+			s inciId = +$p(^DHCPHRTI(PhRetId,"RTI",phRetCh),"^",13)
+			if (inciId = "0"){
+				s phdItm = $p(^DHCPHRTI(PhRetId,"RTI",phRetCh),"^",7)    //兼容8.0门诊退药表结构
+				s phdSub=$o(^DHCPHDI(+phdItm,"PHDI",$p(phdItm,"||",2),"INCLB","0"))
+				s inciId=+$p(^DHCPHDI(+phdItm,"PHDI",$p(phdItm,"||",2),"INCLB",phdSub),"^",3)
+				}
+            s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+			if (prefixBar '= "") {
+				s traceCodeFlag = 1
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查住院发药是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkIPDisp("")
+ClassMethod ChkIPDisp(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen {
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s phaCollId = bsId
+		s phaCollChl = ""
+		for{
+			s phaCollChl = $o(^DHCPHAC(phaCollId,"I",phaCollChl)) 
+			q:(phaCollChl="")||(traceCodeFlag = 1)
+			s phaCollSub = ""
+			for{
+				s phaCollSub = $o(^DHCPHAC(phaCollId,"I",phaCollChl,"B",phaCollSub)) 
+				q:(phaCollSub="")||(traceCodeFlag = 1)
+				s inciId = +$p(^DHCPHAC(phaCollId,"I",phaCollChl,"B",phaCollSub),"^",1)
+                s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+				if (prefixBar '= "") {
+					s traceCodeFlag = 1
+				}
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查住院退药是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkIPRet("")
+ClassMethod ChkIPRet(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s phaRetId = bsId
+		s phaRetChl = ""
+		for{
+			s phaRetChl = $o(^PHARET(phaRetId,"I",phaRetChl)) 
+			q:(phaRetChl = "")||(traceCodeFlag = 1)
+			s phaRetSub = ""
+			for{
+				s phaRetSub = $o(^PHARET(phaRetId,"I",phaRetChl,"B",phaRetSub)) 
+				q:(phaRetSub = "")||(traceCodeFlag = 1)
+				s inciId = +$p(^PHARET(phaRetId,"I",phaRetChl,"B",phaRetSub),"^",1)
+                s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+				if (prefixBar '= "") {
+					s traceCodeFlag = 1
+				}				
+			}
+		}		
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查入库中是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkInGdRec("")
+ClassMethod ChkInGdRec(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s ingdRecId = bsId
+		s ingdRecCh = ""
+		for {
+			s ingdRecCh = $o(^DHCINGR(ingdRecId, "GRI", ingdRecCh))
+			q:(ingdRecCh = "")||(traceCodeFlag = 1)
+			continue:'$d(^DHCINGR(ingdRecId, "GRI", ingdRecCh))
+			s ingdRecItmData = @$zr
+			s inciId = +$p(ingdRecItmData,"^",25)
+            s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+			if (prefixBar '= "") {
+				s traceCodeFlag = 1
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查退货中是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkInGdRet("")
+ClassMethod ChkInGdRet(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s ingdRetId = bsId
+		s ingdRetCh = ""
+		for {
+			s ingdRetCh = $o(^INGRT(ingdRetId,"DHCGRR",ingdRetCh))
+			q:(ingdRetCh = "")||(traceCodeFlag = 1)
+			continue:'$d(^INGRT(ingdRetId,"DHCGRR",ingdRetCh))
+			s ingdRetItmData = @$zr
+			s inciId = +$p(ingdRetItmData,"^",6)
+            s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+			if (prefixBar '= "") {
+				s traceCodeFlag = 1
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查库存调整中是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkInAdj("")
+ClassMethod ChkInAdj(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s inAdjId = bsId
+		s inAdjCh = ""
+		for {
+			s inAdjCh = $o(^DHCINAD(inAdjId,"ADI",inAdjCh))
+			q:(inAdjCh = "")||(traceCodeFlag = 1)
+			continue:'$d(^DHCINAD(inAdjId,"ADI",inAdjCh))
+			s inAdjItmData = @$zr
+			s inciId = +$p(inAdjItmData,"^",1)
+            s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+			if (prefixBar '= "") {
+				s traceCodeFlag = 1
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:检查盘点中是否包含追溯码前缀
+/// Debug:	    w ##class(PHA.DTC.Scan.Query).ChkInst("")
+ClassMethod ChkInst(qBsIdStr, qBsCodeType)
+{
+	s traceCodeFlag = 0
+	s bsIdStrLen = $l(qBsIdStr, "^")
+	for bsIdi = 1 : 1 : bsIdStrLen{
+		q:(traceCodeFlag = 1)
+		s bsId = $p(qBsIdStr, "^", bsIdi)
+		s instId = bsId
+		s instCh = ""
+		for {
+			s instCh = $o(^DHCINST(instId,"STI",instCh))
+			q:(instCh = "")||(traceCodeFlag = 1)
+			continue:'$d(^DHCINST(instId,"STI",instCh))
+			s instItmData = @$zr
+			s inciId = +$p(instItmData,"^",1)
+            s prefixBar = ##class(PHA.DTC.COM.Method).GetInciIDCode(inciId, qBsCodeType)
+			if (prefixBar '= "") {
+				s traceCodeFlag = 1
+			}
+		}
+	}
+	q traceCodeFlag
+}
+
+/// Description:通过追溯码获取已经使用该追溯码的药品基本单位数量
+/// Creator:	suiguoyang
+/// CreateDate:	20240612
+/// Table:      
+/// Input:		TraceCode
+/// Output:		
+/// Return：	已记录的ID
+/// Others: 	
+/// Debug:		w ##class(PHA.DTC.Scan.Query).TraceCodeScanQty("1234567890766")
+ClassMethod TraceCodeScanQty(TraceCode, qType) As %Boolean
+{
+	q:(TraceCode = "") "0"
+	
+	q:('$d(^INCTBPi("TypeBarCode", qType, TraceCode))) "0"
+	s sumBQty = "0"
+	s tbpId="0"
+	for {
+		s tbpId =$o(^INCTBPi("TypeBarCode", qType, TraceCode,tbpId)) q:(tbpId = "")
+		s bQty = $p(^INCTBP(tbpId),"^",4)
+		s sumBQty = sumBQty + bQty
+	}
+	q sumBQty
+}
+
+/// Description:通过业务指针获取已记录的追溯码
+/// Creator:    hulihua
+/// CreateDate:    2024-05-31
+/// Table:      
+/// Input:        Pointer-台账表ID
+/// Output:        
+/// Return：    已记录的追溯码数量
+/// Others:     
+/// Debug:        w ##class(PHA.DTC.Scan.Query).GetTraceCode("11811373")
+ClassMethod GetTraceCode(Pointer) As %String
+{
+    s traceArr = ##class(PHA.COM.Array).%New()
+    q:('$d(^DHCINTR(Pointer))&&(Pointer'["||")) traceArr.ToJSON()    
+    s type="AT"
+    s:Pointer'["||" type = $p(^DHCINTR(Pointer), "^", 1) 
+    s tbpId = ""
+    for {
+        s tbpId = $o(^INCTBPi("TypePointer",type,Pointer,tbpId))
+        q:(tbpId = "")
+        continue:('$d(^INCTBP(tbpId)))
+        s codeObj = ##class(PHA.COM.Object).%New()
+        s barCode = $p(^INCTBP(tbpId), "^", 9)
+        d codeObj.%Set("drug_trac_codg", barCode)
+        d traceArr.Push(codeObj)
+    }
+    q traceArr.ToJSON()
+}
+
+/// Description:获取科室追溯码类型
+/// Creator:	hulihua
+/// CreateDate:	2024-08-12
+/// Table:      
+/// Input:		CodeTypeStr-参数设置配置的码类型串
+/// Output:		
+/// Return：	追溯码类型数据集
+/// Others: 	
+/// Debug:		w ##class(PHA.DTC.Scan.Query).GetCodeType("")
+ClassMethod GetCodeType(CodeTypeStr) As %String
+{
+	s firCodeType = $p(CodeTypeStr, ",", 1)
+	k GetCodeTypeArr
+	s scdRowId = ""
+	for {
+		s scdRowId = $o(^DHCSTSCDI(0, "TYPE", $$ALPHAUP^SSUTIL4("CodeType"), scdRowId))
+		q:(scdRowId = "")
+		s code = $p(^DHCSTSCDI(scdRowId), "^", 1)
+		continue:(CodeTypeStr '= "")&&($lf($lfs(CodeTypeStr), code) = 0)
+		s desc = $p(^DHCSTSCDI(scdRowId), "^", 2)
+		if (firCodeType '= "")&&(firCodeType = code) {
+			s defFlag = 0
+		} else {
+			s defFlag = 1
+		}
+		s GetCodeTypeArr(defFlag, scdRowId) = $lb(code, desc)
+	}
+	s retArr = ##class(PHA.COM.Array).%New()
+	s defFlag = ""
+	for {
+		s defFlag = $o(GetCodeTypeArr(defFlag))
+		q:(defFlag = "")
+		s scdRowId = ""
+		for {
+			s scdRowId = $o(GetCodeTypeArr(defFlag, scdRowId))
+			q:(scdRowId = "")
+			s arrData = GetCodeTypeArr(defFlag, scdRowId)
+			s code = $lg(arrData, 1)
+			s desc = $lg(arrData, 2)
+			s rowObj = ##class(PHA.COM.Object).%New()
+			d rowObj.%Set("RowId", code)
+			d rowObj.%Set("Description", desc)
+			d retArr.%Push(rowObj)
+		}
+	}
+	k GetCodeTypeArr
+	q retArr.%ToJSON()
+}
+
+/// Description:通过追溯码获取对应药品信息
+/// Creator:    hulihua
+/// CreateDate: 2024-09-03
+/// Table:      
+/// Input:      TraceCode-追溯码、CodeTypeId-码类型ID
+/// Output:        
+/// Return：    追溯码对应药品信息
+/// Others:     
+/// Debug:      w ##class(PHA.DTC.Scan.Query).GetDrugByCode("11811373", "27")
+ClassMethod GetDrugByCode(TraceCode, CodeTypeId) As %String
+{
+	q:(CodeTypeId = "") "-1^码类型不能为空！"
+	q:(TraceCode = "") "-1^追溯码为空！"
+	i CodeTypeId [ "TC" {
+        s CodeTypeId = $o(^DHCSTSCDI(0,"TYPECODE",$zcvt("CodeType","U"),CodeTypeId,""))
+    }
+	s typeCode = $p($g(^DHCSTSCDI(+CodeTypeId)), "^", 1)
+	s typeDesc = $p($g(^DHCSTSCDI(+CodeTypeId)), "^", 2)
+	if (($e(TraceCode, 1, 2) = "82") || ($e(TraceCode, 1, 2) = "89")) {
+		s idCode = $e(TraceCode, 1, 8)
+	} else {
+		s idCode = $e(TraceCode, 1, 7)
+	}
+	s inciId = $o(^CT.PHA.IN.IncIDCodeI("TypeActCodeInc", CodeTypeId, 1, idCode, ""))
+	q:(inciId = "") "-1^该药品对应的标识码未关联到药品字典！"
+	s existFlag = ##class(Save).IsSplit(typeCode, TraceCode)
+	q:(existFlag) "-1^该追溯码已拆零！"
+	s inciCode = $p(^INCI(inciId,1),"^",1)
+	s inciDesc = $p(^INCI(inciId,1),"^",2)
+	s inciSpec = ##class(web.DHCST.Common.DrugInfoCommon).GetSpec("", inciId)
+	s manfName = $p(##class(web.DHCST.Common.DrugInfoCommon).GetManf(inciId), "^", 3)
+	s bUomId = $p(^INCI(inciId,1),"^",10)
+	s pUomId = $p(^INCI(inciId,1), "^", 17)
+	if (pUomId = "") {
+		s pUomId = $p(^INCI(inciId,3), "^", 6)
+	}
+	s inciFac = ##class(PHA.DTC.COM.Method).UomFac(pUomId,bUomId)
+    s packFac = 1
+    if (typeCode = "BTC") {
+        s packUomStr = ##class(web.DHCST.Common.DrugInfoCommon).GetIncPackUom(inciId)
+        s packFac = +$p(packUomStr, "^", 3)
+        if (packFac = 0) {
+            s packFac = 1
+        }
+    } elseif (typeCode = "MTC") {
+        s packUomMStr = ##class(web.DHCST.Common.DrugInfoCommon).GetIncPackUomM(inciId)
+        s packFac = +$p(packUomMStr, "^", 3)
+        if (packFac = 0) {
+            s packFac = 1
+        }
+    }
+    s barQty = inciFac * packFac
+	s bUomDesc = $p($g(^CT("UOM",+bUomId)),"^",2)
+    s codeObj = ##class(PHA.COM.Object).%New()
+    d codeObj.%Set("inciId", inciId)
+    d codeObj.%Set("idCode", idCode)
+    d codeObj.%Set("typeDesc", typeDesc)
+    d codeObj.%Set("traceCode", TraceCode)
+    d codeObj.%Set("typeDr", CodeTypeId)
+    d codeObj.%Set("inciCode", inciCode)
+    d codeObj.%Set("inciDesc", inciDesc)
+    d codeObj.%Set("inciSpec", inciSpec)
+    d codeObj.%Set("manfName", manfName)
+    d codeObj.%Set("barQty", barQty)
+    d codeObj.%Set("uomDesc", bUomDesc)
+    d codeObj.%Set("uomId", bUomId)
+    q codeObj.%ToJSON()
+}
+
+/// Description:新建临时global的计数器
+/// Creator:	hulihua
+/// CreateDate:	2016-06-05
+/// Table:      
+/// Input:      
+/// Output:		
+/// Return：
+/// Debug:      w ##class(web.DHCST.ReportForms.ReportCommon).NewPid()
+ClassMethod NewPid() As %String
+{
+  	Q $I(^DHCSTPID("PHA",$this))
+}
+
+}

@@ -1,0 +1,30 @@
+<!-- dhcexcelimport.hui.csp -- Excel批量导入通用对话框
+     使用方法：
+       1. 页面中 <csp:Include Page="dhcexcelimport.hui.csp">
+       2. JS中配置 DHCExcelImport.config({...})
+       3. 调用 DHCExcelImport.open() 打开对话框
+-->
+<div id="DHCExcelImportDialog" class="hisui-dialog"
+     data-options="title:'批量导入',closed:true,modal:true,width:900,height:520,
+     buttons:[{text:'确认导入',iconCls:'icon-ok',handler:DHCExcelImport.doImport},
+              {text:'取消',iconCls:'icon-cancel',handler:function(){DHCExcelImport.close();}}]">
+    <div style="padding:16px">
+        <div style="margin-bottom:12px">
+            <input type="file" id="DHCExcelImportFile" accept=".xlsx,.xls"
+                   style="display:none" onchange="DHCExcelImport.handleFile(event)">
+            <a class="hisui-linkbutton" data-options="iconCls:'icon-w-folder'"
+               onclick="document.getElementById('DHCExcelImportFile').click()">选择 Excel 文件</a>
+            <span id="DHCExcelImportFileName" style="margin-left:12px;color:#666;font-size:13px">未选择文件</span>
+            <a class="hisui-linkbutton" data-options="iconCls:'icon-w-download'"
+               onclick="DHCExcelImport.downloadTemplate()" style="margin-left:12px">下载模板</a>
+        </div>
+        <div style="margin-bottom:8px;font-weight:bold;color:#15428b;font-size:13px">预览数据（前3行）</div>
+        <div style="width:100%;height:210px"><div id="DHCExcelImportPreview" style="width:100%;height:200px"></div></div>
+        <div id="DHCExcelImportResult" style="display:none;margin-top:12px">
+            <div style="font-weight:bold;color:#15428b;font-size:13px;margin-bottom:8px">导入结果</div>
+            <div id="DHCExcelImportSummary" style="font-size:13px;margin-bottom:8px"></div>
+            <div id="DHCExcelImportErrors" style="max-height:150px;overflow-y:auto;font-size:12px"></div>
+        </div>
+        <input type="hidden" id="DHCExcelImportTSV">
+    </div>
+</div>

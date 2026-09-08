@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:05:04">
+<Class name="User.OEOrder">
+<Description>
+OE Order                (OEORD,119)</Description>
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlTableName>OE_Order</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Persistent,User.Abstract</Super>
+<TimeChanged>65774,53762.957131</TimeChanged>
+<TimeCreated>61079,43953.934124</TimeCreated>
+<Inheritance>right</Inheritance>
+
+<Property name="ChildOEOrdEnt">
+<Type>OEOrdEnt</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>OEORNOEORDParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildOEOrdItem">
+<Type>OEOrdItem</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>OEORIOEORDParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildOERecDept">
+<Type>OERecDept</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>OERECOEORDParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildOEOrdAccept">
+<Type>OEOrdAccept</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>ACCParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="ChildOEOrdCateg">
+<Type>OEOrdCateg</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>CATParRef</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="OEORDRowId">
+<Description>
+OEORD Row ID</Description>
+<Type>%Numeric</Type>
+<Collection/>
+<InitialExpression>$i(^OEORD(0))</InitialExpression>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlFieldName>OEORD_RowId</SqlFieldName>
+<Parameter name="SCALE" value="0"/>
+</Property>
+
+<Property name="OEORDAdmDR">
+<Description>
+Des Ref to PAADM</Description>
+<Type>PAAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>OEORD_Adm_DR</SqlFieldName>
+</Property>
+
+<Property name="OEORDDate">
+<Description>
+Order Date</Description>
+<Type>%Date</Type>
+<Collection/>
+<InitialExpression>+$h</InitialExpression>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>OEORD_Date</SqlFieldName>
+</Property>
+
+<Property name="OEORDTime">
+<Description>
+Order Time</Description>
+<Type>%Time</Type>
+<Collection/>
+<InitialExpression>+$p($h,",",2)</InitialExpression>
+<Relationship>0</Relationship>
+<Required>1</Required>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>OEORD_Time</SqlFieldName>
+</Property>
+
+<Property name="OEORDDoctorDR">
+<Description>
+Des Ref to CTPCP</Description>
+<Type>CTCareProv</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>OEORD_Doctor_DR</SqlFieldName>
+</Property>
+
+<Property name="OEORDARCOPDR">
+<Description>
+Des Ref to ARCOP(not in use)</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>OEORD_ARCOP_DR</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="OEORDOEOTCDR">
+<Description>
+Des Ref to OEORD (not in use)</Description>
+<Type>%String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>OEORD_OEOTC_DR</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="OEORDSundryDebtorDR">
+<Description>
+Des Ref SundryDebtor</Description>
+<Type>ARCSundryDebtor</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>OEORD_SundryDebtor_DR</SqlFieldName>
+</Property>
+
+<Index name="RowIDBasedIDKeyIndex">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>OEORDRowId</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Trigger name="TAfterDel">
+<Code> d ##Class(User.OEOrder).OnTrigger($g(%d(1)))
+
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnAfterDelete")
+
+</Code>
+<Event>DELETE</Event>
+<Order>3</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TAfterIns">
+<Code> d ##Class(User.OEOrder).OnTrigger($g(%d(1)))
+
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnAfterInsert")
+
+</Code>
+<Event>INSERT</Event>
+<Order>1</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TAfterUpd">
+<Code> d ##Class(User.OEOrder).OnTrigger($g(%d(1)))
+
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnAfterUpdate")
+
+</Code>
+<Event>UPDATE</Event>
+<Order>2</Order>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="TBeforeDel">
+<Code> d ##Class(User.OEOrder).getOld($g(%d(1)))
+
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnBeforeDelete")
+
+</Code>
+<Event>DELETE</Event>
+<Order>3</Order>
+<Time>BEFORE</Time>
+</Trigger>
+
+<Trigger name="TBeforeUpd">
+<Code> d ##Class(User.OEOrder).getOld($g(%d(1)))
+
+ d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnBeforeUpdate")
+
+</Code>
+<Event>UPDATE</Event>
+<Order>2</Order>
+<Time>BEFORE</Time>
+</Trigger>
+
+<Trigger name="TBeforeIns">
+<Code> d ##Class(websys.DSSActionType).doSomething($g(%d(1)),"L","User.OEOrder","OnBeforeInsert")
+
+</Code>
+<Event>INSERT</Event>
+<Order>1</Order>
+<Time>BEFORE</Time>
+</Trigger>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^OEORD(0))</SqlIdExpression>
+<SqlRowIdName>OEORD_RowId</SqlRowIdName>
+<StreamLocation>^User.OEOrderS</StreamLocation>
+<ExtentSize>100000</ExtentSize>
+<SQLMap name="DataMasterOEORD">
+<Type>data</Type>
+<Global>^OEORD</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{OEORD_RowId}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>OEORD_RowId</Field>
+</RowIdSpec>
+<Data name="OEORD_ARCOP_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="OEORD_Adm_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="OEORD_Date">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="OEORD_Doctor_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="OEORD_OEOTC_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="OEORD_SundryDebtor_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="OEORD_Time">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexOEORDAdmDR">
+<Type>index</Type>
+<Global>^OEORD</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"Adm"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{OEORD_Adm_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{OEORD_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>OEORD_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexOEORDDate">
+<Type>index</Type>
+<Global>^OEORD</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"Date"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{OEORD_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{OEORD_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>OEORD_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexSundryDeb">
+<Type>index</Type>
+<Global>^OEORD</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"SunDeb"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{OEORD_SundryDebtor_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{OEORD_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>OEORD_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+</Class>
+</Export>

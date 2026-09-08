@@ -35,7 +35,9 @@ Blocks do not take a `title`. To give a block a heading, place a `rich-text` blo
 
 **Before/After columns**: compose a `columns` block from `<Column>` CHILDREN — never a `columns=` attribute or inline JSON array. Author it as `<Columns><Column label="Before">…child block(s)…</Column><Column label="After">…child block(s)…</Column></Columns>`. Each `<Column>` wraps real nested blocks (e.g. a `Wireframe`); the parser fills in column ids and child-block `data` from that markup, whereas a `columns=` attribute array leaves them missing and FAILS schema validation. For UI state comparisons put one `wireframe` block in each side and label the columns `Before` and `After`; the renderer draws labels as headings and lays narrow surfaces side by side. Never bake Before/After labels inside the wireframe HTML or hand-stack the pair.
 
-**MDX component syntax**: every capitalized block component must be either self-closing (`<RichText id="..." data={{ ... }} />`) or have a matching closing tag around children (`<RichText id="...">…</RichText>`). Never write a bare opening tag like `<RichText ...>` as a paragraph; the MDX parser treats it as unclosed JSX and import fails before the plan can render.
+**MDX prose and component syntax**: write ordinary top-level prose as normal Markdown; it imports as rich-text automatically. Use `<RichText id="...">…</RichText>` only when prose needs explicit metadata such as `title`, `summary`, or `editable`, or when preserving a referenced block id. Every capitalized block component must be self-closing (`<Diagram id="..." data={{ ... }} />`) or have a matching closing tag around children (`<RichText id="...">…</RichText>`). Never write a bare opening tag like `<RichText ...>` as a paragraph; the MDX parser treats it as unclosed JSX and import fails before the plan can render.
+
+**Code-bearing blocks**: `code`, `annotated-code`, and `diff` are whitespace-sensitive. Prefer the exact MDX form emitted by the authoring examples / source exporter, where multiline code is encoded as JSON string attributes such as `code={"const x =\\n  y"}`. Static template literals are accepted and preserve indentation, but they must be static strings with no `${...}` interpolation.
 
 **File maps**: prefer `annotated-code` blocks (real code + line-anchored notes) grouped in a vertical `tabs` block, one tab per key file. Drop to a plain `code` block only for throwaway snippets with nothing to call out.
 
@@ -271,14 +273,17 @@ Creates a message and returns the assistant response.
 ### `diagram`
 
 ```mdx
-<Diagram
-  id="example-diagram"
-  data={{
-    html: '<div class="diagram-panel" data-rough><div class="diagram-node">Diff</div><div class="diagram-node">Recap blocks</div><div class="diagram-node">Published recap</div></div>',
-    css: ".diagram-panel { display: flex; gap: 12px; }",
-    caption: "Recap import flow.",
-  }}
-/>
+<Diagram id="example-diagram" caption="Recap import flow.">
+
+```html
+<div class="diagram-panel" data-rough><div class="diagram-node">Diff</div><div class="diagram-node">Recap blocks</div><div class="diagram-node">Published recap</div></div>
+```
+
+```css
+.diagram-panel { display: flex; gap: 12px; }
+```
+
+</Diagram>
 ```
 
 ### `wireframe`
@@ -382,13 +387,9 @@ This recap is informational; reviewers still inspect the diff.
 ### `rich-text`
 
 ```mdx
-<RichText id="example-rich-text">
-
 ### Summary
 
 Adds per-block salvage so one bad block never blanks a recap.
-
-</RichText>
 ```
 
 ### `json-explorer`

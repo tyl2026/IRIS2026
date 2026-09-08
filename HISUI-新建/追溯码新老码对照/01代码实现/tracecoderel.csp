@@ -1,0 +1,117 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>追溯码新老码对照维护</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+    :root {
+        --bg:        #cee4ff;
+        --surface:   #F9FBFF;
+        --titlebg:   #E4F0FF;
+        --heading:   #15428b;
+        --border:    #95B8E7;
+        --accent:    #017bce;
+        --muted:     #666;
+        --radius:    4px;
+    }
+    body {
+        background: var(--bg);
+        font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        font-size: 14px; margin: 0; padding: 0; color: #333;
+    }
+    #titleBar {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 20px;
+        background: var(--surface);
+        border-bottom: 2px solid var(--border);
+    }
+    #titleBar h1 { color: var(--heading); font-size: 18px; margin: 0; font-weight: 600; }
+    #titleBar .hint { color: #999; font-size: 12px; }
+    .f-spacer { flex: 1; }
+
+    #queryBar {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+        padding: 10px 18px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+    }
+    #queryBar label { color: var(--muted); font-size: 13px; }
+    #queryBar input, #queryBar select {
+        width: 160px; height: 26px; line-height: 26px;
+        border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 0 6px; font-size: 13px;
+    }
+    #queryBar select { width: 110px; }
+
+    #paneList { padding: 12px 18px; }
+    #dg { width: 100%; }
+
+    /* === 批量操作工具栏 === */
+    #dgBar {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 12px;
+        background: var(--surface);
+        border: 1px solid var(--border); border-bottom: 0;
+        border-radius: var(--radius) var(--radius) 0 0;
+    }
+    #dgBar .bar-hint { color: #999; font-size: 12px; }
+
+    /* === 弹窗 === */
+    .window-body { overflow: hidden !important; padding: 14px 18px !important; }
+    .panel-body.panel-body-dialog { overflow: hidden !important; padding: 0 !important; }
+    .dlg-inner { padding: 0; }
+    .dl-row { margin-bottom: 14px; }
+    .dl-row label { display: block; margin-bottom: 5px; font-size: 13px; color: #555; font-weight: 500; }
+    .dl-row input, .dl-row select {
+        width: 100%; padding: 8px 10px !important; height: auto !important;
+        box-sizing: border-box; border: 1px solid var(--border); border-radius: var(--radius);
+        font-size: 13px;
+    }
+    .dl-row select { padding: 6px 8px !important; }
+    .dl-row input[readonly] { background: #f0f0f0; color: #888; }
+</style>
+</head>
+<body>
+
+<div id="titleBar">
+    <h1>追溯码新老码对照维护</h1>
+    <span class="hint">收费项代码 → 追溯码新老码映射（收费项目ID/描述实时联查收费项目字典）</span>
+    <span class="f-spacer"></span>
+    <a id="btnAdd" class="hisui-linkbutton" onclick="openAddDlg()">新增</a>
+</div>
+
+<div id="queryBar">
+    <label>收费项代码</label>
+    <input id="qCode" class="hisui-textbox" placeholder="收费项代码(模糊)">
+    <label>可用标志</label>
+    <select id="qFlag">
+        <option value="">全部</option>
+        <option value="Y">可用</option>
+        <option value="N">不可用</option>
+    </select>
+    <a id="btnQuery" class="hisui-linkbutton" onclick="doQuery()">查询</a>
+    <a id="btnReset" class="hisui-linkbutton" onclick="doReset()">重置</a>
+</div>
+
+<div id="paneList">
+    <div id="dgBar">
+        <a id="btnBatchOn" class="hisui-linkbutton" onclick="batchSetFlag('Y')">批量启用</a>
+        <a id="btnBatchOff" class="hisui-linkbutton" onclick="batchSetFlag('N')">批量停用</a>
+        <span class="bar-hint">勾选多行后批量修改可用标志</span>
+    </div>
+    <table id="dg"></table>
+</div>
+
+<script type="text/javascript" src="../scripts/tracecoderel.js"></script>
+</body>
+</html>
+</csp:content>

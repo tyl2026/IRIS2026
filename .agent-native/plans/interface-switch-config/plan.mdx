@@ -1,0 +1,173 @@
+---
+title: "接口开关配置系统 — 实施计划"
+brief: "基于 CSP + CLS 的 HIS 接口开关管理页面，支持接口级总开关与节点级分开关的 AND 逻辑控制"
+version: 1
+---
+
+## 概述
+
+为 IRIS HIS 构建**接口开关配置管理系统**，管理员可动态控制各对外接口及子节点的启用/停用。
+
+核心业务逻辑：**节点实际状态 = 接口总开关 AND 节点自身开关**，每个接口独立一套开关体系。
+
+<Table
+  id="logic-table"
+  columns={["接口总开关", "节点开关", "节点实际状态"]}
+  rows={[
+    ["开", "开", "开"],
+    ["开", "关", "关"],
+    ["关", "开", "关"],
+    ["关", "关", "关"]
+  ]}
+/>
+
+### 产出物
+
+<Table
+  id="deliverables"
+  columns={["文件", "类型", "说明"]}
+  rows={[
+    ["web.YZSY.YZSYInterfaceSwitchManager.cls", "CLS", "后端业务类"],
+    ["yzsyinterfaceswitchconfig.csp", "CSP", "配置管理页面"]
+  ]}
+/>
+
+## 数据存储设计
+
+全局变量前缀 `^YZSYInterfaceSwitch`：
+
+<Code
+  id="data-global"
+  language="text"
+  code={`^YZSYInterfaceSwitch("InterfaceDef", interfaceCode) = "接口中文名"
+^YZSYInterfaceSwitch("NodeDef", interfaceCode, nodeCode) = "节点中文名"
+^YZSYInterfaceSwitch("Master", interfaceCode) = "ON" / "OFF"
+^YZSYInterfaceSwitch("Node", interfaceCode, nodeCode) = "ON" / "OFF"`}
+/>
+
+新增时默认 OFF，删除接口时一并清理下属所有节点数据。
+
+## 后端 CLS 方法
+
+类名：`web.YZSY.YZSYInterfaceSwitchManager`，继承 `DHCDoc.Util.RegisteredObject`。
+
+<Table
+  id="backend-methods"
+  columns={["方法", "说明"]}
+  rows={[
+    ["GetAllInterfaces()", "返回所有接口完整配置JSON"],
+    ["SetMasterSwitch(code, ON/OFF)", "设置接口总开关"],
+    ["SetNodeSwitch(code, node, ON/OFF)", "设置节点开关"],
+    ["AddInterface(code, name)", "新增接口"],
+    ["AddNode(code, nodeCode, nodeName)", "新增节点"],
+    ["DeleteInterface(code)", "删除接口及下属节点"],
+    ["DeleteNode(code, nodeCode)", "删除单个节点"],
+    ["GetSwitchStatus(code?)", "外部查询，返回含计算状态JSON"]
+  ]}
+/>
+
+### GetSwitchStatus 返回格式
+
+<Code
+  id="api-json"
+  language="json"
+  code={`{
+  "InterfaceCode": "REG",
+  "InterfaceName": "挂号接口",
+  "MasterSwitch": "ON",
+  "Nodes": [
+    {"Code":"REG_QUERY","Name":"挂号查询","Switch":"ON","Status":"ON"},
+    {"Code":"REG_CREATE","Name":"创建挂号","Switch":"OFF","Status":"OFF"}
+  ]
+}`}
+/>
+
+## 前端 CSP 页面
+
+技术栈：HISUI 框架 + EasyUI + `$cm` 通信。所有接口纵向排列，一屏显示，超出滚动。
+
+核心交互：
+
+<Table
+  id="frontend-interactions"
+  columns={["操作", "后端调用", "UI响应"]}
+  rows={[
+    ["页面加载", "GetAllInterfaces()", "动态渲染所有接口区域"],
+    ["总开关切换", "SetMasterSwitch()", "刷新节点表格状态/禁用态"],
+    ["节点开关切换", "SetNodeSwitch()", "更新状态列 + 轻提示"],
+    ["新增接口/节点", "AddInterface/AddNode", "弹窗输入 → 刷新列表"],
+    ["删除接口/节点", "DeleteInterface/DeleteNode", "确认弹窗 → 移除"]
+  ]}
+/>
+
+开关联动：总开关关闭时节点表格整区置灰、开关 disabled、状态列统一「关」。总开关打开恢复可操作，状态按 AND 计算。
+
+HISUI 配色：body `#cee4ff`，标题 `#15428b`，面板 `#F9FBFF`。组件用 EasyUI switchbutton + datagrid formatter。
+
+## 实施步骤
+
+分两阶段：先 CLS 后 CSP，两个文件一次交付。
+
+### 阶段 1：后端 CLS
+
+1. 创建 `web.YZSY.YZSYInterfaceSwitchManager.cls`
+2. 实现 8 个方法，加 `lock +^YZSYInterfaceSwitch:n` 并发保护
+3. `GetSwitchStatus` 实现 AND 逻辑计算 Status
+4. 编译验证
+
+### 阶段 2：CSP 页面
+
+1. 创建 `yzsyinterfaceswitchconfig.csp`，用 `<EXTHEALTH:HEAD>` + `<HISUI>` 模板
+2. JS 动态构建接口区域 + switchbutton/datagrid
+3. 总开关联动节点表格置灰
+4. 新增/删除弹窗 + AJAX 即时保存
+5. IE11 兼容验证
+
+## 验证清单
+
+<Checklist
+  id="verify-checklist"
+  items={[
+    { id: "v1", label: "CLS 编译通过，无语法错误" },
+    { id: "v2", label: "CSP 页面正常加载，接口列表正确渲染" },
+    { id: "v3", label: "总开关 ON/OFF 联动节点表格置灰/恢复" },
+    { id: "v4", label: "节点开关切换即时保存并刷新状态列" },
+    { id: "v5", label: "新增/删除接口和节点功能正常" },
+    { id: "v6", label: "GetSwitchStatus 返回正确的 AND 计算结果" },
+    { id: "v7", label: "并发场景 lock 加锁正常" },
+    { id: "v8", label: "IE11 浏览器兼容" }
+  ]}
+/>
+
+## 开放问题
+
+<QuestionForm
+  id="questions-form"
+  questions={[
+    {
+      id: "q1",
+      title: "接口编码命名规范",
+      mode: "freeform",
+      subtitle: "建议与集成平台接口编码一致（如 REG/RX/DIAG），是否有现有规范？",
+      placeholder: "输入编码规范或确认无规范"
+    },
+    {
+      id: "q2",
+      title: "是否需要角色权限控制？",
+      mode: "single",
+      options: [
+        { id: "q2a", label: "暂不需要", detail: "后续通过 CSP Method 代理层添加", recommended: true },
+        { id: "q2b", label: "需要", detail: "本期实现基于 HIS 角色体系的权限控制" }
+      ]
+    },
+    {
+      id: "q3",
+      title: "是否需要操作日志？",
+      mode: "single",
+      options: [
+        { id: "q3a", label: "暂不需要", detail: "不记录变更历史", recommended: true },
+        { id: "q3b", label: "需要", detail: "扩展日志 Global 记录操作人/时间/新旧值" }
+      ]
+    }
+  ]}
+/>

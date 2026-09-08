@@ -1,0 +1,116 @@
+/// Description：进销存上传记录查询接口类(将已经上传的数据从医保平台拉下来展示，比记录的上传日志更准确)
+/// Creator:     WangYaJun
+/// CreateDate:  2024-08-27
+/// d $system.OBJ.MakeClassDeployed("PHA.FACE.TPS.INSUTE.UpQuery")
+Class PHA.FACE.TPS.INSUTE.UpQuery Extends Format
+{
+
+/// Description：查询接口入口
+/// Creator:     WangYaJun
+/// CreateDate:  2024-08-27	
+/// Input：      院区ID^接口代码^用户ID^库存项ID^业务批次流水号^开始日期^截止日期
+/// return：     失败：-1^错误信息
+/// 			 成功：JSON字符串
+/// w ##class(PHA.FACE.TPS.INSUTE.UpQuery).GetFaceData("2^3513^1^600049^26032310010159^2026-06-02^2026-06-02^1^4^1711503845^84128800369619874784^ZA16EAN0073020203884")
+ClassMethod GetFaceData(Input As %String = "", LogFlag = "N")
+{
+	s hospId = $p(Input,"^",1)
+	q:(##class(PHA.FACE.TPS.INSUTE.Data).CheckHosp(hospId) = 0) ..Error(-1,"GetFaceData:接口授权失败")
+	s faceCode = $p(Input,"^",2)
+	s userId = $p(Input,"^",3)
+	s inciCode = $p(Input,"^",4)
+	s batNo = $p(Input,"^",5)
+	q:(inciCode = "")&&(batNo = "") ..Error(-1,"GetFaceData:批次流水号和药品不能同时为空")
+	s inci = ""
+	s:inciCode'="" inci = $o(^INCI(0,"Code",$$ALPHAUP^SSUTIL4(inciCode),""),-1)
+	s startDate = $p(Input,"^",6)
+	s startDateH = ##class(websys.Conversions).DateHtmlToLogical(startDate)
+	s startDate = $zd(startDateH,3)
+	s endDate = $p(Input,"^",7)
+	s endDateH = ##class(websys.Conversions).DateHtmlToLogical(endDate)
+	s endDate = $zd(endDateH,3)
+	s insuManf = $p(Input,"^",8)
+	s selId = $p(Input,"^",9)
+	s mdtrtId = $p(Input,"^",10)
+	s traceCode = $p(Input,"^",11)
+	s medListCode = $p(Input,"^",12)
+	s comJson = ##class(PHA.COM.Object).%New()
+	if (faceCode = "3513") {
+		d comJson.Set("fixmedins_code",..GetInsuDictVal("InsuHospCode",hospId))
+		d comJson.Set("medins_list_codg",medListCode)
+		d comJson.Set("med_list_codg",medListCode)
+		d comJson.Set("fixmedins_bchno",batNo)
+		d comJson.Set("begndate",startDate)
+		d comJson.Set("enddate",endDate)
+		d comJson.Set("mdtrt_id",mdtrtId)
+		d comJson.Set("drug_trac_codg",traceCode)
+	}else {
+		d comJson.Set("fixmedins_code",..GetInsuDictVal("InsuHospCode",hospId))
+		d comJson.Set("medins_list_codg",$g(inciCode))
+		d comJson.Set("fixmedins_bchno",batNo)
+		d comJson.Set("begndate",startDate)
+		d comJson.Set("enddate",endDate)
+		d comJson.Set("setl_id",selId)
+	}
+	s inputObj = ##class(PHA.COM.Object).%New()
+	s inputObj.data = comJson
+	s inputJson = ..CreateInputJson(inputObj,hospId,faceCode,userId)
+	q:($p(inputJson,"^",1) < 0) inputJson
+	if (LogFlag = "Y") {
+		s logStr = $lb(traceCode,"",inci,0)
+		s insertRet = ##class(LogSave).SaveLog("Method"_faceCode, (inputJson.%ToJSON()), logStr, hospId, insuManf)
+	}
+	s retObj = ##class(PHA.FACE.TPS.INSUTE.Data).SendToInsuFace(inputJson, hospId, insuManf)
+	if '$IsObject(retObj) {
+		s errorRet = ..Error(-1,"医保接口INSUAPI:" _ $p(retObj,"^",2))
+		if (LogFlag = "Y") {
+			d ##class(LogSave).UpdateLog("Method"_faceCode, errorRet, traceCode, 0, "N", insuManf)
+		}
+		q errorRet
+	}
+	if 'retObj.%IsA("PHA.COM.Object") {
+		s errorRet = ..Error(-1,"Request:出参JSON格式错误")
+		if (LogFlag = "Y") {
+			d ##class(LogSave).UpdateLog("Method"_faceCode, errorRet, traceCode, 0, "N", insuManf)
+		}
+		q errorRet
+	}
+	s infcode = retObj.infcode
+	s retJsonStr = retObj.%ToJSON() 
+	if (LogFlag = "Y") {
+		d ##class(LogSave).UpdateLog("Method"_faceCode, retJsonStr, traceCode, 0, "Y", insuManf)
+	}
+	q:(infcode = 0) retJsonStr
+	s errMsg = retObj."err_msg"
+	q ..Error(-5,"接口提示:" _ errMsg)
+}
+
+/// ////////////////////// ////////////////////// ////////////////////// ///////////////////
+/// ///////////////////上面为接口方法,下面为过程函数,请按此规则/////////////////////////////
+/// ////////////////////// ////////////////////// ////////////////////// ///////////////////
+/// Description：创建接口请求JSON
+/// Creator:     WangYaJun
+/// CreateDate:  2024-08-27
+/// Input:       InputJson-各接口请求JSON数据
+/// w ##class(PHA.FACE.TPS.INSUTE.UpQuery).CreateInputJson(##class(PHA.COM.Object).%New(),2,"3508",1)
+ClassMethod CreateInputJson(InputJson As PHA.COM.Object, HospId, FaceCode, UserId, InsuManf = "1")
+{
+    q:'$IsObject(InputJson) ..Error(-1,"CreateHead:入参类型错误")
+    q:'InputJson.%IsA("PHA.COM.Object") ..Error(-1,"CreateHead:入参类型错误") 
+    s jsonObj = ##class(PHA.COM.Object).%New()
+	s insuTypeCode = ..#InsuTypeCode
+    d ..SetTitleData(jsonObj, UserId, HospId, InsuManf)
+    d jsonObj.Set("infno",FaceCode)
+    d jsonObj.Set("input",InputJson)
+    q jsonObj
+}
+
+/// Description：获取日期初始化值，格式统一
+ClassMethod GetDefDate()
+{
+    s startDate = ##class(websys.Conversions).DateLogicalToHtml(+$h)
+    s endDate = ##class(websys.Conversions).DateLogicalToHtml(+$h)
+    q startDate _"^"_ endDate
+}
+
+}

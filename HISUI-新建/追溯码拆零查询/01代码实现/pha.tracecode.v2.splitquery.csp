@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<!--药品追溯码拆零查询
+    csp:csp/pha.tracecode.v2.splitquery.csp
+    js: scripts/pha/tracecode/v2/splitquery.js
+-->
+<HTML XMLNS=TRAK>
+
+    <HEAD>
+        <title>
+            <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+        </title>
+        <TRAK:HEAD></TRAK:HEAD>
+        <HISUI/>
+        <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+        </link>
+        <style>
+            .pha-row {
+                margin-top: 10px;
+                margin-bottom: 10px;
+                text-align: left;
+            }
+
+            .pha-col:first-child {
+                margin-left: -1px;
+            }
+
+            /* inline-block 有间隙,大概4px */
+            .pha-col {
+                display: inline-block;
+                margin-left: -4px;
+                padding-left: 10px;
+                vertical-align: middle;
+            }
+        </style>
+    </HEAD>
+
+    <body>
+        <div class="hisui-layout" fit="true" border="false">
+            <div data-options="region:'center'" class="dhcpha-hisui-container">
+                <div class="hisui-layout" fit="true" border="false">
+                    <div data-options="region:'center',title:'',headerCls:'panel-header-gray',iconCls:'icon-book-add'" border="false">
+                        <div id="panel3" class="hisui-panel" title="追溯码拆零查询"
+                            data-options="headerCls:'panel-header-gray',iconCls:'icon-paper',fit:true,bodyCls:''">
+                            <table id="gridTraceCode" data-options="fit:true" border="false"> </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="gridTraceCodeBar">
+            <div class="datagrid-toolbar" style="border-bottom:0">
+                <div style="margin-top:10px;">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtTraceCode">追溯码</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="txtTraceCode" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true'
+                            spellcheck="false" style="width:312px">
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbLocId">拆零科室</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbLocId" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbStatus">使用状态</label>
+                        </div>
+                    </div>                   
+                    <div class="pha-col">
+                        <input id="cmbStatus" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtCodeType">码类型</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="comCodeType" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col">
+                        <a id="btnFind" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-find',plain:false">查询</a>
+                    </div>
+                    <div class="pha-col">
+                    	<a id="btnDet" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-clean',plain:false">取消拆零</a>
+                    </div>
+                    <div class="pha-col">
+                        <a id="btnTrans" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-add',plain:false">拆零转移</a>
+                    </div>
+                </div>
+            </div>
+            <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbgridInci">药品名称</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbgridInci"  class="hisui-lookup" style="width:320px"/>
+                    </div>
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="cmbSplitType">拆零方式</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbSplitType" data-pha='class:"hisui-combobox"'>
+                    </div>
+                    <div class="pha-col" style="margin-left:228px">
+                        <a id="btnClean" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-save',plain:false">清屏</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 拆零转移弹窗 -->
+        <div id="dlgTransfer" class="hisui-dialog" data-options="closed:true,width:380,title:'拆零转移',iconCls:'icon-w-add',modal:true,
+buttons:[{
+    text:'确定',
+    handler:function(){
+        DoTransfer();
+    }
+},{
+    text:'取消',
+    handler:function(){
+        $('#dlgTransfer').dialog('close');
+    }
+}]">
+            <div class="pha-row">
+                <div class="pha-col">
+                    <div style="text-align: right;width:70px;">
+                        <label for="cmbTransLoc"><span style="color:red">*</span>药房科室</label>
+                    </div>
+                </div>
+                <div class="pha-col">
+                    <input id="cmbTransLoc" class="hisui-combobox" data-pha='class:"hisui-combobox",requied:true' spellcheck="false" style="width:220px">
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="../scripts/hisui/websys.comm.js"></script>
+        <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.extend.js"></script>
+        <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.com.js"></script>
+        <script type="text/javascript" src="../scripts/pha/tracecode/v2/splitquery.js"></script>
+    </body>
+
+</HTML>

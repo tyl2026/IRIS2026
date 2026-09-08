@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- 3563 湖南医保配送下载（优化版—增加校验界面）
+    csp: pha.in.com.rec.hhimport.csp
+    js:  scripts/pha/in/v3/rec/hhimport.js -->
+<csp:method name=OnPreHTTP arguments="" returntype=%Boolean>
+    If ##Class(websys.SessionEvents).SessionExpired() Quit 1
+    Quit 1
+</csp:method>
+<HTML XMLNS=TRAK>
+
+<HEAD>
+    <title>
+        <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+    </title>
+    <TRAK:HEAD> </TRAK:HEAD>
+    <HISUI />
+    <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+    </link>
+    <style>
+        .panel-header-card-gray+.panel-body {
+            border-color: #cccccc;
+        }
+        .validation-summary-box {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            background: #fafafa;
+            border-radius: 3px;
+        }
+        .validation-pass {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .validation-fail {
+            color: #F44336;
+            font-weight: bold;
+        }
+        .log-toolbar {
+            padding: 5px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</HEAD>
+
+<body style="overflow:hidden;">
+    <div class="hisui-layout" fit="true">
+        <div data-options="region:'center'" class="pha-body" border="false">
+            <div class="hisui-layout" fit="true" border="false">
+                <!-- ============================================ -->
+                <!-- 左侧：tabs切换                                    -->
+                <!-- ============================================ -->
+                <div data-options="region:'west',width:550,split:true,title:'配送管理',collapsible:true,bodyCls:'panel-body-gray',headerCls:'panel-header-gray',showCollapsedTitle:true,iconCls:'icon-paper'">
+                    <div id="tabs-left" class="hisui-tabs" fit="true" border="false">
+                        <!-- Tab 1: 配送订单列表（原有） -->
+                        <div title="配送订单" iconCls="icon-list">
+                            <div class="hisui-layout" fit="true" border="false">
+                                <div data-options="region:'north',height:380,border:false">
+                                    <div id="gridIncItmBar">
+                                        <table class="dhcpha-north-tbl" cellspacing=0 cellpadding=0>
+                                            <tr title="查询条件">
+                                                <td><label for="StartDate">开始日期</label></td>
+                                                <td><input id="StartDate" class="hisui-datebox dhcpha-date" type="text" data-options="width:150" /></td>
+                                                <td><label for="EndDate">结束日期</label></td>
+                                                <td><input id="EndDate" class="hisui-datebox dhcpha-date" type="text" data-options="width:150" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="cmbHospital">医院</label></td>
+                                                <td><input id="cmbHospital" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                                                <td><label for="cmbPhaLocId">药房科室</label></td>
+                                                <td><input id="cmbPhaLocId" type="text" class="hisui-combobox" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="txtbatchno">批次流水号</label></td>
+                                                <td><input id="txtbatchno" class="hisui-validatebox" placeholder="批次流水号..." /></td>
+                                                <td><label for="comQueryVendor">供应商</label></td>
+                                                <td><input id="comQueryVendor" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="" class="hisui-linkbutton" id="btn-find" style="width:100px;" data-options="iconCls:'icon-w-find'">查询</a></td>
+                                                <td><a href="" class="hisui-linkbutton" id="btn-clear" style="width:100px;" data-options="iconCls:'icon-w-clean'">清屏</a></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- 下载区 -->
+                                    <div style="padding:5px 8px;border-top:1px solid #ddd;margin-top:3px;">
+                                        <table cellspacing=0 cellpadding=0 style="width:100%;">
+                                            <tr>
+                                                <td><label for="downHospital">医院</label></td>
+                                                <td><input id="downHospital" type="text" class="hisui-combobox" data-options="width:150" /></td>
+                                                <td><label for="comVendor">供应商</label></td>
+                                                <td><input id="comVendor" type="text" class="hisui-combobox" data-options="width:150,required:true" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td><label for="BatchNo">下载流水号</label></td>
+                                                <td><input id="downloadBatchno" class="hisui-validatebox" placeholder="下载批次流水号..." data-options="width:150,required:true" /></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td><a href="" class="hisui-linkbutton" id="btn-download" style="width:100px;" data-options="iconCls:'icon-w-find'">下载</a></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- 校验摘要（新增，下载后显示） -->
+                                    <div id="validation-summary" style="display:none;"></div>
+                                    <!-- 校验操作按钮（新增，初始隐藏） -->
+                                    <div id="validation-btns" style="padding:5px 8px;display:none;">
+                                        <a href="" class="hisui-linkbutton" id="btn-confirm" style="width:100px;"
+                                            data-options="iconCls:'icon-w-find'">确认导入</a>
+                                        <a href="" class="hisui-linkbutton" id="btn-allpass" style="width:100px;"
+                                            data-options="iconCls:'icon-ok'">全部通过</a>
+                                        <a href="" class="hisui-linkbutton" id="btn-allcancel" style="width:100px;"
+                                            data-options="iconCls:'icon-cancel'">全部取消</a>
+                                        <a href="" class="hisui-linkbutton" id="btn-reset" style="width:100px;"
+                                            data-options="iconCls:'icon-reload'">重新下载</a>
+                                        <a href="" class="hisui-linkbutton" id="btn-export" style="width:100px;"
+                                            data-options="iconCls:'icon-w-find'">导出</a>
+                                        <a href="" class="hisui-linkbutton" id="btn-save" style="width:100px;"
+                                            data-options="iconCls:'icon-save'">保存批次数据</a>
+                                    </div>
+                                </div>
+                                <div data-options="region:'center',border:false">
+                                    <table id="gridInsuData"></table>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Tab 2: 校验日志（新增） -->
+                        <div title="校验日志" iconCls="icon-log">
+                            <div class="hisui-layout" fit="true" border="false">
+                                <div data-options="region:'north',height:130,border:false" class="log-toolbar">
+                                    <table cellspacing=2 cellpadding=2 style="width:100%;">
+                                        <tr>
+                                            <td><label for="logStartDate">开始日期</label></td>
+                                            <td><input id="logStartDate" class="hisui-datebox" type="text" data-options="width:120" /></td>
+                                            <td><label for="logEndDate">结束日期</label></td>
+                                            <td><input id="logEndDate" class="hisui-datebox" type="text" data-options="width:120" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><label for="logSerialNo">流水号</label></td>
+                                            <td><input id="logSerialNo" class="hisui-validatebox" data-options="width:120" /></td>
+                                            <td><label for="logVendor">供应商</label></td>
+                                            <td><input id="logVendor" type="text" class="hisui-combobox" data-options="width:120" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td><a href="" class="hisui-linkbutton" id="btn-logfind" onclick="QueryLogs();return false;" data-options="iconCls:'icon-search'">查询</a></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div data-options="region:'center',border:false">
+                                    <table id="gridLog"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ============================================ -->
+                <!-- 右侧：tabs切换                                    -->
+                <!-- ============================================ -->
+                <div data-options="region:'center',title:'数据详情',bodyCls:'panel-body-gray',headerCls:'panel-header-gray',iconCls:'icon-paper-info'">
+                    <div id="tabs-right" class="hisui-tabs" fit="true" border="false">
+                        <!-- Tab 1: 明细数据（原有） -->
+                        <div title="明细数据" iconCls="icon-list">
+                            <table id="gridInsuDetailData"></table>
+                        </div>
+                        <!-- Tab 2: 校验详情（新增） -->
+                        <div title="校验详情" iconCls="icon-check">
+                            <table id="gridValidation"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 日志详情弹窗 -->
+    <div id="InfoWin" class="hisui-dialog" data-options="closed:true,width:700,height:500,title:'日志详情',modal:true">
+        <div id="info" style="overflow:auto;padding:10px;max-height:430px;"></div>
+    </div>
+    <!-- 脚本引用 -->
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.extend.js"></script>
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.com.js"></script>
+    <script type="text/javascript" src="../scripts/pha/com/v1/js/grideditor.js"></script>
+    <script type="text/javascript" src="../scripts/pha/com/v1/js/extend.js"></script>
+    <script type="text/javascript" src="../scripts/pha/plugins/datagrid-cellediting/datagrid-cellediting.js"></script>
+    <script type="text/javascript" src="../scripts/pha/in/v3/rec/hhimport.js"></script>
+</body>
+
+</HTML>

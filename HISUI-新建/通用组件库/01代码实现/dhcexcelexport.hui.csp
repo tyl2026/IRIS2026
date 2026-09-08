@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<!-- dhcexcelexport.hui.csp -- DHCExcelExport 组件使用示例（完整页面，复制参考即可）
+     组件文件：DHCExcelExport.js（部署至 csp/scripts_lib/DHCExcelExport.js）
+     页面引用：<script type="text/javascript" src="../scripts_lib/DHCExcelExport.js"></script>
+-->
+<html>
+<head>
+    <title>Excel(.xls)导出组件示例</title>
+    <TRAK:HEAD></TRAK:HEAD>
+    <HISUI/>
+    <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css"></link>
+    <style>
+        .pha-row { margin-top: 10px; margin-bottom: 10px; text-align: left; }
+        .pha-col { display: inline-block; margin-left: -4px; padding-left: 10px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="hisui-layout" fit="true" border="false">
+        <div data-options="region:'center',title:'Excel(.xls)导出组件示例',headerCls:'panel-header-gray'">
+            <div class="pha-row">
+                <div class="pha-col">
+                    <a id="btnExportGrid" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-export',plain:false">导出表格(datagrid全量)</a>
+                </div>
+                <div class="pha-col">
+                    <a id="btnExportRows" class="hisui-linkbutton l-btn l-btn-small" data-options="iconCls:'icon-w-export',plain:false">导出静态数组</a>
+                </div>
+            </div>
+            <table id="gridDemo"></table>
+        </div>
+    </div>
+    <script type="text/javascript" src="../scripts/hisui/websys.comm.js"></script>
+    <script type="text/javascript" src="../scripts_lib/DHCExcelExport.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            // 示例数据（模拟追溯码台账行）
+            var demoRows = [{
+                traceCode: '86152177362548192634',
+                inciCode: 'XKF000092',
+                inciDesc: '阿莫西林胶囊[0.25g*50]',
+                manfName: '测试药厂A',
+                barQty: 100,
+                usedQty: 0,
+                resQty: 100
+            }, {
+                traceCode: '86998877665544332211',
+                inciCode: '001234',
+                inciDesc: '维生素B2片[5mg*100]',
+                manfName: '测试药厂B',
+                barQty: 100,
+                usedQty: 60,
+                resQty: 40
+            }];
+
+            $('#gridDemo').datagrid({
+                fit: true,
+                singleSelect: true,
+                rownumbers: true,
+                columns: [[{
+                    field: 'traceCode',
+                    title: '追溯码',
+                    width: 200
+                }, {
+                    field: 'inciDesc',
+                    title: '药品名称',
+                    width: 220
+                }, {
+                    field: 'manfName',
+                    title: '生产企业',
+                    width: 180
+                }, {
+                    field: 'barQty',
+                    title: '拆零数量',
+                    width: 90,
+                    align: 'center'
+                }, {
+                    field: 'usedQty',
+                    title: '已使用数量',
+                    width: 100,
+                    align: 'center'
+                }, {
+                    field: 'resQty',
+                    title: '可使用数量',
+                    width: 100,
+                    align: 'center'
+                }]],
+                data: demoRows
+            });
+
+            // 方式一：导出 datagrid 全部行
+            $('#btnExportGrid').on('click', function () {
+                DHCExcelExport.exportDataGrid({
+                    gridId: 'gridDemo',
+                    fileName: '表格导出示例_' + DHCExcelExport.timestamp(),
+                    columns: [{
+                        field: 'traceCode',
+                        title: '追溯码',
+                        text: true
+                    }, {
+                        field: 'inciCode',
+                        title: '药品代码',
+                        text: true
+                    }, {
+                        field: 'inciDesc',
+                        title: '药品名称'
+                    }, {
+                        field: 'manfName',
+                        title: '生产企业'
+                    }, {
+                        field: 'barQty',
+                        title: '拆零数量'
+                    }, {
+                        field: 'usedQty',
+                        title: '已使用数量'
+                    }, {
+                        field: 'resQty',
+                        title: '可使用数量'
+                    }, {
+                        title: '使用状态',
+                        getValue: function (row) {
+                            var used = Number(row.usedQty) || 0;
+                            var total = Number(row.barQty) || 0;
+                            if (used <= 0) { return '未使用'; }
+                            return (used < total) ? '使用中' : '已使用';
+                        }
+                    }]
+                });
+            });
+
+            // 方式二：导出任意数组
+            $('#btnExportRows').on('click', function () {
+                DHCExcelExport.exportRows({
+                    fileName: '静态数组导出示例',
+                    columns: [{
+                        title: '序号',
+                        getValue: function (row, index) { return index + 1; }
+                    }, {
+                        field: 'inciDesc',
+                        title: '药品名称'
+                    }],
+                    rows: demoRows
+                });
+            });
+        });
+    </script>
+</body>
+</html>

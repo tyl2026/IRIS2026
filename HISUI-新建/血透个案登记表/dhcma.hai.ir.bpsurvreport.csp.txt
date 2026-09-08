@@ -1,0 +1,83 @@
+
+<csp:method name=OnPreHTTP arguments="" returntype=%Boolean>
+ i ##Class(websys.SessionEvents).SessionExpired() q 1
+ quit 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<TITLE><EXTHEALTH:TRANSLATE id=title>##(%session.Get("TITLE"))##</EXTHEALTH:TRANSLATE></TITLE>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	
+		<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+		<HISUI/>
+		<DHCHAI:HEAD></DHCHAI:HEAD>
+	
+		<link rel="stylesheet" href="../scripts/DHCMA/HAI/css/base.css">
+   	   <style>
+        .hisui-accordion ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .hisui-accordion ul>li {
+            line-height: 37px;
+            padding: 0 5px 0 15px;
+            border-bottom:1px solid #ccc; 
+        }
+        .hisui-accordion ul>li>a {
+            position: relative;
+            display: block;
+            text-decoration: none;
+            color:#000000;
+        }
+        .hisui-accordion ul>li:hover ,.hisui-accordion ul>li.active{
+            background-color: #E3E3E3;
+        }
+	 </style>
+	</head>
+	<body>
+		<csp:Include Page="dhcma.hai.ir.bpsurvreport.show.csp">
+		<script type="text/javascript" src="../scripts/DHCMA/HAI/Units/PubFunction.js"></script>
+		
+		<SCRIPT LANGUAGE=CACHE RUNAT=SERVER>
+		    Set BPRegID    = $g(%request.Data("BPRegID",1))
+			Set ReportID   = $g(%request.Data("ReportID",1))
+			Set SurvNumber = $g(%request.Data("SurvNumber",1))
+			Set AdminPower = +$g(%request.Data("AdminPower",1))
+			Set RepStatus  = $g(%request.Data("RepStatus",1))
+			Set inputParams  = $g(%request.Data("inputParams",1))
+			Set ComTempTypeCode = $g(%request.Data("ComTempTypeCode",1)) 	//获取模板ID
+			Set RegTypeID=""
+			If ComTempTypeCode'="" {
+				Set RegTypeID = ##class(DHCHAI.IR.ComTemplateDef).GetValByCode(ComTempTypeCode)
+			}
+			// 服务器日期时间
+			Set ServiceDate = ##Class(DHCHAI.IO.FromHisSrv).DateLogicalToHtml(+$h)
+			Set ServiceTime = $zt($p($h,",",2))
+		
+		</SCRIPT>
+		<script language="javascript" type="text/javascript">
+			var AdminPower  = '#(AdminPower)#';
+			var ReportID    = '#(ReportID)#';
+			var BPRegID     = '#(BPRegID)#';
+			var SurvNumber  = '#(SurvNumber)#'
+			var ServiceDate = '#(ServiceDate)#';
+			var ServiceTime = '#(ServiceTime)#';
+			var RepStatus   ='#(RepStatus)#';
+			var inputParams = '#(inputParams)#';
+			var RegTypeID   = '#(RegTypeID)#';
+			
+			$(window).load(function() {
+				InitReportWin(1);
+   				InitPatWin(1);
+			});
+		</script>
+		<script type="text/javascript" src="../scripts/DHCMA/HAI/IR/BPSurvReport/Report_Gui.js"></script>
+		<script type="text/javascript" src="../scripts/DHCMA/HAI/IR/BPSurvReport/Report_Event.js"></script>
+		<!-- 引入公共模板的JS -->
+		<script type="text/javascript" src="../scripts/DHCMA/HAI/IR/ComTempPreview/Gui.js"></script>
+		<script type="text/javascript" src="../scripts/DHCMA/HAI/IR/ComTempPreview/Event.js"></script>
+	</body>
+</html>

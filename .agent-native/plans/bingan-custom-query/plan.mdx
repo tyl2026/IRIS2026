@@ -1,0 +1,380 @@
+---
+title: "病案编目数据自定义查询系统"
+brief: "基于 HISUI 框架的病案编目数据自定义查询系统 — 输出列自定义、多条件组合查询、模板保存/引用、Excel 导出、汇总统计，覆盖 DHCMRInfo 全字段（~370 个）。"
+status: "draft"
+---
+
+## 目标
+
+开发一个完整的病案编目数据自定义查询系统，让用户能自由选择输出字段、动态组合查询条件，并将配置保存为可复用模板。系统包含查询主界面和模板配置管理两个页面，覆盖 DHCMRInfo 全部约 370 个字段。
+
+**"Done" 的定义：**
+- 用户可以在查询主界面选择输出列、添加条件、执行查询、导出 Excel
+- 用户可以保存/引用/管理查询模板（CRUD + 默认模板）
+- datagrid 分页展示结果，footer 显示费用合计
+- IE11 兼容，所有 JS 使用 ES5 语法
+
+---
+
+## 范围与非目标
+
+**范围内：**
+- 模块 A — 查询主界面（输出列选择、条件动态配置、AND/OR + 括号分组、查询、导出、模板引用）
+- 模块 B — 模板管理界面（CRUD、详情查看、默认标记）
+- 后端 ClassMethod（查询引擎 + 括号表达式解析 + 模板 CRUD + 字段元数据）
+- 前端 CSP 页面 + JavaScript（IE11 兼容）
+- 默认输出列预设（姓名、住院号、出院日期、出院诊断、总费用、住院天数）
+- 查询结果上限 200,000 条（超限提示缩小查询范围）
+
+**非目标（v1 不包含）：**
+- 多院区数据隔离
+- 权限/角色控制
+- SQL 聚合分组查询（GROUP BY）
+- 图表可视化
+
+---
+
+## 架构
+
+<Callout id="arch-summary" tone="info">
+
+**三层结构：** CSP 前端 → `$.cm()` → IRIS ClassMethod → `^DHCMRInfo` Global / SQL 表
+
+模板持久化使用 `%Persistent` 持久化类 `User.DHCMRQueryTemplate`（自动生成 SQL 表 + Global），
+通过嵌入式 SQL 进行 CRUD 操作。字段元数据从 `DHCMRInfo-props.csv` 构建为 JS 配置对象。
+
+</Callout>
+
+### 数据流
+
+<Diagram id="data-flow" caption="查询执行数据流">
+
+```html
+<div class="diagram-panel" data-rough style="display:flex;flex-direction:column;gap:14px;padding:16px">
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="diagram-node" style="flex:1;text-align:center">CSP 查询页面<br/><span class="diagram-muted">columns + conditions</span></div>
+    <span style="font-size:20px">→</span>
+    <div class="diagram-node" style="flex:1;text-align:center">$.cm()<br/><span class="diagram-muted">ClassName + MethodName</span></div>
+    <span style="font-size:20px">→</span>
+    <div class="diagram-node" style="flex:1;text-align:center">ClassMethod<br/><span class="diagram-muted">解析条件 → $o遍历</span></div>
+    <span style="font-size:20px">→</span>
+    <div class="diagram-node" style="flex:1;text-align:center">^DHCMRInfo<br/><span class="diagram-muted">Global 数据</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+    <div class="diagram-card" style="padding:6px 12px;font-size:12px">条件: {field, op, value}[]</div>
+    <div class="diagram-card" style="padding:6px 12px;font-size:12px">列: {field, title, piece}[]</div>
+    <div class="diagram-card" style="padding:6px 12px;font-size:12px">分页: page, rows</div>
+  </div>
+</div>
+```
+
+</Diagram>
+
+### 模板存储 — `User.DHCMRQueryTemplate` (%Persistent)
+
+<DataModel
+  id="template-model"
+  entities={[
+    {
+      id: "dhcmrquerytemplate",
+      name: "User.DHCMRQueryTemplate (%Persistent → SQL + Global)",
+      fields: [
+        { name: "ID", type: "int", pk: true, note: "自增主键" },
+        { name: "Name", type: "string", note: "模板名称，唯一" },
+        { name: "Scope", type: "string", note: "G=通用(所有人可见) P=个人(仅创建者可见)，默认 P" },
+        { name: "CreateUserID", type: "string", note: "创建者用户 ID" },
+        { name: "ColumnsJSON", type: "%String(MAXLEN=\"\")", note: "JSON: [{field,title,piece,group}]" },
+        { name: "ConditionsJSON", type: "%String(MAXLEN=\"\")", note: "JSON: [{field,op,value,logic,groupId}]" },
+        { name: "IsDefault", type: "bool", note: "是否默认模板（同一时间仅一个为 1）" },
+        { name: "IsActive", type: "bool", note: "启用状态（0=禁用）" },
+        { name: "CreateDate", type: "date" },
+        { name: "CreateTime", type: "time" }
+      ]
+    }
+  ]}
+/>
+
+---
+
+## 后端 API
+
+### 查询引擎
+
+<Endpoint id="api-query" method="POST" path="web.YZSY.DHCMRCustomQuery → QueryData" summary="执行自定义查询" params={[
+  { name: "columns", in: "body", type: "string", required: true, description: "JSON: [{field:'MR_XM', title:'姓名', piece:9}, ...]" },
+  { name: "conditions", in: "body", type: "string", description: "JSON: [{field:'MR_CYRQ', op:'between', value:'2026-01-01~2026-06-30', logic:'AND'}, ...]" },
+  { name: "page", in: "body", type: "int", description: "页码，默认 1" },
+  { name: "rows", in: "body", type: "int", description: "每页条数，默认 20" }
+]} responses={[
+  { status: "200", description: "成功（匹配行 ≤200,000）", example: "{ \"ok\": true, \"total\": 1250, \"rows\": [{...}], \"footer\": { \"MR_ZFJE\": 1582000.50 } }" },
+  { status: "200", description: "超出上限", example: "{ \"ok\": false, \"error\": \"匹配行数 215,836 超过上限 200,000，请缩小查询范围\" }" }
+]}>
+将 columns JSON 解析为 piece 位置列表，conditions JSON 解析为过滤逻辑（含 AND/OR + 括号分组），
+遍历 `^DHCMRInfo` Global，逐行匹配条件后提取指定 piece 值返回。
+支持手动分页：先收集所有匹配行 ID，再按 page/rows 切片返回。
+**上限控制**：收集过程中行数超过 200,000 立即中止并返回错误，要求用户缩小查询范围。
+</Endpoint>
+
+### 模板 CRUD
+
+<Endpoint id="api-tmpl-list" method="POST" path="web.YZSY.DHCMRCustomQuery → GetTemplateList" summary="获取模板列表（含权限过滤）" params={[
+  { name: "UserID", in: "body", type: "string", required: true, description: "当前用户 ID" }
+]} responses={[
+  { status: "200", description: "成功", example: "{ \"rows\": [{ \"ID\":1, \"Name\":\"出院患者\", \"Scope\":\"G\", \"CreateUserID\":\"tyl\", ... }] }" }
+]}>
+`SELECT ... WHERE IsActive = 1 AND (Scope = 'G' OR CreateUserID = ?) ORDER BY ID DESC`
+通用模板所有人可见，个人模板仅创建者可见。
+</Endpoint>
+
+<Endpoint id="api-tmpl-save" method="POST" path="web.YZSY.DHCMRCustomQuery → SaveTemplate" summary="保存/更新模板（含权限）" params={[
+  { name: "ID", in: "body", type: "int", description: "0 或空 = INSERT 新建，>0 = UPDATE 覆盖" },
+  { name: "Name", in: "body", type: "string", required: true },
+  { name: "Scope", in: "body", type: "string", description: "'G'=通用 / 'P'=个人，新建时生效，默认 'P'" },
+  { name: "UserID", in: "body", type: "string", required: true, description: "当前用户 ID" },
+  { name: "ColumnsJSON", in: "body", type: "string", required: true },
+  { name: "ConditionsJSON", in: "body", type: "string", required: true }
+]} responses={[
+  { status: "200", description: "成功", example: "{ \"success\": true, \"id\": 3 }" }
+]}>
+新建时 INSERT（含 CreateUserID、Scope），覆盖时 UPDATE BY ID（仅创建者可修改个人模板）。
+通用模板保存后所有人可见；个人模板仅 CreateUserID 匹配者可编辑/删除。
+</Endpoint>
+
+<Endpoint id="api-tmpl-delete" method="POST" path="web.YZSY.DHCMRCustomQuery → DeleteTemplate" summary="删除模板（SQL DELETE）" params={[
+  { name: "ID", in: "body", type: "int", required: true }
+]}>
+`DELETE FROM SQLUser.DHCMRQueryTemplate WHERE ID = ?`
+</Endpoint>
+
+<Endpoint id="api-tmpl-toggle" method="POST" path="web.YZSY.DHCMRCustomQuery → ToggleDefault" summary="设置/取消默认模板（SQL UPDATE）" params={[
+  { name: "ID", in: "body", type: "int", required: true },
+  { name: "IsDefault", in: "body", type: "string", description: "'1' 或 '0'" }
+]}>
+设默认时先 `UPDATE ... SET IsDefault = 0` 清空所有，再 `UPDATE ... SET IsDefault = 1 WHERE ID = ?`，保证唯一。
+</Endpoint>
+
+### 字段元数据
+
+<Endpoint id="api-fields" method="POST" path="web.YZSY.DHCMRCustomQuery → GetFieldMeta" summary="获取字段元数据列表" responses={[
+  { status: "200", description: "成功", example: "{ \"fields\": [{ \"name\": \"MR_XM\", \"title\": \"姓名\", \"type\": \"String\", \"piece\": 9, \"group\": \"基本信息\" }, ...] }" }
+]}>
+从 DHCMRInfo-props.csv 构建分组字段列表，或后端 ClassMethod 读取 CSV 文件返回 JSON。
+实际实现中可能直接在前端 JS 中硬编码 fields 数组（减少一次网络请求）。
+</Endpoint>
+
+---
+
+## 实现步骤
+
+### 步骤 1：后端类
+
+#### 1a：持久化类 — `User.DHCMRQueryTemplate.cls`
+
+创建 `%Persistent` 类作为模板 SQL 表（自动生成 Global `^User.DHCMRQueryTemplateD`）：
+
+```objectscript
+Class User.DHCMRQueryTemplate Extends %Persistent
+{
+Property Name As %String(MAXLEN = 100);
+Property ColumnsJSON As %String(MAXLEN = "");
+Property ConditionsJSON As %String(MAXLEN = "");
+Property IsDefault As %Boolean;
+Property IsActive As %Boolean [ InitialExpression = 1 ];
+Property CreateDate As %Date;
+Property CreateTime As %Time;
+Index NameIdx On Name [ Unique ];
+}
+```
+
+编译后自动生成 `SQLUser.DHCMRQueryTemplate` 表。
+
+#### 1b：业务类 — `web.YZSY.DHCMRCustomQuery.cls`
+
+创建 ObjectScript 业务类，实现以下 ClassMethod：
+
+1. **`GetFieldMeta()`** — 返回字段分组元数据 JSON（供前端字段选择器使用）
+2. **`QueryData(columns, conditions, page, rows)`** — 查询引擎
+   - 解析 columns JSON → piece 位置数组
+   - 解析 conditions JSON → 过滤规则（含 AND/OR + 括号分组表达式）
+   - `$o` 遍历 `^DHCMRInfo` Global
+   - 逐行匹配条件（字符型: `[` 包含 / 左匹配，日期型: 日期比较，数字型: 数值比较）
+   - 括号表达式求值：每组条件先按 AND 求交、组间按 OR 求并
+   - 收集匹配行 ID（上限 200,000 → 超限立即中止返回错误）
+   - 按 page/rows 分页 → `$e` 提取 piece 值
+   - 计算 footer 合计（费用字段）
+3. **`GetTemplateList()`** — 嵌入式 SQL `SELECT ... FROM SQLUser.DHCMRQueryTemplate`
+4. **`SaveTemplate(ID, Name, ColumnsJSON, ConditionsJSON)`** — INSERT 或 UPDATE
+5. **`DeleteTemplate(ID)`** — `DELETE FROM SQLUser.DHCMRQueryTemplate WHERE ID = ?`
+6. **`ToggleDefault(ID, IsDefault)`** — 先清空所有默认 → 设当前为默认（保证唯一）
+7. **`GetDefaultTemplate()`** — `SELECT ... WHERE IsDefault = 1 AND IsActive = 1`
+
+<Callout id="iriscaveat" tone="warning">
+
+**IRIS 编译注意：** 后置表达式运算符 `=` 两侧不能有空格（如 `q:admId=""` 而非 `q:admId = ""`）；`&&`/`||` 连接的 `)&&(` 之间不能有空；`'[` 包含运算符内不能有空。编码规范详见 `CLAUDE.md`。
+
+</Callout>
+
+### 步骤 2：查询主界面 — `dhcmrcustomquery.csp` + `dhcmrcustomquery.js`
+
+**CSP 页面结构（参考 [dhcmrtop10disease.csp](HISUI-新建/病案前十病种统计/01代码实现/dhcmrtop10disease.csp)）：**
+- `hisui-layout` 全屏布局
+- North 区域顶部：页面标题 + 模板管理入口按钮
+- North → **模板面板**（默认折叠，点击标题栏展开/收起）：
+  - 标题栏：chevron 图标 + "模板" 标签 + 模板计数 badge + "保存当前模板" 按钮
+  - 当前模板指示器（如已引用模板）：模板名称 + 列数/条件数 + "更换模板" + "查看明细"
+  - 展开后模板列表：每行模板名称 + 配置摘要 + "引用"按钮 + "明细"按钮（弹窗显示 columns/conditions）
+  - 底部"模板管理"链接按钮
+- North → 输出列配置卡片（已选 chips + 选择列按钮）
+- North → 条件配置卡片（动态条件行 + 添加条件/条件组按钮）
+- North 底部：查询 + 导出 Excel 按钮
+- Center 区域：`hisui-datagrid` 结果表格
+
+**JavaScript 关键逻辑（IE11 兼容 — 全部 `var` + `function`）：**
+1. `initPage()` — 页面初始化，加载默认列预设（姓名、住院号、出院日期、出院诊断、总费用、住院天数），检查默认模板
+2. `toggleTemplatePanel()` — 模板面板展开/收起（chevron 旋转动画，默认收起）
+3. `loadTemplateList()` — `$.cm()` 获取模板列表，渲染到模板面板列表中
+4. `loadTemplate(id)` / `viewTemplateDetail(id)` — 引用模板填充 UI / 弹窗查看配置明细
+5. `openColumnSelector()` — 弹出字段选择面板（双栏：分组可搜索复选框树 + 已选拖拽排序列表）
+6. `addCondition()` / `addConditionGroup()` / `removeCondition(row)` — 动态条件行/组管理
+7. `onFieldChange(row)` — 字段选择后自动切换运算符列表
+8. `doQuery()` — 收集 columns + conditions → `$.cm()` → datagrid 渲染
+9. `doExport()` — 后端返回全量数据 → 前端 CSV Blob 下载（BOM + `\t` 前缀）
+10. `saveTemplate()` — 弹出保存弹窗（模板名称中文≥4字 + Scope 单选 G/P + **输出列/条件配置明细预览**）→ 确认 → `$.cm()` 保存
+
+<Callout id="ie11-caveat" tone="warning">
+
+**IE11 兼容约束：** 禁用 `let`/`const`（用 `var`）、箭头函数（用 `function`）、`Promise`/`async`（用回调）、`startsWith`/`includes`（用 `indexOf`）。datagrid 的 `columns` 必须通过 JS `.datagrid({columns:...})` 设置，禁止在 HTML `data-options` 中写 `formatter: function()`。
+
+</Callout>
+
+### 步骤 3：模板管理界面 — `dhcmrcustomquerytmpl.csp`
+
+- 独立页面（查询页面通过 `window.open` 打开）
+- datagrid 展示模板列表（名称、创建时间、状态、默认标记）
+- 展开行显示模板详情（输出列 chips + 条件列表）
+- 工具栏操作：编辑（弹窗）、删除（确认）、启用/禁用
+- 设为默认（radio 互斥）
+
+### 步骤 4：字段选择器组件
+
+**字段分组（6 组，来自需求 §五）：**
+
+<Table
+  id="field-groups"
+  columns={["分组", "前缀", "示例字段"]}
+  rows={[
+    ["基本信息", "MR_XM, MR_XB, MR_CSRQ, MR_NN, MR_GJ, MR_SFZH, MR_MZ, MR_ZY, MR_HY", "姓名、性别、出生日期、年龄"],
+    ["住院信息", "MR_ZYH, MR_BAH, MR_RYRQ, MR_RYKB, MR_CYRQ, MR_CYKB, MR_SJZYTS", "住院号、入院/出院日期、住院天数"],
+    ["诊断信息", "MR_RYZD, MR_CYZYZD, MR_CYQTZD1~21, MR_MJZZD", "入院诊断、出院诊断、其他诊断"],
+    ["手术信息", "MR_SSMC1~30, MR_SSRQ1~30, MR_SSCZYS1~30", "手术名称、手术日期、手术医生"],
+    ["费用信息", "MR_ZFJE, MR_XYF, MR_MZF, MR_SSF, MR_KFF, MR_HLF, MR_ZYZLF ...", "总费用、西药费、麻醉费、手术费"],
+    ["其他", "剩余 ~200 个字段", "质控、护理、随诊等"]
+  ]}
+/>
+
+字段选择器前端用双栏布局：左侧可搜索复选框树（按组折叠），右侧拖拽排序已选列表。
+
+---
+
+## 文件清单
+
+<FileTree
+  id="files-touched"
+  title="产出文件"
+  entries={[
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/User.DHCMRQueryTemplate.cls", change: "added", note: "%Persistent 持久化类 — 模板 SQL 表（~30 行）" },
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/web.YZSY.DHCMRCustomQuery.cls", change: "added", note: "后端查询引擎 + 模板 CRUD（嵌入式 SQL，~280 行 ClassMethod）" },
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/dhcmrcustomquery.csp", change: "added", note: "查询主界面 CSP 页面" },
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/dhcmrcustomquery.js", change: "added", note: "查询主界面 JS 逻辑（IE11 兼容）" },
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/dhcmrcustomquerytmpl.csp", change: "added", note: "模板管理界面 CSP 页面" },
+    { path: "HISUI-新建/病案数据自定义查询/01代码实现/dhcmrcustomquerytmpl.js", change: "added", note: "模板管理界面 JS 逻辑" }
+  ]}
+/>
+
+---
+
+## 关键决策
+
+<Callout id="decision-piece" tone="decision">
+
+**条件匹配在服务端做。** 虽然 Global 遍历 + JS 匹配也可以，但 IRIS 端 `$o` + `$e` 逐行过滤效率更高，且避免将全量数据传输到前端。手动分页模式：先收集所有匹配行 ID，再按 page/rows 切片返回。
+
+</Callout>
+
+<Callout id="decision-template" tone="decision">
+
+**模板存储用 `%Persistent` 持久化类。** `User.DHCMRQueryTemplate` 自动生成 SQL 表 + Global，通过嵌入式 SQL 进行 CRUD。与 `^DHCMRInfo` 分离，模板只存 columns/conditions JSON 配置，不存查询结果缓存。
+
+</Callout>
+
+<Callout id="decision-scope" tone="decision">
+
+**模板分为通用和个人两种可见范围。** `Scope = "G"`（通用）所有用户可见，`Scope = "P"`（个人）仅创建者可见。模板列表查询按 `WHERE Scope = 'G' OR CreateUserID = ?` 过滤。个人模板仅创建者可编辑/删除。保存时默认 Scope = "P"，用户可在保存弹窗中选择切换。
+
+</Callout>
+
+<Callout id="decision-fields" tone="decision">
+
+**字段元数据在前端硬编码。** 370 个字段的分组/类型/标签信息直接写在 JS 的 `FIELD_META` 数组中，避免每次请求后端。字段元数据是静态的（仅在 DHCMRInfo 表结构变更时才需更新），不需要动态查询。
+
+</Callout>
+
+<Callout id="decision-bracket" tone="decision">
+
+**v1 包含括号分组。** 条件支持 AND/OR 逻辑切换 + 条件组括号分组。前端提供「+ 添加条件组」按钮，每个组内条件 AND 连接，组间 OR 连接。后端在 `QueryData` 中按「组内 AND 求交 → 组间 OR 求并」逻辑逐行求值。
+
+</Callout>
+
+<Callout id="decision-default-columns" tone="decision">
+
+**首次打开预设常用列。** 查询页面初始化时，默认选中 6 个常用字段：姓名（MR_XM）、住院号（MR_ZYH）、出院日期（MR_CYRQ）、出院诊断（MR_CYZYZDMC）、总费用（MR_ZFJE）、住院天数（MR_SJZYTS）。用户可随时修改该预设，保存为模板后以模板为准。
+
+</Callout>
+
+<Callout id="decision-rowlimit" tone="decision">
+
+**查询结果硬上限 200,000 行。** 在 Global 遍历收集匹配行 ID 过程中，行数达到 200,000 立即中止并返回错误提示，要求用户缩小查询范围（如添加日期区间、科室等过滤条件）。此上限防止全表遍历导致 IRIS 进程超时。
+
+</Callout>
+
+---
+
+## 验证
+
+<Checklist
+  id="verify-checklist"
+  items={[
+    { id: "v1", label: "默认列预设：首次打开 → 6 个常用列已选中并显示 chips", checked: false },
+    { id: "v2", label: "查询主界面：选择列 + 添加条件 → 查询 → datagrid 正确显示结果 + footer 汇总", checked: false },
+    { id: "v3", label: "字段选择器：搜索「费用」→ 过滤出费用组字段 → 勾选 → 已选列表更新并拖拽排序", checked: false },
+    { id: "v4", label: "条件运算符：选日期字段 → 出现「区间」；选字符字段 → 出现「包含」", checked: false },
+    { id: "v5", label: "括号分组：添加 2 个条件组 → 组内 AND + 组间 OR → 查询结果正确", checked: false },
+    { id: "v6", label: "模板：保存 → 刷新页面 → combo 下拉可选 → 引用后 columns + conditions 恢复", checked: false },
+    { id: "v7", label: "默认模板：模板管理页设为默认 → 查询页自动加载", checked: false },
+    { id: "v8", label: "导出 Excel：点击导出 → 下载 CSV（BOM + 长数字 \\t 前缀 + 中文正常）", checked: false },
+    { id: "v9", label: "200k 上限：构造超限查询条件 → 返回错误提示而非超时报错", checked: false },
+    { id: "v10", label: "IE11：在 IE11 内核中打开，无 JS 报错，datagrid/combobox 正常", checked: false }
+  ]}
+/>
+
+---
+
+### Resolved Decisions
+
+<Callout id="resolved-q1" tone="success">
+
+**括号分组：v1 包含。** 条件支持 AND/OR 逻辑切换 + 条件组括号分组，已在范围内，实现方案见上文「关键决策」。
+
+</Callout>
+
+<Callout id="resolved-q2" tone="success">
+
+**默认输出列：预设常用列。** 首次打开默认选中姓名、住院号、出院日期、出院诊断、总费用、住院天数 6 列。
+
+</Callout>
+
+<Callout id="resolved-q3" tone="success">
+
+**查询上限：200,000 行。** 匹配行数达到 200,000 时立即中止并返回错误，提示用户缩小查询范围。
+
+</Callout>

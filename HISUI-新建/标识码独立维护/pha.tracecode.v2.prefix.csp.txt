@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--标识码独立维护
+	csp:csp/pha.tracecode.v2.prefix.csp
+	js: scripts/pha/tracecode/v2/prefix.js
+-->
+<HTML XMLNS=TRAK>
+
+<HEAD>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>
+        <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+    </title>
+    <TRAK:HEAD></TRAK:HEAD>
+    <HISUI />
+    <link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+    </link>
+    <style>
+        .pha-row {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .pha-col:first-child {
+            margin-left: -1px;
+        }
+
+        /* inline-block 有间隙,大概4px */
+        .pha-col {
+            display: inline-block;
+            margin-left: -4px;
+            padding-left: 10px;
+            vertical-align: middle;
+        }
+        
+        .pha-prefix-drug-maintain .pha-col:first-child{
+	        width: 100px;
+			text-align: right;
+			padding-right: 10px;
+        }
+
+        /* 标识码工具栏样式 */
+        #gridTraceCodePrefixBar {
+            padding: 5px 0;
+        }
+    </style>
+</HEAD>
+
+<body>
+    <div class="hisui-layout" fit="true" border="false">
+        <div data-options="region:'center'" class="dhcpha-hisui-container">
+            <div class="hisui-layout" fit="true" border="false">
+                <div data-options="region:'center',title:'',headerCls:'panel-header-gray',iconCls:'icon-book-add'" border="false">
+                    <div id="panel2" class="hisui-panel" title="药品列表" data-options="headerCls:'panel-header-gray',iconCls:'icon-paper',fit:true,bodyCls:''">
+                        <table id="gridInci" data-options="fit:true" border="false"> </table>
+                    </div>
+                    <div id="gridProcessBar">
+                        <div class="datagrid-toolbar" style="border-bottom:0">
+                            <div class="pha-row">
+                                <div class="pha-col">
+                                    <label for="cmbHosp">院区</label>
+                                </div>
+                                <div class="pha-col">
+                                    <input id="cmbHosp" class="hisui-combobox" data-pha='class:"hisui-combobox",requied:false' spellcheck="false" style="width:200px">
+                                </div>
+                                <div class="pha-col">
+                                    <label for="txtIncPY">药品简称</label>
+                                </div>
+                                <div class="pha-col">
+                                    <input id="txtIncPY" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true' spellcheck="false" style="width:280px">
+                                </div>
+                            </div>
+                            <div class="pha-row">
+                                <div class="pha-col">
+                                    <label for="conLocStkGrp">类组</label>
+                                </div>
+                                <div class="pha-col">
+                                    <input id="conLocStkGrp" class="hisui-combobox" style="width:220px">
+                                </div>
+                                <div class="pha-col">
+                                    <label for="conArcCat">子类</label>
+                                </div>
+                                <div class="pha-col">
+                                    <input id="conArcCat" class="hisui-combobox" style="width:220px">
+                                </div>
+                                <div class="pha-col">
+                                    <label for="coMaintenState">维护状态</label>
+                                </div>
+                                <div class="pha-col">
+                                    <input id="coMaintenState" class="hisui-combobox" style="width:160px">
+                                </div>
+                                <div class="pha-col">
+                                    <a class="hisui-linkbutton" plain='true' iconCls="icon-search" id="btnFindInci" style="margin-left:10px">查找</a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div data-options="region:'east',width:600,split:true" border="false">
+                    <div class="hisui-layout" fit="true" border="false">
+                        <div data-options="region:'north',height:434,split:true" border="false">
+                            <div class="hisui-panel" title="药品相关信息维护" data-options="headerCls:'panel-header-gray',iconCls:'icon-paper',fit:false,height:'auto',bodyCls:''">
+                                <div style="padding:10px;" class="pha-prefix-drug-maintain">
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciCode">药品代码</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciCode" data-pha='class:"hisui-validatebox",clear:true' style="width:316px">
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciDesc">药品名称</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciDesc" data-pha='class:"hisui-validatebox",clear:true' style="width:316px">
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciBUom">基本单位</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciBUom" data-pha='class:"hisui-combobox",clear:true'>
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciPackUnit">包装单位</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciPackUnit" data-pha='class:"hisui-combobox",save:true,clear:true'>
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciPackUomM">中包装单位</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciPackUomM" data-pha='class:"hisui-combobox",clear:true,save:true'>
+                                            <label for="inciPackUomMFac">与包装单位系数</label>
+                                            <input id="inciPackUomMFac" data-pha='class:"hisui-numberbox",clear:true,save:true' style="margin-left:5px">
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciPackUom">大包装单位</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciPackUom" data-pha='class:"hisui-combobox",clear:true,save:true'>
+                                            <label for="inciPackUomFac">与包装单位系数</label>
+                                            <input id="inciPackUomFac" data-pha='class:"hisui-numberbox",clear:true,save:true' style="margin-left:5px">
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciMinTCodeLev">最小码级别</label>
+                                        </div>
+                                        <div class="pha-col">
+                                            <input id="inciMinTCodeLev" data-pha='class:"hisui-combobox",clear:true,save:true'>
+                                        </div>
+                                    </div>
+                                    <div class="pha-row">
+                                        <div class="pha-col">
+                                            <label for="inciNoTraceCodeFlag">无码标识</label>
+                                        </div>
+                                        <div class="pha-col" style="margin-left:-10px">
+                                            <input id="inciNoTraceCodeFlag" type="checkbox" class="hisui-checkbox" data-pha='class:"hisui-checkbox",save:true,clear:true'>
+                                        </div>
+                                    </div>
+                                    <div style="text-align:center;padding:10px 0">
+                                        <a class="hisui-linkbutton" iconCls='icon-w-save' plain="false" style="overflow:hidden;" id="SaveInc">保存</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-options="region:'center'" border="false">
+                            <div class="hisui-panel" title="标识码维护" data-options="headerCls:'panel-header-gray',iconCls:'icon-paper',fit:true,bodyCls:''">
+                                <table id="gridTraceCodePrefix" data-options="fit:true" border="false"> </table>
+                                <div id="gridTraceCodePrefixBar">
+                                    <div class="datagrid-toolbar" style="border-bottom:0">
+                                        <a class="hisui-linkbutton" plain='true' iconCls="icon-add" id="btnAdd">新增</a>
+                                        <a class="hisui-linkbutton" plain='true' iconCls="icon-edit" id="btnUpdate">修改</a>
+                                        <a class="hisui-linkbutton" plain='true' iconCls="icon-remove" id="btnDelete">删除</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- 对话框部分保持不变 -->
+    <div id="diagSaveTraceCode" class="hisui-dialog" data-options="closed:true,width:500,height:450,title:'保存',iconCls:'icon-w-add',
+	onClose:function(){
+		ClearForm();
+		},
+     buttons:[{
+         text:'保存',
+         handler:function(){
+             SaveIDCode();
+         }
+     },{
+         text:'继续新增',
+         id:'diagProp_btnAdd',
+         handler:function(){
+            SaveIDCode(1);
+         }
+     },{
+         text:'关闭',
+         handler:function(){
+	         ClearForm();
+             $('#diagSaveTraceCode').dialog('close');
+         }
+     }]">
+        <div class="hisui-layout" fit="true">
+            <div data-options="region:'center',border:false" style="overflow:hidden;">
+                <div class="pha-row" style="display:none">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtInci"><span style="color:red">*</span>inci</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="txtInci" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true' spellcheck="false" style="width:350px">
+                    </div>
+                </div>
+                <div class="pha-row" style="display:none">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="txtIncIDCId"><span style="color:red">*</span>incIDCId</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="txtIncIDCId" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true' spellcheck="false" style="width:350px">
+                    </div>
+                </div>
+
+                <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:65px;">
+                            <label for="txtIdCode"><span style="color:red">*</span>标识码</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="txtIdCode" class="hisui-validatebox" data-pha='class:"hisui-validatebox",requied:true' spellcheck="false" style="width:350px">
+                    </div>
+                </div>
+
+                <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:65px;">
+                            <label for="cmbTypeList"><span style="color:red">*</span>标识类型</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="cmbTypeList" class="hisui-combobox" data-pha='class:"hisui-combobox",requied:false' spellcheck="false" style="width:350px">
+                    </div>
+                </div>
+
+                <div class="pha-row">
+                    <div class="pha-col">
+                        <div style="text-align: right;width:60px;">
+                            <label for="ckActiveFlag">是否有效</label>
+                        </div>
+                    </div>
+                    <div class="pha-col">
+                        <input id="ckActiveFlag" type="checkbox" checked><br />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="../scripts/hisui/websys.comm.js"></script>
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.extend.js"></script>
+    <script type="text/javascript" src="../scripts/pharmacy/common/js/dhcpha.hisui.com.js"></script>
+    <script type="text/javascript" src="../scripts/pha/tracecode/v2/prefix.js"></script>
+</body>
+
+</HTML>

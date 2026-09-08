@@ -1,0 +1,345 @@
+/// Description:追溯码拆零-查询
+/// Creator:    hulihua
+/// CreatDate:  2025-02-19
+Class PHA.DTC.Split.Query Extends %RegisteredObject
+{
+
+/// Description:通过追溯码获取对应药品的库存项集
+/// Creator:    hulihua
+/// CreateDate: 2025-05-19
+/// Table:      CT_PHA_IN.IncIDCode
+/// Input:      TraceCode-追溯码、CodeType-码类型代码、LocId-拆零科室ID
+/// Output:        
+/// Return：    标识码对应的库存项集合
+/// Others:     
+/// Debug:      w ##class(PHA.DTC.Split.Query).GetInciByIDCode("87977990000701374584", "BTC", "235")
+ClassMethod GetInciByIDCode(TraceCode, CodeType, LocId) As %String
+{
+    q:(TraceCode = "") "-1^追溯码为空！"
+    s inCodeTypeId = ""
+    if (CodeType '= "") {    
+        s inCodeTypeId = $o(^DHCSTSCDI(0, "TYPECODE", $ZCVT("CodeType", "U"), CodeType, ""))
+        q:(inCodeTypeId = "") "-1^该码类型在系统中不存在！"
+    }
+    s idCode = ##class(PHA.DTC.COM.Method).GetIDCodeByTCode(TraceCode)
+    q:(idCode = "") "-1^该追溯码没有获取到对应规则的标识码！"
+    
+    s errmsg=""
+    s inciIdStr = ""
+    s codeTypeId = ""
+    for {
+        s codeTypeId = $o(^CT.PHA.IN.IncIDCodeI("TypeActCodeInc", codeTypeId))
+        q:(codeTypeId = "")
+        continue:(inCodeTypeId '= "")&&(inCodeTypeId '= codeTypeId)
+        s codeType = $p($g(^DHCSTSCDI(+codeTypeId)), "^", 1)
+        i '$d(^CT.PHA.IN.IncIDCodeI("TypeActCodeInc", codeTypeId, 1, idCode)) s errmsg="对应码类型标识码不存在"
+        s inciId = ""
+        for {
+            s inciId = $o(^CT.PHA.IN.IncIDCodeI("TypeActCodeInc", codeTypeId, 1, idCode, inciId))
+            q:(inciId = "")
+            
+            s inciCode=$p(^INCI(inciId,1),"^",1)
+            /* 过滤-不可用的药品 */
+            s notUseFlag = $p(^INCI(inciId, 2), "^", 9)
+     		i notUseFlag = "Y" s errmsg=inciCode_":不可用的药品!"
+            continue:(notUseFlag = "Y")
+            /* 过滤-无科室库存项 */
+            s inciChl = $o(^INCI("IL_LOC", LocId, inciId, 0))
+            i inciChl = "" s errmsg=inciCode_":无科室库存项!"
+            continue:(inciChl = "")
+            s hospId = $p($g(^CTLOC(+LocId)),"^",22)
+            /* 过滤-院级未授权 */
+            
+            if ($$$comMemberDefined("PHA.FACE.IN.Method", "m", "GetShowDataFlag")) {
+                s flag = ##class(PHA.FACE.IN.Method).GetShowDataFlag("INC_Itm", inciId, hospId)
+            } else {
+                s flag = ##class(PHA.DTC.COM.Method).CheckIncItmHosp(inciId, hospId)
+            }
+            i flag = "N" s errmsg=inciCode_":院级未授权!"
+            continue:(flag = "N")
+            
+            if (CodeType = "") {
+                s minLevTCDr = $p($g(^INCI(inciId, 3)), "^", 16)
+                if (minLevTCDr '= "") {
+                    s minCodeType = $p($g(^DHCSTSCDI(+minLevTCDr)), "^", 1)
+                } else {
+                    s minCodeType = "STC"
+                }
+                /* 过滤-最小码级别和遍历到的码级别不一样的 */    
+                i (codeType '=minCodeType) s errmsg=inciCode_":最小码级别和遍历到的码级别不一样!"  
+                continue:(codeType '= minCodeType)
+            }
+            b ;5
+            if (inciIdStr = "") {
+                s inciIdStr = inciId
+            } elseif ($lf($lfs(inciIdStr, "^"), inciId) = 0) {
+                s inciIdStr = inciIdStr_"^"_inciId
+            }
+        }
+    }
+    q:(inciIdStr = "") "-1^"_errmsg
+    q inciIdStr
+}
+
+/// Description:通过追溯码获取对应药品信息
+/// Creator:    hulihua
+/// CreateDate: 2024-09-03
+/// Table:      
+/// Input:      TraceCode-追溯码、CodeType-码类型代码、InciId-库存项ID
+/// Output:        
+/// Return：    追溯码对应药品信息
+/// Others:     
+/// Debug:      w ##class(PHA.DTC.Split.Query).GetDrugByCode("11811373", "27")
+ClassMethod GetDrugInfo(TraceCode, CodeType, InciId) As %String
+{
+    q:(TraceCode = "") "-1^追溯码为空！"
+    q:(InciId = "") "-1^该药品对应的标识码未关联到药品字典！"
+    if (CodeType = "") {
+        s minLevTCDr = $p($g(^INCI(InciId, 3)), "^", 16)
+        if (minLevTCDr '= "") {
+            s CodeType = $p($g(^DHCSTSCDI(+minLevTCDr)), "^", 1)
+        } else {
+            s CodeType = "STC"
+        }
+    }
+    s codeTypeId = $o(^DHCSTSCDI(0, "TYPECODE", "CODETYPE", CodeType, ""))
+    s typeDesc = $p($g(^DHCSTSCDI(+codeTypeId)), "^", 2)
+	s compFlag = ##Class(PHA.DTC.COM.Method).IsComp(CodeType, TraceCode)
+    q:(compFlag) "-1^该追溯码已使用！"
+    s existFlag = ##class(PHA.DTC.COM.Method).IsSplit(CodeType, TraceCode)
+    q:(existFlag) "-1^该追溯码已拆零！"
+    s inciCode = $p(^INCI(InciId,1),"^",1)
+    s inciDesc = $p(^INCI(InciId,1),"^",2)
+    s inciSpec = ##class(web.DHCST.Common.DrugInfoCommon).GetSpec("", InciId)
+    s manfName = $p(##class(web.DHCST.Common.DrugInfoCommon).GetManf(InciId), "^", 3)
+    s bUomId = $p(^INCI(InciId,1),"^",10)
+    s packFac = ##class(PHA.DTC.COM.Method).GetPackFac(InciId, CodeType)
+    s barQty = packFac
+    s bUomDesc = $p($g(^CT("UOM",+bUomId)),"^",2)
+    s idCode = ##class(PHA.DTC.COM.Method).GetIDCodeByTCode(TraceCode)
+    s codeObj = ##class(PHA.COM.Object).%New()
+    d codeObj.%Set("inciId", InciId)
+    d codeObj.%Set("idCode", idCode)
+    d codeObj.%Set("typeDesc", typeDesc)
+    d codeObj.%Set("traceCode", TraceCode)
+    d codeObj.%Set("typeDr", codeTypeId)
+    d codeObj.%Set("inciCode", inciCode)
+    d codeObj.%Set("inciDesc", inciDesc)
+    d codeObj.%Set("inciSpec", inciSpec)
+    d codeObj.%Set("manfName", manfName)
+    d codeObj.%Set("barQty", barQty)
+    d codeObj.%Set("uomDesc", bUomDesc)
+    d codeObj.%Set("uomId", bUomId)
+    q codeObj.%ToJSON()
+}
+
+/// Description:通过追溯码获取对应药品信息
+/// Creator:    chengshuo
+/// CreateDate: 2024-11-05
+/// Table:      
+/// Input:      LocId-查询科室ID、TraceCode-追溯码、CodeTypeId-码类型ID、InciId-库存项ID、Status-使用状态, SplitType-拆零方式
+/// Output:        
+/// Return：    追溯码对应药品信息
+/// Others:     
+/// Debug:      d ##class(%ResultSet).RunQuery("PHA.DTC.Split.Query","SplitQuery","118","81015301026683136047","134","","All","")
+Query SplitQuery(LocId, TraceCode, CodeTypeId, InciId, Status, SplitType) As websys.Query(ROWSPEC = "codeId, inciId, typeDesc, traceCode, typeDr, inciCode, inciDesc, inciSpec, manfName, barQty, uomDesc, bUomId, usedQty, resQty, serialNo") [ SqlProc ]
+{
+}
+
+ClassMethod SplitQueryExecute(ByRef qHandle As %Binary, LocId As %String = "", TraceCode As %String = "", CodeTypeId As %String = "", InciId As %String = "", Status As %String = "", SplitType As %String = "") As %Status
+{
+	s ^tyl("SplitQuery")=$lb(LocId, TraceCode, CodeTypeId, InciId, Status, SplitType)
+    s repid=$I(^CacheTemp)
+    s qHandle=$lb(0,repid,0)
+    s ind=1
+    s typeCode = $p($g(^DHCSTSCDI(+CodeTypeId)), "^", 1)
+    b ;111
+    q:(typeCode = "") $$$OK
+    s typeDesc = $p($g(^DHCSTSCDI(+CodeTypeId)), "^", 2)
+    b ;121
+    //按追溯码
+    i TraceCode '= "" {
+        s bcId = $o(^BS.PHA.IN.BarCodeI("BarCode",TraceCode,""))
+        q:(bcId = "") $$$OK
+        b ;01
+        s barLocId = $lg($g(^BS.PHA.IN.BarCodeD(bcId)), 12)
+        q:(LocId '= barLocId) $$$OK
+        b ;02
+        d GetRowData
+    }
+    //按药品
+    i $g(InciId) '= "" {
+        s bcId = ""
+        for {
+            s bcId = $o(^BS.PHA.IN.BarCodeI("TypeLocCompInci", typeCode, LocId, 0, InciId, bcId))  q:(bcId = "")
+            continue:(bcId = "")
+            d GetRowData
+        }
+    }
+    //全部
+    i (TraceCode = "")&&($g(InciId) = ""){
+        s pInci = ""
+        for {
+            s pInci = $o(^BS.PHA.IN.BarCodeI("TypeLocCompInci", typeCode, LocId, 0, pInci)) q:(pInci = "")
+            continue:(pInci '> 0)
+            s bcId = ""
+            for {
+                s bcId = $o(^BS.PHA.IN.BarCodeI("TypeLocCompInci", typeCode, LocId, 0, pInci, bcId))  q:(bcId = "")
+                continue:(bcId = "")
+                d GetRowData
+            }
+        }
+    }
+    s qHandle=$lb(0,repid,0)
+    q $$$OK
+GetRowData
+
+    q:(bcId = "")
+    s bcData = $g(^BS.PHA.IN.BarCodeD(bcId))
+    q:(bcData = "")
+  
+    s splitFlag = $lg(bcData,19)
+    q:(splitFlag '= 1)
+  
+    s compFlag = $lg(bcData,16)
+    //q:(compFlag '= 0)
+
+    s resQty = $lg(bcData,17)
+    s bQty = $lg(bcData,7)
+    s usedQty = bQty - resQty
+    q:(Status = 1)&&(usedQty '= 0)
+    q:(Status = 2)&&(usedQty '> 0)
+   
+    s serialNo = $lg(bcData,18)
+    q:(SplitType = 1)&&(serialNo = "")
+    q:(SplitType = 2)&&(serialNo '= "")
+    b ;5
+    s traceCode = $lg(bcData,3)
+    s inci = $lg(bcData,14)
+    s inciCode = $p(^INCI(inci,1),"^",1)
+    s inciDesc = $p(^INCI(inci,1),"^",2)
+    s spec = ##class(web.DHCST.Common.DrugInfoCommon).GetSpec("", inci)
+    s manfName = $p(##class(web.DHCST.Common.DrugInfoCommon).GetManf(inci), "^", 3)
+    s bUomId = $p(^INCI(inci,1),"^",10)
+    s pUomId = $p(^INCI(inci,1), "^", 17)
+    if (pUomId = "") {
+        s pUomId = $p(^INCI(inci,3), "^", 6)
+    }
+    s inciFac = ##class(web.DHCST.Common.UtilCommon).UOMFac(pUomId,bUomId)
+    s bUomDesc = $p($g(^CT("UOM",+bUomId)),"^",2)
+    
+    s ^CacheTemp(repid,ind) = $lb(bcId, inci, typeDesc, traceCode, CodeTypeId, inciCode, inciDesc, spec, manfName, bQty, bUomDesc, bUomId, usedQty, resQty, serialNo)
+    s ind=ind+1 
+    q
+}
+
+/// Description：Excel导入拆零数据用
+/// Creator:     WangYaJun
+/// CreateDate:  2025-07-24
+/// w ##class(PHA.DTC.Split.Query).ImportSplit(257,"STC",[{"InciCode":"XKF000092","InciDesc":"阿莫西林胶囊[0.25g*50]","TraceCode":"86152177362548192634"},{"InciCode":"XKF000092","InciDesc":"阿莫西林胶囊[0.25g*50]","TraceCode":"86152174928371659284"}].%ToJSON())
+ClassMethod ImportSplit(Loc, CodeType, JsonData As %Text)
+{
+    q:(Loc = "")||(JsonData = "") "-1^参数错误"
+    s dataObj = ##class(PHA.COM.Object).FromJSON(JsonData)
+    q:'$IsObject(dataObj) "-1^JSON格式化失败"
+    q:('dataObj.%IsA("PHA.COM.Array")) "-1^JSON格式错误"
+    s retStr = ""
+    s retArr = ##class(PHA.COM.Array).%New()
+    s size = dataObj.%Size()
+    for i = 0 : 1 : size - 1 {
+        s rowData = dataObj.Get(i)
+        s inciCode = rowData.InciCode
+        s inciDesc = rowData.InciDesc
+        s traceCode = rowData.TraceCode
+        continue:(inciCode = "")||(traceCode = "")
+        s inciId = $o(^INCI(0,"Code",$$ALPHAUP^SSUTIL4(inciCode),""))
+        i (inciId = "") {
+            s retStr = "-1^第"_(i + 1)_"行药品代码"_inciCode_",不存在"
+            q
+        }
+		s inciStr = ##class(PHA.DTC.Split.Query).GetInciByIDCode(traceCode,CodeType,Loc)
+        if ($p(inciStr,"^",1) < 0) {
+	       	s retStr = "-1^第"_(i + 1)_"行药品代码"_inciCode_$p(inciStr,"^",2)
+            continue
+	    }
+	    if ('$lf($lfs(inciStr,"^"),inciId)) {
+			s retStr = "-1^第"_(i + 1)_"行药品代码"_inciCode_"标识码对应药品和导入药品不一致"
+            continue
+		}
+        s itmLocChl = $o(^INCI("IL_LOC",Loc,inciId,""))
+        i (itmLocChl = "") {
+            s retStr = "-1^第"_(i + 1)_"行"_inciDesc_",在当前科室不存在"
+            q
+        }
+        s idCode = ##class(PHA.DTC.COM.Method).GetIDCodeByTCode(traceCode)
+        i (idCode = "") {
+            s retStr = "-1^第"_(i + 1)_"行追溯码"_traceCode_",没有获取到对应规则的标识码"
+            q
+        }
+        if (CodeType = "") {
+            s minLevTCDr = $p($g(^INCI(inciId, 3)), "^", 16)
+            if (minLevTCDr '= "") {
+                s CodeType = $p($g(^DHCSTSCDI(+minLevTCDr)), "^", 1)
+            } else {
+                s CodeType = "STC"
+            }
+        }
+        s drugData = ..GetDrugInfo(traceCode, CodeType, inciId)
+        i $p(drugData,"^",1) < 0 {
+            s retStr = "-1^第"_(i + 1)_"行追溯码"_traceCode_","_$p(drugData,"^",2)
+            continue
+        }
+        s drugObj = ##class(PHA.COM.Object).FromJSON(drugData)
+        d retArr.%Push(drugObj)
+    }
+    q:(retArr.%Size() = 0) retStr
+    q retArr.%ToJSON()
+}
+
+/// Description:拆零码转移-更新选中拆零码记录的当前科室(BC_Loc)
+/// Creator:    AI
+/// CreatDate:  2026-08-24
+/// Table:      BS_PHA_IN.BarCode
+/// Input:      CodeIdStr-拆零码记录ID串(^分隔,取自拆零查询的codeId), LocId-目标药房科室ID
+/// Output:     
+/// Return:     0-成功, -1^错误信息
+/// Others:     仅BC_ResQty等于BC_Qty(未使用)的拆零码可转移;必须通过对象模型更新,保证索引TypeLocCompInci(含LocId)同步
+/// Debug:      w ##class(PHA.DTC.Split.Query).TransferLoc("123^456","235")
+ClassMethod TransferLoc(CodeIdStr As %String, LocId As %String) As %String
+{
+    q:(CodeIdStr = "") "-1^请选择需要转移的拆零码数据！"
+    q:(LocId = "") "-1^请选择转移的药房科室！"
+    q:'$d(^CTLOC(LocId)) "-1^所选药房科室不存在！"
+    s $zt = "TransferLocErr"
+    s okNum = 0
+    s cnt = $l(CodeIdStr, "^")
+    ts
+    for i = 1:1:cnt {
+        s codeId = $p(CodeIdStr, "^", i)
+        continue:(codeId = "")
+        continue:'$d(^BS.PHA.IN.BarCodeD(codeId))
+        s bcData = $g(^BS.PHA.IN.BarCodeD(codeId))
+        // BC_ResQty须等于BC_Qty(未使用)才允许转移
+        continue:($lg(bcData, 17) '= $lg(bcData, 7))
+        s obj = ##class(BS.PHA.IN.BarCode).%OpenId(codeId, .sc)
+        continue:'$isobject(obj)
+        d obj.BCLocSetObjectId(LocId)
+        s sc = obj.%Save()
+        continue:$$$ISERR(sc)
+        s okNum = okNum + 1
+    }
+    if (okNum = 0) {
+        tro
+        q "-1^拆零码转移失败！"
+    }
+    tc
+    q 0
+TransferLocErr
+    s $zt = ""
+    if ($tlevel > 0) {
+        tro
+    }
+    q "-1^拆零码转移异常："_$ze
+}
+
+}

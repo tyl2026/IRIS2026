@@ -1,0 +1,46 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+	n fileName,dir,fullPath,stream,utf8,enc,i,c,a,h,ymPart,asciiName
+	s fileName = $g(%request.Data("filename",1))
+	s dir = "/tmp/excel/"
+
+	; 安全：拒绝空文件名与路径穿越
+	i (fileName="")||(fileName["/")||(fileName["\")||(fileName["..") q 0
+
+	s fullPath = dir_fileName
+	i '##class(%File).Exists(fullPath) q 0
+
+	; 文件名：中文转 UTF-8 逐字节百分号编码（filename*，RFC 5987），另给 ASCII 兜底名
+	s utf8 = $zconvert(fileName,"O","UTF8")
+	s enc = ""
+	for i=1:1:$l(utf8) {
+		s c = $e(utf8,i)
+		s a = $a(c)
+		if ((a>=48)&&(a<=57))||((a>=65)&&(a<=90))||((a>=97)&&(a<=122))||(c="-")||(c="_")||(c=".")||(c="~") {
+			s enc = enc_c
+		} else {
+			s h = $zhex(a)
+			s:$l(h)<2 h="0"_h
+			s enc = enc_"%"_h
+		}
+	}
+	s ymPart = $p(fileName,"_",2,99)
+	s:ymPart="" ymPart="download.csv"
+	s asciiName = "OEPInfoPage_"_ymPart
+
+	; 以二进制流分块推送，避免大文件 MAXSTRING
+	s stream = ##class(%Stream.FileBinary).%New()
+	d stream.LinkToFile(fullPath)
+
+	s %response.ContentType = "application/octet-stream"
+	s %response.NoCharSetConvert = 1
+	d %response.SetHeader("Content-Disposition","attachment; filename="""_asciiName_"""; filename*=UTF-8''"_enc)
+	d %response.SetHeader("Content-Length",stream.Size)
+	d %response.WriteHTTPHeader()
+
+	while 'stream.AtEnd {
+		w stream.Read(32000)
+	}
+	q 0
+</csp:method>
+</csp:content>

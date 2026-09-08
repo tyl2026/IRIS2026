@@ -1,0 +1,19 @@
+﻿; ============================================================
+; 诊断脚本(单行版): 入库3563追溯码下载异常日志 rows 为空定位
+; 每条命令为一行，在 DHC-APP 终端逐行复制执行，贴回全部输出
+; ============================================================
+
+; ① 确认 Global 总条数
+s n=0,ingr="" f { s ingr=$o(^YZSY("SaveCodeRelaBy3563Excel",ingr)) q:ingr="" s n=n+1 } w "总条数=",n,!
+
+; ② BuildRow 单行测试（用真实数据）
+w "BuildRow=["_##class(web.YZSY.DHCCodeRelaLog).BuildRow("25600","5069^XYKG20260105004^32221806^XC02DDX070B001010200289^2026-08-15")_"]",!
+
+; ③ 部署版本 QueryLog 小页测试（3行）
+w ##class(web.YZSY.DHCCodeRelaLog).QueryLog("","","","","",1,3),!
+
+; ④ 复现收集逻辑 + 检查临时数组
+s pid=$i(^||CacheTemp("DHCCodeRelaLog","PID")) k ^||CacheTemp("DHCCodeRelaLog","Query",pid) s idx=0,ingr="" f { s ingr=$o(^YZSY("SaveCodeRelaBy3563Excel",ingr)) q:ingr="" s data=$g(^YZSY("SaveCodeRelaBy3563Excel",ingr)) continue:data="" s idx=idx+1 s ^||CacheTemp("DHCCodeRelaLog","Query",pid,idx)=ingr_"^"_data } w "idx=",idx," d1236=",$d(^||CacheTemp("DHCCodeRelaLog","Query",pid,1236))," line1236=["_$g(^||CacheTemp("DHCCodeRelaLog","Query",pid,1236))_"]",!
+
+; ⑤ 分页计算 + 递减循环单行测试
+s total=1236,page=1,rows=20 s startIdx=total-(page-1)*rows s:startIdx<1 startIdx=1 s endIdx=startIdx-rows+1 s:endIdx<1 endIdx=1 s c=0 f i=startIdx:-1:endIdx { s c=c+1 } w "startIdx=",startIdx," endIdx=",endIdx," 循环次数=",c,!

@@ -1,0 +1,158 @@
+<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HQMS 病案首页数据导入</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+html,body{height:100%}
+body{background:#cee4ff;font-family:"Microsoft Yahei";font-size:14px;margin:0;padding:0;overflow:hidden}
+#main{display:flex;flex-direction:column;height:100vh}
+.headbar{display:flex;align-items:center;padding:8px 14px;background:#E4F0FF;border-bottom:1px solid #95B8E7;flex:0 0 auto}
+.headbar .title{font-weight:700;font-size:14px;color:#15428b}
+.nav{display:flex;align-items:center;padding:8px 14px;background:#F9FBFF;border-bottom:2px solid #95B8E7;gap:8px;flex:0 0 auto}
+.nav a{margin-right:6px}
+.body{flex:1;min-height:0;padding:10px 14px;background:#fff;display:flex;flex-direction:column}
+.panel{display:none;flex:1;min-height:0;flex-direction:column}
+.panel.active{display:flex}
+.toolbar{display:flex;align-items:center;gap:10px;padding:4px 0 8px 0;flex:0 0 auto;flex-wrap:wrap}
+.toolbar label{font-size:13px;color:#15428b}
+.hint{color:#888;font-size:12px;line-height:1.8;flex:0 0 auto}
+.grow{flex:1;min-height:0;position:relative}
+#gridBatch,#gridCols,#gridRecs,#gridLogs{width:100%;height:100%}
+</style>
+</head>
+<body>
+<div id="main">
+    <div class="headbar">
+        <span class="title">HQMS 病案首页数据导入（User.YZSYHQMSData）</span>
+        <span style="margin-left:20px;color:#888;font-size:12px">标准文件：CSV 逗号分隔，首行字段码表头（A01…D34，共811列，支持 GBK/UTF-8）</span>
+    </div>
+
+    <!-- 功能导航 -->
+    <div class="nav">
+        <a id="navBatch" class="hisui-linkbutton" data-options="iconCls:'icon-w-add'" onclick="showPanel('batch')">批次与上传</a>
+        <a id="navAudit" class="hisui-linkbutton" data-options="iconCls:'icon-w-save'" onclick="showPanel('audit')">数据审核与导入</a>
+        <a id="navLog" class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="showPanel('log');loadLogs()">导入日志</a>
+    </div>
+
+    <div class="body">
+
+        <!-- ============ 1 批次与上传 ============ -->
+        <div id="panelBatch" class="panel active">
+            <div class="toolbar">
+                <label>上传HQMS文件：</label>
+                <input class="hisui-filebox" id="hqmsFile" data-options="width:300,buttonAlign:'left',buttonText:'选择文件',prompt:'*.csv，文件名须为年月如202601.csv'" accept=".csv,text/csv,text/plain,application/octet-stream" />
+                <a id="btnUpload" class="hisui-linkbutton" data-options="iconCls:'icon-w-import'" onclick="uploadFile()">上传并解析</a>
+                <span class="sep" style="width:12px"></span>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-reload'" onclick="loadBatches()">刷新批次</a>
+            </div>
+            <div class="hint">说明：<b>文件名必须为年月格式</b>（6位，如 <b>202601</b> 或 202601.csv），不符合命名要求的文件不能导入。
+                导入采用<b>前端本地解析</b>方式（自动识别 GBK / UTF-8 编码，参照基数药维护导入模式），数据经 JSON 提交服务器；
+                文件须 ≤10MB（超大请按年月拆分）。文件字段按国家病案首页采集接口标准（2020-06-29）码名自动对齐入库，
+                解析结果先保存在暂存批次中（不落库），经数据审核后再点“导入”才写入 <b>User.YZSYHQMSData</b> 表并记录日志。</div>
+            <div class="grow"><table id="gridBatch" class="hisui-datagrid"></table></div>
+        </div>
+
+        <!-- ============ 2 数据审核与导入 ============ -->
+        <div id="panelAudit" class="panel">
+            <div class="toolbar">
+                <span id="auditBatchInfo" style="color:#15428b;font-weight:600"></span>
+                <span class="sep" style="width:12px"></span>
+                <label>状态筛选：</label>
+                <select id="selAuditFilter" class="hisui-combobox" style="width:110px" data-options="panelHeight:'auto',editable:false,onChange:function(){curAuditPage=1;loadRecords();}">
+                    <option value="">全部</option>
+                    <option value="0">待审核</option>
+                    <option value="1">已通过</option>
+                    <option value="2">已驳回</option>
+                </select>
+                <span class="sep" style="width:12px"></span>
+                <label>校验结果：</label>
+                <select id="selValiFilter" class="hisui-combobox" style="width:110px" data-options="panelHeight:'auto',editable:false,onChange:function(){curAuditPage=1;loadRecords();}">
+                    <option value="">全部</option>
+                    <option value="0">未校验</option>
+                    <option value="1">通过</option>
+                    <option value="2">不通过</option>
+                </select>
+                <span class="sep" style="width:12px"></span>
+                <a id="btnAuditPass" class="hisui-linkbutton" data-options="iconCls:'icon-ok'" onclick="auditRows(1)">审核通过选中</a>
+                <a id="btnAuditReject" class="hisui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="auditRows(2)">驳回选中</a>
+                <a id="btnAuditAll" class="hisui-linkbutton" data-options="iconCls:'icon-ok'" onclick="auditAll()">全部通过</a>
+                <span class="sep" style="width:12px"></span>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="doBatchValidate()">字典校验</a>
+                <span class="sep" style="width:12px"></span>
+                <a id="btnImport" class="hisui-linkbutton" data-options="iconCls:'icon-w-import'" onclick="doImport()">导入已通过数据</a>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-back'" onclick="loadBatches();showPanel('batch')">返回批次</a>
+            </div>
+            <div class="hint">双击行可修改该行字段值；已通过(status=1)的行在点“导入”后写入 YZSYHQMSData 表；已导入行不可再修改。
+                五列语义索引(身份证/入院日期/出院日期/主要诊断/主要手术)在导入时自动提取填充。
+                <b>字典校验</b>：按接口文档值域(User.YZSYHQMSDataDic)自动校验，不满足要求的行导入时将被拦截并在日志注明原因。</div>
+            <div class="grow"><table id="gridRecs" class="hisui-datagrid"></table></div>
+        </div>
+
+        <!-- ============ 3 导入日志 ============ -->
+        <div id="panelLog" class="panel">
+            <div class="toolbar">
+                <label>起始日期：</label><input class="hisui-datebox" id="logSDate" style="width:110px" />
+                <label>结束日期：</label><input class="hisui-datebox" id="logEDate" style="width:110px" />
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-search'" onclick="loadLogs()">查询</a>
+            </div>
+            <div class="grow"><table id="gridLogs" class="hisui-datagrid"></table></div>
+
+            <!-- 日志明细（页面内展开，纯表格） -->
+            <div id="logItemDrawer" style="display:none;flex:0 0 auto;border-top:1px solid #95B8E7;height:320px;background:#fff">
+                <div style="display:flex;align-items:center;padding:4px 8px;background:#E4F0FF">
+                    <b style="color:#15428b">导入日志明细</b>
+                    <span id="logItemsPager" style="margin-left:14px;font-size:12px;color:#333"></span>
+                    <span style="flex:1"></span>
+                    <a class="hisui-linkbutton" onclick="closeDrawer('logItemDrawer')" data-options="iconCls:'icon-cancel'">关闭</a>
+                </div>
+                <div id="logItemsBody" style="height:260px;overflow:auto;padding:4px 8px;font-size:13px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 修改记录弹窗（参照 病案数据自定义查询 的 hisui-dialog + data-options 写法） -->
+<div id="dlgEdit" class="hisui-dialog" data-options="closed:true,title:'修改记录',width:1020,height:660,modal:true,minimizable:false,maximizable:true">
+    <div style="padding:6px 10px 0">
+        <input id="editSearch" class="hisui-searchbox" style="width:320px" data-options="prompt:'输入字段名或码快速定位',searcher:function(v){filterEditFields(v)}" />
+        <span style="color:#999;font-size:12px;margin-left:8px">红色边框字段 = 校验不通过（悬停看原因）</span>
+    </div>
+    <div id="editFields" style="padding:4px 10px;font-size:12px;max-height:470px;overflow:auto"></div>
+    <div style="text-align:right;padding:8px 10px;border-top:1px solid #e6ecf5;background:#fbfdff">
+        <a class="hisui-linkbutton" onclick="saveRecordEdit()" data-options="iconCls:'icon-save'">保存</a>
+        <a class="hisui-linkbutton" onclick="$('#dlgEdit').dialog('close')" data-options="iconCls:'icon-cancel'" style="margin-left:6px">取消</a>
+    </div>
+</div>
+
+<!-- 字典校验详情弹窗（纯 HTML 表格） -->
+<div id="dlgVali" class="hisui-dialog" data-options="closed:true,title:'字典校验详情',width:1020,height:580,modal:true,minimizable:false,maximizable:true">
+    <div id="valiHead" style="padding:8px 10px 0;color:#15428b"></div>
+    <div id="valiBody" style="padding:8px 10px;font-size:13px;max-height:420px;overflow:auto"></div>
+    <div style="text-align:right;padding:6px 10px;border-top:1px solid #e6ecf5;background:#fbfdff">
+        <a class="hisui-linkbutton" onclick="$('#dlgVali').dialog('close')" data-options="iconCls:'icon-cancel'">关闭</a>
+    </div>
+</div>
+
+<!-- 字典内容弹窗（值域核对） -->
+<div id="dlgDic" class="hisui-dialog" data-options="closed:true,title:'字典内容',width:720,height:520,modal:true,minimizable:false,maximizable:true">
+    <div id="dicHead" style="padding:8px 10px 0;color:#15428b"></div>
+    <div id="dicBody" style="padding:8px 10px;font-size:13px;max-height:380px;overflow:auto"></div>
+    <div style="text-align:right;padding:6px 10px;border-top:1px solid #e6ecf5;background:#fbfdff">
+        <a class="hisui-linkbutton" onclick="$('#dlgDic').dialog('close')" data-options="iconCls:'icon-cancel'">关闭</a>
+    </div>
+</div>
+
+<script type="text/javascript" src="../scripts/yzsyhqmsimport.js"></script>
+</body>
+</html>
+</csp:content>

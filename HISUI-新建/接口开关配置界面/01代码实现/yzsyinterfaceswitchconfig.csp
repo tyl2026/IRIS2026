@@ -1,0 +1,130 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>接口开关配置</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+    :root {
+        --bg:        #cee4ff;
+        --surface:   #F9FBFF;
+        --titlebg:   #E4F0FF;
+        --heading:   #15428b;
+        --border:    #95B8E7;
+        --accent:    #017bce;
+        --muted:     #666;
+        --radius:    4px;
+    }
+    body {
+        background: var(--bg);
+        font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        font-size: 14px; margin: 0; padding: 0; color: #333;
+    }
+    #titleBar {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 20px;
+        background: var(--surface);
+        border-bottom: 2px solid var(--border);
+    }
+    #titleBar h1 { color: var(--heading); font-size: 18px; margin: 0; font-weight: 600; }
+    #titleBar .hint { color: #999; font-size: 12px; }
+    .f-spacer { flex: 1; }
+    #paneList { padding: 14px 18px; min-height: 300px; }
+
+    .if-panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 14px;
+        overflow: hidden;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        transition: opacity 0.25s;
+    }
+    .if-panel.if-disabled { opacity: 0.55; }
+    .if-panel.if-disabled .if-head { background: #e8e8e8; }
+    .if-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px;
+        background: var(--titlebg);
+        border-bottom: 1px solid var(--border);
+        min-height: 28px;
+    }
+    .if-head-left { display: flex; align-items: center; gap: 10px; }
+    .if-head-right { display: flex; align-items: center; gap: 10px; }
+    .if-caret { cursor: pointer; color: var(--heading); font-size: 12px; user-select: none; width: 16px; text-align: center; }
+    .if-title { color: var(--heading); font-size: 15px; font-weight: 600; }
+    .if-badge { background: #e0e8f5; color: #556; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: 500; }
+    .if-sw-label { color: var(--muted); font-size: 12px; }
+    .if-del-btn { color: #c44 !important; }
+    .if-del-btn:hover { color: #e00 !important; }
+    .if-foot { padding: 8px 14px; border-top: 1px solid #eee; background: #fafcfd; }
+    .if-link { display: inline-block; padding: 4px 10px; cursor: pointer; color: #15428b; font-size: 13px; text-decoration: none; border-radius: 3px; }
+    .if-link:hover { background: #eaf2ff; color: #017bce; }
+    .if-link.danger { color: #c44; }
+    .if-link.danger:hover { background: #fff0f0; color: #e00; }
+    .if-grid { width: 100%; }
+    .if-grid .datagrid-header { background: #f2f4f7; }
+    .if-grid .datagrid-header td { border-right: 1px dotted #ccc !important; }
+
+    /* === Toggle Switch === */
+    .if-toggle {
+        position: relative; display: inline-block;
+        width: 50px; height: 24px;
+        border-radius: 12px;
+        background: #E0E0E0;
+        cursor: pointer;
+        vertical-align: middle;
+        transition: background 0.2s;
+        user-select: none;
+    }
+    .if-toggle.on  { background: #25BE30; }
+    .if-toggle.off { background: #E0E0E0; }
+    .if-toggle.dis { opacity: 0.4; cursor: default; }
+    .if-toggle .if-toggle-knob {
+        position: absolute; top: 2px; left: 2px;
+        width: 20px; height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        transition: left 0.15s;
+    }
+    .if-toggle.on .if-toggle-knob  { left: 28px; }
+
+    /* === Dialog === */
+    .window-body { overflow: hidden !important; padding: 20px 24px !important; }
+    .panel-body.panel-body-dialog { overflow: hidden !important; padding: 0 !important; }
+    .dl-row { margin-bottom: 14px; }
+    .dl-row label { display: block; margin-bottom: 5px; font-size: 13px; color: #555; font-weight: 500; }
+    .dl-row input { width: 100%; padding: 8px 10px !important; height: auto !important; box-sizing: border-box; }
+    .dlg-inner { padding: 0; }
+    .dlg-cfm { display: flex; align-items: flex-start; gap: 14px; padding: 8px 0; }
+    .dlg-cfm-icon { color: #e88800; font-size: 28px; line-height: 1; flex-shrink: 0; }
+    .dlg-cfm-msg { margin: 0; font-size: 14px; color: #555; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div id="titleBar">
+    <h1>接口开关配置</h1>
+    <span class="hint">修改即时保存</span>
+    <span class="f-spacer"></span>
+    <a id="btnAddIf" class="hisui-linkbutton" onclick="showAddDlg()">新增接口</a>
+</div>
+
+<div id="paneList"></div>
+
+<input type="hidden" id="dlgMode" value="">
+<input type="hidden" id="dlgIfCode" value="">
+
+<script type="text/javascript" src="../scripts/yzsyinterfaceswitchconfig.js"></script>
+</body>
+</html>
+</csp:content>

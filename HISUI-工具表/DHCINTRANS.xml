@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 15:30:47">
+<Class name="User.DHCINTRANS">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>INTR_RowId</SqlRowIdName>
+<SqlTableName>DHC_INTRANS</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent</Super>
+<TimeChanged>65843,65871.631196</TimeChanged>
+<TimeCreated>62602,66789.921284</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>25000</Default>
+</Parameter>
+
+<Property name="INTRAmount">
+<Description>
+Amount</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>INTR_Amount</SqlFieldName>
+<Parameter name="MAXVAL" value="999999999999.9999"/>
+<Parameter name="MINVAL" value="-99999999999999.9999"/>
+</Property>
+
+<Property name="INTRAveragePrice">
+<Description>
+Average Price</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>INTR_AveragePrice</SqlFieldName>
+</Property>
+
+<Property name="INTRCTUOMDR">
+<Description>
+Des Ref to CTUOM (Unit of Me</Description>
+<Type>User.CTUOM</Type>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>INTR_CTUOM_DR</SqlFieldName>
+</Property>
+
+<Property name="INTRDate">
+<Description>
+Transaction Date</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>INTR_Date</SqlFieldName>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="INTRGLBatchDR">
+<Description>
+GL Batch</Description>
+<Type>User.GLBatch</Type>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>INTR_GLBatch_DR</SqlFieldName>
+</Property>
+
+<Property name="INTRINCIDR">
+<Description>
+Des Ref INCI</Description>
+<Type>User.INCItm</Type>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlComputeCode>	s {INTR_INCI_DR}=$p({INTR_INCLB_DR},"||")
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlFieldName>INTR_INCI_DR</SqlFieldName>
+<Transient>1</Transient>
+</Property>
+
+<Property name="INTRINCLBDR">
+<Description>
+Des Ref to INCLB</Description>
+<Type>User.INCItmLcBt</Type>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>INTR_INCLB_DR</SqlFieldName>
+</Property>
+
+<Property name="INTRNo">
+<Description>
+Transaction Number</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>INTR_No</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INTRPointer">
+<Description>
+Pointer to other table</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>INTR_Pointer</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INTRQty">
+<Description>
+Quantity</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>INTR_Qty</SqlFieldName>
+<Parameter name="MAXVAL" value="9999999999999999"/>
+<Parameter name="MINVAL" value="-99999999999999"/>
+</Property>
+
+<Property name="INTRSSUSRDR">
+<Description>
+Des ref to SSUSR</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>INTR_SSUSR_DR</SqlFieldName>
+</Property>
+
+<Property name="INTRTime">
+<Description>
+Transaction Time</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>INTR_Time</SqlFieldName>
+</Property>
+
+<Property name="INTRType">
+<Description>
+Stock Transaction Type</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>INTR_Type</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INTRUpdBalFlag">
+<Description>
+Update Balance Flag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>INTR_UpdBalFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INTRUpdFlag">
+<Description>
+Update Inventory Flag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>INTR_UpdFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INTRRp">
+<Description>
+INTR_Rp</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>INTR_Rp</SqlFieldName>
+</Property>
+
+<Property name="INTRRpAmount">
+<Description>
+INTR_RpAmount</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>INTR_RpAmount</SqlFieldName>
+</Property>
+
+<Property name="INTRStkQty">
+<Description>
+INTR_StkQty</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>INTR_StkQty</SqlFieldName>
+</Property>
+
+<Property name="INTRLbQty">
+<Description>
+INTR_LbQty</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>INTR_LbQty</SqlFieldName>
+</Property>
+
+<Property name="INTRInsuCode">
+<Description>
+INTR_InsuCode</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>INTR_InsuCode</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INTRProvCode">
+<Description>
+INTR_ProvCode</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>INTR_ProvCode</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="50"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCINTR)</SqlIdExpression>
+<StreamLocation>^User.DHCINTRANSS</StreamLocation>
+<ExtentSize>25000</ExtentSize>
+<SQLMap name="DataMasterDHCINTR">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCINTR</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+<Data name="INTR_Amount">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="INTR_AveragePrice">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="INTR_CTUOM_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="INTR_Date">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="INTR_GLBatch_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="INTR_INCI_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+<Data name="INTR_INCLB_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="INTR_InsuCode">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="INTR_LbQty">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="INTR_No">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="INTR_Pointer">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="INTR_ProvCode">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="INTR_Qty">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="INTR_Rp">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="INTR_RpAmount">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="INTR_SSUSR_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="INTR_StkQty">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="INTR_Time">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="INTR_Type">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="INTR_UpdBalFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="INTR_UpdFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexDate">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"Date"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexGlBatch">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"GlBatch"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_GLBatch_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexGlPosted">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"GlPost"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINCLB">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"INCLB"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_INCLB_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexInciDate">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"INCI"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_INCI_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexLocTypeDate">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"LOCTYPEDATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>$$LOC^ST01({INTR_INCLB_DR})</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{INTR_Type}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypeDate">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"TypeDate"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Type}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypeNo">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"TypeNo"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Type}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>$$ALPHAUP({INTR_No})</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexTypePointer">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"TypePointer"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Type}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Pointer}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="Indexinciltypedate">
+<Type>index</Type>
+<Global>^DHCINTR</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"ILTYPEDATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>$P({INTR_INCLB_DR},"||",1,2)</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Type}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INTR_Date}</Expression>
+</Subscript>
+<Subscript name="6">
+<AccessType>sub</AccessType>
+<Expression>{INTR_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L6}</Expression>
+<Field>INTR_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCINTR)
+	s oldI = +$g(^mdata("DHCINTRANS"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCINTR = maxI
+	s ^mdata("DHCINTRANS") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

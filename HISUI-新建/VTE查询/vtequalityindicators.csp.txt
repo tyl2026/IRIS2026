@@ -1,0 +1,960 @@
+<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VTE 质控指标汇总</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+    :root {
+        --c-bg:        #cee4ff;
+        --c-surface:   #F9FBFF;
+        --c-titlebar:  #E4F0FF;
+        --c-text:      #333;
+        --c-heading:   #15428b;
+        --c-border:    #95B8E7;
+        --c-focus:     #6b9cde;
+        --c-accent:    #017bce;
+        --c-warn:      #fd7201;
+        --c-danger:    #cc0000;
+        --c-success:   #008000;
+        --c-muted:     #666;
+        --c-link:      #40A2DE;
+        --c-hover-row: #eaf2ff;
+        --c-select-row:#FFE48D;
+        --radius-sm:   4px;
+        --radius-md:   6px;
+        --shadow-filter: 0 2px 8px rgba(0,0,0,0.06);
+        --transition:    0.2s ease;
+    }
+
+    body {
+        background: var(--c-bg);
+        background-image: radial-gradient(circle, rgba(149,184,231,0.18) 1px, transparent 1px);
+        background-size: 20px 20px;
+        font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        font-size: 14px;
+        margin: 0; padding: 0;
+        color: var(--c-text);
+        letter-spacing: 0.01em;
+    }
+
+    #mainLayout { width: 100%; height: 100vh; }
+
+    /* ===== 筛选区 ===== */
+    #filterBar {
+        display: flex; align-items: center; gap: 8px;
+        padding: 6px 14px;
+        background: var(--c-surface);
+        border-bottom: 2px solid var(--c-border);
+        box-shadow: var(--shadow-filter);
+        position: relative; z-index: 10;
+        flex-wrap: wrap;
+    }
+    #filterBar .f-label {
+        color: var(--c-heading); font-size: 12px; font-weight: 600;
+        white-space: nowrap; user-select: none;
+    }
+    #filterBar .f-sep {
+        width: 1px; height: 20px; background: #d0dcee; margin: 0 2px;
+    }
+    #filterBar .f-spacer { flex: 1; }
+
+    /* 日期快捷按钮组 */
+    .date-presets { display: inline-flex; gap: 2px; margin-right: 4px; }
+    .date-presets .dp-btn {
+        padding: 3px 8px; font-size: 12px; cursor: pointer;
+        border: 1px solid #d0dcee; background: #f8fafd; color: var(--c-muted);
+        border-radius: var(--radius-sm);
+        transition: all var(--transition);
+        white-space: nowrap;
+    }
+    .date-presets .dp-btn:hover { border-color: var(--c-accent); color: var(--c-accent); background: #eef5fd; }
+    .date-presets .dp-btn.active { background: var(--c-accent); color: #fff; border-color: var(--c-accent); font-weight: 600; }
+
+    /* ===== 概览卡片 ===== */
+    #summaryRow {
+        display: flex; gap: 12px; padding: 8px 14px;
+        background: linear-gradient(to bottom, #f8faff, var(--c-surface));
+        border-bottom: 1px solid var(--c-border);
+    }
+    .summary-card {
+        flex: 1; display: flex; align-items: center; gap: 8px;
+        padding: 8px 14px; border-radius: var(--radius-md);
+        background: #fff; border: 1px solid #e8eef5;
+        min-width: 0;
+    }
+    .summary-card .sc-icon {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px; flex-shrink: 0;
+    }
+    .sc-icon.sc-blue   { background: #e3f0fd; color: var(--c-accent); }
+    .sc-icon.sc-orange { background: #fff4e8; color: var(--c-warn); }
+    .sc-icon.sc-green  { background: #e8f5e9; color: var(--c-success); }
+    .sc-icon.sc-red    { background: #fde8e8; color: var(--c-danger); }
+    .sc-body { min-width: 0; }
+    .sc-value { font-size: 22px; font-weight: 700; color: var(--c-heading); line-height: 1; }
+    .sc-label { font-size: 11px; color: var(--c-muted); margin-top: 2px; white-space: nowrap; }
+
+    /* ===== 指标面板 ===== */
+    .indicator-wrap { padding: 10px 12px; height: 100%; box-sizing: border-box; position: relative; }
+
+    .indicator-wrap .datagrid-header-row,
+    .indicator-wrap .datagrid-row { height: 36px !important; }
+    .indicator-wrap .datagrid-cell { font-size: 13px; line-height: 36px; }
+    .indicator-wrap .datagrid-header .datagrid-cell {
+        font-weight: 600; color: var(--c-heading);
+        background: linear-gradient(to bottom, #F9F9F9, #efefef);
+    }
+    .indicator-wrap .datagrid-row {
+        cursor: pointer;
+        transition: background var(--transition);
+    }
+
+    /* 比率进度条 */
+    .rate-cell { display: flex; align-items: center; gap: 6px; }
+    .rate-bar-outer {
+        flex: 1; height: 6px; background: #e8e8e8; border-radius: 3px;
+        overflow: hidden; min-width: 50px;
+    }
+    .rate-bar-inner {
+        height: 100%; border-radius: 3px;
+        transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .rate-bar-high  { background: linear-gradient(to right, #4caf50, #66bb6a); }
+    .rate-bar-mid   { background: linear-gradient(to right, #ff9800, #ffb74d); }
+    .rate-bar-low   { background: linear-gradient(to right, #e53935, #ef5350); }
+    .rate-value { font-weight: 700; font-size: 14px; min-width: 50px; text-align: right; }
+    .rate-high  { color: var(--c-success); }
+    .rate-mid   { color: var(--c-warn); }
+    .rate-low   { color: var(--c-danger); }
+
+    /* 备注图标 */
+    .note-icon {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #e8f0fa; color: var(--c-link);
+        font-size: 12px; font-weight: bold;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+    .note-icon:hover { background: var(--c-accent); color: #fff; transform: scale(1.15); }
+
+    /* 目标值标签 */
+    .target-tag {
+        display: inline-block; padding: 1px 8px; border-radius: 12px;
+        font-size: 12px; background: #eef5fd; color: var(--c-accent);
+        border: 1px solid #c5daf5;
+    }
+
+    /* ===== 患者明细 ===== */
+    #patientDetail { border-top: 3px solid var(--c-border); }
+    #patientDetail .panel-header {
+        background: var(--c-titlebar);
+        border-bottom: 1px solid var(--c-border);
+        font-weight: 600; color: var(--c-heading);
+    }
+    #patientDetail .panel-body { background: #fdfdfd; }
+
+    /* 风险等级标签 */
+    .risk-badge {
+        display: inline-block; padding: 2px 8px; border-radius: 3px;
+        font-size: 12px; font-weight: 600;
+    }
+    .risk-critical { background: #ffe0e0; color: #b71c1c; border: 1px solid #ef9a9a; }
+    .risk-high     { background: #fff3e0; color: #e65100; border: 1px solid #ffcc80; }
+    .risk-medium   { background: #fffde7; color: #827717; border: 1px solid #fff176; }
+    .risk-low      { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+
+    .tag-yes { color: var(--c-success); font-weight: 600; }
+    .tag-no  { color: #bbb; }
+
+    /* ===== 加载遮罩 ===== */
+    .loading-mask {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(255,255,255,0.7); z-index: 999;
+        display: flex; align-items: center; justify-content: center;
+        pointer-events: none; opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .loading-mask.show { opacity: 1; pointer-events: auto; }
+    .loading-spinner {
+        width: 36px; height: 36px; border: 3px solid #e0e8f0;
+        border-top-color: var(--c-accent); border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== 脚注 ===== */
+    #footerNote {
+        display: flex; align-items: center; gap: 12px;
+        padding: 5px 16px; height: 100%; box-sizing: border-box;
+        font-size: 11px; color: var(--c-muted);
+        background: var(--c-surface);
+        border-top: 1px solid var(--c-border);
+        overflow: hidden; white-space: nowrap;
+    }
+    #footerNote .fn-dot {
+        width: 4px; height: 4px; border-radius: 50%;
+        background: var(--c-accent); flex-shrink: 0;
+    }
+    #footerNote strong { color: var(--c-heading); }
+
+    /* ===== 空状态 ===== */
+    .empty-state {
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        height: 100%; color: #b0bec5; user-select: none;
+        position: absolute; top: 0; left: 0; width: 100%;
+    }
+    .empty-state .es-icon {
+        font-size: 40px; margin-bottom: 8px; opacity: 0.4;
+        width: 64px; height: 64px; border-radius: 50%;
+        background: #eef3f8; display: flex; align-items: center; justify-content: center;
+    }
+    .empty-state .es-title { font-size: 15px; color: #90a4ae; margin-bottom: 2px; }
+    .empty-state .es-desc  { font-size: 12px; color: #b0bec5; }
+
+    /* ===== 手风琴 ===== */
+    .accordion .accordion-header {
+        background: linear-gradient(to bottom, #f5f8fc, var(--c-titlebar));
+        border-color: var(--c-border);
+    }
+    .accordion .accordion-header .panel-title {
+        font-weight: 600; color: var(--c-heading); letter-spacing: 0.03em;
+    }
+
+    /* ===== 动画 ===== */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(8px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+    .indicator-wrap .datagrid-row {
+        animation: fadeInUp 0.3s ease both;
+    }
+    .indicator-wrap .datagrid-row:nth-child(1) { animation-delay: 0.04s; }
+    .indicator-wrap .datagrid-row:nth-child(2) { animation-delay: 0.10s; }
+    .indicator-wrap .datagrid-row:nth-child(3) { animation-delay: 0.16s; }
+    .indicator-wrap .datagrid-row:nth-child(4) { animation-delay: 0.22s; }
+
+    /* ===== 打印样式 ===== */
+    @media print {
+        body { background: #fff; }
+        #mainLayout { height: auto; }
+        #filterBar, #footerNote, .f-spacer, .f-sep, #summaryRow { display: none !important; }
+        .datagrid-row { break-inside: avoid; }
+        .indicator-wrap .datagrid-row { animation: none; }
+    }
+</style>
+
+<!--
+╔══════════════════════════════════════════════════════════════╗
+║           后端接口规格说明 (Backend Interface Spec)           ║
+║   本文件预留 3 个后端 Query + 1 个公用 Query，实际部署时      ║
+║   需在 IRIS 中创建对应类与方法。                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+== 1. 公用查询: web.dhcvte.QryCommon::FindLocation ==============
+  用途: 科室下拉框数据源
+  输入: 无
+  输出 JSON rows:
+    RowID  - 科室 RowID (^CTLOC)
+    Code   - 科室代码
+    CName  - 科室名称
+
+== 2. 评估质量指标: web.dhcvte.QryIndicators::QryAssessmentIndicators ==
+  用途: 查询 4 项评估质量指标 (Indicator A01-A04)
+  输入:
+    SttDate - 出院开始日期 (YYYY-MM-DD)
+    EndDate - 出院结束日期 (YYYY-MM-DD)
+    LocID   - 科室ID列表 (逗号分隔, 空=全部)
+  输出 JSON rows (4 条):
+    [
+      {
+        IndicatorCode: "A01",
+        IndicatorName: "VTE 风险评估率",
+        Category:      "评估质量指标",
+        Numerator:     1200,
+        Denominator:   1408,
+        Rate:          "85.2",
+        Target:        "≥80%",
+        Note:          "入院24h内Caprini/Padua评估不为空 / 符合条件的出院患者"
+      },
+      {
+        IndicatorCode: "A02",
+        IndicatorName: "VTE 中高风险比例",
+        Category:      "评估质量指标",
+        Numerator:     506,
+        Denominator:   1200,
+        Rate:          "42.1",
+        Target:        "-",
+        Note:          "任意一次评估为中危/高危 / 接受过VTE评估的患者"
+      },
+      {
+        IndicatorCode: "A03",
+        IndicatorName: "出血风险评估率",
+        Category:      "评估质量指标",
+        Numerator:     398,
+        Denominator:   506,
+        Rate:          "78.7",
+        Target:        "≥75%",
+        Note:          "有出血评估记录 / VTE中高危患者"
+      },
+      {
+        IndicatorCode: "A04",
+        IndicatorName: "出血高风险比例",
+        Category:      "评估质量指标",
+        Numerator:     61,
+        Denominator:   398,
+        Rate:          "15.3",
+        Target:        "-",
+        Note:          "出血评估为高危/极高危 / 接受出血评估的患者"
+      }
+    ]
+
+  指标计算逻辑 (基于 VTE质控指标汇总-备注.docx):
+
+  ┌─ 适用人群过滤 (所有指标共用) ─────────────────────────────┐
+  │ 入组: 年龄 ≥ 13 岁 的住院患者 (PAADM类型=I)              │
+  │ 排除:                                                    │
+  │   a. 住院时间 ≤ 24h (DisDate - AdmDate <= 1 且时间差≤24h)│
+  │   b. 已接受抗凝治疗者:                                    │
+  │      - 已确诊 VTE (ICD编码: I26/I80/I82)                 │
+  │      - 房颤 (ICD: I48)                                   │
+  │      - 急性心肌梗死 (ICD: I21)                            │
+  │      - 缺血性脑卒中 (ICD: I63)                            │
+  │      - CRRT/ECMO/血液透析 (医嘱项判断)                    │
+  │      - 机械瓣膜植入 (ICD: Z95.2)                          │
+  │ 数据源:                                                  │
+  │   ^PAADM(admId)       → 就诊记录(类型/日期/科室)         │
+  │   ^PAPER(patId,"ALL") → 患者年龄/性别                    │
+  │   ^MRC("ID",icdId)    → ICD诊断编码                      │
+  └──────────────────────────────────────────────────────────┘
+
+  A01 - VTE风险评估率:
+    分母 = 符合入组条件的出院患者总数
+    分子 = 分母中, 在入院24h内 Caprini评估表 或 Padua评估表
+           "评估时机"字段不为空的患者数
+    关键: 出院患者可能多次入院，取统计时段内的出院记录
+    备注: 手术患者用Caprini, 非手术患者用Padua, 肿瘤可联合Khorana
+
+  A02 - VTE中高风险比例:
+    分母 = A01的分子 (已评估患者数)
+    分子 = 分母中, 任意一次Caprini/Padua评估结果为
+           "中危" 或 "高危" 或 "极高危" 的患者数
+    风险等级映射: 低危/中危/高危/极高危 ← 需确认存储字段名
+
+  A03 - 出血风险评估率:
+    分母 = A02的分子 (VTE中高危患者数)
+    分子 = 分母中, 有出血风险评估记录的患者数
+           (非手术患者: "知情同意书-出血因素" 不为空)
+           (手术患者:   "外科住院患者出血风险评估量表" 不为空)
+
+  A04 - 出血高风险比例:
+    分母 = A03的分子 (接受出血评估的患者数)
+    分子 = 分母中, 出血风险评估结果为 "高危" 或 "极高危" 的患者数
+
+== 3. 预防质量指标: web.dhcvte.QryIndicators::QryPreventionIndicators ==
+  用途: 查询 4 项预防质量指标 (Indicator P01-P04)
+  输入: 同 QryAssessmentIndicators
+  输出 JSON rows (4 条):
+    [
+      {
+        IndicatorCode: "P01",
+        IndicatorName: "药物预防实施率",
+        Category:      "预防质量指标",
+        Numerator:     223,
+        Denominator:   372,
+        Rate:          "59.9",
+        Target:        "≥60%",
+        Note:          "勾选药物预防 / VTE中高危∩出血低危"
+      },
+      {
+        IndicatorCode: "P02",
+        IndicatorName: "机械预防实施率",
+        Category:      "预防质量指标",
+        Numerator:     34,
+        Denominator:   75,
+        Rate:          "45.3",
+        Target:        "≥50%",
+        Note:          "勾选机械预防 / VTE中高危∩出血高危"
+      },
+      {
+        IndicatorCode: "P03",
+        IndicatorName: "联合预防实施率",
+        Category:      "预防质量指标",
+        Numerator:     89,
+        Denominator:   297,
+        Rate:          "30.0",
+        Target:        "≥30%",
+        Note:          "药物+机械都勾选 / VTE高危∩出血低危"
+      },
+      {
+        IndicatorCode: "P04",
+        IndicatorName: "VTE 规范预防率",
+        Category:      "预防质量指标",
+        Numerator:     120,
+        Denominator:   218,
+        Rate:          "55.0",
+        Target:        "≥55%",
+        Note:          "极高危且已实施预防 / VTE极高危患者"
+      }
+    ]
+
+  指标计算逻辑:
+
+  P01 - 药物预防实施率:
+    分母 = VTE中高危 (A02分子) ∩ 出血低危 的患者
+    分子 = 分母中, Caprini/Padua评估表 "药物预防" 勾选框已勾选的患者数
+    字段参考: Caprini/Padua表中 → 药物预防: 勾选=1
+
+  P02 - 机械预防实施率:
+    分母 = VTE中高危 (A02分子) ∩ 出血高危/极高危 的患者
+    分子 = 分母中, Caprini/Padua评估表 "机械预防" 勾选框已勾选的患者数
+    意义: 出血高风险患者无法安全使用抗凝药物, 机械预防是核心手段
+          (梯度压力弹力袜、间歇充气加压装置等)
+
+  P03 - 联合预防实施率:
+    分母 = VTE高危/极高危 ∩ 出血低危 的患者
+    分子 = 分母中, "药物预防" AND "机械预防" 都勾选的患者数
+
+  P04 - VTE规范预防率:
+    分母 = VTE评估为 "极高危" 的患者
+    分子 = 分母中, 已实施任意预防措施 (药物/机械任一勾选) 的患者数
+    注意: 部分地区将此指标作为综合指标使用
+
+== 4. 患者明细: web.dhcvte.QryPatientList::QryByIndicator ===========
+  用途: 点击指标行后, 查询该指标对应的患者列表
+  输入:
+    SttDate       - 出院开始日期
+    EndDate       - 出院结束日期
+    LocID         - 科室ID列表 (逗号分隔)
+    IndicatorCode - 指标代码 (A01/A02/A03/A04/P01/P02/P03/P04)
+  输出 JSON rows (分页):
+    [
+      {
+        RegNo:          "ZY0000001",
+        PatName:        "张三",
+        Sex:            "男",
+        Age:            65,
+        LocDesc:        "骨科",
+        WardDesc:       "骨科一区",
+        AdmDate:        "2026-05-03",
+        DisDate:        "2026-05-15",
+        VTERiskLevel:   "高危",
+        BleedRiskLevel: "低危",
+        DrugPrev:       "Y",
+        MechPrev:       "N"
+      }
+    ]
+
+  字段说明:
+    RegNo          登记号      ^PAPER(patId,"PAT",1) REGNO
+    PatName        患者姓名    ^PAPER(patId,"ALL") Name
+    Sex            性别        ^PAPER(patId,"ALL") Sex
+    Age            年龄        从出生日期计算
+    LocDesc        科室名称    ^CTLOC(locId) 名称
+    WardDesc       病区名称    ^PAADM(admId) 病区
+    AdmDate        入院日期    ^PAADM(admId) AdmDate → $zd格式化
+    DisDate        出院日期    ^PAADM(admId) DisDate → $zd格式化
+    VTERiskLevel   VTE风险等级 Caprini/Padua评分 → 低危/中危/高危/极高危
+    BleedRiskLevel 出血风险等级 出血评估量表 → 低危/中危/高危/极高危
+    DrugPrev       药物预防    Caprini/Padua表中勾选 → Y/N
+    MechPrev       机械预防    Caprini/Padua表中勾选 → Y/N
+
+  各指标返回患者子集定义:
+    A01: 分母人群中有Caprini/Padua评估记录的患者
+    A02: A01中评估结果为中危/高危/极高危的患者
+    A03: A02中有出血评估记录的患者
+    A04: A03中出血评估为高危/极高危的患者
+    P01: VTE中高危∩出血低危 中药物预防=Y的患者
+    P02: VTE中高危∩出血高危 中机械预防=Y的患者
+    P03: VTE高危∩出血低危 中药物=Y AND 机械=Y的患者
+    P04: VTE极高危 中药物=Y OR 机械=Y的患者
+
+== 数据存储参考 (来自现有HIS Global结构) ============================
+  评估表存储 (需确认实际Global路径, 以下为建议结构):
+    方案A - 结构化存储:
+      ^DHCVTE("ASSESS", assessId) = Score ^ RiskLevel ^ Type ^ AdmDate ^ ...
+      ^DHCVTE("ASSESS", 0, "PAADM", admId, assessId)  → 按就诊索引
+      ^DHCVTE("BLEED", bleedId) = Level ^ FormType ^ ...
+      ^DHCVTE("BLEED", 0, "PAADM", admId, bleedId)
+
+    方案B - 病历元素存储 (参照现有电子病历模式):
+      评估数据作为病历元素存储在EMR document中,
+      通过病历元素编码检索 (如 CapriniScore, PaduaScore, BleedRiskLevel)
+
+== 通知逻辑 (护理部需求, P54-P55) ====================================
+  Caprini/Padua总分 > 3 时:
+    1. 推送通知消息: "VTE高危患者"
+    2. 提示医生完成评估量表评分
+    3. 患者列表增加 "VTE高危" 标记
+  实现建议:
+    - 定时任务扫描: 对24h内新入院且未评估的患者推送提醒
+    - 保存评估时实时检查: 总分>3 立即触发通知
+    - 通知渠道: 集成平台消息 / 站内信 / HIS消息队列
+
+== Rate字段计算 ====================================================
+  前端接收 Rate 为已格式化的百分比字符串 (如 "85.2"),
+  后端计算: Rate = (Numerator / Denominator * 100).toFixed(1)
+  如果 Denominator = 0, 返回 Rate = "0.0"
+-->
+<script language="javascript" type="text/javascript">
+var me = {
+    SttDate: '',
+    EndDate: '',
+    LocID: '',
+    activePreset: 'month',
+    isLoading: false
+};
+
+$(function () {
+    InitFilter();
+    InitDatagrids();
+    // 回车键触发查询
+    $(document).on('keydown', function(e) { if (e.keyCode === 13 && !e.target.closest('.combo-panel')) DoSearch(); });
+});
+
+/* ========== 筛选初始化 ========== */
+function InitFilter() {
+    var now = new Date();
+    var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    me.SttDate = FormatDate(firstDay);
+    me.EndDate = FormatDate(now);
+
+    $('#SttDate').datebox({
+        value: me.SttDate,
+        onSelect: function (d) { me.SttDate = FormatDate(d); ValidateDateRange(); }
+    });
+    $('#EndDate').datebox({
+        value: me.EndDate,
+        onSelect: function (d) { me.EndDate = FormatDate(d); ValidateDateRange(); }
+    });
+
+    // 日期快捷按钮
+    SetDatePreset('month');
+
+    $('#cmbLocation').combogrid({
+        url: $URL + '?ClassName=web.dhcvte.QryCommon&QueryName=FindLocation',
+        panelWidth: 300, multiple: true,
+        idField: 'RowID', textField: 'CName',
+        columns: [[
+            { field: 'ck', checkbox: true },
+            { field: 'RowID', title: 'ID', width: 40, hidden: true },
+            { field: 'Code', title: '代码', width: 70, align: 'center' },
+            { field: 'CName', title: '科室名称', width: 160, align: 'left' }
+        ]]
+    });
+}
+
+function FormatDate(d) {
+    var y = d.getFullYear();
+    var m = ('0' + (d.getMonth() + 1)).slice(-2);
+    var day = ('0' + d.getDate()).slice(-2);
+    return y + '-' + m + '-' + day;
+}
+
+function ValidateDateRange() {
+    if (me.SttDate > me.EndDate) {
+        me.EndDate = me.SttDate;
+        $('#EndDate').datebox('setValue', me.EndDate);
+    }
+}
+
+function SetDatePreset(type) {
+    me.activePreset = type;
+    var now = new Date(); var stt;
+    switch (type) {
+        case 'today': stt = now; break;
+        case 'week':  stt = new Date(now); stt.setDate(stt.getDate() - 7); break;
+        case 'month': stt = new Date(now.getFullYear(), now.getMonth(), 1); break;
+        case 'last':  stt = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                      now = new Date(now.getFullYear(), now.getMonth(), 0); break;
+    }
+    me.SttDate = FormatDate(stt);
+    me.EndDate = FormatDate(now);
+    $('#SttDate').datebox('setValue', me.SttDate);
+    $('#EndDate').datebox('setValue', me.EndDate);
+    $('.dp-btn').removeClass('active');
+    $('#dp_' + type).addClass('active');
+}
+
+/* ========== 指标列定义 ========== */
+function MakeIndicatorColumns() {
+    return [[
+        { field: 'IndicatorName', title: '指标名称', width: 175, align: 'left',
+            styler: function() { return 'font-weight:600;color:#15428b;'; }
+        },
+        { field: 'Numerator', title: '分子', width: 80, align: 'center',
+            styler: function() { return 'font-size:14px;font-weight:500;'; }
+        },
+        { field: 'Denominator', title: '分母', width: 80, align: 'center',
+            styler: function() { return 'font-size:14px;color:#666;'; }
+        },
+        { field: 'Rate', title: '比率', width: 175, align: 'center',
+            formatter: function(v) {
+                var num = parseFloat(v) || 0;
+                var cls = num >= 80 ? 'high' : (num >= 50 ? 'mid' : 'low');
+                return '<div class="rate-cell">'
+                    + '<div class="rate-bar-outer"><div class="rate-bar-inner rate-bar-' + cls + '" style="width:' + num + '%"></div></div>'
+                    + '<span class="rate-value rate-' + cls + '">' + v + '%</span>'
+                    + '</div>';
+            }
+        },
+        { field: 'Target', title: '目标', width: 62, align: 'center',
+            formatter: function(v) {
+                return v && v !== '-' ? '<span class="target-tag">' + v + '</span>' : '<span style="color:#ccc;">—</span>';
+            }
+        },
+        { field: 'Note', title: '备注', width: 40, align: 'center',
+            formatter: function(v) {
+                return '<span class="note-icon" title="' + (v || '').replace(/"/g, '&quot;') + '">i</span>';
+            }
+        }
+    ]];
+}
+
+/* ========== 初始化 Datagrid ========== */
+function InitDatagrids() {
+    var cols = MakeIndicatorColumns();
+
+    $('#dgAssessment').datagrid({
+        fit: true, border: false, rownumbers: false,
+        singleSelect: true, pagination: false, nowrap: false,
+        columns: cols,
+        onLoadSuccess: function (data) { UpdateSummary(data.rows || [], 'A'); },
+        onClickRow: function (idx, row) { ShowPatientDetail(row.IndicatorCode, row.IndicatorName); }
+    });
+
+    $('#dgPrevention').datagrid({
+        fit: true, border: false, rownumbers: false,
+        singleSelect: true, pagination: false, nowrap: false,
+        columns: cols,
+        onLoadSuccess: function (data) { UpdateSummary(data.rows || [], 'P'); },
+        onClickRow: function (idx, row) { ShowPatientDetail(row.IndicatorCode, row.IndicatorName); }
+    });
+
+    $('#dgPatients').datagrid({
+        fit: true, border: true, rownumbers: true,
+        singleSelect: true,
+        pagination: true, pageSize: 20, pageList: [20, 50, 100, 200],
+        columns: [[
+            { field: 'RegNo', title: '登记号', width: 90, align: 'center' },
+            { field: 'PatName', title: '患者姓名', width: 80, align: 'left' },
+            { field: 'Sex', title: '性别', width: 45, align: 'center' },
+            { field: 'Age', title: '年龄', width: 45, align: 'center' },
+            { field: 'LocDesc', title: '科室', width: 110, align: 'left' },
+            { field: 'WardDesc', title: '病区', width: 100, align: 'left' },
+            { field: 'AdmDate', title: '入院', width: 85, align: 'center' },
+            { field: 'DisDate', title: '出院', width: 85, align: 'center' },
+            { field: 'Diag', title: '诊断', width: 130, align: 'left' },
+            { field: 'VTEScore', title: 'VTE评分', width: 65, align: 'center',
+                styler: function(v) {
+                    var s = parseInt(v) || 0;
+                    if (s >= 5) return 'background:#ffe0e0;color:#b71c1c;font-weight:600;';
+                    if (s >= 3) return 'background:#fff8e0;color:#e65100;font-weight:600;';
+                    return '';
+                }
+            },
+            { field: 'VTERiskLevel', title: 'VTE风险', width: 70, align: 'center',
+                formatter: function(v) {
+                    var cls = v === '极高危' ? 'risk-critical' : (v === '高危' ? 'risk-high' : (v === '中危' ? 'risk-medium' : 'risk-low'));
+                    return '<span class="risk-badge ' + cls + '">' + (v || '—') + '</span>';
+                }
+            },
+            { field: 'BleedRiskLevel', title: '出血风险', width: 75, align: 'center',
+                formatter: function(v) {
+                    var cls = v === '极高危' ? 'risk-critical' : (v === '高危' ? 'risk-high' : (v === '中危' ? 'risk-medium' : 'risk-low'));
+                    return '<span class="risk-badge ' + cls + '">' + (v || '—') + '</span>';
+                }
+            },
+            { field: 'DrugPrev', title: '药物', width: 55, align: 'center',
+                formatter: function(v) { return v === 'Y' ? '<span class="tag-yes">是</span>' : '<span class="tag-no">否</span>'; }
+            },
+            { field: 'MechPrev', title: '机械', width: 55, align: 'center',
+                formatter: function(v) { return v === 'Y' ? '<span class="tag-yes">是</span>' : '<span class="tag-no">否</span>'; }
+            }
+        ]]
+    });
+}
+
+/* ========== 更新概览卡片 ========== */
+function UpdateSummary(rows, type) {
+    if (!rows.length) return;
+    if (type === 'A') {
+        var a0 = rows[0]; // 评估率
+        var a1 = rows[1]; // 中高风险
+        var a3 = rows[3]; // 出血高风险
+        $('#scDischarges').text(a0 ? (a0.Denominator || 0) : 0);
+        $('#scAssessed').text(a0 ? (a0.Numerator || 0) : 0);
+        $('#scHighRisk').text(a1 ? (a1.Numerator || 0) : 0);
+        $('#scBleedHigh').text(a3 ? (a3.Numerator || 0) : 0);
+    }
+}
+
+/* ========== 查询 ========== */
+function DoSearch() {
+    me.SttDate = $('#SttDate').datebox('getValue');
+    me.EndDate = $('#EndDate').datebox('getValue');
+    me.LocID = ($('#cmbLocation').combogrid('getValues') || '').toString();
+
+    if (me.isLoading) return;
+    me.isLoading = true;
+    $('#loadMaskA, #loadMaskP').addClass('show');
+    $('#assessmentEmpty, #preventionEmpty').hide();
+
+    var qp = { ClassName: 'web.dhcvte.QryIndicators', SttDate: me.SttDate, EndDate: me.EndDate, LocID: me.LocID };
+
+    $('#dgAssessment').datagrid({
+        url: $URL,
+        queryParams: $.extend({}, qp, { QueryName: 'QryAssessmentIndicators' }),
+        onLoadSuccess: function (data) {
+            UpdateSummary(data.rows || [], 'A');
+            $('#loadMaskA').removeClass('show');
+        }
+    }).datagrid('clearSelections');
+
+    $('#dgPrevention').datagrid({
+        url: $URL,
+        queryParams: $.extend({}, qp, { QueryName: 'QryPreventionIndicators' }),
+        onLoadSuccess: function (data) {
+            UpdateSummary(data.rows || [], 'P');
+            $('#loadMaskP').removeClass('show');
+            me.isLoading = false;
+        }
+    }).datagrid('clearSelections');
+
+    $('#dgPatients').datagrid('loadData', { total: 0, rows: [] });
+    $('#patientDetail').panel('setTitle', '患者明细 — 点击上方指标行查看');
+}
+
+/* ========== 患者明细 ========== */
+function ShowPatientDetail(indicatorCode, indicatorName) {
+    if (!indicatorCode) return;
+    $('#patientDetail').panel('setTitle', '患者明细 — ' + (indicatorName || indicatorCode));
+    me.patientParams = {
+        ClassName: 'web.dhcvte.QryPatientList',
+        QueryName: 'QryByIndicator',
+        SttDate: me.SttDate, EndDate: me.EndDate, LocID: me.LocID,
+        IndicatorCode: indicatorCode
+    };
+    $('#dgPatients').datagrid({
+        url: $URL,
+        queryParams: me.patientParams
+    });
+}
+
+
+/* ========== 清空 ========== */
+function DoClear() {
+    $('#cmbLocation').combogrid('setValue', '');
+    $('#dgAssessment').datagrid('loadData', { total: 0, rows: [] });
+    $('#dgAssessment').datagrid('clearSelections');
+    $('#assessmentEmpty').css('display', 'flex');
+    $('#dgPrevention').datagrid('loadData', { total: 0, rows: [] });
+    $('#dgPrevention').datagrid('clearSelections');
+    $('#preventionEmpty').css('display', 'flex');
+    $('#dgPatients').datagrid('loadData', { total: 0, rows: [] });
+    $('#patientDetail').panel('setTitle', '患者明细 — 点击上方指标行查看');
+    $('#scDischarges, #scAssessed, #scHighRisk, #scBleedHigh').text('—');
+}
+
+/* ========== 导出 CSV ========== */
+function DoExport() {
+    var assessRows = $('#dgAssessment').datagrid('getRows') || [];
+    var prevRows  = $('#dgPrevention').datagrid('getRows') || [];
+    var allRows = assessRows.concat(prevRows);
+    if (allRows.length === 0) {
+        $.messager.alert('提示', '请先查询数据后再导出', 'info');
+        return;
+    }
+    var headers = ['指标类别','指标名称','分子','分母','比率(%)','目标值','备注'];
+    var fields  = ['Category','IndicatorName','Numerator','Denominator','Rate','Target','Note'];
+    var csv = '﻿' + headers.join(',') + '\n';
+    for (var r = 0; r < allRows.length; r++) {
+        var row = [];
+        for (var f = 0; f < fields.length; f++) {
+            var v = allRows[r][fields[f]];
+            v = (v != null) ? String(v).replace(/"/g, '""') : '';
+            if (v.indexOf(',') > -1 || v.indexOf('"') > -1 || v.indexOf('\n') > -1) v = '"' + v + '"';
+            row.push(v);
+        }
+        csv += row.join(',') + '\n';
+    }
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'VTE_Indicators_' + me.SttDate.replace(/-/g, '') + '_' + me.EndDate.replace(/-/g, '') + '.csv';
+    link.click();
+}
+
+/* ========== 导出患者明细 CSV ========== */
+function DoExportPatients() {
+    var rows = $('#dgPatients').datagrid('getRows') || [];
+    if (rows.length === 0) {
+        $.messager.alert('提示', '请先点击指标查看患者明细后再导出', 'info');
+        return;
+    }
+    $.messager.progress({ title: '请稍候', msg: '正在导出全部明细数据...' });
+    var url = $URL + '?ClassName=' + encodeURIComponent(me.patientParams.ClassName)
+        + '&QueryName=' + encodeURIComponent(me.patientParams.QueryName)
+        + '&SttDate=' + encodeURIComponent(me.patientParams.SttDate)
+        + '&EndDate=' + encodeURIComponent(me.patientParams.EndDate)
+        + '&LocID=' + encodeURIComponent(me.patientParams.LocID)
+        + '&IndicatorCode=' + encodeURIComponent(me.patientParams.IndicatorCode)
+        + '&page=1&rows=99999';
+    $.ajax({
+        url: url, type: 'GET', dataType: 'json',
+        success: function (data) {
+            $.messager.progress('close');
+            var allRows = data.rows || [];
+            if (allRows.length === 0) {
+                $.messager.alert('提示', '没有数据可以导出！');
+                return;
+            }
+            var headers = ['登记号','患者姓名','性别','年龄','科室','病区','入院日期','出院日期','诊断','VTE评分','VTE风险等级','出血风险等级','药物预防','机械预防'];
+            var fields  = ['RegNo','PatName','Sex','Age','LocDesc','WardDesc','AdmDate','DisDate','Diag','VTEScore','VTERiskLevel','BleedRiskLevel','DrugPrev','MechPrev'];
+            var csv = '﻿' + headers.join(',') + '\n';
+            for (var r = 0; r < allRows.length; r++) {
+                var row = [];
+                for (var f = 0; f < fields.length; f++) {
+                    var v = allRows[r][fields[f]];
+                    v = (v != null) ? String(v).replace(/"/g, '""') : '';
+                    if (v.indexOf(',') > -1 || v.indexOf('"') > -1 || v.indexOf('\n') > -1) v = '"' + v + '"';
+                    row.push(v);
+                }
+                csv += row.join(',') + '\n';
+            }
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'VTE_Patients_' + me.SttDate.replace(/-/g, '') + '_' + me.EndDate.replace(/-/g, '') + '.csv';
+            link.click();
+        },
+        error: function () {
+            $.messager.progress('close');
+            $.messager.alert('错误', '导出失败，请重试！');
+        }
+    });
+}
+
+</script>
+</head>
+<body>
+    <div id="mainLayout" class="hisui-layout" data-options="fit:true">
+
+        <!-- ========== 筛选区 ========== -->
+        <div data-options="region:'north',border:false" style="height:110px;overflow:visible;z-index:100;">
+            <div id="filterBar">
+                <span class="date-presets">
+                    <span class="dp-btn" id="dp_today" onclick="SetDatePreset('today')">今天</span>
+                    <span class="dp-btn" id="dp_week"  onclick="SetDatePreset('week')">近7天</span>
+                    <span class="dp-btn" id="dp_month" onclick="SetDatePreset('month')">本月</span>
+                    <span class="dp-btn" id="dp_last"  onclick="SetDatePreset('last')">上月</span>
+                </span>
+                <span class="f-sep"></span>
+                <span class="f-label">开始</span>
+                <input id="SttDate" class="hisui-datebox" style="width:130px;" />
+                <span class="f-label">结束</span>
+                <input id="EndDate" class="hisui-datebox" style="width:130px;" />
+                <span class="f-sep"></span>
+                <span class="f-label">科室</span>
+                <input id="cmbLocation" class="hisui-combogrid" style="width:180px;" />
+                <span class="f-spacer"></span>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-search',plain:false" onclick="DoSearch()">查询</a>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-w-export',plain:false" onclick="DoExport()">导出指标</a>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-w-export',plain:false" onclick="DoExportPatients()">导出明细</a>
+                <a class="hisui-linkbutton" data-options="iconCls:'icon-clear',plain:false" onclick="DoClear()">清空</a>
+            </div>
+
+            <!-- 概览卡片 -->
+            <div id="summaryRow">
+                <div class="summary-card">
+                    <div class="sc-icon sc-blue">&#128195;</div>
+                    <div class="sc-body">
+                        <div class="sc-value" id="scDischarges">—</div>
+                        <div class="sc-label">出院患者总数</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="sc-icon sc-green">&#10003;</div>
+                    <div class="sc-body">
+                        <div class="sc-value" id="scAssessed">—</div>
+                        <div class="sc-label">已评估患者数</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="sc-icon sc-orange">&#9888;</div>
+                    <div class="sc-body">
+                        <div class="sc-value" id="scHighRisk">—</div>
+                        <div class="sc-label">VTE 中高危人数</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="sc-icon sc-red">&#128308;</div>
+                    <div class="sc-body">
+                        <div class="sc-value" id="scBleedHigh">—</div>
+                        <div class="sc-label">出血高危人数</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 主内容区 ========== -->
+        <div data-options="region:'center'" style="overflow:hidden;">
+            <div class="hisui-layout" data-options="fit:true">
+
+                <!-- 指标汇总 -->
+                <div data-options="region:'north',split:true" style="height:320px;">
+                    <div class="hisui-accordion" data-options="fit:true,border:false">
+                        <!-- 评估质量 -->
+                        <div title="一、评估质量指标 — 风险识别" data-options="iconCls:'icon-w-magnifier',selected:true" style="overflow:hidden;">
+                            <div class="indicator-wrap">
+                                <div class="loading-mask" id="loadMaskA"><div class="loading-spinner"></div></div>
+                                <table id="dgAssessment" style="width:100%;height:225px;"></table>
+                                <div id="assessmentEmpty" class="empty-state" style="display:flex;">
+                                    <div class="es-icon">&#128202;</div>
+                                    <div class="es-title">暂无评估质量指标</div>
+                                    <div class="es-desc">请设置筛选条件后点击"查询"</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 预防质量 -->
+                        <div title="二、预防质量指标 — 干预落实" data-options="iconCls:'icon-w-shield'" style="overflow:hidden;">
+                            <div class="indicator-wrap">
+                                <div class="loading-mask" id="loadMaskP"><div class="loading-spinner"></div></div>
+                                <table id="dgPrevention" style="width:100%;height:225px;"></table>
+                                <div id="preventionEmpty" class="empty-state" style="display:flex;">
+                                    <div class="es-icon">&#128737;</div>
+                                    <div class="es-title">暂无预防质量指标</div>
+                                    <div class="es-desc">请设置筛选条件后点击"查询"</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 患者明细 -->
+                <div id="patientDetail" data-options="region:'center',title:'患者明细 — 点击上方指标行查看',iconCls:'icon-w-list'" style="overflow:hidden;">
+                    <table id="dgPatients" style="width:100%;height:100%;"></table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== 脚注区 ========== -->
+        <div data-options="region:'south',border:false" style="height:24px;overflow:hidden;">
+            <div id="footerNote">
+                <span class="fn-dot"></span><strong>纳入</strong> 年龄 ≥ 13 岁住院患者
+                <span class="fn-dot" style="background:#ccc;"></span><strong>排除</strong> 住院 ≤ 24h、已确诊 VTE/房颤/急性心梗/缺血性卒中、CRRT/ECMO/血透、机械瓣膜植入
+            </div>
+        </div>
+    </div>
+</body>
+</html>

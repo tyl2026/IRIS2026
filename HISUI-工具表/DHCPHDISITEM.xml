@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-24 00:35:28">
+<Class name="User.DHCPHDISITEM">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>PHDI_ROWID</SqlRowIdName>
+<SqlTableName>DHC_PHDISITEM</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent,User.Abstract</Super>
+<TimeChanged>65848,55123.747095</TimeChanged>
+<TimeCreated>62287,38119.109338</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Index name="RowIDBasedIDKeyIndex">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>PHDICHILDSUB</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="ChildDHCPHDISITMCLB">
+<Type>User.DHCPHDISITMCLB</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>PHDICPHDIPARREF</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="PHDIPHDPARREF">
+<Description>
+DHC_PHDISPEN Parent Reference</Description>
+<Type>User.DHCPHDISPEN</Type>
+<Cardinality>parent</Cardinality>
+<Collection/>
+<Inverse>ChildDHCPHDISITEM</Inverse>
+<Relationship>1</Relationship>
+<Required>1</Required>
+<SqlFieldName>PHDI_PHD_PARREF</SqlFieldName>
+</Property>
+
+<Property name="PHDICHILDSUB">
+<Description>
+PHDI_CHILDSUB</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>PHDI_CHILDSUB</SqlFieldName>
+</Property>
+
+<Property name="PHDIPAPMIDR">
+<Description>
+PHDI_PAPMI_DR</Description>
+<Type>User.PAPatMas</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>PHDI_PAPMI_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDIINCLBDR">
+<Description>
+PHDI_INCLB_DR</Description>
+<Type>User.INCItmLcBt</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>PHDI_INCLB_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDIQTY">
+<Description>
+PHDI_QTY</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>PHDI_QTY</SqlFieldName>
+</Property>
+
+<Property name="PHDIPAYAMOUNT">
+<Description>
+PHDI_PAYAMOUNT</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>PHDI_PAYAMOUNT</SqlFieldName>
+</Property>
+
+<Property name="PHDIOEORIDR">
+<Description>
+PHDI_OEORI_DR</Description>
+<Type>User.OEOrdItem</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>PHDI_OEORI_DR</SqlFieldName>
+</Property>
+
+<Property name="phdiretqty">
+<Description>
+phdi_rtqty</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>phdi_retqty</SqlFieldName>
+</Property>
+
+<Property name="PHDICTLOCDR">
+<Description>
+PHDI_CTLOC_DR</Description>
+<Type>User.CTLoc</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>PHDI_CTLOC_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDIUNITDR">
+<Description>
+PHDI_UNIT_DR</Description>
+<Type>User.CTUOM</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>PHDI_UNIT_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDICFNO">
+<Description>
+PHDI_CFNO</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>PHDI_CFNO</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDIFYFLAG">
+<Description>
+PHDI_FYFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>PHDI_FYFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDIPRICE">
+<Description>
+PHDI_PRICE</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>PHDI_PRICE</SqlFieldName>
+</Property>
+
+<Property name="PHDIPoisonMaBianNo">
+<Description>
+毒麻编号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>PHDI_PoisonMaBianNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDIPYFLAG">
+<Description>
+配药完成标记</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>PHDI_PYFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDIMachienDispFlag">
+<Description>
+摆药机发放标识</Description>
+<Type>%String</Type>
+<InitialExpression>"N"</InitialExpression>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>PHDI_MachienDisp_Flag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PHDIPRTDR">
+<Description>
+医嘱发票</Description>
+<Type>User.DHCINVPRT</Type>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>PHDI_PRT_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDIMachienDispQty">
+<Description>
+PHDI_MachienDisp_Qty</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>PHDI_MachienDisp_Qty</SqlFieldName>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<StreamLocation>^User.DHCPHDISITEMS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="IndexOeori">
+<Type>index</Type>
+<Global>^DHCPHDI</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"OEORI"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{PHDI_OEORI_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{DHC_PHDISPEN.PHD_ROWID}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PHDI_CHILDSUB}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>DHC_PHDISPEN.PHD_ROWID</Field>
+</RowIdSpec>
+<RowIdSpec name="2">
+<Expression>{L5}</Expression>
+<Field>PHDI_CHILDSUB</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHDIMASTER">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCPHDI</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>{DHC_PHDISPEN.PHD_ROWID}</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"PHDI"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{PHDI_CHILDSUB}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>DHC_PHDISPEN.PHD_ROWID</Field>
+</RowIdSpec>
+<RowIdSpec name="2">
+<Expression>{L3}</Expression>
+<Field>PHDI_CHILDSUB</Field>
+</RowIdSpec>
+<Data name="PHDI_CFNO">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="PHDI_CTLOC_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="PHDI_FYFLAG">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="PHDI_INCLB_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="PHDI_MachienDisp_Flag">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="PHDI_MachienDisp_Qty">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="PHDI_OEORI_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="PHDI_PAPMI_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="PHDI_PAYAMOUNT">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="PHDI_PRICE">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="PHDI_PRT_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+<Data name="PHDI_PYFLAG">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="PHDI_PoisonMaBianNo">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="PHDI_QTY">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="PHDI_UNIT_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="phdi_retqty">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+</SQLMap>
+</Storage>
+</Class>
+</Export>

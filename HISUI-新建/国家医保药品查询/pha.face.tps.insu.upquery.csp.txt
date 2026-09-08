@@ -1,0 +1,111 @@
+<!--国家医保上传数据查询
+    csp:csp/pha.face.tps.insu.upquery.csp
+    js: scripts/pha/face/tps/insu/upquery.js
+-->
+<html>
+<!-- 验证session过期 -->
+<csp:method name=OnPreHTTP arguments="" returntype=%Boolean>
+    d ##Class(websys.SessionEvents).SessionExpired() q 1
+</csp:method>
+
+<HEAD>
+    <!-- iMedical版本标题 -->
+    <title>
+        <TRAK:TRANSLATE id=title>##(%session.Get("TITLE"))##</TRAK:TRANSLATE>
+    </title>
+    <TRAK:HEAD>
+    </TRAK:HEAD>
+    <HISUI />
+</HEAD>
+<body style="overflow:hidden;">
+    <div class="hisui-layout" fit="true">
+	    <div data-options="region:'center'" class="dhcpha-north-tbl" border="false" style="padding:10px">
+	        <div class="hisui-layout" data-options="fit:true,border:false">   
+	            <div data-options="region:'north',split:false,collapsible:false,border:true,bodyCls:'panel-body-gray',headerCls:'panel-header-gray'" style="height:92px;border-bottom-right-radius: 0px;border-bottom-left-radius: 0px;overflow-y: hidden">
+	                <div id="con-form">
+	                    <table class="dhcpha-north-tbl">
+	                        <tr>
+	                            <td >
+	                                <label for="startDate">开始日期</label>
+	                            </td>
+	                            <td>
+	                                <input id="startDate" class="hisui-datebox" />
+	                            </td>
+	                            <td >
+	                                <label for="endDate">截止日期</label>
+	                            </td>
+	                            <td>
+	                                <input id="endDate" class="hisui-datebox" />
+	                            </td>
+	                            <td >
+	                                <label for="batNo">批次流水ID</label>
+	                            </td>
+	                            <td >
+	                                <input id="batNo"  class="hisui-validatebox textbox" style="width:193px">
+	                            </td>
+	                            <td>
+				                    <label for="TypeManf">医保对接方</label>                            
+				                </td>
+				        		<td>
+				                   <input id="cmbTypeManf" type="text" class="hisui-combobox" />
+				                </td>  
+	                            <td>
+	                                <a id="btnFind" href="#" class="hisui-linkbutton" plain="false">查询</a>
+	                            </td>
+	                            
+	                        </tr>
+	                        <tr>
+	                        	<td >
+	                                <label for="cmbgridInci">药品代码</label>
+	                            </td>
+	                            <td colspan = 3>
+	                                <input id="cmbgridInci"  class="hisui-lookup" style="width:390px"/>
+	                            </td>
+	                             <td>
+				                    <label for="cmbHospital">医院</label>                            
+				                </td>
+				                <td>
+				                	<input id="cmbHospital" type="text" class="hisui-combobox" />
+				                </td>
+				                <td>
+				                </td> 
+				                <td>
+				                </td>
+				                <td>
+	                                <a id="btnClear" href="#" class="hisui-linkbutton" plain="false">清屏</a>
+	                            </td>
+	                        </tr>
+	                    </table>
+	                </div>
+	            </div>   
+	            <div data-options="region:'center',split:true,border:false" style="border-top-right-radius: 0px;border-top-left-radius: 0px;">
+	                <div id="mainTabs" class="hisui-tabs tabs-gray" data-options="tools:'#mainTabsTool'" fit="true" style="border-top-right-radius: 0px;border-top-left-radius: 0px;"> 
+	                	<div title="商品库存信息查询" id="3508">
+	                    	<table id="gridInsu3508"></table>
+	                    </div>  
+	                    <div title="商品库存变更记录查询" id="3509">   
+	                        <table id="gridInsu3509"></table>
+	                    </div> 
+	                    <div title="商品采购信息查询" id="3510">   
+	                        <table id="gridInsu3510"></table>
+	                    </div> 
+	                    <div title="商品销售信息查询" id="3511">   
+	                        <table id="gridInsu3511"></table>
+	                    </div>
+	                    <div title="商品入库追溯信息查询" id="3512">   
+	                        <table id="gridInsu3512"></table>
+	                    </div> 
+	                    <div title="商品销售追溯信息查询" id="3513">   
+	                        <table id="gridInsu3513"></table>
+	                    </div> 
+	                </div> 
+	            </div> 
+	        </div> 
+	    </div> 
+	</div> 
+	<link rel="stylesheet" type="text/css" href="../scripts/pharmacy/common/css/dhcpha.hisui.css">
+    <!-- 本页面js -->
+    <script type="text/javascript" src="../scripts/pha/face/tps/insu/upquery.js"></script>
+</body>
+
+</HTML>

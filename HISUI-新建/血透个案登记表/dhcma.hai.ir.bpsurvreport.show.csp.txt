@@ -1,0 +1,93 @@
+<!-- 主页面-->
+<div id="INFReport" class="hisui-layout" data-options="fit:true" style="width:100%;height:100%;">
+	<div id="DIVToolBar" data-options="region:'north'" style="border-width:0px 0px 0px 0px;height: 38px;width:100%;">	
+		<table class="search-table" style="margin-top: -5px;margin-buttom: -1px;">
+			<tr>
+				<td class="r-label">
+					<input class='hisui-radio' type="radio" label=#(..Get("未调查"))# name='chkStatunit' value="1" id="chkStatunit-UnSub">
+					<input class='hisui-radio' type="radio" label=#(..Get("已调查"))# name='chkStatunit' value="2" id="chkStatunit-UnCheck">	
+					<input class='hisui-radio' type="radio" label=#(..Get("已审核"))# name='chkStatunit' value="3" id="chkStatunit-Check">	
+				</td>							
+			</tr>								
+		</table>
+	</div>
+	<div id="west" data-options="region:'west',border:false,collapsible:false" style="width:160px;padding:1px 0 10px 10px;">
+		
+        <div class="hisui-panel" data-options="fit:true,title:'患者列表',headerCls:'panel-header-gray',iconCls:'icon-paper',">
+            <div class="hisui-panel" style="border-radius:0;border-top:0px;border:none;">
+				<div style="float:right;padding:3px;">
+					<input class="hisui-searchbox" id="searchboxT" style="width:140px;padding-right:2px;"/>
+				</div>
+			</div>
+            <div title="" class="hisui-accordion accordion-gray" fit="true" data-options="border:false" style="border-top:1px solid #ccc;"> 
+				 <div id="ulPAAdmList" style="border:none;">
+				 </div>
+			</div>
+        </div>
+    </div>
+	<div data-options="region:'center',fit:true,border:false,collapsible:false">
+		<div class="page-body" id="divbody" style="width:1240px;">
+			<div class="report-content">
+				<div class="hisui-panel" id="BaseInfo" data-options="title:'一、一般情况',headerCls:'panel-header-gray',iconCls:'icon-paper'">
+					<table id="PatInfoTab" class="report-tab">
+						<tr class="report-tr">
+							<td class="infoLabel" style="padding-left:10px;">#(..Get("病人编号："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="txtBPRegID" style="width:180px;">
+							</td>
+							<td class="report-td infoLabel" class="report-td">#(..Get("姓名："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="txtPatName"  style="width:180px;">
+							</td>
+							<td class="report-td infoLabel" >#(..Get("性别："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="Sex" style="width:180px;">
+							</td>
+							<td class="report-td infoLabel">#(..Get("年龄："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="Age" style="width:180px;">
+							</td>
+						</tr>
+						<tr class="report-tr">
+							<td class="infoLabel" style="padding-left:10px;">#(..Get("登记日期："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="txtPARegDate" style="width:180px;">
+							</td>
+							<td class="report-td infoLabel">#(..Get("主管医生："))#</td>				
+							<td>
+								<input class="textbox readonly-noborder" id="txtPAAdmDoc"  style="width:180px;">
+							</td>
+							<td class="report-td infoLabel" style="padding-left:10px;">#(..Get("诊断："))#</td>				
+							<td colspan="3">
+								<input class="textbox readonly-noborder" id="txtPADiagnosis" style="width:400px;">
+							</td>
+						</tr>
+						<tr class="report-tr">
+						    <td class="infoLabel" style="padding-left:10px;">#(..Get("报告时间："))#</td>				
+							<td><input class="textbox readonly-noborder" id="txtBPRegDate"  style="width:180px;"></td>
+							<td class="report-td infoLabel">#(..Get("报告科室："))#</td>					
+							<td><input class="textbox readonly-noborder" id="txtBPRegLocDesc"  style="width:180px;"></td>					
+							<td class="report-td infoLabel">#(..Get("报告人："))#</td>				
+							<td><input class="textbox readonly-noborder" id="txtBPRegUserDesc"  style="width:180px;"></td>
+							<td class="report-td infoLabel">#(..Get("报告状态："))#</td>					
+							<td><input class="textbox readonly-noborder" id="txtRepStatus"  style="width:180px;color:red;font-weight: bold;"></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!--加载公共模板信息-->
+    		<div class="report-content">
+        		<div id="ComTemplateInfo"></div>
+    		</div>
+		</div>
+		<div class="page-footer" style="height:76px;">
+			<a id="btnSubmit"  class="hisui-linkbutton CSSButton">#(..Get("提交"))#</a>
+			<a id="btnCheck"  class="hisui-linkbutton CSSButton">#(..Get("审核"))#</a>
+			<a id="btnUnCheck"  class="hisui-linkbutton CSSButton">#(..Get("取消审核"))#</a>
+			<a id="btnDelete"  class="hisui-linkbutton CSSButton">#(..Get("删除"))#</a>
+			<a id="btnReturn"  class="hisui-linkbutton CSSButton">#(..Get("退回"))#</a>
+			<a id="btnExport"  class="hisui-linkbutton CSSButton">导出</a>
+			<a id="btnClose"  class="hisui-linkbutton">#(..Get("关闭"))#</a>
+		</div>
+	</div>
+</div>

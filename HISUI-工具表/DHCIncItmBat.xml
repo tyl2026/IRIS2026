@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 22:13:30">
+<Class name="User.DHCIncItmBat">
+<Description>
+DHC_IncItmBat</Description>
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>INCIB_RowID</SqlRowIdName>
+<SqlTableName>DHC_IncItmBat</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent</Super>
+<TimeChanged>66211,54847.280407</TimeChanged>
+<TimeCreated>62602,67188.073577</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="INCIBINCIBDr">
+<Description>
+INCIB_INCIB_Dr</Description>
+<Type>User.INCItmBat</Type>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>INCIB_INCIB_Dr</SqlFieldName>
+</Property>
+
+<Property name="INCIBProduceDate">
+<Description>
+INCIB_ProduceDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>INCIB_ProduceDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="INCIBRp">
+<Description>
+INCIB_Rp</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>INCIB_Rp</SqlFieldName>
+</Property>
+
+<Property name="INCIBRpPuruom">
+<Description>
+INCIB_RpPuruom</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>INCIB_RpPuruom</SqlFieldName>
+</Property>
+
+<Property name="INCIBSp">
+<Description>
+INCIB_Sp</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>INCIB_Sp</SqlFieldName>
+</Property>
+
+<Property name="INCIBSpPuruom">
+<Description>
+INCIB_SpPuruom</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>INCIB_SpPuruom</SqlFieldName>
+</Property>
+
+<Property name="INCIBPHMNFDr">
+<Description>
+INCIB_PHMNF_Dr</Description>
+<Type>User.PHManufacturer</Type>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>INCIB_PHMNF_Dr</SqlFieldName>
+</Property>
+
+<Property name="INCIBAPCVMDr">
+<Description>
+INCIB_APCVM_Dr</Description>
+<Type>User.APCVendor</Type>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>INCIB_APCVM_Dr</SqlFieldName>
+</Property>
+
+<Property name="INCIBINGRIDr">
+<Description>
+INCIB_INGRI_Dr</Description>
+<Type>User.DHCINGdRecItm</Type>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>INCIB_INGRI_Dr</SqlFieldName>
+</Property>
+
+<Property name="INCIBDateAdd">
+<Description>
+INCIB_DateAdd</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>INCIB_DateAdd</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="INCIBTimeAdd">
+<Description>
+INCIB_TimeAdd</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>INCIB_TimeAdd</SqlFieldName>
+</Property>
+
+<Property name="INCIBSourceOfFund">
+<Description>
+INCIB_SourceOfFund</Description>
+<Type>User.DHCSourceOfFund</Type>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>INCIB_SourceOfFund</SqlFieldName>
+</Property>
+
+<Property name="INCIBSpecList">
+<Description>
+具体规格INCIB_SpecList</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>INCIB_SpecList</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBTempStoreFlag">
+<Description>
+INCIB_TempStoreFlag (虚库/暂存库标记)</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>INCIB_TempStoreFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INCIBGiftFlag">
+<Description>
+捐赠标志</Description>
+<Type>%String</Type>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>INCIB_GiftFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INCIBAdjCheque">
+<Description>
+调价换票标志</Description>
+<Type>%String</Type>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>INCIB_AdjCheque</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INCIBBarCode">
+<Description>
+条码</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>INCIB_BarCode</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="60"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBPrintNum">
+<Description>
+打印次数</Description>
+<Type>%Library.Integer</Type>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>INCIB_PrintNum</SqlFieldName>
+</Property>
+
+<Property name="INCIBSterilizedBat">
+<Description>
+灭菌批号INCIB_SterilizedBat</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>INCIB_SterilizedBat</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBDetailId">
+<Description>
+类似incib的id信息(记录第三方数据)</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>INCIB_DetailId</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBTax">
+<Description>
+INCIB_Tax 基本单位对应税额</Description>
+<Type>%Library.Float</Type>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>INCIB_Tax</SqlFieldName>
+</Property>
+
+<Property name="INCIBSterilizedDate">
+<Description>
+INCIB_SterilizedDate</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>INCIB_SterilizedDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="INCIBIssuedBatNo">
+<Description>
+疫苗批签发号 INCIB_IssuedBatNo</Description>
+<Type>%String</Type>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>INCIB_IssuedBatNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBStkType">
+<Description>
+INCIB_StkType</Description>
+<Type>%String</Type>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>INCIB_StkType</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Drug,Material,Others"/>
+<Parameter name="MAXLEN" value="8"/>
+<Parameter name="SELECTIVITY" value="25.0000%"/>
+<Parameter name="VALUELIST" value=",G,M,O"/>
+</Property>
+
+<Property name="INCIBDrugPackFlag">
+<Description>
+连包标志（草药）</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>INCIB_DrugPackFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="INCIBPackWaysDR">
+<Description>
+包装方式</Description>
+<Type>User.INCPackInstructions</Type>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>INCIB_PackWays_DR</SqlFieldName>
+</Property>
+
+<Property name="INCIBCarrierDR">
+<Description>
+配送商</Description>
+<Type>User.DHCCarrier</Type>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>INCIB_Carrier_DR</SqlFieldName>
+</Property>
+
+<Property name="INCIBFactoryNo">
+<Description>
+INGRI_FactoryNo出厂编号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>INCIB_FactoryNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="300"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="INCIBLockDate">
+<Description>
+批次锁定日期</Description>
+<Type>%Date</Type>
+<SqlColumnNumber>30</SqlColumnNumber>
+<SqlFieldName>INCIB_LockDate</SqlFieldName>
+</Property>
+
+<Property name="INCIBLockTime">
+<Description>
+批次锁定时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>31</SqlColumnNumber>
+<SqlFieldName>INCIB_LockTime</SqlFieldName>
+</Property>
+
+<Property name="INCIBUnLockDate">
+<Description>
+批次解锁日期</Description>
+<Type>%Date</Type>
+<SqlColumnNumber>32</SqlColumnNumber>
+<SqlFieldName>INCIB_UnLockDate</SqlFieldName>
+</Property>
+
+<Property name="INCIBUnLockTime">
+<Description>
+批次解锁时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>33</SqlColumnNumber>
+<SqlFieldName>INCIB_UnLockTime</SqlFieldName>
+</Property>
+
+<Property name="INCIBPurSourceDr">
+<Description>
+采购来源</Description>
+<Type>User.DHCStkComDictionary</Type>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>INCIB_PurSource_Dr</SqlFieldName>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCINCIB)</SqlIdExpression>
+<StreamLocation>^User.DHCIncItmBatS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="DataMasterDHCINCIB">
+<Type>data</Type>
+<Global>^DHCINCIB</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+<StartValue>1</StartValue>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+<Data name="INCIB_APCVM_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>8</Piece>
+</Data>
+<Data name="INCIB_AdjCheque">
+<Delimiter>"^"</Delimiter>
+<Piece>16</Piece>
+</Data>
+<Data name="INCIB_BarCode">
+<Delimiter>"^"</Delimiter>
+<Piece>17</Piece>
+</Data>
+<Data name="INCIB_Carrier_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>27</Piece>
+</Data>
+<Data name="INCIB_DateAdd">
+<Delimiter>"^"</Delimiter>
+<Piece>10</Piece>
+</Data>
+<Data name="INCIB_DetailId">
+<Delimiter>"^"</Delimiter>
+<Piece>20</Piece>
+</Data>
+<Data name="INCIB_DrugPackFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>25</Piece>
+</Data>
+<Data name="INCIB_FactoryNo">
+<Delimiter>"^"</Delimiter>
+<Piece>28</Piece>
+</Data>
+<Data name="INCIB_GiftFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>15</Piece>
+</Data>
+<Data name="INCIB_INCIB_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="INCIB_INGRI_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>9</Piece>
+</Data>
+<Data name="INCIB_IssuedBatNo">
+<Delimiter>"^"</Delimiter>
+<Piece>23</Piece>
+</Data>
+<Data name="INCIB_LockDate">
+<Delimiter>"^"</Delimiter>
+<Piece>29</Piece>
+</Data>
+<Data name="INCIB_LockTime">
+<Delimiter>"^"</Delimiter>
+<Piece>30</Piece>
+</Data>
+<Data name="INCIB_PHMNF_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="INCIB_PackWays_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>26</Piece>
+</Data>
+<Data name="INCIB_PrintNum">
+<Delimiter>"^"</Delimiter>
+<Piece>18</Piece>
+</Data>
+<Data name="INCIB_ProduceDate">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="INCIB_PurSource_Dr">
+<Delimiter>"^"</Delimiter>
+<Piece>33</Piece>
+</Data>
+<Data name="INCIB_Rp">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="INCIB_RpPuruom">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="INCIB_SourceOfFund">
+<Delimiter>"^"</Delimiter>
+<Piece>12</Piece>
+</Data>
+<Data name="INCIB_Sp">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="INCIB_SpPuruom">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="INCIB_SpecList">
+<Delimiter>"^"</Delimiter>
+<Piece>13</Piece>
+</Data>
+<Data name="INCIB_SterilizedBat">
+<Delimiter>"^"</Delimiter>
+<Piece>19</Piece>
+</Data>
+<Data name="INCIB_SterilizedDate">
+<Delimiter>"^"</Delimiter>
+<Piece>22</Piece>
+</Data>
+<Data name="INCIB_StkType">
+<Delimiter>"^"</Delimiter>
+<Piece>24</Piece>
+</Data>
+<Data name="INCIB_Tax">
+<Delimiter>"^"</Delimiter>
+<Piece>21</Piece>
+</Data>
+<Data name="INCIB_TempStoreFlag">
+<Delimiter>"^"</Delimiter>
+<Piece>14</Piece>
+</Data>
+<Data name="INCIB_TimeAdd">
+<Delimiter>"^"</Delimiter>
+<Piece>11</Piece>
+</Data>
+<Data name="INCIB_UnLockDate">
+<Delimiter>"^"</Delimiter>
+<Piece>31</Piece>
+</Data>
+<Data name="INCIB_UnLockTime">
+<Delimiter>"^"</Delimiter>
+<Piece>32</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="IndexBarCode">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"BarCode"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{INCIB_BarCode}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexDetailId">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"DetailId"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{INCIB_DetailId}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{INCIB_RowId}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INCIB_RowId</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINCIB">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"INCIB"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexINGRI">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"INGRI"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INGRI_Dr}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexManf">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"PHMNF"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_PHMNF_Dr}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPPA">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"PPA"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_ProduceDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_PHMNF_Dr}</Expression>
+</Subscript>
+<Subscript name="6">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_APCVM_Dr}</Expression>
+</Subscript>
+<Subscript name="7">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L7}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexProduceDate">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"PRODATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_ProduceDate}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexVendor">
+<Type>index</Type>
+<Global>^DHCINCIB</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>"APCVM"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_INCIB_Dr}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_APCVM_Dr}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>sub</AccessType>
+<Expression>{INCIB_RowID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>INCIB_RowID</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCINCIB)
+	s oldI = +$g(^mdata("DHCINCLBADDION"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCINCIB = maxI
+	s ^mdata("DHCINCLBADDION") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

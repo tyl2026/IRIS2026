@@ -1,0 +1,55 @@
+{
+    "cainfo": "",
+    "dev_no": "",
+    "dev_safe_info": "",
+    "fixmedins_code": "H43011100007",
+    "fixmedins_name": "湖南省职业病防治院",
+    "fixmedins_soft_fcty": "",
+    "inf_time": "2026-08-01 04:05:01",
+    "infno": "3502",
+    "infver": "1.0.0",
+    "input": {
+        "invinfo": {
+            "cnt": "10",
+            "drug_trac_info": [],
+            "drugtracinfo": [],
+            "fixmedins_bchno": "8214||3",
+            "fixmedins_hilist_id": "5030012322028",
+            "fixmedins_hilist_name": "妥布霉素滴眼液（5ml）",
+            "inv_chg_opter_name": "谭静娴",
+            "inv_chg_time": "2026-07-31 10:10:26",
+            "inv_chg_type": "108",
+            "med_list_codg": "XS01AAT125G010010100840",
+            "memo": "",
+            "pric": "1.89",
+            "rx_flag": "0",
+            "trac_codg_pac_hery": "1",
+            "trdn_flag": "1"
+        }
+    },
+    "insuplc_admdvs": "430111",
+    "mdtrtarea_admvs": "430111",
+    "msgid": "H4301110000720260801040501128",
+    "opter": "1",
+    "opter_name": "Demo Group",
+    "opter_type": "1",
+    "recer_sys_code": "DHCC",
+    "sign_no": "262017340",
+    "signtype": "SM3"
+}
+
+
+
+
+出参：
+{
+    "cainfo": "null",
+    "err_msg": "null",
+    "inf_refmsgid": "430000202608010405125360309702",
+    "infcode": "0",
+    "output": "null",
+    "refmsg_time": "20260801040512823",
+    "respond_time": "20260801040512847",
+    "signtype": "null",
+    "warn_msg": "null"
+}

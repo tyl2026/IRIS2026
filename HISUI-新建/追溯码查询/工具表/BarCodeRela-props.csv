@@ -1,0 +1,8 @@
+propertyName,propertyNode,propertyDeli,propertyPiece,propertyType,propertyField,propertyColumn,propertyDesc,
+approvNo,,,,%String,approvNo,7,批准文号,
+barcode,,,,%String,barcode,2,码值,
+batNo,,,,%String,batNo,5,批号,
+codeLevel,,,,%String,codeLevel,3,码级别,
+expDate,,,,%Date,expDate,6,效期,
+parentDr,,,,BS.PHA.IN.BarCodeRela,parent_Dr,4,父码,
+produceDate,,,,%Date,produceDate,8,生产日期,

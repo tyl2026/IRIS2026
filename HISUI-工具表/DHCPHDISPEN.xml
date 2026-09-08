@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26" zv="IRIS for UNIX (Red Hat Enterprise Linux for x86-64) 2021.1.2 (Build 338_0_21956U)" ts="2026-06-23 23:32:18">
+<Class name="User.DHCPHDISPEN">
+<ClassType>persistent</ClassType>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdName>PHD_ROWID</SqlRowIdName>
+<SqlTableName>DHC_PHDISPEN</SqlTableName>
+<StorageStrategy>SQLStorage</StorageStrategy>
+<Super>%Library.Persistent</Super>
+<TimeChanged>66042,64789.5072</TimeChanged>
+<TimeCreated>62287,38119.402819</TimeCreated>
+
+<Parameter name="EXTENTSIZE">
+<Default>250</Default>
+</Parameter>
+
+<Property name="ChildDHCPHDISITEM">
+<Type>User.DHCPHDISITEM</Type>
+<Cardinality>children</Cardinality>
+<Collection/>
+<Inverse>PHDIPHDPARREF</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="PHDPRTDR">
+<Description>
+PHD_ARRCP_DR</Description>
+<Type>User.DHCINVPRT</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>2</SqlColumnNumber>
+<SqlFieldName>PHD_PRT_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDPAPMIDR">
+<Description>
+PHD_PAPMI_DR</Description>
+<Type>User.PAPatMas</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>3</SqlColumnNumber>
+<SqlFieldName>PHD_PAPMI_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDPYDATE">
+<Description>
+PHD_PYDATE</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>4</SqlColumnNumber>
+<SqlFieldName>PHD_PYDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDPYTIME">
+<Description>
+PHD_PYTIME</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>5</SqlColumnNumber>
+<SqlFieldName>PHD_PYTIME</SqlFieldName>
+</Property>
+
+<Property name="PHDFYDATE">
+<Description>
+PHD_FYDATE</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>6</SqlColumnNumber>
+<SqlFieldName>PHD_FYDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDFYTIME">
+<Description>
+PHD_FYTIME</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>PHD_FYTIME</SqlFieldName>
+</Property>
+
+<Property name="PHDPRTDATE">
+<Description>
+PHD_ARCPDATE</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>PHD_PRTDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDPHPPYDR">
+<Description>
+PHD_PHP_PYDR</Description>
+<Type>User.DHCPHPERSON</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>PHD_PHP_PYDR</SqlFieldName>
+</Property>
+
+<Property name="PHDPHPFYDR">
+<Description>
+PHD_PHP_FYDR</Description>
+<Type>User.DHCPHPERSON</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>PHD_PHP_FYDR</SqlFieldName>
+</Property>
+
+<Property name="PHDMONTH">
+<Description>
+PHD_MONTH</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>PHD_MONTH</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDSERIALNO">
+<Description>
+PHD_SERIALNO</Description>
+<Type>%Library.Float</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>PHD_SERIALNO</SqlFieldName>
+</Property>
+
+<Property name="PHDPYFLAG">
+<Description>
+PHD_PYFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>PHD_PYFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDFYFLAG">
+<Description>
+PHD_FYFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>PHD_FYFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPHLDR">
+<Description>
+PHD_PHL_DR</Description>
+<Type>User.DHCPHLOC</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>PHD_PHL_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDPHWDR">
+<Description>
+PHD_PHW_DR</Description>
+<Type>User.DHCPHWINDOW</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>PHD_PHW_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDPRINTFLAG">
+<Description>
+PHD_PRINTFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>PHD_PRINTFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDCFFLAG">
+<Description>
+PHD_CFFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>PHD_CFFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDNOUSE">
+<Description>
+PHD_NOUSE</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>PHD_NOUSE</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPHPCXDR">
+<Description>
+PHD_PHP_CXDR</Description>
+<Type>User.DHCPHPERSON</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>20</SqlColumnNumber>
+<SqlFieldName>PHD_PHP_CXDR</SqlFieldName>
+</Property>
+
+<Property name="PHDCXDATE">
+<Description>
+PHD_CXDATE</Description>
+<Type>%Library.Date</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>21</SqlColumnNumber>
+<SqlFieldName>PHD_CXDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDCXTIME">
+<Description>
+PHD_CXTIME</Description>
+<Type>%Library.Time</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>PHD_CXTIME</SqlFieldName>
+</Property>
+
+<Property name="PHDRETFLAG">
+<Description>
+PHD_RETFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>23</SqlColumnNumber>
+<SqlFieldName>PHD_RETFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPHPPYDR2">
+<Description>
+PHD_PHP_PYDR2</Description>
+<Type>User.DHCPHPERSON</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>PHD_PHP_PYDR2</SqlFieldName>
+</Property>
+
+<Property name="PHDMIXFLAG">
+<Description>
+PHD_MIXFLAG</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>PHD_MIXFLAG</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="phdpaadmdr">
+<Description>
+phd_paadm_dr</Description>
+<Type>User.PAAdm</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>phd_paadm_dr</SqlFieldName>
+</Property>
+
+<Property name="phdpattype">
+<Description>
+phd_patype</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>phd_pattype</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPrescNo">
+<Description>
+PHD_Prescno</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>PHD_PrescNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDOWEDR">
+<Description>
+PHD_Owe_Dr</Description>
+<Type>User.DHCPHOweList</Type>
+<Collection/>
+<Relationship>0</Relationship>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>PHD_OWE_DR</SqlFieldName>
+</Property>
+
+<Property name="PHDPYCKDATE">
+<Description>
+PHD_PYCKDATE</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>30</SqlColumnNumber>
+<SqlFieldName>PHD_PYCKDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDPYCKTIME">
+<Description>
+PHD_PYCKTIME</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>31</SqlColumnNumber>
+<SqlFieldName>PHD_PYCKTIME</SqlFieldName>
+</Property>
+
+<Property name="PHDPYEDDATE">
+<Description>
+PHD_PYEDDATE</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>32</SqlColumnNumber>
+<SqlFieldName>PHD_PYEDDATE</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDPYEDTIME">
+<Description>
+PHD_PYEDTIME</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>33</SqlColumnNumber>
+<SqlFieldName>PHD_PYEDTIME</SqlFieldName>
+</Property>
+
+<Property name="PHDCheckUserDr">
+<Description>
+PHD_CheckUser_Dr</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>PHD_CheckUser_Dr</SqlFieldName>
+</Property>
+
+<Property name="PHDPrintNum">
+<Description>
+打印次数</Description>
+<Type>%Library.Integer</Type>
+<SqlColumnNumber>35</SqlColumnNumber>
+<SqlFieldName>PHD_PrintNum</SqlFieldName>
+</Property>
+
+<Property name="PHDGetMedPerName">
+<Description>
+PHD_GetMedPerName</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>36</SqlColumnNumber>
+<SqlFieldName>PHD_GetMedPerName</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="20"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDGetMedPerCardNo">
+<Description>
+PHD_GetMedPerCardNo</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>37</SqlColumnNumber>
+<SqlFieldName>PHD_GetMedPerCardNo</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="40"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPHSendMedNum">
+<Description>
+发送发药机次数</Description>
+<Type>%Library.Integer</Type>
+<SqlColumnNumber>38</SqlColumnNumber>
+<SqlFieldName>PHD_PHSendMedNum</SqlFieldName>
+</Property>
+
+<Property name="PHDDataSource">
+<Description>
+发药数据来源</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>39</SqlColumnNumber>
+<SqlFieldName>PHD_DataSource</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="10"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDPIETDr">
+<Description>
+电子标签</Description>
+<Type>User.PHAINCETag</Type>
+<SqlColumnNumber>40</SqlColumnNumber>
+<SqlFieldName>PHD_PIET_Dr</SqlFieldName>
+</Property>
+
+<Property name="PHDFineHerbFlag">
+<Description>
+贵重药打印标记</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>41</SqlColumnNumber>
+<SqlFieldName>PHD_FineHerbFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDStatus">
+<Description>
+配发状态</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>42</SqlColumnNumber>
+<SqlFieldName>PHD_Status</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDBASKET">
+<Description>
+药框编号</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>43</SqlColumnNumber>
+<SqlFieldName>PHD_BASKET</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="10"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDItmCounts">
+<Description>
+明细品种数草药味数</Description>
+<Type>%Library.Integer</Type>
+<SqlColumnNumber>44</SqlColumnNumber>
+<SqlFieldName>PHD_ItmCounts</SqlFieldName>
+</Property>
+
+<Property name="PHDAgreeRetFlag">
+<Description>
+可退药标志</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>45</SqlColumnNumber>
+<SqlFieldName>PHD_AgreeRetFlag</SqlFieldName>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Property name="PHDAgreeRetUserDr">
+<Description>
+可退药操作人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>46</SqlColumnNumber>
+<SqlFieldName>PHD_AgreeRetUser_Dr</SqlFieldName>
+</Property>
+
+<Property name="PHDAgreeRetDate">
+<Description>
+可退药日期</Description>
+<Type>%Library.Date</Type>
+<SqlColumnNumber>47</SqlColumnNumber>
+<SqlFieldName>PHD_AgreeRetDate</SqlFieldName>
+<Parameter name="FORMAT" value="1"/>
+</Property>
+
+<Property name="PHDAgreeRetTime">
+<Description>
+可退药时间</Description>
+<Type>%Library.Time</Type>
+<SqlColumnNumber>48</SqlColumnNumber>
+<SqlFieldName>PHD_AgreeRetTime</SqlFieldName>
+</Property>
+
+<Property name="PHDAgreeRetRemark">
+<Description>
+可退药备注</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>49</SqlColumnNumber>
+<SqlFieldName>PHD_AgreeRetRemark</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDDefeatedUser">
+<Description>
+代煎人</Description>
+<Type>User.SSUser</Type>
+<SqlColumnNumber>50</SqlColumnNumber>
+<SqlFieldName>PHD_DefeatedUser</SqlFieldName>
+</Property>
+
+<Property name="PHDDspRemark">
+<Description>
+发药备注</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>51</SqlColumnNumber>
+<SqlFieldName>PHD_DspRemark</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="0"/>
+</Property>
+
+<Property name="PHDCESFlag">
+<Description>
+PHD_CESFlag</Description>
+<Type>%Library.String</Type>
+<SqlColumnNumber>52</SqlColumnNumber>
+<SqlFieldName>PHD_CESFlag</SqlFieldName>
+<Parameter name="COLLATION" value="Exact"/>
+<Parameter name="DISPLAYLIST" value=",Yes,No"/>
+<Parameter name="MAXLEN" value="3"/>
+<Parameter name="SELECTIVITY" value="33.3333%"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",Y,N"/>
+</Property>
+
+<Storage name="SQLStorage">
+<Type>%Storage.SQL</Type>
+<SqlIdExpression>$i(^DHCPHDISP)</SqlIdExpression>
+<StreamLocation>^User.DHCPHDISPENS</StreamLocation>
+<ExtentSize>250</ExtentSize>
+<SQLMap name="IndexETag">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>"ETag"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PHD_PIET_Dr}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPatFyDate">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"PATFYDATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_FYDATE}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPatPyDate">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<AccessType>Sub</AccessType>
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>Sub</AccessType>
+<Expression>"PATPYDATE"</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_PYDATE}</Expression>
+</Subscript>
+<Subscript name="5">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPhlPydtFyflag">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>0</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>"PhlPydtFyflag"</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHD_FYFLAG}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PHD_PHW_DR}</Expression>
+</Subscript>
+<Subscript name="6">
+<Expression>{PHD_PYDATE}</Expression>
+</Subscript>
+<Subscript name="7">
+<Expression>{PHD_PYTIME}</Expression>
+</Subscript>
+<Subscript name="8">
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L8}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPrescno">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"PRESCNO"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PrescNo}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPyEdDate">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>"PYEDDATE"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PHD_PYEDDATE}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexPyFine">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>"PyFine"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHD_FineHerbFlag}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PHD_PYDATE}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="IndexStatus">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Subscript name="1">
+<Expression>"Status"</Expression>
+</Subscript>
+<Subscript name="2">
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<Expression>{PHD_Status}</Expression>
+</Subscript>
+<Subscript name="4">
+<Expression>{PHD_PYDATE}</Expression>
+</Subscript>
+<Subscript name="5">
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L5}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHDINDEX">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"PAPMI"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PAPMI_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="PHDMASTER">
+<Type>data</Type>
+<ConditionalWithHostVars>0</ConditionalWithHostVars>
+<Global>^DHCPHDISP</Global>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L1}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+<Data name="PHD_AgreeRetDate">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>20</Piece>
+</Data>
+<Data name="PHD_AgreeRetFlag">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>18</Piece>
+</Data>
+<Data name="PHD_AgreeRetRemark">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>22</Piece>
+</Data>
+<Data name="PHD_AgreeRetTime">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>21</Piece>
+</Data>
+<Data name="PHD_AgreeRetUser_Dr">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>19</Piece>
+</Data>
+<Data name="PHD_BASKET">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>16</Piece>
+</Data>
+<Data name="PHD_CESFlag">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>25</Piece>
+</Data>
+<Data name="PHD_CFFLAG">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>10</Piece>
+</Data>
+<Data name="PHD_CXDATE">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>13</Piece>
+</Data>
+<Data name="PHD_CXTIME">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>14</Piece>
+</Data>
+<Data name="PHD_CheckUser_Dr">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>7</Piece>
+</Data>
+<Data name="PHD_DataSource">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>12</Piece>
+</Data>
+<Data name="PHD_DefeatedUser">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>23</Piece>
+</Data>
+<Data name="PHD_DspRemark">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>24</Piece>
+</Data>
+<Data name="PHD_FYDATE">
+<Delimiter>"^"</Delimiter>
+<Piece>3</Piece>
+</Data>
+<Data name="PHD_FYFLAG">
+<Delimiter>"^"</Delimiter>
+<Piece>4</Piece>
+</Data>
+<Data name="PHD_FYTIME">
+<Delimiter>"^"</Delimiter>
+<Piece>5</Piece>
+</Data>
+<Data name="PHD_FineHerbFlag">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>14</Piece>
+</Data>
+<Data name="PHD_GetMedPerCardNo">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>10</Piece>
+</Data>
+<Data name="PHD_GetMedPerName">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>9</Piece>
+</Data>
+<Data name="PHD_ItmCounts">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>17</Piece>
+</Data>
+<Data name="PHD_MIXFLAG">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>17</Piece>
+</Data>
+<Data name="PHD_MONTH">
+<Delimiter>"^"</Delimiter>
+<Piece>6</Piece>
+</Data>
+<Data name="PHD_NOUSE">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>11</Piece>
+</Data>
+<Data name="PHD_OWE_DR">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="PHD_PAPMI_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>7</Piece>
+</Data>
+<Data name="PHD_PHL_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="PHD_PHP_CXDR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>12</Piece>
+</Data>
+<Data name="PHD_PHP_FYDR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>2</Piece>
+</Data>
+<Data name="PHD_PHP_PYDR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="PHD_PHP_PYDR2">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>16</Piece>
+</Data>
+<Data name="PHD_PHSendMedNum">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>11</Piece>
+</Data>
+<Data name="PHD_PHW_DR">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="PHD_PIET_Dr">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>13</Piece>
+</Data>
+<Data name="PHD_PRINTFLAG">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>9</Piece>
+</Data>
+<Data name="PHD_PRTDATE">
+<Delimiter>"^"</Delimiter>
+<Piece>1</Piece>
+</Data>
+<Data name="PHD_PRT_DR">
+<Delimiter>"^"</Delimiter>
+<Piece>2</Piece>
+</Data>
+<Data name="PHD_PYCKDATE">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>3</Piece>
+</Data>
+<Data name="PHD_PYCKTIME">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>4</Piece>
+</Data>
+<Data name="PHD_PYDATE">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="PHD_PYEDDATE">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>5</Piece>
+</Data>
+<Data name="PHD_PYEDTIME">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>6</Piece>
+</Data>
+<Data name="PHD_PYFLAG">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>6</Piece>
+</Data>
+<Data name="PHD_PYTIME">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>7</Piece>
+</Data>
+<Data name="PHD_PrescNo">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>1</Piece>
+</Data>
+<Data name="PHD_PrintNum">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>8</Piece>
+</Data>
+<Data name="PHD_RETFLAG">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>15</Piece>
+</Data>
+<Data name="PHD_SERIALNO">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>8</Piece>
+</Data>
+<Data name="PHD_Status">
+<Delimiter>"^"</Delimiter>
+<Node>2</Node>
+<Piece>15</Piece>
+</Data>
+<Data name="phd_paadm_dr">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>18</Piece>
+</Data>
+<Data name="phd_pattype">
+<Delimiter>"^"</Delimiter>
+<Node>1</Node>
+<Piece>19</Piece>
+</Data>
+</SQLMap>
+<SQLMap name="phdindexdate">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PYDATE}</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L3}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="phdindexfydate">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"FYDATE"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHD_FYDATE}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>Sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+<SQLMap name="phdindexprt">
+<Type>index</Type>
+<Global>^DHCPHDISPi</Global>
+<PopulationType>nonnull</PopulationType>
+<Structure>delimited</Structure>
+<Subscript name="1">
+<AccessType>sub</AccessType>
+<Expression>"PRT"</Expression>
+</Subscript>
+<Subscript name="2">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PHL_DR}</Expression>
+</Subscript>
+<Subscript name="3">
+<AccessType>sub</AccessType>
+<Expression>{PHD_PRT_DR}</Expression>
+</Subscript>
+<Subscript name="4">
+<AccessType>sub</AccessType>
+<Expression>{PHD_ROWID}</Expression>
+</Subscript>
+<RowIdSpec name="1">
+<Expression>{L4}</Expression>
+<Field>PHD_ROWID</Field>
+</RowIdSpec>
+</SQLMap>
+</Storage>
+
+<Method name="SetSqlIdExpression">
+<Description>
+编译时判断是否需要重生计数器</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<Implementation><![CDATA[
+	s newI = +$g(^DHCPHDISP)
+	s oldI = +$g(^mdata("DHCPHDISPEN"))
+	s maxI = $s(newI > oldI : newI, 1 : oldI)
+	s ^DHCPHDISP = maxI
+	s ^mdata("DHCPHDISPEN") = maxI
+]]></Implementation>
+</Method>
+</Class>
+</Export>

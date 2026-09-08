@@ -1,0 +1,112 @@
+﻿<csp:content type="text/html" charset="utf-8">
+<csp:method name="OnPreHTTP" arguments="" returntype="%Boolean">
+    s %response.CharSet = "utf-8"
+    q 1
+</csp:method>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>入库3563追溯码下载异常日志查询界面</title>
+<EXTHEALTH:HEAD></EXTHEALTH:HEAD>
+<HISUI/>
+<style>
+    :root {
+        --bg:        #cee4ff;
+        --surface:   #F9FBFF;
+        --titlebg:   #E4F0FF;
+        --heading:   #15428b;
+        --border:    #95B8E7;
+        --accent:    #017bce;
+        --muted:     #666;
+        --radius:    4px;
+    }
+    body {
+        background: var(--bg);
+        font-family: "Microsoft Yahei", "PingFang SC", sans-serif;
+        font-size: 14px; margin: 0; padding: 0; color: #333;
+    }
+    #titleBar {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 20px;
+        background: var(--surface);
+        border-bottom: 2px solid var(--border);
+    }
+    #titleBar h1 { color: var(--heading); font-size: 18px; margin: 0; font-weight: 600; }
+    #titleBar .hint { color: #999; font-size: 12px; }
+    .f-spacer { flex: 1; }
+
+    #queryBar {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px;
+        padding: 10px 18px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+    }
+    #queryBar label { color: var(--muted); font-size: 13px; }
+    #queryBar .sep { color: #bbb; }
+    #queryBar input {
+        width: 150px; height: 24px; line-height: 24px;
+        border: 1px solid var(--border); border-radius: var(--radius);
+        padding: 0 6px; font-size: 13px;
+    }
+    #queryBar input.w160 { width: 160px; }
+    #paneList { padding: 12px 18px; }
+    #dg { width: 100%; }
+
+    /* === 明细弹窗 === */
+    .dl-main-info {
+        display: flex; flex-wrap: wrap; gap: 6px 22px;
+        padding: 10px 12px; margin-bottom: 10px;
+        background: #f4f8ff; border: 1px solid #dbe6f5; border-radius: var(--radius);
+        font-size: 13px; color: #445;
+    }
+    .dl-main-info b { color: var(--heading); font-weight: 600; }
+    .dlg-inner { padding: 0; }
+    .window-body { overflow: hidden !important; padding: 12px 14px !important; }
+    .panel-body.panel-body-dialog { overflow: hidden !important; padding: 0 !important; }
+</style>
+</head>
+<body>
+
+<div id="titleBar">
+    <h1>入库3563追溯码下载异常日志查询界面</h1>
+    <span class="hint">医保 3563 接口 SaveCodeRelaBy3563Excel 入库追溯码下载异常日志</span>
+</div>
+
+<div id="queryBar">
+    <label>保存日期</label>
+    <input id="qStart" class="hisui-datebox w160" placeholder="yyyy-MM-dd">
+    <span class="sep">至</span>
+    <input id="qEnd" class="hisui-datebox w160" placeholder="yyyy-MM-dd">
+    <label>入库单号</label>
+    <input id="qIngrNo" class="hisui-textbox w160" placeholder="入库单号">
+    <label>配送流水号</label>
+    <input id="qApprovalNo" class="hisui-textbox w160" placeholder="配送批次流水号">
+    <label>医保编码</label>
+    <input id="qInsuCode" class="hisui-textbox w160" placeholder="医疗目录编码">
+    <label>收费项代码</label>
+    <input id="qTarCode" class="hisui-textbox w160" placeholder="收费项代码">
+    <label>收费项名称</label>
+    <input id="qTarName" class="hisui-textbox w160" placeholder="收费项名称">
+    <a id="btnQuery" class="hisui-linkbutton" onclick="doQuery()">查询</a>
+    <a id="btnReset" class="hisui-linkbutton" onclick="doReset()">重置</a>
+    <a id="btnExport" class="hisui-linkbutton" onclick="doExport()">导出</a>
+</div>
+
+<div id="paneList">
+    <table id="dg"></table>
+</div>
+
+<div id="dlgDetail" style="display:none;">
+    <div class="dlg-inner">
+        <div class="dl-main-info" id="dlMainInfo"></div>
+        <table id="dgDetail"></table>
+    </div>
+</div>
+
+<script type="text/javascript" src="../scripts/dhccoderelalog.js"></script>
+</body>
+</html>
+</csp:content>
