@@ -1,0 +1,3657 @@
+Class BLD.WS.BLL.DHCBDXMTest Extends %RegisteredObject
+{
+
+/// Creator：      wangyan
+/// CreatDate：    20200316
+/// Description:： 根据工号查找这个员工
+/// Input：        工号
+/// Output：       工号，姓名（工号）
+/// d ##Class(%ResultSet).RunQuery("LIS.WS.BLL.DHCRPCarry","QryCheckUser","00","","","","","","","","","","","","20","1","113^1^^13^1")
+Query QryCheckUser(Code, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "Code,CName")
+{
+}
+
+ClassMethod QryCheckUserExecute(ByRef qHandle As %Binary, Code, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	
+	Set repid=$I(^CacheTemp)
+ 	s ind=1
+    S RowCount=0
+ 	s qHandle=$lb(0,repid,0)
+ 	Quit:$g(Code)="" $$$OK
+	S Rowid=$O(^dbo.SYSUserI("IndexCode",##Class(LIS.Util.Common).IndexData(Code),""))
+	i Rowid="" q 1
+	
+	s UserData=$g(^dbo.SYSUserD(Rowid))
+    s CName=$lg(UserData,3) 
+    i $l(CName) s CName=CName_"("_Code_")"
+	d OutPut
+	Quit $$$OK 
+	
+
+OutPut
+	Set Data=$lb(Code,CName)
+        Set ColFields="Code,CName"
+ 	Set ^CacheTemp(repid,ind)=Data
+        Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	q
+}
+
+ClassMethod QryCheckUserClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryCheckUserExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryCheckUserFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryCheckUserExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3)
+ 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170829
+/// Description:： 根据接收日期查询申请单接收列表
+/// Input：        接收起始时间，接收结束时间,Status:申请单状态
+/// Output：       输血申请单列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryBdReqFormReceiveList","2023-01-02","2023-01-04","20230103015","","","","","","true","","","","","","8280^10^0^37^1")
+Query QryBdReqFormReceiveList(SttAccDate, EndAccDate, FormNo, fPatName, MedicalNo, fRegNo, fLocationDR, fUseSampleNo, fTimeLimit, fTakeRecordNo, fReqTypeDR, fABODR, fRHDR, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "ReqTypeDR,PXXMPlanNoS,iIssueDateTimes,ReqTypeCode,ReqType,ReqTypeName,ReqFormNo,AdmType,RegNo,MedicalRecordNo,AdmNo,PatName,SpeciesName,AgeDesc,ABODR,RHDR,ABO,RH,Location,Ward,BedNo,Diagnosis,Ethnicity,NativePlace,RowID,SampleNo,UseSampleNo,EpisodeNo,AcceptDate,BookDate,TimeReceive,ProductList,ReqProductInfo,PurposeList,IsXMPlaned,IsPlanIssued,IsPlanNotIssued,Remark,PAAdmDate,IssueTimes,machinePlaned,AuthDate,AuthTime,CollectDate,CollectTime,PositionDesc,MedicalInsuranceType,TakeRecordDR,Patstatus,Isdiscrepancy,discrepancy,admInpat,InpatType,ReqAdmNo,EMRAddr,IssLeftHours,VisitNumberReportDR,ReqTypeColor,IsLocked,LeftDate,VReceiveDate,VReceiveTime,IsChaoliang,IssuePackInfo,IsBldDifficultFlag,Issueforms")
+{
+}
+
+ClassMethod QryBdReqFormReceiveListExecute(ByRef qHandle As %Binary, SttAccDate, EndAccDate, FormNo, fPatName, MedicalNo, fRegNo, fLocationDR, fUseSampleNo, fTimeLimit, fTakeRecordNo, fReqTypeDR, fABODR, fRHDR, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s ^tmpreqformreceive=$lb(SttAccDate, EndAccDate, FormNo, fPatName, MedicalNo, fRegNo, fLocationDR, fUseSampleNo, fTimeLimit, fTakeRecordNo, fReqTypeDR, fABODR, fRHDR, P13, Sessions)
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    Set $ZTrap = "ErrorHandle" 
+  
+	s curhospital=$p(Sessions,"^",5)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s TakeRecordDR=""
+	s Issueforms=""
+	k ^TMP($zn,repid,$j) 
+    i $l(FormNo) d 
+    .d QryListByNo
+    e  i $l(MedicalNo)&&(fTimeLimit="false") d 
+    .d QryFormByMedicalNo
+    e  i $l(fRegNo)&&(fTimeLimit="false") d 
+    .d QryFormByRegNo
+    e  i $l(fUseSampleNo) d 
+    .d QryFormByUseSampleNo
+    e  i $l(fTakeRecordNo) d
+    .d QryFormByTakeRecordNo
+    e  i $l(fPatName) d
+    .d QryFormByPatName
+    e  d 
+    .d QryList 
+    
+  
+    s Count="" f  s Count=$o(^TMP($zn,repid,$j,"DATA",Count)) q:Count=""  d  
+	.s Data=$g(^TMP($zn,repid,$j,"DATA",Count))
+	.Set ColFields="ReqTypeDR,PXXMPlanNoS,iIssueDateTimes,ReqTypeCode,ReqType,ReqTypeName,ReqFormNo,AdmType,RegNo,MedicalRecordNo,AdmNo,PatName,SpeciesName,AgeDesc,ABODR,RHDR,ABO,RH,Location,Ward,BedNo,Diagnosis,Ethnicity,NativePlace,RowID,SampleNo,UseSampleNo,EpisodeNo,AcceptDate,BookDate,TimeReceive,ProductList,ReqProductInfo,PurposeList,IsXMPlaned,IsPlanIssued,IsPlanNotIssued,Remark,PAAdmDate,IssueTimes,machinePlaned,AuthDate,AuthTime,CollectDate,CollectTime,PositionDesc,MedicalInsuranceType,TakeRecordDR,Patstatus,Isdiscrepancy,discrepancy,admInpat,InpatType,ReqAdmNo,EMRAddr,IssLeftHours,VisitNumberReportDR,ReqTypeColor,IsLocked,LeftDate,IssuePackInfo,IsBldDifficultFlag,Issueforms"
+    .s ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+    .S ind=ind+1  
+    k ^TMP($zn,repid,$j) 
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+
+QryListByNo  
+   s BDReqFormDR= $o(^dbo.BDReqFormI("IndexReqFormNo",##Class(LIS.Util.Common).IndexData(FormNo),""),-1) 
+   i '$l(BDReqFormDR)  q $$$OK   
+   d OutPut
+   q 
+   
+QryFormByMedicalNo
+   s IndexMedicalNo=##Class(LIS.Util.Common).IndexData(MedicalNo)
+   s BDReqFormDR="" f  s BDReqFormDR=$o(^dbo.BDReqFormI("IndexMedicalRecordNo",IndexMedicalNo,BDReqFormDR)) q:BDReqFormDR=""  d  
+   .d OutPut
+   q 
+   
+QryFormByRegNo
+   s IndexfRegNo=##Class(LIS.Util.Common).IndexData(fRegNo)
+   s BDReqFormDR="" f  s BDReqFormDR=$o(^dbo.BDReqFormI("IndexRegNo",IndexRegNo,BDReqFormDR)) q:BDReqFormDR=""  d  
+   .d OutPut
+   q
+   
+QryFormByUseSampleNo  
+   s IndexUseSampleNo=##Class(LIS.Util.Common).IndexData(fUseSampleNo)
+   s BDReqFormDR="" f  s BDReqFormDR=$o(^dbo.BDReqFormI("IndexUseSampleNo",IndexUseSampleNo,BDReqFormDR)) q:BDReqFormDR=""  d  
+   .d OutPut
+   q 
+QryFormByTakeRecordNo
+   s TakeRecordDR=$o(^dbo.BDTakeRecordI("IndexMaster",##Class(LIS.Util.Common).IndexData(fTakeRecordNo),""))
+   s TakeRecordData=$g(^dbo.BDTakeRecordD(TakeRecordDR)) 
+   s BDReqFormDR=$lg(TakeRecordData,3) 
+   d OutPut
+   q
+   
+QryFormByPatName
+	s SttAccDate=$tr(SttAccDate,"-"),EndAccDate=$tr(EndAccDate,"-") 
+    s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,SttAccDate),-1)
+    f  s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date)) q:(Date="")||($l(EndAccDate)&&(Date>EndAccDate))  d
+    .s BDReqFormDR="" f  s BDReqFormDR=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date,BDReqFormDR)) q:(BDReqFormDR="")  d
+    ..s BDReqFormData=$g(^dbo.BDReqFormD(BDReqFormDR))
+    ..s SurName=$lg(BDReqFormData,10),GivenName=$lg(BDReqFormData,11)
+    ..i SurName=GivenName s PatName=SurName
+    ..i SurName'= GivenName s PatName=SurName_GivenName
+    ..i PatName[fPatName d
+    ...d OutPut
+    q 
+	
+   
+QryList
+    s SttAccDate=$tr(SttAccDate,"-"),EndAccDate=$tr(EndAccDate,"-") 
+    s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,SttAccDate),-1)
+    f  s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date)) q:(Date="")||($l(EndAccDate)&&(Date>EndAccDate))  d
+    .s BDReqFormDR="" f  s BDReqFormDR=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date,BDReqFormDR)) q:(BDReqFormDR="")  d
+    ..//b ;s
+    ..d OutPut
+    q 
+OutPut   
+   s BDReqFormData=$g(^dbo.BDReqFormD(BDReqFormDR))
+   s RowID=BDReqFormDR
+   s Status=$lg(BDReqFormData,51) 
+   i Status'=35 q
+   s fWorkGroupDR=$lg(BDReqFormData,71)
+   i fWorkGroupDR'=WorkGroupDR q
+   s AdmType=$lg(BDReqFormData,52) 
+   s ReqFormNo=$lg(BDReqFormData,2)
+   s ReqTypeDR=$lg(BDReqFormData,3)
+   s IsDefinitely=""
+   S IsDefinitelyUse=$lg(BDReqFormData,86)
+   I IsDefinitelyUse=1 s IsDefinitely="用血"
+   e  s IsDefinitely="备血"
+   i (ReqTypeDR=2)|| (ReqTypeDR=3) d
+   .s ReqTypeName = $lg($g(^dbo.BBReqTypeD(ReqTypeDR)),3)_IsDefinitely
+   e  s ReqTypeName = $lg($g(^dbo.BBReqTypeD(ReqTypeDR)),3)
+   s (ReqTypeCode,ReqTypeColor)=""
+   i $l(ReqTypeDR) {
+		s ReqTypeCode = $lg(^dbo.BBReqTypeD(ReqTypeDR),2)
+		;s ReqTypeName = $lg(^dbo.BBReqTypeD(ReqTypeDR),3)
+		s ReqType = $lg(^dbo.BBReqTypeD(ReqTypeDR),4)
+		s ReqTypeColor=$lg(^dbo.BBReqTypeD(ReqTypeDR),7)
+   }
+
+   s AdmNo = $lg(BDReqFormData,4)
+   s PAAdmDate="",EMRAddr=""
+   s RegNo=$lg(BDReqFormData,8)
+   i $l(fRegNo),fRegNo'= RegNo q 
+   //i '$l(AdmNo) q
+   s (admInpat,Patstatus,PAAdmDatetimes,EMRAddr)=""  
+   i $l(AdmNo) d
+   .s EMRAddr = ##Class(LIS.WS.BLL.DHCEMRView).GetEmrAddrMTHD("",AdmNo)
+   
+   s (InpatType,PAAdmDate)=""
+   i $l(admInpat) s InpatType="I"
+   i $L(PAAdmDatetimes) d
+   .s PAAdmDate=$ZD($p(PAAdmDatetimes,"^",1),3)
+   .s PAAdmTime=$zt($p(PAAdmDatetimes,"^",2),1)
+   .s PAAdmDate=PAAdmDate_" "_PAAdmTime  
+   
+   s SpeciesDR = $lg(BDReqFormData,12)
+   s SpeciesName = "" 
+   i $l(SpeciesDR) s SpeciesName = $lg(^dbo.BTSpeciesD(SpeciesDR),3)
+   s WardDR = $lg(BDReqFormData,24)
+   s Ward=""
+   i $l(WardDR) s Ward = $lg(^dbo.BTWardD(WardDR),3)
+   i $l(Ward,"-")>1 s Ward = $p(Ward,"-",2)
+   s LocationDR= $lg(BDReqFormData,23)
+   s Location=""
+   i $l(LocationDR) s Location = $lg(^dbo.BTLocationD(LocationDR),3)
+   i $l(Location,"-")>1 s Location = $p(Location,"-",2)
+   s PatName=""
+   s SurName=$lg(BDReqFormData,10),GivenName=$lg(BDReqFormData,11)
+   i SurName=GivenName s PatName=SurName
+   i SurName'= GivenName s PatName=SurName_GivenName
+   s SampleNo=$lg(BDReqFormData,46)
+   s UseSampleNo=$lg(BDReqFormData,47)
+   s MedicalInsuranceType=$lg(BDReqFormData,87)
+   s TISMedicalInsuranceType=$lg(BDReqFormData,88)
+   i $l(TISMedicalInsuranceType) s MedicalInsuranceType=TISMedicalInsuranceType
+   s EpisodeNo=$lg(BDReqFormData,112)
+   s IsLocked=$lg(BDReqFormData,122)
+   s AcceptDate="",AuthDate="",AuthTime="",CollectDate="",CollectTime="",PositionDesc="",VReceiveDate="",VReceiveTime=""
+   
+   i $l(UseSampleNo)
+   {
+	  s SampleNo=UseSampleNo
+	  s VisitNumberR=$o(^dbo.RPVisitNumberI("IndexVisitNumber",##Class(LIS.Util.Common).IndexData(UseSampleNo),""))
+	  i $l(VisitNumberR) 
+	  { 
+	   s VisitNumberData=$g(^dbo.RPVisitNumberD(VisitNumberR))
+	   s CollectDate=$lg(VisitNumberData,51)
+	   s CollectTime=$lg(VisitNumberData,52)
+	   
+	   s VReceiveDate=$lg(VisitNumberData,66)
+	   s VReceiveTime=$lg(VisitNumberData,67)
+ 	   i $l(VReceiveDate) s VReceiveDate=$zd($zdh(VReceiveDate,8),3)
+	   i $l(VReceiveTime) s VReceiveTime=$zt(VReceiveTime)
+	   
+	   s WorkGroupMachineDR="" 
+	   for
+	   {
+		 s WorkGroupMachineDR=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberR,WorkGroupMachineDR))
+		 q:WorkGroupMachineDR=""
+		 s WorkGroupMachineData=$g(^dbo.BTWorkGroupMachineD(WorkGroupMachineDR))
+		 s ReportWorkGroupDR=$lg(WorkGroupMachineData,4)
+		 i WorkGroupDR'=ReportWorkGroupDR continue
+		 s OrderNo=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberR,WorkGroupMachineDR,""),-1)
+	     s VisitNumberReportDR=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberR,WorkGroupMachineDR,OrderNo,""))
+	     s VisitNumberReportData=$g(^dbo.RPVisitNumberReportD(VisitNumberReportDR))
+	     //s EpisodeNo=$lg(VisitNumberReportData,8)
+	     s AcceptDate=$lg(VisitNumberReportData,9)
+	     s AuthDate=$lg(VisitNumberReportData,19)
+	     s AuthTime=$lg(VisitNumberReportData,20)
+	    }
+	    s SpcimenStorageDR=$o(^dbo.RPSpcimenStorageI("IndexVisitNumber",VisitNumberR,""))
+	    i $l(SpcimenStorageDR) {
+	    s SpcimenStorageData=$g(^dbo.RPSpcimenStorageD(SpcimenStorageDR))
+	    s PositionNo=$lg(SpcimenStorageData,3)
+	    s SpecimenRackDR=$lg(SpcimenStorageData,2)
+	    s SpecimenRackData=$g(^dbo.BTSpecimenRackD(SpecimenRackDR))
+		s SpecimenRackName=$lg(SpecimenRackData,3)
+		s FridgeDR=$lg(SpecimenRackData,4)
+		s LayerNo=$lg(SpecimenRackData,5)
+		s FridgeDName=$lg($g(^dbo.BTFridgeD(FridgeDR)),3)
+		s RackTypeDR=$lg(SpecimenRackData,6)
+		s RackTypeData=$g(^dbo.BTRackTypeD(RackTypeDR))
+		s RowSum=$lg(RackTypeData,4)
+		s ColSum=$lg(RackTypeData,5) 
+		s flag=0  
+		f k=1:1:RowSum
+ 	    {
+	 	  f n=1:1:ColSum
+ 	        {
+ 	          i ((ColSum*(k-1)+n)=PositionNo) 
+ 	          {
+ 	            s flag=1 q
+ 	          }
+ 	        }
+ 	        i flag=1 q
+ 	    } 
+ 	    s PositionDesc=FridgeDName_"第"_LayerNo_"层"_"("_k_","_n_")"
+	   }
+	  } 
+   } 
+  
+   s ProductList = "",PurposeDRList="",PurposeList="",ReqProductInfo=""
+   s ReqProductDR = ""
+   
+   k ReqArray
+   
+   s TPackDR=""
+   for{
+	   s TPackDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,TPackDR))
+	   q:TPackDR=""
+	   s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,TPackDR,""))
+	   s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+	   s IsIssued=$lg(XMPlanData,32)
+	   i IsIssued=0 continue
+	   s BloodProductDR=$lg(^dbo.BDPackD(TPackDR),3)
+	   s PackVolume=+$lg(^dbo.BDPackD(TPackDR),10)
+	   s ReqProductDR=$lg(^dbo.BBBloodProductD(BloodProductDR),10)  // 血液成分
+	   i '$l(ReqProductDR) continue
+	   i $d(ReqArray(ReqProductDR)) s ReqArray(ReqProductDR)=$g(ReqArray(ReqProductDR))+PackVolume
+	   e  s ReqArray(ReqProductDR)=PackVolume
+   }     
+   
+   
+   
+   s IsChaoliang=1
+   s LeftDate=""
+   s ReqProductDR=""
+   for {
+		 s ReqProductDR = $o(^dbo.BDReqFormProductI("IndexMaster",BDReqFormDR,ReqProductDR))
+		 q:ReqProductDR=""
+		 s ReqFormProductDR = $o(^dbo.BDReqFormProductI("IndexMaster",BDReqFormDR,ReqProductDR,""))
+		 s ReqFormProductData = $g(^dbo.BDReqFormProductD(ReqFormProductDR)) 
+		 s ReqProductName = $lg($g(^dbo.BBReqProductD(ReqProductDR)),3)
+		 s ReqProductCode = $lg($g(^dbo.BBReqProductD(ReqProductDR)),2)
+		 s BloodComponentsDR=$lg($g(^dbo.BBReqProductD(ReqProductDR)),7)
+		 s PurposeDR = $lg(ReqFormProductData,4)
+		 s Purpose = $lg(^dbo.BBPurposeD(PurposeDR),3)
+		 i PurposeDRList'[(","_PurposeDR) 
+		 {
+		   i $l(PurposeList) s PurposeList=PurposeList_"   "_Purpose
+		   e  s PurposeList=Purpose
+		 }
+		 s PurposeDRList=PurposeDRList_","_PurposeDR  
+		 s Volumn = $lg(ReqFormProductData,5)
+		 s Volumn=##class(LIS.Util.Common).ConvertNumber(Volumn)
+		 //b ; 1
+		 i (+$g(ReqArray(BloodComponentsDR))<=Volumn) s IsChaoliang=0
+		 s Unit = $lg(ReqFormProductData,6)
+		 s ReqBloodGroupDR = $lg(ReqFormProductData,9)
+		 s (ReqBloodGroup,ReqBloodGroupName,ABO,RH)="" 
+		 i $l(ReqBloodGroupDR){
+	 	  s ReqBloodGroupName = $lg(^dbo.BBBloodGroupD(ReqBloodGroupDR),3) 
+	 	  s ReqBloodGroup = $lg(^dbo.BBBloodGroupD(ReqBloodGroupDR),2) 
+	 	  s ABO= $lg(^dbo.BBBloodGroupD(ReqBloodGroupDR),4)
+	 	  s RH= $lg(^dbo.BBBloodGroupD(ReqBloodGroupDR),5)
+	 	 }
+	 	 i $l(ProductList) d
+		 .s ProductList = ProductList_"+"_ReqProductCode_"["_ReqBloodGroup_"]("_Volumn_Unit_")"
+		 .s ReqProductInfo=ReqProductInfo_"^"_ReqProductDR_"@"_ReqProductName_"@"_ReqBloodGroupDR_"@"_ReqBloodGroupName_"@"_ABO_"@"_RH_"@"_Volumn_"@"_Unit_"@"_BloodComponentsDR
+		 e  d
+		 .s ProductList = ReqProductCode_"["_ReqBloodGroup_"]("_Volumn_Unit_")"
+		 .s ReqProductInfo=ReqProductDR_"@"_ReqProductName_"@"_ReqBloodGroupDR_"@"_ReqBloodGroupName_"@"_ABO_"@"_RH_"@"_Volumn_"@"_Unit_"@"_BloodComponentsDR
+		 //计算标本有效剩余时间
+		 s CostItemDR=""
+		  i $l(ReqBloodGroupDR){
+		 for {
+		    s CostItemDR = $o(^dbo.BBReqProductCostItemI("IndexMaster",ReqProductDR,ReqBloodGroupDR,CostItemDR))
+		    q:CostItemDR="" 
+		    q:$L(LeftDate) 
+		    s ReqProductCostItemDR = $o(^dbo.BBReqProductCostItemI("IndexMaster",ReqProductDR,ReqBloodGroupDR,CostItemDR,""))
+		    i '$l(ReqProductCostItemDR) q
+		    s ReqProductCostItemData = $g(^dbo.BBReqProductCostItemD(ReqProductCostItemDR))
+	        s Active = $lg(ReqProductCostItemData,8)
+		    i Active'=1 continue
+            s BillType = $lg(ReqProductCostItemData,4)
+		    s Hours = $lg(ReqProductCostItemData,10)
+		    s Days=Hours/24
+		    i BillType=1 {
+			    s curDate=$zd(+$h,8)
+			    S diffD=curDate-CollectDate
+			    S LeftDate=Days-diffD
+			    i LeftDate<0 s LeftDate=0
+			    s LeftDate=LeftDate_"天"
+			}
+		 }
+		 
+		 
+		 
+   }
+   }
+   s ReqProductDR = ""
+   for{
+     s ReqProductDR = $o(^dbo.BDReqFormProductAddI("IndexMaster",BDReqFormDR,ReqProductDR))
+	 q:ReqProductDR=""
+	 s AdditionalTimes="" 
+	 for{ 
+		s AdditionalTimes=$o(^dbo.BDReqFormProductAddI("IndexMaster",BDReqFormDR,ReqProductDR,AdditionalTimes))
+        q:AdditionalTimes=""
+        s ReqFormProductAddDR=""
+        for{
+	     s ReqFormProductAddDR=$o(^dbo.BDReqFormProductAddI("IndexMaster",BDReqFormDR,ReqProductDR,AdditionalTimes,ReqFormProductAddDR))
+	     q:ReqFormProductAddDR=""
+	     s ReqFormProductAddData=$g(^dbo.BDReqFormProductAddD(ReqFormProductAddDR))
+	     s ReceiveDate=$lg(ReqFormProductAddData,12)
+	     i $L(ReceiveDate) continue
+	     s Volumn=$Lg(ReqFormProductAddData,5)
+	     s Unit=$Lg(ReqFormProductAddData,6)
+	     s ^TMP($zn,repid,$j,"ReqProductAdd",ReqProductDR,Unit)=Volumn+$g(^TMP($zn,repid,$j,"ReqProductAdd",ReqProductDR,Unit))
+      }
+	 } 
+   }
+   s ReqProductAddInfo=""
+   s ReqProductDR=""
+   for{
+      s ReqProductDR=$o(^TMP($zn,repid,$j,"ReqProductAdd",ReqProductDR))
+      q:ReqProductDR=""
+      s Unit=""
+      for{
+        s Unit=$o(^TMP($zn,repid,$j,"ReqProductAdd",ReqProductDR,Unit))
+        q:Unit=""
+        s ReqProductName= $lg($g(^dbo.BBReqProductD(ReqProductDR)),3)
+        s Volumn=^TMP($zn,repid,$j,"ReqProductAdd",ReqProductDR,Unit)
+        i $l(ReqProductAddInfo) s ReqProductAddInfo=ReqProductAddInfo_"^"_ReqProductDR_"@"_ReqProductName_"@@@@@"_Volumn_"@"_Unit_"@"
+        e  s ReqProductAddInfo=ReqProductDR_"@追加:"_ReqProductName_"@@@@@"_Volumn_"@"_Unit_"@"
+       
+      }
+   }
+   i $l(ReqProductAddInfo) s ReqProductInfo=ReqProductInfo_"^"_ReqProductAddInfo
+   s IsXMPlaned="0",IsPlanIssued="0",IsPlanNotIssued="0",machinePlaned="0",Issueforms=""
+   s PackDR=""
+   for
+   {
+	   s PackDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,PackDR))
+	   q:(PackDR="")
+	   s XMPlanDR = $o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,PackDR,""))
+	   s XMPlanData = $g(^dbo.BDXMPlanD(XMPlanDR))
+	   s IsFinished = $lg(XMPlanData,30)
+	   s TransactionDR=$lg(XMPlanData,33)
+	   s TransactionCode=""
+	   i $l(TransactionDR) s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+	   i $l(TransactionDR) s TransactionCode=$lg(TransactionData,2)
+       i TransactionCode="MachineXMPlan" s machinePlaned="1"
+	   s IsIssued= $lg(XMPlanData,32)
+	   s PackData=$g(^dbo.BDPackD(PackDR))
+	   s PackStatusDR=$lg(PackData,34)
+	   s PackStatusData=$g(^dbo.BBPackStatusD(PackStatusDR))
+	   s PackStatusCode=$lg(PackStatusData,2)
+	   i IsFinished="1" s IsXMPlaned="1"
+	   i IsIssued="1" s IsPlanIssued="1"
+	   i IsIssued="0" s IsPlanNotIssued="1"
+   } 
+   s ABODR = $lg(BDReqFormData,18)
+   s RHDR = $lg(BDReqFormData,19)
+   S (ABO,RH)=""
+   i $L(BDReqFormDR) d
+   .S IsPlanNotIssued=..GetIssStatueMTHD(BDReqFormDR)   //0全部 1部分 2超量 3超期未发
+   i $l(ABODR) s ABO = $lg($g(^dbo.BTABOBGD(ABODR)),3)
+   i $l(RHDR) s RH = $lg($g(^dbo.BTRHBGD(RHDR)),3)
+   s IndexRegNo=##Class(LIS.Util.Common).IndexData(RegNo)
+   s IssueTimes=0
+   
+   s IssueRecordDR="" f  s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexRegNo",IndexRegNo,IssueRecordDR)) q:(IssueRecordDR="")  d
+   .s IssueRecordStatus=$lg($g(^dbo.BDIssueRecordD(IssueRecordDR)),12)
+   .i IssueRecordStatus'="1" q
+   .s IssueTimes=IssueTimes+1 
+   
+  
+   
+   s iIssueDateTime="",iIssueDateTimes="",Issueforms=""
+   s sxIssueRecordDR="" f  s sxIssueRecordDR=$o(^dbo.BDIssueRecordI("IndexReqForm",BDReqFormDR,sxIssueRecordDR)) q:(sxIssueRecordDR="")  d
+   .s iIssueDate=$lg($g(^dbo.BDIssueRecordD(sxIssueRecordDR)),4) 
+   .s iIssueTime=$lg($g(^dbo.BDIssueRecordD(sxIssueRecordDR)),5)
+   .s Issueforms=Issueforms_$lg($g(^dbo.BDIssueRecordD(sxIssueRecordDR)),2)_";" 
+   .//i $l(iIssueDate) s iIssueDate=$e(iIssueDate,1,4)_"-"_$e(iIssueDate,5,6)_"-"_$e(iIssueDate,7,8)  
+   .i $l(iIssueTime) s iIssueTime=$zt(iIssueTime,2)
+   .i $l(iIssueDate) s iIssueDateTime=iIssueDate_" "_iIssueTime
+   .i '$l(iIssueDateTimes) s iIssueDateTimes=iIssueDateTime
+   .e  s iIssueDateTimes=iIssueDateTimes_","_iIssueDateTime
+   
+   
+   
+   
+   
+   
+   s MedicalRecordNo=$lg(BDReqFormData,9)
+   i $l(MedicalNo),MedicalNo'= MedicalRecordNo q
+   s Ethnicity=$lg(BDReqFormData,21)
+   s NativePlace=$lg(BDReqFormData,22)
+   s BedNo=$lg(BDReqFormData,25)
+   s Diagnosis=$lg(BDReqFormData,26)
+   s BookDate = $lg(BDReqFormData,40)
+   s AgeUnitDR = $lg(BDReqFormData,14)
+   s Remark=$lg(BDReqFormData,49)
+   s AgeUnit=""
+   i $l(AgeUnitDR) s AgeUnit = $lg($g(^dbo.BTAgeUnitD(AgeUnitDR)),3)
+   s AgeDesc=$lg(BDReqFormData,85)
+   s ReceiveDate=$lg(BDReqFormData,68)
+   s ReceiveTime=$lg(BDReqFormData,69)
+   s ReqAdmNo=$lg(BDReqFormData,102)
+   s TimeReceive= ##Class(LIS.Util.Common).FormatDate(ReceiveDate)_" "_##Class(LIS.Util.Common).FormatTime(ReceiveTime)
+   s PatInfoExtendDR=$o(^dbo.BDPatInfoExtendI("IndexRegNo",IndexRegNo,""),-1)
+   s discrepancy="",Isdiscrepancy=""
+   i $l(PatInfoExtendDR)
+   {
+	   s PatInfoExtendData=$g(^dbo.BDPatInfoExtendD(PatInfoExtendDR))
+	   s Isdiscrepancy=$lg(PatInfoExtendData,3)
+	   i Isdiscrepancy="1" s discrepancy="是"
+	   i Isdiscrepancy="0" s discrepancy="否"
+   }
+   
+   s NowDate=$p($h,",",1)
+   s NotTime= $p($h,",",2)
+   s ReceiveDate=$ZDateH(ReceiveDate,5)
+   S ReceiveHours=(NowDate-ReceiveDate)*24*60+((NotTime-ReceiveDate)/60)
+   s IssHours= $lg(^dbo.BBReqTypeD(ReqTypeDR),13)
+   s IssLeftHours=""
+   
+   i $l(IssHours){
+	
+    s IssLeftHours= $Justify((+IssHours)-ReceiveHours,"",0)
+   }
+   k ^TMP($zn,repid,$j,"PackCount")
+   s XMPackDR=""
+   s PXXMPlanNo="",PXXMPlanNoS="",IsBldDifficultFlag=""
+   for{
+	   s XMPackDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,XMPackDR))
+	   q:XMPackDR=""
+	   s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,XMPackDR,""))
+	   s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+	   s IsIssued=$lg(XMPlanData,32)
+
+	   i IsIssued=0 continue
+	   s PXXMPlanNo=$lg(XMPlanData,26)
+	   i '$l(PXXMPlanNoS) s PXXMPlanNoS=PXXMPlanNo
+	   e  s PXXMPlanNoS=PXXMPlanNoS_","_PXXMPlanNo
+	   s BloodProductDR=$lg(^dbo.BDPackD(XMPackDR),3)
+	   s IsBldDifficult=$lg(XMPlanData,38)
+	   i IsBldDifficult="1" s IsBldDifficultFlag="1"
+	   s PackVolume=+$lg(^dbo.BDPackD(XMPackDR),10)
+	   s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	   s Unit=$Lg(BloodProductData,15)
+	   s BloodComponentsDR=$lg(BloodProductData,10)
+	   
+	   s BDComponentCName=$lg($g(^dbo.BBBloodComponentsD(BloodComponentsDR)),3)
+	   i $d(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)) s ^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)=$g(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))+PackVolume
+       e  s ^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)=PackVolume
+   } 
+   s IssuePackInfo=""
+   s BDComponentCName=""
+    for{
+      s BDComponentCName=$o(^TMP($zn,repid,$j,"PackCount",BDComponentCName))
+      q:BDComponentCName=""
+      s Unit=""
+      for{
+        s Unit=$o(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))
+        q:Unit=""
+        i $l(IssuePackInfo) s IssuePackInfo=IssuePackInfo_"，"_BDComponentCName_":"_$g(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))_Unit
+        e  s IssuePackInfo=BDComponentCName_":"_$g(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))_Unit
+      }
+    }
+   k ^TMP($zn,repid,$j,"PackCount")
+   Set Data=$lb(ReqTypeDR,PXXMPlanNoS,iIssueDateTimes,ReqTypeCode,ReqType,ReqTypeName,ReqFormNo,AdmType,RegNo,MedicalRecordNo,AdmNo,PatName,SpeciesName,AgeDesc,ABODR,RHDR,ABO,RH,Location,Ward,BedNo,Diagnosis,Ethnicity,NativePlace,RowID,SampleNo,UseSampleNo,EpisodeNo,AcceptDate,BookDate,TimeReceive,ProductList,ReqProductInfo,PurposeList,IsXMPlaned,IsPlanIssued,IsPlanNotIssued,Remark,PAAdmDate,IssueTimes,machinePlaned,AuthDate,AuthTime,CollectDate,CollectTime,PositionDesc,MedicalInsuranceType,TakeRecordDR,Patstatus,Isdiscrepancy,discrepancy,admInpat,InpatType,ReqAdmNo,EMRAddr,IssLeftHours,VisitNumberReportDR,ReqTypeColor,IsLocked,LeftDate,VReceiveDate,VReceiveTime,IsChaoliang,IssuePackInfo,IsBldDifficultFlag,Issueforms)
+   Set RowCount=RowCount+1
+   Set ^TMP($zn,repid,$j,"DATA",RowCount)=Data
+    
+   Set ind=ind+1
+   Quit
+   
+ErrorHandle  
+    s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+   Set qHandle=$lb(0,repid,0)
+   Quit $$$OK
+}
+
+ClassMethod QryBdReqFormReceiveListClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryBdReqFormReceiveListExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryBdReqFormReceiveListFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryBdReqFormReceiveListExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      zyx
+/// CreatDate：    20200317
+/// Description:： 根据血产品
+/// Table：        
+/// Input：        
+/// Output：       
+/// Return：       
+/// Others：  
+/// w ##Class(BLD.WS.BLL.DHCBDXMTest).GetIssStatueMTHD("1222")
+ClassMethod GetIssStatueMTHD(BDReqFormRowID, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String
+{
+	//发血数据
+	S BDReqFormRowID=$g(BDReqFormRowID)
+	I BDReqFormRowID="" Q ""
+ 	s IssueRecordStr=""
+ 	s IssueRecordDR="" 
+ 	s ProductBarCode=""
+ 	s IssueUser=""
+ 	s IssStatPackVol=0
+ 	s ReqStatPackVol=0
+ 	s ReqProductDR=""
+	for {
+			 	s ReqProductDR = $o(^dbo.BDReqFormProductI("IndexMaster",BDReqFormRowID,ReqProductDR))
+			 	q:ReqProductDR=""
+			 	s ReqFormProductDR= $o(^dbo.BDReqFormProductI("IndexMaster",BDReqFormRowID,ReqProductDR,""))
+			 	q:ReqFormProductDR=""
+			 	s ReqFormProductData = $g(^dbo.BDReqFormProductD(ReqFormProductDR))
+			 	s Volumn = $lg(ReqFormProductData,5)
+			 	s ReqProductData = $g(^dbo.BBReqProductD(ReqProductDR))
+			 	s ScaleFactor = $lg(ReqProductData,8)
+			    s ReqVol=Volumn*ScaleFactor
+			    s ReqStatPackVol=ReqStatPackVol+ReqVol
+			 	
+	}
+
+ 	
+    for { 
+	      s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexReqForm",BDReqFormRowID,IssueRecordDR))
+	      q:IssueRecordDR="" 
+	      s PackDR="" 
+	      for
+	      {
+		        s PackDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR))
+		        q:PackDR=""
+		        s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR,""))
+		        s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+		        s IsReturned=$lg(IssueRecordItemsData,4)
+		        i IsReturned="1" continue
+		        s PackData = $g(^dbo.BDPackD(PackDR))
+			 	s BloodProductDR = $lg(PackData,3)
+			 	s BarCode = $lg(PackData,6)
+			 	s BloodProduct=$lg(^dbo.BBBloodProductD(BloodProductDR),3)
+			 	s Units=$lg(^dbo.BBBloodProductD(BloodProductDR),15)
+			 	s BloodGroupDR = $lg(PackData,9),BloodGroup=""
+			 	i $l(BloodGroupDR) s BloodGroup = $lg(^dbo.BBBloodGroupD(BloodGroupDR),3)
+			 	s PackVolume = $lg(PackData,10)
+			 	s ScaleFactor=$lg(^dbo.BBBloodProductD(BloodProductDR),16)
+			 	s PackVol=PackVolume*ScaleFactor
+			 	s IssStatPackVol=IssStatPackVol+PackVol   //发血总量
+			 
+	      }
+    }
+	s IsPlanIssuedStr=""
+    s IsXMPlaned="0",IsPlanIssued="0",IsPlanNotIssued="0" 	// IsPlanNotIssued=1 部分发血  IsPlanNotIssued=0 全部发血  
+    s PackDR=""
+    for
+    {
+	   s PackDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormRowID,PackDR))
+	   q:(PackDR="")
+	   s XMPlanDR = $o(^dbo.BDXMPlanI("IndexMaster",BDReqFormRowID,PackDR,""))
+	   s XMPlanData = $g(^dbo.BDXMPlanD(XMPlanDR))
+	   s IsFinished = $lg(XMPlanData,30)
+	   s TransactionDR=$lg(XMPlanData,33)
+	   s TransactionCode=""
+	   i $l(TransactionDR) s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+	   i $l(TransactionDR) s TransactionCode=$lg(TransactionData,2)
+       i TransactionCode="MachineXMPlan" s machinePlaned="1"
+	   s IsIssued= $lg(XMPlanData,32)
+	   s PackData=$g(^dbo.BDPackD(PackDR))
+	   s PackStatusDR=$lg(PackData,34)
+	   s PackStatusData=$g(^dbo.BBPackStatusD(PackStatusDR))
+	   s PackStatusCode=$lg(PackStatusData,2)
+	   i IsFinished="1" s IsXMPlaned="1"
+	   i IsIssued="1" s IsPlanIssuedStr=IsPlanIssuedStr_"^1"
+	   i IsIssued="0" s IsPlanIssuedStr=IsPlanIssuedStr_"^0"
+	   ;b ;9
+	   
+   } 
+   s ReqFormNo=$LG($g(^dbo.BDReqFormD(BDReqFormRowID)),2)
+   ;b ;3
+   i IssStatPackVol'=0,IssStatPackVol<ReqStatPackVol s IsPlanNotIssued="1"   //部分发血
+   //i IsPlanIssuedStr["0",IsPlanIssuedStr["1" s IsPlanNotIssued="1"
+   i IsPlanIssuedStr'["0" s IsPlanIssued="1"
+   i IssStatPackVol>ReqStatPackVol s IsPlanNotIssued="0"   //超量发血
+   s BookDate=$LG($g(^dbo.BDReqFormD(BDReqFormRowID)),40)
+   i $L(BookDate) S BookDate=$ZDh(BookDate,8)
+   s curdate=+$H
+   i $l(BookDate),IssStatPackVol=0,curdate-BookDate>3 s IsPlanNotIssued="3"   //超期未发血
+   ;b ;31
+   Q IsPlanNotIssued
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170829
+/// Description:： 根据申请单查询配血计划
+/// Input：        BDReqFormDR申请单DR
+/// Output：       配血计划列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryXMPlanByReqForm","1","","","","","","","2","20","1","","","","","113^46^^2^1")
+Query QryXMPlanByReqForm(BDReqFormDR, fPackDR, fPlanIssued, fIsVified, fIsFinished, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "RowID,PackDR,PackID,PackBarcode,ProductBarcode,BloodProductName,BloodGroupName,ABO,RH,PackVolume,MajorXMResultCode,MinorXMResultCode,TransactionCode,TransactionName,PackStatusName,AddDate,AddTime,XMCheckDate,XMCheckTime,AddUser,XMCheckUser,XMPlanNo,moreMatch,CostItemInfo,XMLastResultDR,IsXMatchProduct,MajorXMDepictDR,MajorXMResultDR,MajorXMConclusionDR,MinorXMDepictDR,MinorXMResultDR,MinorXMConclusionDR,MachineParameterDR,XMMethodDR,IsFinished,IsIssued,PackStatusColor,CallbackDate,ExpiredDate,ExpiredTime,PackPositionName,SpecimenRackName,MachineParameterName,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName,ReqCostItemInfo,IsBldDifficult,BldDifficultDesc,PackStatusDR,NoticeStatus,PackPositionCode,PackStatusCode,BloodComponentsDR,NoticeDR,XMCheckUserDR,Remark,IsNoticed,BloodGroupDR,IsSpecial,IsVerify,IsVerified,VerifyDate,VerifyTime,VerifyUser,XMLastResultStr")
+{
+}
+
+ClassMethod QryXMPlanByReqFormExecute(ByRef qHandle As %Binary, BDReqFormDR, fPackDR, fPlanIssued, fIsVified, fIsFinished, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s ^tmpxmplanreq=$Lb(BDReqFormDR, fPackDR, fPlanIssued, fIsVified, fIsFinished, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions)
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+ 	s fIsVified=$g(fIsVified) // 是否已经校验 0 未检验 1 已校验
+ 	s fIsFinished=$g(fIsFinished)
+    s RowCount=0    
+	k ^TMP($zn,$j) 
+                s ReqCostItemInfo=""
+	s PackDR=""  
+    for
+    {  
+	   s PackDR=$o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,PackDR))
+	   q:(PackDR="")
+	   i $l(fPackDR),(","_fPackDR_",")'[(","_PackDR_",") continue 
+	   s XMPlanDR= ""
+	   s moreMatch=""
+	   s moreCount=0
+	   for
+	   {
+	     s XMPlanDR=$o(^dbo.BDXMPlanI("IndexPack",PackDR,XMPlanDR))
+	     q:(XMPlanDR="")||(moreCount>1)
+	     s XMPlanData = $g(^dbo.BDXMPlanD(XMPlanDR)) 
+	     s IsFinished=$lg(XMPlanData,30)
+	     i IsFinished'="1" continue 
+	     s moreCount=moreCount+1
+	   } 
+	   i moreCount>1 s moreMatch="1" 
+	   s XMPlanDR=""
+	   s XMPlanDR = $o(^dbo.BDXMPlanI("IndexMaster",BDReqFormDR,PackDR,""))
+	   i '$l(XMPlanDR) continue 
+	   s XMPlanData = $g(^dbo.BDXMPlanD(XMPlanDR)) 
+	   s PackData=$g(^dbo.BDPackD(PackDR))
+	   s PackID=$lg(PackData,2)
+	   s PackBarcode=$lg(PackData,2)
+	   s BloodProductDR=$lg(PackData,3)
+	   s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	   s BloodProductName=$lg(BloodProductData,3)
+	   s BloodComponentsDR=$lg(BloodProductData,10)
+	   s IsXMatchProduct=$lg(BloodProductData,12)
+	   s IsSpecial=$lg(BloodProductData,32)
+	   s IsVerify=$lg(BloodProductData,33)
+	   s Unit=$lg(BloodProductData,15)
+	   s ProductBarcode=$lg(PackData,6)
+	   s BloodGroupDR=$lg(PackData,9)
+	   s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+	   s BloodGroupName=$lg(BloodGroupData,3)
+	   s ABO=$lg(BloodGroupData,4)
+	   s RH=$lg(BloodGroupData,5)
+	   s PackVolume=$lg(PackData,10)_Unit 
+	   s ArriveDate=$lg(PackData,57)
+	   s ArriveTime =$lg(PackData,58)
+	   s ArriveUserDR=$lg(PackData,59)
+	   s ArriveUserName=""
+	   i $l(ArriveUserDR) s ArriveUserName=$lg($g(^dbo.SYSUserD(ArriveUserDR)),3)
+	   s InfusionStartDate=$lg(PackData,62)
+	   s InfusionStartTime=$lg(PackData,63)
+	   s FirstCheckUserDR=$lg(PackData,64)
+	   s SecondCheckUserDR=$lg(PackData,65)
+	   s FirstCheckUserName="",SecondCheckUserName=""
+	   i $l(FirstCheckUserDR) s FirstCheckUserName=$lg($g(^dbo.SYSUserD(FirstCheckUserDR)),3)
+	   i $l(SecondCheckUserDR) s SecondCheckUserName=$lg($g(^dbo.SYSUserD(SecondCheckUserDR)),3)
+	   s CheckUserName=FirstCheckUserName_","_SecondCheckUserName
+	   
+	   i '$l(SecondCheckUserName) s CheckUserName=$e(CheckUserName,1,$l(CheckUserName)-1)
+	   s InfusionEndDate=$lg(PackData,66)
+	   s InfusionEndTime=$lg(PackData,67)
+	   s InfusionEndUserDR=$lg(PackData,68)
+	   s InfusionEndUserName=""
+	   i $l(InfusionEndUserDR) s InfusionEndUserName=$lg($g(^dbo.SYSUserD(InfusionEndUserDR)),3)
+	   
+	   s MajorXMResultCode="",MinorXMResultCode=""
+	   s MajorXMDepictDR=$lg(XMPlanData,9)
+	   s MajorXMResultDR=$lg(XMPlanData,11)
+	   s MajorXMConclusionDR=$lg(XMPlanData,13)
+	   s MinorXMDepictDR=$lg(XMPlanData,15)
+	   s MinorXMResultDR=$lg(XMPlanData,17)
+	   s MinorXMConclusionDR=$lg(XMPlanData,19)
+	   s MachineParameterDR=$lg(XMPlanData,21)
+	   s XMMethodDR=$lg(XMPlanData,22)
+	   i $l(MajorXMResultDR) s MajorXMResultCode=$lg($g(^dbo.BBXMResultD(MajorXMResultDR)),2)
+	   i $l(MinorXMResultDR) s MinorXMResultCode=$lg($g(^dbo.BBXMResultD(MinorXMResultDR)),2)
+	   s XMLastResultStr=$lg(XMPlanData,24)
+	   s Remark=$lg(XMPlanData,25)
+	   s IsFinished=$lg(XMPlanData,30)
+	   i $l(fIsFinished),fIsFinished'=IsFinished continue
+	   s IsNoticed=$lg(XMPlanData,31)
+	   s IsIssued= $lg(XMPlanData,32)
+	   i $l(fPlanIssued),fPlanIssued=1,IsIssued'=1 continue
+	   i $l(fPlanIssued),fPlanIssued=0,(IsIssued=1) continue 
+	   s IsVerified="",VerifyDate="",VerifyTime="",VerifyUser=""
+	   s IsVerified=$lg(XMPlanData,46)
+	   i (fIsVified=0)&&(IsVerified=1) continue
+	   s VerifyDate=$lg(XMPlanData,47)
+	   s VerifyTime=$lg(XMPlanData,48)
+	   s VerifyUserDR=$lg(XMPlanData,49)
+	   i $l(VerifyUserDR) s VerifyUser=$lg(^dbo.SYSUserD(VerifyUserDR),3)
+	   s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexXMPlan",XMPlanDR,""),-1)
+	   s IssueUserName="",IssueDate="",IssueTime=""
+	   i $l(IssueRecordItemsDR){
+	    s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+	    s IsReturned=$lg(IssueRecordItemsData,4)
+	    s IssuePackDR=$lg(IssueRecordItemsData,3)
+	    i IssuePackDR'=PackDR continue
+	    s IssueRecordDR=$lg(IssueRecordItemsData,2)
+	    s IssueRecordData=$g(^dbo.BDIssueRecordD(IssueRecordDR))
+	    s IssueUserDR=$lg(IssueRecordData,6)
+	    i $l(IssueUserDR) s IssueUserName=$lg($g(^dbo.SYSUserD(IssueUserDR)),3)
+	    s IssueDate=$lg(IssueRecordData,4)
+	    s IssueTime=$lg(IssueRecordData,5)
+	   }
+	   
+	   
+	   s TransactionDR=$lg(XMPlanData,33),TransactionData="" 
+	   i $l(TransactionDR) s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+	   s TransactionCode=$lg(TransactionData,2)
+	   s TransactionName=$lg(TransactionData,3)
+	   
+	   s ReqFormCostItemDR="" 
+	   s CostItemInfo=""
+	   for
+	   {  
+	      s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexXMPlan",XMPlanDR,ReqFormCostItemDR)) 
+	      q:ReqFormCostItemDR=""
+	      s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+	      s CostType=$lg(ReqFormCostItemData,3)
+	      s CostItemDR=$lg(ReqFormCostItemData,4)
+	      s CostItemName=$lg($g(^dbo.BTCostItemD(CostItemDR)),3)
+	      s Price=$lg(ReqFormCostItemData,5)
+	      s Quantity=$lg(ReqFormCostItemData,6)
+	      s ItemStatus=$lg(ReqFormCostItemData,17) 
+	      s HISOrderID=$lg(ReqFormCostItemData,25)
+	      s HISOrderStatus=##Class(HIS.DHCOrderItem).GetCostItemFeeStatusMTHD(HISOrderID)
+	      i $l(CostItemInfo) s CostItemInfo=CostItemInfo_"^"_CostType_"@"_CostItemName_"@"_Price_"@"_Quantity_"@"_HISOrderStatus_"@"_ItemStatus
+	      e  s CostItemInfo=CostType_"@"_CostItemName_"@"_Price_"@"_Quantity_"@"_HISOrderStatus_"@"_ItemStatus
+	      
+	   } 
+	   
+	   s PackStatusDR=$lg(PackData,34)
+	   s CallbackDate=$lg(PackData,69)
+	   s ExpiredDate=$lg(PackData,13) 
+	   s ExpiredTime=$lg(PackData,14)
+	   s PackStatusCode=$lg($g(^dbo.BBPackStatusD(PackStatusDR)),2)
+	   s PackStatusName=$lg($g(^dbo.BBPackStatusD(PackStatusDR)),3)
+	   s PackStatusColor=$lg($g(^dbo.BBPackStatusD(PackStatusDR)),8)
+	   s AddUser="",XMCheckUser=""
+	   s AddDate=$lg(XMPlanData,6)
+	   s AddTime=$lg(XMPlanData,7)
+	   s AddUserDR=$lg(XMPlanData,8) 
+	   i $l(AddUserDR) s AddUser=$lg($g(^dbo.SYSUserD(AddUserDR)),3)
+	   s XMLastResultDR=$lg(XMPlanData,23) 
+	   s XMCheckDate=$lg(XMPlanData,27)
+	   s XMCheckTime=$lg(XMPlanData,28) 
+	   s XMCheckUserDR=$lg(XMPlanData,29)
+	   s IsBldDifficult=$lg(XMPlanData,38) //IsBldDifficult,BldDifficultDesc
+	   s BldDifficultDesc=$lg(XMPlanData,39)
+	   i $l(XMCheckUserDR) s XMCheckUser=$lg($g(^dbo.SYSUserD(XMCheckUserDR)),3) 
+	   s XMPlanNo=$lg(XMPlanData,26)  
+	   s MachineParameterDR=$o(^dbo.BDMachineXMI("IndexPack",PackDR,""),-1)
+	   s MachineParameterName=""
+	   i $l(MachineParameterDR) s MachineParameterData=$g(^dbo.BTMIMachineParameterD(MachineParameterDR))
+	   i $l(MachineParameterDR) s MachineParameterName=$lg(MachineParameterData,3) 
+	   s PackPositionDR=$lg(PackData,74) 
+	   s PackPositionName="",PackPositionCode=""
+	   i $l(PackPositionDR)  
+	   {  
+		  s PackPositionData=$g(^dbo.BDPackPositionD(PackPositionDR))
+		  s PackPositionName=$lg(PackPositionData,3)
+	  	  s FridgeLayerDR=$lg(PackPositionData,4)
+		  s FridgeLayerData=$g(^dbo.BTFridgeLayerD(FridgeLayerDR))
+		  s FridgeDR=$lg(FridgeLayerData,2)
+		  s FridgeData=$g(^dbo.BTFridgeD(FridgeDR))
+		  s FridgeName=$lg(FridgeData,3)
+	   }
+	  
+	   s SpecimenRackName="",SpecimenNo="",SpecimenNo1="",SpecimenNo2="",SpecimenNo3=""
+	   for
+	    {
+		  s SpecimenNo=$o(^dbo.BDPackSpecimenI("IndexMaster",PackDR,SpecimenNo))
+		  q:SpecimenNo=""    
+		  s PackSpecStorageDR=$o(^dbo.BDPackSpecStorageI("IndexPackSpecNo",SpecimenNo,""))
+		  i '$l(PackSpecStorageDR) continue
+		  s PackSpecStorageData=$g(^dbo.BDPackSpecStorageD(PackSpecStorageDR))
+		  s PositionNo=$lg(PackSpecStorageData,3)
+		  s SpecimenRackDR=$lg(PackSpecStorageData,2)
+		  s SpecimenRackData=$g(^dbo.BTSpecimenRackD(SpecimenRackDR))
+		  s SpecimenRackName=$lg(SpecimenRackData,3)
+		  s RackTypeDR=$lg(SpecimenRackData,6)
+		  s RackTypeData=$g(^dbo.BTRackTypeD(RackTypeDR))
+		  s RowSum=$lg(RackTypeData,4)
+		  s ColSum=$lg(RackTypeData,5) 
+		  s flag=0 
+		  f k=1:1:RowSum
+ 	      {
+	 	     f n=1:1:ColSum
+ 	         {
+ 	           i ((ColSum*(k-1)+n)=PositionNo) 
+ 	           {
+ 	             s flag=1 q
+ 	           }
+ 	         }
+ 	         i flag=1 q
+ 	       } 
+ 	       i n=1 s n="a"
+           i n=2 s n="b"
+           i n=3 s n="c"
+           i n=4 s n="d"
+           i n=5 s n="e"
+           i n=6 s n="f"
+           i n=7 s n="g"
+           i n=8 s n="h"
+           i n=9 s n="i"
+           i n=10 s n="j"
+           i n=11 s n="k"
+           i n=12 s n="l"
+           i n=13 s n="m"
+           i n=14 s n="n" 
+ 	       s SpecimenRackName=SpecimenRackName_"("_k_","_n_") "  
+  	       i '$l(SpecimenNo1) s SpecimenNo1=SpecimenNo    continue //_"("_k_","_n_")" 
+  	       i ($l(SpecimenNo1)&&'$l(SpecimenNo2)) s SpecimenNo2=SpecimenNo continue //_"("_k_","_n_")" 
+ 	       i ($l(SpecimenNo1)&&$l(SpecimenNo2)) s SpecimenNo3=SpecimenNo q        //_"("_k_","_n_")" 
+	    }  
+	      
+	  
+	    i (ind=1){
+                       s ReqFormCostItemDR=""
+	     for
+	     {  
+	       s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",BDReqFormDR,ReqFormCostItemDR)) 
+	       q:ReqFormCostItemDR=""
+	       s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+	       s CostType=$lg(ReqFormCostItemData,3) 
+	       i CostType=5 continue
+	       s CostItemDR=$lg(ReqFormCostItemData,4)
+	       s CostItemName=$lg($g(^dbo.BTCostItemD(CostItemDR)),3)
+	       s Price=$lg(ReqFormCostItemData,5)
+	       s Quantity=$lg(ReqFormCostItemData,6)
+	       s ItemStatus=$lg(ReqFormCostItemData,17) 
+	       s HISOrderID=$lg(ReqFormCostItemData,25)
+	       s HISOrderStatus=##Class(HIS.DHCOrderItem).GetCostItemFeeStatusMTHD(HISOrderID)
+	       i $l(ReqCostItemInfo) s ReqCostItemInfo=ReqCostItemInfo_"^"_CostType_"@"_CostItemName_"@"_Price_"@"_Quantity_"@"_HISOrderStatus_"@"_ItemStatus
+	       e  s ReqCostItemInfo=CostType_"@"_CostItemName_"@"_Price_"@"_Quantity_"@"_HISOrderStatus_"@"_ItemStatus
+	     }     
+	   }
+	   s NoticeStatus=""
+	   s NoticePackDR="" f  s NoticePackDR=$o(^dbo.BDNoticePackI("IndexPack",PackDR,NoticePackDR),-1) q:(NoticePackDR="")||$l(NoticeStatus)  d
+	   .s NoticePackData=$g(^dbo.BDNoticePackD(NoticePackDR)) 
+	   .s ReqFormDR=$lg(NoticePackData,3)
+	   .i ReqFormDR'=BDReqFormDR q
+	   .s NoticeDR=$lg(NoticePackData,2) 
+	   .s NoticeData=$g(^dbo.BDNoticeD(NoticeDR))
+	   .s NoticeStatus=$lg(NoticeData,21)
+	   d OutPut
+    } 
+    
+     
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	
+OutPut
+	Set RowCount=RowCount+1
+    Set Data=$lb(XMPlanDR,PackDR,PackID,PackBarcode,ProductBarcode,BloodProductName,BloodGroupName,ABO,RH,PackVolume,MajorXMResultCode,MinorXMResultCode,TransactionCode,TransactionName,PackStatusName,AddDate,AddTime,XMCheckDate,XMCheckTime,AddUser,XMCheckUser,XMPlanNo,moreMatch,CostItemInfo,XMLastResultDR,IsXMatchProduct,MajorXMDepictDR,MajorXMResultDR,MajorXMConclusionDR,MinorXMDepictDR,MinorXMResultDR,MinorXMConclusionDR,MachineParameterDR,XMMethodDR,IsFinished,IsIssued,PackStatusColor,CallbackDate,ExpiredDate,ExpiredTime,PackPositionName,SpecimenRackName,MachineParameterName,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName,ReqCostItemInfo,IsBldDifficult,BldDifficultDesc,PackStatusDR,NoticeStatus,PackPositionCode,PackStatusCode,BloodComponentsDR,NoticeDR,XMCheckUserDR,Remark,IsNoticed,BloodGroupDR,IsSpecial,IsVerify,IsVerified,VerifyDate,VerifyTime,VerifyUser,XMLastResultStr)
+  	Set ColFields="RowID,PackDR,PackID,PackBarcode,ProductBarcode,BloodProductName,BloodGroupName,ABO,RH,PackVolume,MajorXMResultCode,MinorXMResultCode,TransactionCode,TransactionName,PackStatusName,AddDate,AddTime,XMCheckDate,XMCheckTime,AddUser,XMCheckUser,XMPlanNo,moreMatch,CostItemInfo,XMLastResultDR,IsXMatchProduct,MajorXMDepictDR,MajorXMResultDR,MajorXMConclusionDR,MinorXMDepictDR,MinorXMResultDR,MinorXMConclusionDR,MachineParameterDR,XMMethodDR,IsFinished,IsIssued,PackStatusColor,CallbackDate,ExpiredDate,ExpiredTime,PackPositionName,SpecimenRackName,MachineParameterName,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName,ReqCostItemInfo,IsBldDifficult,BldDifficultDesc,PackStatusDR,NoticeStatus,PackPositionCode,PackStatusCode,BloodComponentsDR,NoticeDR,XMCheckUserDR,Remark,IsNoticed,BloodGroupDR,IsSpecial,IsVerify,IsVerified,VerifyDate,VerifyTime,VerifyUser,XMLastResultStr"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields) 
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod QryXMPlanByReqFormClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryXMPlanByReqFormExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryXMPlanByReqFormFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryXMPlanByReqFormExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170905
+/// Description:： 根据申请血液查询匹配条件血液
+/// Input：         sortType (默认效期匹配，phoType:"表型匹配")
+/// Output：       根据申请血液查询匹配条件血液
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryXMPlanPack","0000000533","XSame","3","1","true","400","33","0","","CCEE","","","","","8285^11^^39^1")
+Query QryXMPlanPack(fRegNo, XMType, ReqProductDRs, fBloodGroupDR, IsVolumnFit, listVolumn, ReqFormDR, LisBloodGroupDR, fpackBarCode, fPhenotype, sortType, fProductBarCode, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "RowID,PackID,PackBarcode,ProductBarcode,ProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,BloodGroupDR,PackPositionName,SpecimenRackName,SpecimenNo1,SpecimenNo2,SpecimenNo3,Phenotype,UploadMachineParameterDR,PlanDate,PlanTime")
+{
+}
+
+ClassMethod QryXMPlanPackExecute(ByRef qHandle As %Binary, fRegNo, XMType, ReqProductDRs, fBloodGroupDR, IsVolumnFit, listVolumn, ReqFormDR, LisBloodGroupDR, fpackBarCode, fPhenotype, sortType, fProductBarCode, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	//S ^tmpxmplanpack=$Lb(fRegNo, XMType, ReqProductDRs, fBloodGroupDR, IsVolumnFit, listVolumn, ReqFormDR, LisBloodGroupDR, fpackBarCode, fPhenotype, sortType, fProductBarCode, P12, P13, Sessions)
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+    s ReqTypeDR=$lg(ReqFormData,3)
+	s AdmType=$lg(ReqFormData,52)
+	i (AdmType="A")&&(fBloodGroupDR="0") s fBloodGroupDR=LisBloodGroupDR 
+	s fWorkGroupDR=$p(Sessions,"^",2),fHospitalDR=$p(Sessions,"^",5)
+	s fHospitalData=$g(^dbo.BTHospitalD(fHospitalDR))
+	s BBHospitalDR=$Lg(fHospitalData,14)
+	//i $l(BBHospitalDR) s fHospitalDR=fHospitalDR_","_BBHospitalDR
+	k ^TMP($zn,repid,$j) 
+	s NowDate=$p($h,",",1)
+	s nowTime=$p($h,",",2)
+	i $l(fPhenotype){
+	  s PackPhenotype=""
+	  for{
+	       s PackPhenotype=$o(^dbo.BBPhenotypeXMatchI("IndexMaster",fPhenotype,PackPhenotype))
+	       q:PackPhenotype=""
+	       s PhenotypeXMatchDR=$o(^dbo.BBPhenotypeXMatchI("IndexMaster",fPhenotype,PackPhenotype,""))
+	       s PhenotypeXMatchData=$g(^dbo.BBPhenotypeXMatchD(PhenotypeXMatchDR))  
+	       s PhenotypeSeq=$lg(PhenotypeXMatchData,4) 
+	       s ^TMP($zn,repid,$j,"PhenotypeXMatch",fPhenotype,PackPhenotype)=PhenotypeSeq
+	  } 
+	}
+	f i=1:1:$l(ReqProductDRs,",") 
+ 	{ 
+      s ReqProductDR=$p(ReqProductDRs,",",i)
+      s ReqVolumn=$p(listVolumn,",",i)
+ 	  s ReqProductData=$g(^dbo.BBReqProductD(ReqProductDR))
+ 	  s BloodComponentsDR=$lg(ReqProductData,7)
+      s XBloodGroupDRs="",XBloodProductDRs=""
+ 	  i XMType="XMatch" d XMatchFun
+ 	   
+ 	  i $l(XBloodProductDRs) 
+ 	  {
+	 	 f k=1:1:$l(XBloodProductDRs,",")
+	 	 {
+		 	s BloodProductDR=$p(XBloodProductDRs,",",k)  
+		    i '$l(BloodProductDR) continue
+		 	d GetPackInfo
+	 	 } 
+ 	  }
+ 	 
+ 	  s BloodProductDR="" 
+ 	  for
+ 	  {  
+ 	      s BloodProductDR=$o(^dbo.BBBloodProductI("IndexBloodComponents",BloodComponentsDR,BloodProductDR))
+	 	  q:BloodProductDR=""
+	 	  d GetPackInfo
+ 	   } 
+ 	  
+ 	}
+   
+    s PhenotypeSeq=""
+    for{
+ 	   s PhenotypeSeq=$o(^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq))
+ 	   q:PhenotypeSeq=""
+ 	   s ExpiredDate=""
+ 	   for{
+ 	     s ExpiredDate=$o(^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq,ExpiredDate))
+ 	     q:ExpiredDate=""
+ 	     s ExpiredTime=""
+ 	     for
+ 	     {
+	       s ExpiredTime=$o(^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq,ExpiredDate,ExpiredTime))  
+	 	   q:ExpiredTime="" 
+ 	       s PackDR=""
+	 	   for
+	 	   {
+		 	   s PackDR=$o(^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq,ExpiredDate,ExpiredTime,PackDR))
+		 	   q:PackDR=""
+		 	   Set Data=^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq,ExpiredDate,ExpiredTime,PackDR)
+ 	           d OutPut
+	 	   }
+ 	     }
+ 	   }
+     } 
+ 	   
+	k ^TMP($zn,repid,$j) 
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	
+GetPackInfo
+  s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+  s HospitalDR=$lg(BloodProductData,6)
+  //i (","_fHospitalDR_",")'[(","_HospitalDR_",") q
+  i HospitalDR'=fHospitalDR q
+  s Active=$lg(BloodProductData,23)
+  i Active'=1 q
+  s PackDR="" 
+  s StatusStock=##Class(LIS.Util.Common).IndexData(10)
+  for
+  {  
+     s PackDR=$o(^dbo.BDPackI("IndexStatusStock",StatusStock,PackDR)) 
+	 q:PackDR="" 
+	 i $d(^TMP($zn,repid,$j,"PackDR",PackDR)) continue 
+	 s PackData=$g(^dbo.BDPackD(PackDR))
+	 s WorkGroupDR=$lg(PackData,40)  
+	 i fWorkGroupDR'=WorkGroupDR continue  
+	 s RegNo=$lg(PackData,23)
+	 s PBloodProductDR=$lg(PackData,3)
+	 s BloodProductData=$g(^dbo.BBBloodProductD(PBloodProductDR))
+	 s BloodGroupDR=$lg(PackData,9) 
+	 i XMType="XMatch",(XBloodGroupDRs)'[(","_BloodGroupDR_",") continue  
+	 i XMType="XAutologous",fRegNo'=RegNo continue  
+	 i (XMType'="XMatch")&&(XMType'="XAutologous"),BloodGroupDR'=fBloodGroupDR continue  
+	 i XMType'="XSameGroup",BloodProductDR'=PBloodProductDR continue 
+	 s PackVolume=$lg(PackData,10) 
+	 i IsVolumnFit="true", ReqVolumn<PackVolume continue
+	 s PackID=$lg(PackData,2) 
+	 s Packquitflag="1"
+	 i '$l(fpackBarCode) s Packquitflag="0"
+	 i $l(fpackBarCode),fpackBarCode=PackID s Packquitflag="0"
+	 s ProductBarcode=$lg(PackData,6)
+	 i $l(fProductBarCode),fProductBarCode'=ProductBarcode continue
+	 s ProductName=$lg(BloodProductData,3)
+	 s BloodGroupName=$lg($g(^dbo.BBBloodGroupD(BloodGroupDR)),3)
+	 s ExpiredDate=$lg(PackData,13)
+	 s hExpiredDate=$ZDateH(ExpiredDate,5)
+	 i hExpiredDate<NowDate continue
+	 s PackBarcode=$lg(PackData,5)
+	 s ExpiredTime=$lg(PackData,14)
+	 i '$l(ExpiredTime) s ExpiredTime=0  
+	 i hExpiredDate=NowDate,ExpiredTime<nowTime continue
+	 s IsXMatchProduct=$lg(BloodProductData,12)
+	 s IsAutologous=$lg(BloodProductData,13) 
+	 s IsBGChecked=$lg(PackData,78)
+	 s Phenotype=$lg(PackData,83)
+	 i XMType'="XAutologous",IsAutologous="1" continue
+	 
+	 s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,PackDR,""),-1)
+	 s PlanDate="",PlanTime=""
+	 i $l(XMPlanDR)
+	 {
+	    s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+		s PlanDate=$lg(XMPlanData,6)
+		s PlanTime=$lg(XMPlanData,7)
+		s hPlanDate=$ZDateH(PlanDate,5) 
+		s nowDate=$p($h,",",1)
+        s nowTime=$p($h,",",2)  
+		S diffHours=(nowDate-hPlanDate)*24+((nowTime-PlanTime)/3600)
+		//配血时间超过36h,配血时间置空
+		i (diffHours>36)
+		 {
+			 s PlanDate="",PlanTime=""
+		 }
+	  } 
+	  s PhenotypeSeq="99" 
+	  i $L(fPhenotype),$L(Phenotype){ 
+	     i $d(^TMP($zn,repid,$j,"PhenotypeXMatch",fPhenotype,Phenotype)){
+	       s PhenotypeSeq=$g(^TMP($zn,repid,$j,"PhenotypeXMatch",fPhenotype,Phenotype))
+	     }
+	   }  
+	   s PackPositionDR=$lg(PackData,74) 
+	   s PackPositionName=""
+	   i $l(PackPositionDR)  
+	   {  
+		  s PackPositionData=$g(^dbo.BDPackPositionD(PackPositionDR))
+		  s PackPositionName=$lg(PackPositionData,3)
+		  s FridgeLayerDR=$lg(PackPositionData,4)
+		  s FridgeLayerData=$g(^dbo.BTFridgeLayerD(FridgeLayerDR))
+		  s FridgeDR=$lg(FridgeLayerData,2)
+		  s FridgeData=$g(^dbo.BTFridgeD(FridgeDR))
+		  s FridgeName=$lg(FridgeData,3)
+	    }
+	    s SpecimenRackName="",SpecimenNo="",SpecimenNo1="",SpecimenNo2="",SpecimenNo3=""
+	    for
+	    {
+		  s SpecimenNo=$o(^dbo.BDPackSpecimenI("IndexMaster",PackDR,SpecimenNo))
+		  q:SpecimenNo=""   
+		  i $l(fpackBarCode),(SpecimenNo=($c(32)_fpackBarCode)) s Packquitflag="0"
+		  s PackSpecStorageDR=$o(^dbo.BDPackSpecStorageI("IndexPackSpecNo",SpecimenNo,""))
+		  i '$l(PackSpecStorageDR) continue
+		  s PackSpecStorageData=$g(^dbo.BDPackSpecStorageD(PackSpecStorageDR))
+		  s PositionNo=$lg(PackSpecStorageData,3)
+		  s SpecimenRackDR=$lg(PackSpecStorageData,2)
+		  s SpecimenRackData=$g(^dbo.BTSpecimenRackD(SpecimenRackDR))
+		  s SpecimenRackName=$lg(SpecimenRackData,3)
+		  s RackTypeDR=$lg(SpecimenRackData,6)
+		  s RackTypeData=$g(^dbo.BTRackTypeD(RackTypeDR))
+		  s RowSum=$lg(RackTypeData,4)
+		  s ColSum=$lg(RackTypeData,5) 
+		  s flag=0 
+		  f k=1:1:RowSum
+ 	      {
+	 	      f n=1:1:ColSum
+ 	          {
+ 	             i ((ColSum*(k-1)+n)=PositionNo) 
+ 	             {
+ 	               s flag=1 q
+ 	             }
+ 	          }
+ 	          i flag=1 q
+ 	       } 
+ 	       i n=1 s n="a"
+           i n=2 s n="b"
+           i n=3 s n="c"
+           i n=4 s n="d"
+           i n=5 s n="e"
+           i n=6 s n="f"
+           i n=7 s n="g"
+           i n=8 s n="h"
+           i n=9 s n="i"
+           i n=10 s n="j"
+           i n=11 s n="k"
+           i n=12 s n="l"
+           i n=13 s n="m"
+           i n=14 s n="n"  
+  	       i '$l(SpecimenNo1) s SpecimenNo1=SpecimenNo_"("_k_","_n_")" continue
+  	       i ($l(SpecimenNo1)&&'$l(SpecimenNo2)) s SpecimenNo2=SpecimenNo_"("_k_","_n_")" continue
+ 	       i ($l(SpecimenNo2)&&$l(SpecimenNo2)) s SpecimenNo3=SpecimenNo_"("_k_","_n_")" q
+	     } 
+	     i Packquitflag'="0" continue
+	     s UploadMachineParameterDR=""
+ 	     s ^TMP($zn,repid,$j,"PackDR",PackDR)=1 
+ 	     //i (sortType="phoType"){ 
+ 	      s ^TMP($zn,repid,$j,"PackInfo",PhenotypeSeq,ExpiredDate,ExpiredTime,PackDR)=$lb(PackDR,PackID,PackBarcode,ProductBarcode,ProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,BloodGroupDR,PackPositionName,SpecimenRackName,SpecimenNo1,SpecimenNo2,SpecimenNo3,Phenotype,UploadMachineParameterDR,PlanDate,PlanTime)
+ 	     //}
+ 	     //else
+ 	    //{
+ 	       //s ^TMP($zn,repid,$j,"PackInfo","1",ExpiredDate,ExpiredTime,PackDR)=$lb(PackDR,PackID,PackBarcode,ProductBarcode,ProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,BloodGroupDR,PackPositionName,SpecimenRackName,SpecimenNo1,SpecimenNo2,SpecimenNo3,Phenotype,UploadMachineParameterDR,PlanDate,PlanTime)
+ 	    // } 
+     }
+    Quit
+    
+XMatchFun
+ i (fBloodGroupDR="0"){
+	 s sfBloodGroupDR=""
+	 for
+	 {
+		 s sfBloodGroupDR=$o(^dbo.BBBloodGroupD(sfBloodGroupDR))
+		 Q:sfBloodGroupDR=""
+		 S sfBloodGroupData=$g(^dbo.BBBloodGroupD(sfBloodGroupDR))
+		 s ABO=$lg(sfBloodGroupData,4)
+		 s RH=$lg(sfBloodGroupData,5)
+		 i ABO'="U" continue
+		 i RH'="U" continue
+		 s fBloodGroupDR=sfBloodGroupDR
+		 q
+	 }
+ }
+ s XBloodGroupDR="" 
+ for
+ {
+	s XBloodGroupDR=$o(^dbo.BBBloodGroupXMatchI("IndexMaster",fBloodGroupDR,BloodComponentsDR,XBloodGroupDR))
+	q:XBloodGroupDR=""
+	s XBloodGroupDRs=XBloodGroupDRs_","_XBloodGroupDR
+	s BBBloodGroupXMatchDR=$o(^dbo.BBBloodGroupXMatchI("IndexMaster",fBloodGroupDR,BloodComponentsDR,XBloodGroupDR,""))
+	s BBBloodGroupXMatchData=$g(^dbo.BBBloodGroupXMatchD(BBBloodGroupXMatchDR)) 
+ }
+ s XBloodGroupDRs=XBloodGroupDRs_","
+ S BloodProductDR=""
+ for{
+   s BloodProductDR=$o(^dbo.BBReqProductLinkI("IndexMaster",ReqTypeDR,ReqProductDR,BloodProductDR))
+   q:BloodProductDR=""
+   s XBloodProductDRs=XBloodProductDRs_","_BloodProductDR
+ } 
+ i $l(XBloodProductDRs) s XBloodProductDRs=XBloodProductDRs_","
+ Quit
+ 
+  
+OutPut
+   	Set ColFields="RowID,PackID,PackBarcode,ProductBarcode,ProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,BloodGroupDR,PackPositionName,SpecimenRackName,SpecimenNo1,SpecimenNo2,SpecimenNo3,Phenotype,UploadMachineParameterDR,PlanDate,PlanTime"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod QryXMPlanPackClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryXMPlanPackExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryXMPlanPackFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryXMPlanPackExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170905
+/// Description:： 根据申请单查询病人标本列表
+/// Input：         
+/// Output：       根据申请单查询病人标本列表
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryPatVisitNum","0000000001","","","","","","","2","20","1","","","","","8285^26^0^37^1")
+Query QryPatVisitNum(fRegNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "VisitNumberDR,VisitNumber,ReceiveDate,ReceiveTime,AuthDate,AuthTime,CollectDate,CollectTime")
+{
+}
+
+ClassMethod QryPatVisitNumExecute(ByRef qHandle As %Binary, fRegNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0   
+    s fWorkGroupDR=$p(Sessions,"^",2)
+	k ^TMP($zn,repid,$j)  
+	s RequestDate="" 
+	S curDate=$P($H,",",1),curTime=$P($H,",",2)
+	s fRegNo=##Class(LIS.Util.Common).IndexData(fRegNo)
+	for
+ 	  { 
+ 	     s RequestDate=$o(^dbo.RPVisitNumberI("IndexPatientRequest",fRegNo,RequestDate),-1)
+	 	 q:RequestDate="" 
+	 	 s VisitNumberDR=""  
+         for
+         {  
+           s VisitNumberDR=$o(^dbo.RPVisitNumberI("IndexPatientRequest",fRegNo,RequestDate,VisitNumberDR)) 
+	       q:VisitNumberDR="" 
+	       s VisitNumberData=$g(^dbo.RPVisitNumberD(VisitNumberDR)) 
+	       s OutStorageType=$lg(VisitNumberData,77)
+	       i OutStorageType'="" continue 
+	       s VisitNumber=$lg(VisitNumberData,2) 
+	       s ReceiveDate=$lg(VisitNumberData,66)
+	       s ReceiveTime=$lg(VisitNumberData,67)
+	       s CollectDate=$lg(VisitNumberData,51)
+	       s CollectTime=$lg(VisitNumberData,52)
+	       //s diffHours=(curDate-CollectDate)*24+((curTime-CollectTime)/3600) 
+	       I $L(ReceiveDate)>0{
+	        s tReceiveDate=$zdh(ReceiveDate,5)
+	        i (curDate-tReceiveDate)>7 continue 
+	       }
+	       //i diffHours>72 continue
+	       s IsWorkGroupVis=""
+	       s WorkGroupMachineDR=""
+	       for{
+		       s WorkGroupMachineDR=$o(^dbo.RPVisitNumberTestSetI("IndexWGMachineDR",VisitNumberDR,WorkGroupMachineDR))
+		       Q:(WorkGroupMachineDR="")||(IsWorkGroupVis="1")
+		       S WorkGroupMachineData=$g(^dbo.BTWorkGroupMachineD(WorkGroupMachineDR))
+		       s WorkGroupDR=$lg(WorkGroupMachineData,4)
+		       i fWorkGroupDR=WorkGroupDR s IsWorkGroupVis="1"
+	       }
+	       i IsWorkGroupVis'=1 continue
+	       s ReportWorkGroupDR="" 
+	       s AuthDate="",AuthTime=""
+	       for
+	       {
+		    s ReportWorkGroupDR=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberDR,ReportWorkGroupDR))
+		    q:ReportWorkGroupDR=""
+		    s OrderNo=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberDR,ReportWorkGroupDR,""),-1)
+	        s VisitNumberReportDR=$o(^dbo.RPVisitNumberReportI("IndexReportID",VisitNumberDR,ReportWorkGroupDR,OrderNo,""))
+	        s VisitNumberReportData=$g(^dbo.RPVisitNumberReportD(VisitNumberReportDR))
+	        s EpisodeNo=$lg(VisitNumberReportData,8) 
+	        s AuthDate=$lg(VisitNumberReportData,19)
+	        s AuthTime=$lg(VisitNumberReportData,20)
+	       }
+	        
+	       d OutPut
+         }  
+ 	  }  
+	
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+  
+OutPut
+    Set Data=$lb(VisitNumberDR,VisitNumber,ReceiveDate,ReceiveTime,AuthDate,AuthTime,CollectDate,CollectTime)
+  	Set ColFields="VisitNumberDR,VisitNumber,ReceiveDate,ReceiveTime,AuthDate,AuthTime,CollectDate,CollectTime"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod QryPatVisitNumClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryPatVisitNumExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryPatVisitNumFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryPatVisitNumExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      bgt
+/// CreatDate：    20171228
+/// Description:：  
+/// Table：        
+/// Input：        admId:就诊号,
+/// 	               P0:OrdItmList->JYZH000008@1^SXSH000004@2  0002313为医嘱Code,1为医嘱数量
+/// 					 
+/// 					   
+/// Output：       无
+/// Return：       (admId, OrdItmList, Usercode, Loc, Doc, LABDATA, InsType, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+/// Others: w ##Class(BLD.WS.BLL.DHCBDXMTest).SaveXMTestRes("62233","<Data><P3>1155@1^</P3><P12></P12><P4>407</P4><P0>ZT00175@1^</P0><P8></P8><P10></P10><P5>62</P5><P1>01697</P1><P13></P13><P9></P9><P14></P14><P6>20171205002,20171205001</P6><P2>ReqForm</P2><P11></P11><P7></P7></Data>","7968^^62^36^1")
+ClassMethod SaveDHCXMTestResult(admId As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+	s Sessions=$g(Sessions),Param=$g(Param)
+    s repid=$i(^CacheTemp) 
+	s RetValue=100    
+	 
+    Set reader = ##class(%XML.Reader).%New()
+    Do reader.OpenString(Param)
+    Do reader.Correlate("Data","LIS.WS.Model.InputParameter")
+    s RetValue=100
+    // Read objects from xml file
+    While (reader.Next(.obj,.sc)) {
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    {
+		    s SampleNo =$tr(obj.P0,$c(0))
+		    s PackDRList = $tr(obj.P1,$c(0)) 
+		    
+			f k=1:1:$l(PackDRList,"^") 
+			{
+		     s PackDR=$p(PackDRList,"^",k)
+			 s ^DHCXMTestResult("XMTestResult",SampleNo,PackDR)=1
+			 s RetValue=1			
+			} 
+		}
+    }
+    
+    If $system.Status.IsError(sc)  s RetValue="-1^参数错误:" Quit RetValue
+    
+	q RetValue
+}
+
+/// Creator：      bgt
+/// CreatDate：    20171228
+/// Description：  创建配血计划
+/// Table：        dbo.BD_ReqFormCostItem
+/// Input：         AddUserDR:增加用户ID,PackBarcode:血液献血码，SampleNo：标本号,MajorXMDepictStr:主侧描述，MajorXMResultStr主侧结果，MajorXMConclusionStr：主侧结论，MinorXMDepictStr：次侧描述，MinorXMResultStr：次侧结果，MinorXMConclusionStr：次侧结论，MachineParameterDR：仪器参数DR，XMMethodDR：交叉配血方法DR，XMLastResultStr：配血最后结果
+/// Output：       无
+/// Return：       保存结果 
+/// Others  w ##Class(BLD.WS.BLL.DHCBDXMTest).SaveXMPlanResult("81","00100121334","1706060001","相合","相合","","1","2")
+ClassMethod SaveXMPlanResult(AddUserCode, PackID, SampleNo, MajorResultStr, MinorResultStr, MachineParameterDR, XMMethodDR, fPackSpecimenNo) As %String
+{
+
+	s AddUserCode=$g(AddUserCode),SampleNo=$g(SampleNo),MajorResultStr=$g(MajorResultStr),MinorResultStr=$g(MinorResultStr),MachineParameterDR=$g(MachineParameterDR),XMMethodDR=$g(XMMethodDR),fPackSpecimenNo=$g(fPackSpecimenNo)
+	Set $ZTrap = "Error1" 
+	b ;12
+	s PlanpackDR=""
+	s IndexPackID=##Class(LIS.Util.Common).IndexData(PackID)
+	s SecondID="" f  s SecondID=$o(^dbo.BDPackI("IndexMaster",IndexPackID,SecondID)) q:(SecondID="")  d
+	.s packDR=$o(^dbo.BDPackI("IndexMaster",IndexPackID,SecondID,""))
+	.i '$l(packDR) q
+	.s packData=$g(^dbo.BDPackD(packDR)) 
+	.s PackBarcode=$lg(packData,5)
+	.s PackStatusDR=$lg(packData,34)
+	.s StatusStock=$lg(packData,35)
+	.i StatusStock'=10 q
+	.s BloodProductDR=$lg(packData,3)
+	.i '$l(BloodProductDR) q
+	.s IsXMatchProduct=$lg(^dbo.BBBloodProductD(BloodProductDR),12)
+	.i IsXMatchProduct'=1 q
+	.s PackVolume=+$lg(packData,10)
+	.s PlanpackDR=packDR 
+	i '$l(PlanpackDR) d
+	.s PackSpecimenDR=$o(^dbo.BDPackSpecimenI("IndexSpecimenNo",##Class(LIS.Util.Common).IndexData(fPackSpecimenNo),""))
+	.i '$l(PackSpecimenDR) q
+	.s PackSpecimenData=$g(^dbo.BDPackSpecimenD(PackSpecimenDR))
+	.s PackDR=$lg(PackSpecimenData,2)
+	.s PlanpackDR=PackDR 
+	i '$l(PlanpackDR) q "未找到需要交叉配血的血液" 
+ 
+	s palnReqFormDR="",RegNo="",LocationDR=""
+	s IndexSampleNo=##Class(LIS.Util.Common).IndexData(SampleNo)
+	s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexUseSampleNo",IndexSampleNo,ReqFormDR),-1) q:(ReqFormDR="")||($l(palnReqFormDR))  d
+	.s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	.s LocationDR= $lg(ReqFormData,23)
+	.s Status=$lg(ReqFormData,51)
+	.s RegNo=$lg(ReqFormData,8) 
+	.i Status'=35 q
+	.s ReqProductDR="" f  s ReqProductDR=$o(^dbo.BDReqFormProductI("IndexMaster",ReqFormDR,ReqProductDR)) Q:ReqProductDR=""  d
+	..s ReqProductData=$g(^dbo.BBReqProductD(ReqProductDR))
+	..s ReqProductName=$lg(ReqProductData,3)
+	..i ReqProductName'["红细胞" q
+	..s palnReqFormDR=ReqFormDR 
+    i '$l(palnReqFormDR) q "未找到需要交叉配血的申请单"
+	s (planMajorDepictDR,planMinorDepictDR,planMajorResultDR,planMinorResultDR,planMajorXMConclusionDR,planMinorXMConclusionDR,planLastResultDR)=""
+	s (MajorXMDepictStr,MinorXMDepictStr,planMajorXMConclusionStr,planMinorXMConclusionStr,planLastResultStr)=""
+   /*
+	s XMDepictDR="" f  s XMDepictDR=$o(^dbo.BBXMDepictD(XMDepictDR)) Q:XMDepictDR=""  D
+	.s XMDepictData=$g(^dbo.BBXMDepictD(XMDepictDR))
+	.s XMDepictName=$lg(XMDepictData,3)
+	.i XMDepictName=MajorXMDepictStr s planMajorDepictDR=XMDepictDR
+	.i XMDepictName=MinorXMDepictStr s planMinorDepictDR=XMDepictDR 
+	i $l(planMajorDepictDR) d
+	.s planMajorResultDR=$o(^dbo.BBXMDepictResultI("IndexMaster",planMajorDepictDR,""))
+	.i '$l(planMajorResultDR) q
+	.s planMajorResultData=$g(^dbo.BBXMResultD(planMajorResultDR))
+	.s planMajorResultStr=$lg(planMajorResultData,3)
+	i $l(planMinorDepictDR) d
+	.s planMinorResultDR=$o(^dbo.BBXMDepictResultI("IndexMaster",planMinorDepictDR,""))
+	.i '$l(planMinorResultDR) q
+	.s planMinorResultData=$g(^dbo.BBXMResultD(planMinorResultDR))
+	.s planMinorResultStr=$lg(planMinorResultData,3)
+  */
+  
+    s XMResultDR="" f  s XMResultDR=$o(^dbo.BBXMResultD(XMResultDR)) Q:XMResultDR=""  D
+	.s XMResultData=$g(^dbo.BBXMResultD(XMResultDR))
+	.s XMResultName=$lg(XMResultData,3)
+	.i XMResultName=MajorResultStr s planMajorResultDR=XMResultDR
+	.i XMResultName=MinorResultStr s planMinorResultDR=XMResultDR
+    
+    //仪器配血传过配血结果，查询现象结果表，查找默认为是的配血现象
+    s XMDepictResultDR="" f  s XMDepictResultDR=$o(^dbo.BBXMDepictResultD(XMDepictResultDR)) Q:XMDepictResultDR=""  D
+	.s XMDepictResultData=$g(^dbo.BBXMDepictResultD(XMDepictResultDR))
+	.s XMDepictDR=$lg(XMDepictResultData,2)
+    .s XMResultDR=$lg(XMDepictResultData,3)
+    .s IsDefault=$lg(XMDepictResultData,5) 
+    .i (XMResultDR=planMajorResultDR),(IsDefault=1) d
+    ..s planMajorDepictDR=XMDepictDR 
+    ..s MajorDepictData=$g(^dbo.BBXMDepictD(planMajorDepictDR))
+    ..s MajorXMDepictStr=$lg(MajorDepictData,3) 
+    .i (XMResultDR=planMinorResultDR),(IsDefault=1) d
+    ..s planMinorDepictDR=XMDepictDR 
+    ..s MinorDepictData=$g(^dbo.BBXMDepictD(planMinorDepictDR))
+    ..s MinorXMDepictStr=$lg(MinorDepictData,3) 
+     
+	i $l(planMajorResultDR) d
+	.s planMajorXMConclusionDR=$o(^dbo.BBXMResultConclusionI("IndexMaster",planMajorResultDR,""))
+	.i '$l(planMajorXMConclusionDR) q
+	.s planMajorXMConclusionData=$g(^dbo.BBXMConclusionD(planMajorXMConclusionDR))
+	.s planMajorXMConclusionStr=$lg(planMajorXMConclusionData,3)
+	i $l(planMinorResultDR) d
+	.s planMinorXMConclusionDR=$o(^dbo.BBXMResultConclusionI("IndexMaster",planMinorResultDR,""))
+	.i '$l(planMinorXMConclusionDR) q
+	.s planMinorXMConclusionData=$g(^dbo.BBXMConclusionD(planMinorXMConclusionDR))
+	.s planMinorXMConclusionStr=$lg(planMinorXMConclusionData,3)
+	i $l(planMajorXMConclusionDR),$l(planMinorXMConclusionDR) d
+	.s planLastResultDR=$o(^dbo.BBXMResultRuleI("IndexMaster",planMajorXMConclusionDR,planMinorXMConclusionDR,""))
+	.i '$l(planLastResultDR) q
+	.s planLastResultData=$g(^dbo.BBXMLastResultD(planLastResultDR))
+	.s planLastResultStr=$lg(planLastResultData,3)
+ 
+	s BDMachineXMDR=""
+
+	i $l(MachineParameterDR) d
+	.s BDMachineXMDR=$o(^dbo.BDMachineXMI("IndexMaster",MachineParameterDR,PlanpackDR,SampleNo,""))
+	i '$l(palnReqFormDR),$L(MachineParameterDR) s ^DHCMACHINEXMRES(MachineParameterDR,SampleNo,PlanpackDR)=XMLastResultStr  q "未找到标本关联的接收申请单"
+	TSTART 
+	i $d(^dbo.BDXMPlanI("IndexMaster",palnReqFormDR,PlanpackDR)) d // q "配血计划已经存在"
+	.d UpdateMachineXMPlan
+	e  d
+	.d SaveMachineXMPlan 
+	i ret'=1 TROLLBACK  q ret
+	i '$l(BDMachineXMDR) TCOMMIT  q ret
+	s BDMachineXMData=##class(dbo.BDMachineXM).%OpenId(BDMachineXMDR) 
+	s BDMachineXMData.Sended="1"
+	s sc=BDMachineXMData.%Save() 
+	If ($SYSTEM.Status.IsOK(sc)) {
+		s ret=1
+	}
+	else {
+		s ret=$SYSTEM.Status.GetErrorText(sc) TROLLBACK  q ret
+	}   
+	TCOMMIT
+	q ret
+
+UpdateMachineXMPlan  
+	s BDXMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",palnReqFormDR,PlanpackDR,"")) 
+	s objXMPlan=##class(dbo.BDXMPlan).%OpenId(BDXMPlanDR) 
+	s objXMPlan.MajorXMDepictStr=MajorXMDepictStr
+	s objXMPlan.MajorXMResultStr=MajorResultStr 
+	i $l(planMajorDepictDR) s objXMPlan.MajorXMDepictDR=planMajorDepictDR 
+	i $l(planMinorDepictDR) s objXMPlan.MinorXMDepictDR=planMinorDepictDR
+	i $l(planMajorResultDR) s objXMPlan.MajorXMResultDR=planMajorResultDR
+	i $l(planMinorResultDR) s objXMPlan.MinorXMResultDR=planMinorResultDR 
+	i $l(planMajorXMConclusionDR) s objXMPlan.MajorXMConclusionDR=planMajorXMConclusionDR 
+	i $l(planMinorXMConclusionDR) s objXMPlan.MinorXMConclusionDR=planMinorXMConclusionDR 
+
+	s objXMPlan.MajorXMConclusionStr=planMajorXMConclusionStr
+	s objXMPlan.MinorXMDepictStr=MinorXMDepictStr
+	s objXMPlan.MinorXMResultStr=MinorResultStr  
+	s objXMPlan.MinorXMConclusionStr=planMinorXMConclusionStr 
+	s objXMPlan.XMLastResultStr=planLastResultStr
+
+	i $l(planLastResultDR) s objXMPlan.XMLastResultDR=planLastResultDR 
+	//i $l(BBTransactionDR) s objXMPlan.TransactionDR=BBTransactionDR
+
+	s sc=objXMPlan.%Save()
+
+	s ret=100 
+
+	If ($SYSTEM.Status.IsOK(sc)) {
+		s ret=1
+	}
+	else {
+		s ret=$SYSTEM.Status.GetErrorText(sc)  q ret
+	}   
+	q
+
+SaveMachineXMPlan  
+	s ABOType="",RHType="",AntibodyScreenRes="",ABOTypeInfo="",RHTypeInfo="",AntibodyScreenInfo=""
+	i $l(RegNo) s ABOTypeInfo=##class(BLD.WS.BLL.DHCTCResult).GetTCResultByRegNoMTHD(RegNo,"ABO","BLD","")
+	i $l(RegNo) s RHTypeInfo=##class(BLD.WS.BLL.DHCTCResult).GetTCResultByRegNoMTHD(RegNo,"RH","BLD","")
+	i $l(RegNo) s AntibodyScreenInfo=##class(BLD.WS.BLL.DHCTCResult).GetTCResultByRegNoMTHD(RegNo,"SAS","BLD","")
+
+	i $l(ABOTypeInfo) s ABOType=$p($p($p(ABOTypeInfo,"""P5"":""",2),""",",1),"R",1)
+	i $l(RHTypeInfo) s RHType=$p($p($p(RHTypeInfo,"""P5"":""",2),""",",1),"R",2)
+
+	i $l(AntibodyScreenInfo) s AntibodyScreenRes=$p($p(AntibodyScreenInfo,"""P5"":""",2),""",",1)
+	s PatBdType=""
+	i ($l(ABOType)||$l(RHType)) s PatBdType=ABOType_"R"_RHType 
+	s BBTransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("MachineXMPlan"),""))
+	s AddUserDR=$o(^dbo.SYSUserI("IndexCode",##Class(LIS.Util.Common).IndexData(AddUserCode),""))
+	s objXMPlan=##class(dbo.BDXMPlan).%New()
+	s objXMPlan.ReqFormDR=palnReqFormDR
+	s objXMPlan.PackDR=PlanpackDR 
+	s objXMPlan.PackBarcode=PackBarcode
+	I $l(AddUserDR) s objXMPlan.SampleNo=SampleNo
+	s objXMPlan.AddUserDR=AddUserDR
+	s objXMPlan.AddDate= $zd($h,8)
+	s objXMPlan.AddTime= $p($h,",",2)
+
+
+	s objXMPlan.MajorXMDepictStr=MajorXMDepictStr
+	s objXMPlan.MajorXMResultStr=MajorResultStr
+	s objXMPlan.MajorXMConclusionStr=planMajorXMConclusionStr
+	i $l(planMajorDepictDR) s objXMPlan.MajorXMDepictDR=planMajorDepictDR 
+	i $l(planMinorDepictDR) s objXMPlan.MinorXMDepictDR=planMinorDepictDR
+	i $l(planMajorResultDR) s objXMPlan.MajorXMResultDR=planMajorResultDR
+	i $l(planMinorResultDR) s objXMPlan.MinorXMResultDR=planMinorResultDR 
+	i $l(planMajorXMConclusionDR) s objXMPlan.MajorXMConclusionDR=planMajorXMConclusionDR 
+	i $l(planMinorXMConclusionDR) s objXMPlan.MinorXMConclusionDR=planMinorXMConclusionDR
+
+	s objXMPlan.MinorXMDepictStr=MinorXMDepictStr
+	s objXMPlan.MinorXMResultStr=MinorResultStr
+	s objXMPlan.MinorXMConclusionStr=planMinorXMConclusionStr
+	s objXMPlan.MachineParameterDR=MachineParameterDR
+	i $l(XMMethodDR) s objXMPlan.XMMethodDR=XMMethodDR
+	s objXMPlan.XMLastResultStr=planLastResultStr
+	i $l(planLastResultDR) s objXMPlan.XMLastResultDR=planLastResultDR 
+	s objXMPlan.CheckBloodGroupRes=PatBdType
+	s objXMPlan.AntibodyScreenRes=AntibodyScreenRes
+	i $l(BBTransactionDR) s objXMPlan.TransactionDR=BBTransactionDR
+
+	s sc=objXMPlan.%Save()
+
+	s ret=100 
+
+	If ($SYSTEM.Status.IsOK(sc)) {
+		s ret=1
+	}
+	else {
+		s ret=$SYSTEM.Status.GetErrorText(sc) q ret
+	} 
+
+	s packTransaction=##class(dbo.BDPackTransaction).%New()
+	s packTransaction.PackDR= PlanpackDR
+	s packTransaction.TransDate=$zd($h,8)
+	s packTransaction.TransTime=$p($h,",",2)
+	s packTransaction.TransUserDR=AddUserDR
+	i $l(BBTransactionDR) s packTransaction.TransactionDR=BBTransactionDR  
+	s packTransaction.UsePatientRegNo=RegNo
+	s packTransaction.UseReqDR=palnReqFormDR
+	s packTransaction.NewPackStatusDR=PackStatusDR
+	i $l(LocationDR) s packTransaction.LocationDR=LocationDR
+	s sc=packTransaction.%Save()
+
+	If ($SYSTEM.Status.IsOK(sc)) {
+		s ret=1
+	}
+	else {
+		s ret=$SYSTEM.Status.GetErrorText(sc) q ret
+	} 
+	q
+
+Error1
+	TROLLBACK
+	q 100
+}
+
+ClassMethod SavePackBGResult(fPackBarCode, PhenotypeRes, BloodGroupRes) As %String
+{
+	s fPackBarCode=$g(fPackBarCode),PhenotypeRes=$g(PhenotypeRes),BloodGroupRes=$g(BloodGroupRes)
+	 
+	s BloodGroupDR="" f  s BloodGroupDR=$o(^dbo.BBBloodGroupD(BloodGroupDR)) q:BloodGroupDR=""  d
+    .s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+    .s BloodGroupName=$lg(BloodGroupData,3)
+    .i BloodGroupRes=BloodGroupName q 
+    s ret=100
+    s IndexfPackBarCode=##Class(LIS.Util.Common).IndexData(fPackBarCode)
+    s SecondID="" f  s SecondID=$o(^dbo.BDPackI("IndexMaster",IndexfPackBarCode,SecondID)) Q:SecondID=""  D
+    .s PackDR=$o(^dbo.BDPackI("IndexMaster",IndexfPackBarCode,SecondID,""))
+    .i '$l(PackDR) q
+    .d SavePackBGRes 
+    q ret
+   
+   
+SavePackBGRes   
+   s PackData=##class(dbo.BDPack).%OpenId(PackDR)
+   i $l(PhenotypeRes) s PackData.Phenotype=PhenotypeRes
+   i $l(BloodGroupDR) s PackData.BGBloodGroupDR=BloodGroupDR
+   s sc=PackData.%Save()
+  If ($SYSTEM.Status.IsOK(sc)) {
+	  s ret=1
+  }
+  else {
+	  s ret=$SYSTEM.Status.GetErrorText(sc) q ret
+  } 
+  q
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170829
+/// Description:： 根据申请单查询配血计划
+/// Input：        BDReqFormDR申请单DR
+/// Output：       配血计划列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryIssuePackByRegNo","0000105305","","","","","","","2","20","1","","","","","113^46^^2^1")
+Query QryIssuePackByRegNo(RegNo, fAdmNo, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "PackID,ProductBarcode,BloodProductName,BloodGroupName,PackVolume,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName")
+{
+}
+
+ClassMethod QryIssuePackByRegNoExecute(ByRef qHandle As %Binary, RegNo, fAdmNo, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0    
+	k ^TMP($zn,$j) 
+	s IndexRegNo=##Class(LIS.Util.Common).IndexData(RegNo)
+	s ReqFormDR=""  
+    for
+    {  
+	  s ReqFormDR=$o(^dbo.BDReqFormI("IndexRegNo",IndexRegNo,ReqFormDR))
+	  q:(ReqFormDR="") 
+	  s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	  s AdmNo=$lg(ReqFormData,4)
+	  i $l(fAdmNo),fAdmNo'=AdmNo continue
+	  s IssueRecordDR=""
+	  for
+	  {
+	   s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexReqForm",ReqFormDR,IssueRecordDR))
+	   q:(IssueRecordDR="") 
+	   s PackDR= "" 
+	   for
+	   {
+	     s PackDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR))
+	     q:(PackDR="")  
+	     s PackData=$g(^dbo.BDPackD(PackDR))
+	     s PackID=$lg(PackData,2)
+	     s PackBarcode=$lg(PackData,2)
+	     s ProductBarcode=$lg(PackData,6)
+	     s BloodProductDR=$lg(PackData,3)
+	     s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	     s BloodProductName=$lg(BloodProductData,3)
+	     s IsXMatchProduct=$lg(BloodProductData,12)
+	     s Unit=$lg(BloodProductData,15)
+	     s ProductBarcode=$lg(PackData,6)
+	     s BloodGroupDR=$lg(PackData,9)
+	     s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+	     s BloodGroupName=$lg(BloodGroupData,3)
+	     s ABO=$lg(BloodGroupData,4)
+	     s RH=$lg(BloodGroupData,5)
+	     s PackVolume=$lg(PackData,10)_Unit   
+	     s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR,""))
+	     s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+	     s IsReturned=$lg(IssueRecordItemsData,4)  
+	     i IsReturned=1 continue
+	     s IssueRecordData=$g(^dbo.BDIssueRecordD(IssueRecordDR))
+	     s IssueUserDR=$lg(IssueRecordData,6)
+	     s IssueUserName=""
+	     i $l(IssueUserDR) s IssueUserName=$lg($g(^dbo.SYSUserD(IssueUserDR)),3)
+	     s IssueDate=$lg(IssueRecordData,4)
+	     s IssueTime=$lg(IssueRecordData,5)  
+	     s ArriveDate=$lg(PackData,57)
+	     s ArriveTime =$lg(PackData,58)
+	     s ArriveUserDR=$lg(PackData,59)
+	     s ArriveUserName=""
+	     i $l(ArriveUserDR) s ArriveUserName=$lg($g(^dbo.SYSUserD(ArriveUserDR)),3)
+	     s InfusionStartDate=$lg(PackData,62)
+	     s InfusionStartTime=$lg(PackData,63)
+	     s FirstCheckUserDR=$lg(PackData,64)
+	     s SecondCheckUserDR=$lg(PackData,65)
+	     s FirstCheckUserName="",SecondCheckUserName=""
+	     i $l(FirstCheckUserDR) s FirstCheckUserName=$lg($g(^dbo.SYSUserD(FirstCheckUserDR)),3)
+	     i $l(SecondCheckUserDR) s SecondCheckUserName=$lg($g(^dbo.SYSUserD(SecondCheckUserDR)),3)
+	     s CheckUserName=FirstCheckUserName_","_SecondCheckUserName
+	     i '$l(SecondCheckUserName) s CheckUserName=$e(CheckUserName,1,$l(CheckUserName)-1)
+	     s InfusionEndDate=$lg(PackData,66)
+	     s InfusionEndTime=$lg(PackData,67)
+	     s InfusionEndUserDR=$lg(PackData,68)
+	     s InfusionEndUserName=""
+	     i $l(InfusionEndUserDR) s InfusionEndUserName=$lg($g(^dbo.SYSUserD(InfusionEndUserDR)),3)
+	     d OutPut  
+	   }
+	   
+	  }
+    } 
+   
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	
+OutPut
+    Set Data=$lb(PackID,ProductBarcode,BloodProductName,BloodGroupName,PackVolume,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName)
+  	Set ColFields="PackID,ProductBarcode,BloodProductName,BloodGroupName,PackVolume,IssueUserName,IssueDate,IssueTime,ArriveDate,ArriveTime,ArriveUserName,InfusionStartDate,InfusionStartTime,CheckUserName,InfusionEndDate,InfusionEndTime,InfusionEndUserName"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod QryIssuePackByRegNoClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryIssuePackByRegNoExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryIssuePackByRegNoFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryIssuePackByRegNoExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+// Creator：      baoguotao
+
+/// CreatDate：    20170117
+/// Description:： 根据登记号RegNo查询就诊号admid
+/// Input：       RegNo
+/// Output：       admId
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryTopOneExpiredPLTPack","","","","","","","","","","","","","","","113^11^^2^1")	
+Query QryTopOneExpiredPLTPack(fBloodGroupDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "PackDR,PackID,ExpiredDate,ExpiredTime")
+{
+}
+
+ClassMethod QryTopOneExpiredPLTPackExecute(ByRef qHandle As %Binary, fBloodGroupDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions, Output RowCount As %String) As %Status
+{
+	 
+	Set repid=$I(^CacheTemp)
+    If $g(ind)="" Set ind=1  
+    s NowDate=$p($h,",",1)
+	s nowTime=$p($h,",",2)
+    s Sessions=$g(Sessions)
+    s fWorkGroupDR=$p(Sessions,"^",2) 
+    s fExpiredDate="",fExpiredTime="",fPackDR=""
+    s IndexStatus=##Class(LIS.Util.Common).IndexData(10)
+    s PackDR="" f  s PackDR=$o(^dbo.BDPackI("IndexStatusStock",IndexStatus,PackDR)) q:PackDR=""  d 
+    .s PackData=$g(^dbo.BDPackD(PackDR))
+	.s WorkGroupDR=$lg(PackData,40)  
+	.i fWorkGroupDR'=WorkGroupDR q  
+	.s BloodGroupDR=$lg(PackData,9)
+	.i fBloodGroupDR'=BloodGroupDR q
+    .s BloodProductDR=$lg(PackData,3)
+    .s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+    .s BloodComponentsDR=$lg(BloodProductData,10)
+    .s BBloodComponentsData=$g(^dbo.BBBloodComponentsD(BloodComponentsDR))
+    .s Synonym=$lg(BBloodComponentsData,5) 
+    .i Synonym'="PLT" Q 
+    .s ExpiredDate=$lg(PackData,13)
+    .s ExpiredTime=$lg(PackData,14)
+    .s hExpiredDate=$ZDateH(ExpiredDate,5)
+	.i hExpiredDate<NowDate q   
+	.i hExpiredDate=NowDate,ExpiredTime<nowTime q 
+    .i '$l(fExpiredDate) s fExpiredDate=ExpiredDate,fExpiredTime=ExpiredTime 
+    .i ExpiredDate>fExpiredDate q
+    .i fExpiredDate=ExpiredDate,ExpiredTime>fExpiredTime q
+    .s fExpiredDate=ExpiredDate,fExpiredTime=ExpiredTime
+    .s fPackDR=PackDR
+    .s PackID=$lg(PackData,2) 
+    i $l(fPackDR) d 
+    .d OutPut
+     
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut 
+    set Data=$lb(fPackDR,PackID,fExpiredDate,fExpiredTime)
+	set ColFields="PackDR,PackID,ExpiredDate,ExpiredTime"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod QryTopOneExpiredPLTPackClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryTopOneExpiredPLTPackExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryTopOneExpiredPLTPackFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryTopOneExpiredPLTPackExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Description:：  
+/// Input：        
+/// Output：        
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryXMDepictResRule","","","","","","","","","","","","","","","113^46^^2^1")	
+Query QryXMDepictResRule(P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "XMDepictDR,XMResultDR,XMConclusionDR")
+{
+}
+
+ClassMethod QryXMDepictResRuleExecute(ByRef qHandle As %Binary, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	 
+	Set repid=$I(^CacheTemp)
+	S RowCount=0
+    If $g(ind)="" Set ind=1   
+    s XMDepictResultDR="" f  s XMDepictResultDR=$o(^dbo.BBXMDepictResultD(XMDepictResultDR)) q:XMDepictResultDR=""  d
+    .s XMDepictResultData=$g(^dbo.BBXMDepictResultD(XMDepictResultDR))
+    .S XMDepictDR=$lg(XMDepictResultData,2)
+    .s XMResultDR=$lg(XMDepictResultData,3)
+    .s IsDefault=$lg(XMDepictResultData,5) 
+    .s XMConclusionDR="" f  s XMConclusionDR=$o(^dbo.BBXMResultConclusionI("IndexMaster",XMResultDR,XMConclusionDR)) q:XMConclusionDR=""  d
+    ..s XMResultConclusionDR=$o(^dbo.BBXMResultConclusionI("IndexMaster",XMResultDR,XMConclusionDR,""))
+    ..s XMResultConclusionData=$g(^dbo.BBXMResultConclusionD(XMResultConclusionDR))
+    ..s XMConclusionDR=$lg(XMResultConclusionData,3) 
+    ..d OutPut
+    
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut 
+    set Data=$lb(XMDepictDR,XMResultDR,XMConclusionDR)
+	set ColFields="XMDepictDR,XMResultDR,XMConclusionDR"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+ 	Set RowCount=RowCount+1
+	Quit
+}
+
+ClassMethod QryXMDepictResRuleClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryXMDepictResRuleExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryXMDepictResRuleFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryXMDepictResRuleExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+Query QryXMResultRule(P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "MajorXMConclusionDR,MinorXMConclusionDR,XMLastResultDR")
+{
+}
+
+ClassMethod QryXMResultRuleExecute(ByRef qHandle As %Binary, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	 
+	Set repid=$I(^CacheTemp)
+	S RowCount=0
+    If $g(ind)="" Set ind=1   
+    s XMResultRuleDR="" f  s XMResultRuleDR=$o(^dbo.BBXMResultRuleD(XMResultRuleDR)) Q:XMResultRuleDR=""  D
+    .s XMResultRuleData=$g(^dbo.BBXMResultRuleD(XMResultRuleDR))
+    .s MajorXMConclusionDR=$lg(XMResultRuleData,2)
+    .s MinorXMConclusionDR=$lg(XMResultRuleData,3)
+    .s XMLastResultDR=$lg(XMResultRuleData,4)
+    .d OutPut
+    
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut 
+    set Data=$lb(MajorXMConclusionDR,MinorXMConclusionDR,XMLastResultDR)
+	set ColFields="MajorXMConclusionDR,MinorXMConclusionDR,XMLastResultDR"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+ 	Set RowCount=RowCount+1
+	Quit
+}
+
+ClassMethod QryXMResultRuleClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryXMResultRuleExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryXMResultRuleFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryXMResultRuleExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Description：获取消息内容  
+/// Input：        
+/// Output：        
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryNoticeInfoByDR","117","","","","","","","","","","","","","","113^46^^2^1")	
+Query QryNoticeInfoByDR(NoticeDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "NoticeNo,AddDate,AddTime,AddUser,Remark,TakeRecordProductInfo,StatusDesc,TakeRecordAddDate,TakeRecordAddTime,TakeRecordAddUser")
+{
+}
+
+ClassMethod QryNoticeInfoByDRExecute(ByRef qHandle As %Binary, NoticeDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	 
+	Set repid=$I(^CacheTemp)
+	S RowCount=0
+    If $g(ind)="" Set ind=1    
+	k ^TMP($zn,repid,$j)  
+    s BDNoticeData=$g(^dbo.BDNoticeD(NoticeDR))
+    s NoticeNo=$lg(BDNoticeData,2)
+    s AddDate=$lg(BDNoticeData,3)
+    s AddTime=$lg(BDNoticeData,4)
+    s AddUserDR=$lg(BDNoticeData,5),AddUser=""
+    i $l(AddUserDR) s AddUser=$lg($g(^dbo.SYSUserD(AddUserDR)),3)
+     s Remark=$lg(BDNoticeData,22)
+    s Status=$lg(BDNoticeData,21)
+    s StatusDesc=""
+    i Status="10" s StatusDesc="发送"
+    i Status="20" s StatusDesc="查阅"
+    i Status="30" s StatusDesc="接收"
+    
+    s ReqFormList=$lg(BDNoticeData,11)
+    s AdmNo=$lg(BDNoticeData,9) 
+    s TakeRecordDate="",TakeRecordTime=""
+    s IndexAdmNo=##Class(LIS.Util.Common).IndexData(AdmNo)
+    s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexAdmNo",IndexAdmNo,ReqFormDR)) q:ReqFormDR=""  d
+    .s TakeRecordDR="" f  s TakeRecordDR=$o(^dbo.BDTakeRecordI("IndexRequestForm",ReqFormDR,TakeRecordDR)) Q:TakeRecordDR=""  D
+    ..s ReqProductDR="" f  s ReqProductDR=$o(^dbo.BDTakeRecordProductI("IndexMaster",TakeRecordDR,ReqProductDR))  Q:ReqProductDR=""  D
+    ...s TakeRecordProductDR=$o(^dbo.BDTakeRecordProductI("IndexMaster",TakeRecordDR,ReqProductDR,""))
+    ...s TakeRecordProductData=$g(^dbo.BDTakeRecordProductD(TakeRecordProductDR))
+    ...s Volume=$lg(TakeRecordProductData,4)
+    ...s ^TMP($zn,repid,$j,"TakeRecordProduct",ReqProductDR)=Volume+$g(^TMP($zn,repid,$j,"TakeRecordProduct",ReqProductDR))
+    
+    s (TakeRecordAddDate,TakeRecordAddTime,TakeRecordAddUser)=""
+    s BDTakeRecordDR=$o(^dbo.BDTakeRecordI("IndexRequestForm",ReqFormList,""),-1)
+    i $l(BDTakeRecordDR) d
+    .s TakeRecordData=$g(^dbo.BDTakeRecordD(TakeRecordDR))
+    .s TakeRecordAddDate=$lg(TakeRecordData,4)
+    .s TakeRecordAddTime=$lg(TakeRecordData,5)
+    .s TakeRecordAddUserDR=$lg(TakeRecordData,6)
+    .i $l(TakeRecordAddUserDR) s TakeRecordAddUser=$lg($g(^dbo.SYSUserD(TakeRecordAddUserDR)),3)
+    
+    s TakeRecordProductInfo=""
+    s ReqProductDR="" f  s ReqProductDR=$o(^TMP($zn,repid,$j,"TakeRecordProduct",ReqProductDR)) q:ReqProductDR=""  d
+    .s ReqProductData=$g(^dbo.BBReqProductD(ReqProductDR))
+    .s ReqProductName=$lg(ReqProductData,3)
+    .s TakeVolume=$g(^TMP($zn,repid,$j,"TakeRecordProduct",ReqProductDR))
+    .i $l(TakeRecordProductInfo) s TakeRecordProductInfo=TakeRecordProductInfo_","_ReqProductName_":"_TakeVolume
+    .e  s TakeRecordProductInfo=ReqProductName_":"_TakeVolume
+    
+    d OutPut
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut 
+    set Data=$lb(NoticeNo,AddDate,AddTime,AddUser,Remark,TakeRecordProductInfo,StatusDesc,TakeRecordAddDate,TakeRecordAddTime,TakeRecordAddUser)
+	set ColFields="NoticeNo,AddDate,AddTime,AddUser,Remark,TakeRecordProductInfo,StatusDesc,TakeRecordAddDate,TakeRecordAddTime,TakeRecordAddUser"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+ 	Set RowCount=RowCount+1
+	Quit
+}
+
+ClassMethod QryNoticeInfoByDRClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryNoticeInfoByDRExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryNoticeInfoByDRFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryNoticeInfoByDRExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Description：获取消息内容  
+/// Input：        
+/// Output：        
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryXMDepictResRule","","","","","","","","","","","","","","","113^46^^2^1")	
+Query QryNoticePackByDR(NoticeDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "PackID,ProductBarcode,BloodGroupName,BloodProductName")
+{
+}
+
+ClassMethod QryNoticePackByDRExecute(ByRef qHandle As %Binary, NoticeDR, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	 
+	Set repid=$I(^CacheTemp)
+	S RowCount=0
+    If $g(ind)="" Set ind=1    
+	k ^TMP($zn,repid,$j)  
+    s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDNoticePackI("IndexMaster",NoticeDR,ReqFormDR)) Q:ReqFormDR=""  D
+    .s PackDR="" f  s PackDR=$o(^dbo.BDNoticePackI("IndexMaster",NoticeDR,ReqFormDR,PackDR)) q:PackDR=""  d
+    ..s PackData=$g(^dbo.BDPackD(PackDR))
+    ..s PackID=$lg(PackData,2)
+    ..s ProductBarcode=$lg(PackData,6) 
+    ..s BloodGroupDR=$lg(PackData,9)
+    ..s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+    ..s BloodGroupName=$lg(BloodGroupData,3)
+    ..s BloodProductDR=$lg(PackData,3)
+    ..s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+    ..s BloodProductName=$lg(BloodProductData,3)
+    ..d OutPut
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut 
+    set Data=$lb(PackID,ProductBarcode,BloodGroupName,BloodProductName)
+	set ColFields="PackID,ProductBarcode,BloodGroupName,BloodProductName"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+ 	Set RowCount=RowCount+1
+	Quit
+}
+
+ClassMethod QryNoticePackByDRClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryNoticePackByDRExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryNoticePackByDRFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryNoticePackByDRExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170905
+/// Description:： 查询申请单费用信息
+/// Input：          
+/// Output：       根据申请单查询费用信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryReqCostItem","0000000024","29","","","","","","","","112","","","","","8285^11^^39^1")
+Query QryReqCostItem(fRegNo, fReqFormDR, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "ReqFormDR,RowID,CostType,CostItemDR,CostItemName,Price,Quantity,AddDate,AddTime,AddUser,ExecDate,ExecTime,ExecUser,CancelDate,CancelTime,CancelUser,ItemStatus,HISOrderID,HISOrderStatus")
+{
+}
+
+ClassMethod QryReqCostItemExecute(ByRef qHandle As %Binary, fRegNo, fReqFormDR, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    i $l(fReqFormDR) d
+    .s ReqFormCostItemDR="" f  s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",fReqFormDR,ReqFormCostItemDR)) Q:ReqFormCostItemDR=""  D
+    ..s ReqFormDR=fReqFormDR
+    ..d OutPut
+    e  i $l(fRegNo) d
+    .s IndexfRegNo=##Class(LIS.Util.Common).IndexData(fRegNo)
+    .s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexRegNo",IndexfRegNo,ReqFormDR)) Q:ReqFormDR=""  D
+    ..s ReqFormCostItemDR="" f  s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",ReqFormDR,ReqFormCostItemDR)) Q:ReqFormCostItemDR=""  D
+    ...d OutPut
+	k ^TMP($zn,repid,$j) 
+ 	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	
+GetPackInfo
+  
+    Quit 
+    
+OutPut
+   s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+   s CostType=$lg(ReqFormCostItemData,3)
+   i CostType=5 q
+   s CostItemDR=$lg(ReqFormCostItemData,4)
+   s CostItemData=$g(^dbo.BTCostItemD(CostItemDR))
+   s CostItemName=$lg(CostItemData,3)
+   s Price=$lg(ReqFormCostItemData,5)
+   s Quantity=$lg(ReqFormCostItemData,6)
+   s AddDate=$lg(ReqFormCostItemData,8)
+   s AddTime=$lg(ReqFormCostItemData,9)
+   s AddUserDR=$lg(ReqFormCostItemData,10),AddUser=""
+   i $l(AddUserDR) s AddUser=$lg($g(^dbo.SYSUserD(AddUserDR)),3)
+   s ExecDate=$lg(ReqFormCostItemData,11)
+   s ExecTime=$lg(ReqFormCostItemData,12)
+   s ExecUserDR=$lg(ReqFormCostItemData,13),ExecUser=""
+   i $l(ExecUserDR) s ExecUser=$lg($g(^dbo.SYSUserD(ExecUserDR)),3)
+   s CancelDate=$lg(ReqFormCostItemData,14)
+   s CancelTime=$lg(ReqFormCostItemData,15)
+   s CancelUserDR=$lg(ReqFormCostItemData,16),CancelUser=""
+   i $l(CancelUserDR) s CancelUser=$lg($g(^dbo.SYSUserD(CancelUserDR)),3)
+   s ItemStatus=$lg(ReqFormCostItemData,17)
+   s HISOrderID=$lg(ReqFormCostItemData,25)
+   //s HISOrderStatus=##Class(HIS.DHCOrderItem).GetCostItemFeeStatusMTHD(HISOrderID)
+   s HISOrderStatus="1"
+   set Data=$lb(ReqFormDR,ReqFormCostItemDR,CostType,CostItemDR,CostItemName,Price,Quantity,AddDate,AddTime,AddUser,ExecDate,ExecTime,ExecUser,CancelDate,CancelTime,CancelUser,ItemStatus,HISOrderID,HISOrderStatus)
+   Set ColFields="ReqFormDR,RowID,CostType,CostItemDR,CostItemName,Price,Quantity,AddDate,AddTime,AddUser,ExecDate,ExecTime,ExecUser,CancelDate,CancelTime,CancelUser,ItemStatus,HISOrderID,HISOrderStatus"
+   Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+   Set RowCount=RowCount+1
+   Set ind=ind+1
+   Quit
+}
+
+ClassMethod QryReqCostItemClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryReqCostItemExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryReqCostItemFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryReqCostItemExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20191209
+/// Description:： 查询本工作组下工作小组
+/// Input：          
+/// Output：       本工作组下工作小组
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QueryMachineByGroup","","378","","","","","","","","112","","","","","8285^8^^39^1")
+Query QueryMachineByGroup(P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "RowID,Code,CName")
+{
+}
+
+ClassMethod QueryMachineByGroupExecute(ByRef qHandle As %Binary, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    S WorkGroupDR=$p(Sessions,"^",2)
+    s MachCode="" f  s MachCode=$o(^dbo.BTWorkGroupMachineI("IndexCode",WorkGroupDR,MachCode)) q:MachCode=""  d
+    .s WorkGroupMachineDR=$o(^dbo.BTWorkGroupMachineI("IndexCode",WorkGroupDR,MachCode,""))
+    .s WorkGroupMachineData=$g(^dbo.BTWorkGroupMachineD(WorkGroupMachineDR))
+    .s Active=$lg(WorkGroupMachineData,10)
+    .i Active'=1 q
+    .s MachineParameterDR="" f  s MachineParameterDR=$o(^dbo.BTMIMachineParameterI("IndexWorkGroupMachine",WorkGroupMachineDR,MachineParameterDR)) q:MachineParameterDR=""  d
+    ..s MachineParameterData=$g(^dbo.BTMIMachineParameterD(MachineParameterDR))
+    ..s MCode=$lg(MachineParameterData,2)
+    ..s CName=$lg(MachineParameterData,3)
+    ..d OutPut
+    
+  	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	 
+    
+OutPut 
+   set Data=$lb(MachineParameterDR,MCode,CName)
+   Set ColFields="RowID,Code,CName"
+   Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+   Set RowCount=RowCount+1
+   Set ind=ind+1
+   Quit
+}
+
+ClassMethod QueryMachineByGroupClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QueryMachineByGroupExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QueryMachineByGroupFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QueryMachineByGroupExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      zyx
+/// CreatDate：    20180127
+/// Description:： 通知取血
+/// Output：       
+/// Return：       
+/// Others：     0成功。-1失败
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).InformXMPlanMTHD("","3114","3647","","","","","","","","","","","","113^1^^^1") 
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).InformXMPlanMTHD("我是测试","101","","","","","","","","","","","","","113^1^^^1") 
+ClassMethod InformXMPlanMTHD(MsgContent, ReqformDR, infoXMPlanDRs, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+{
+    S MsgContent=$G(MsgContent),ReqformDR=$G(ReqformDR),infoXMPlanDRs=$g(infoXMPlanDRs) 
+	Q:'$L(ReqformDR) "100"
+	s UserID=$p(Sessions,"^",1)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	S ReqFormInfo=$g(^dbo.BDReqFormD(ReqformDR))
+	S AdmNo=$lg(ReqFormInfo,4)
+	s LocationDR=$lg(ReqFormInfo,23)
+	s RegNo=$lg(ReqFormInfo,8)
+	//s ret=##Class(LISSP.BLL.DHCOTMsgStock).InsertMsg("","",UserID,"HISBdNotice",msg,AdmNo)
+	Set $ZTrap = "ErrorHandle"
+	s NoticeNo=##Class(LISSP.DHCSYSRecordNumber).CreateNewNumber("NOT") 
+	i NoticeNo="" s ret="-1^请维护类型为NOT的流水号规则"  Quit ret
+	s PackInfos=""
+    f i=1:1:$l(infoXMPlanDRs) d
+	.s XMPlanDR=$p(infoXMPlanDRs,"^",i)
+	.i '$l(XMPlanDR) q
+	.s PackDR=$lg($g(^dbo.BDXMPlanD(XMPlanDR)),3)
+	.s BloodProductDR=$lg($g(^dbo.BDPackD(PackDR)),3)
+	.s PackID=$lg($g(^dbo.BDPackD(PackDR)),2)
+	.s PackVolume=$lg($g(^dbo.BDPackD(PackDR)),10)
+	.s BloodProductName=$lg($g(^dbo.BBBloodProductD(BloodProductDR)),3)
+	.s Units=$lg($g(^dbo.BBBloodProductD(BloodProductDR)),15)
+	.s PackInfos=PackInfos_"；献血码为"_PackID_"的【"_PackVolume_Units_"】"_BloodProductName_"已完成配血，请尽快取血"
+	i $L(PackInfos) s PackInfos=$e(PackInfos,2,$l(PackInfos))
+    i '$L(MsgContent) s MsgContent=PackInfos
+    
+    s objMsg=##class(dbo.OTMsgStock).%New()
+	s objMsg.AddDate=$tr($zd(+$h,3),"-")
+	s objMsg.AddTime=$p($h,",",2)
+	s objMsg.SendDate=$tr($zd(+$h,3),"-")
+	s objMsg.SendTime=$p($h,",",2)
+	s objMsg.AddUser=UserID
+	s objMsg.SendUser=UserID
+	s objMsg.MsgType="HISBdNotice"  ///操作类型
+	s objMsg.Msg=MsgContent
+	s objMsg.BllType=ReqformDR
+	s objMsg.BllID=AdmNo
+	s objMsg.IsReply=0
+	s sc=objMsg.%Save()
+	s ret=""
+ 	If ($SYSTEM.Status.IsOK(sc)) {
+	 	s ret=""
+ 	}
+ 	else {
+	 	s ret=$SYSTEM.Status.GetErrorText(sc)
+	}
+	i $l(ret)   Quit ret
+	
+	TSTART
+	 
+	s objNotice=##class(dbo.BDNotice).%New()
+	s objNotice.AddDate=$zd(+$h,8)
+	s objNotice.AddTime=$p($h,",",2)
+	s objNotice.AddUserDR=UserID
+	s objNotice.AdmNo=AdmNo
+	s objNotice.LocationDR=LocationDR
+	s objNotice.RegNo=RegNo
+	s objNotice.ReqFormList=ReqformDR
+	s objNotice.MsgContent=MsgContent
+	s objNotice.NoticeNo=NoticeNo
+	s objNotice.WorkGroupDR=WorkGroupDR
+	s objNotice.MsgStockDR=objMsg.RowID
+	s objNotice.Status=10
+	s sc=objNotice.%Save()
+	If ($SYSTEM.Status.IsOK(sc)) {
+	 	s ret=""
+ 	}
+ 	else {
+	 	s ret=$SYSTEM.Status.GetErrorText(sc)
+	}
+
+ 	i $l(ret) TROLLBACK  Quit ret
+	
+	s err="",InformPackFlag="",BatchPlanDRs=""
+	//s PackDR="" f  s PackDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqformDR,PackDR)) q:(PackDR="")||$l(err)  d
+	f i=1:1:$l(infoXMPlanDRs) d
+	.s XMPlanDR=$p(infoXMPlanDRs,"^",i)
+	.i '$l(XMPlanDR) q
+	.//s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqformDR,PackDR,""))
+	.s objXMPlan=##class(dbo.BDXMPlan).%OpenId(XMPlanDR)
+	.s IsFinished=objXMPlan.IsFinished
+	.s IsNoticed=objXMPlan.IsNoticed
+	.i IsFinished'=1 q
+	.i IsNoticed=1 q 
+	.s objXMPlan.IsNoticed=1
+	.s sc=objXMPlan.%Save()
+	.i $l($SYSTEM.Status.GetErrorText(sc))  s err=$SYSTEM.Status.GetErrorText(sc) q 
+	.s PackDR=objXMPlan.PackDR
+	.s objNoticePack=##class(dbo.BDNoticePack).%New()
+	.s objNoticePack.ReqFormDR=ReqformDR
+	.s objNoticePack.NoticeDR=objNotice.RowID
+	.s objNoticePack.PackDR=PackDR
+	.s sc=objNoticePack.%Save()
+	.i $l($SYSTEM.Status.GetErrorText(sc))  s err=$SYSTEM.Status.GetErrorText(sc) q
+	.s InformPackFlag="1" 
+	.i $l(BatchPlanDRs) s BatchPlanDRs=BatchPlanDRs_"^"_XMPlanDR
+	.e  s BatchPlanDRs=XMPlanDR
+	
+	i $l(err) TROLLBACK  Quit err
+	b //5
+	i InformPackFlag="" s err="没有需要发取血通知的血液"  TROLLBACK  Quit err 
+    TCOMMIT 
+    d ##Class(BLD.Common.OTMsgStock).SaveOTMsgStockMTHD(objNotice.RowID,"BLDCollection",UserID) 
+	q "1"
+	
+ErrorHandle
+	TROLLBACK
+	s ret="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit ret
+}
+
+/// Creator：      JinChao
+/// CreatDate：    20190709
+/// Description:： 查询血袋信息是否匹配(血液扫描入库时走此Ｍ)
+/// Input：         
+/// Output：       返回该血袋是否匹配
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryPackInfoByBarCode","0001517213","9000119113067","13","1","","","1","1","","","","","","","113^8^^39^1")
+Query QryPackInfoByBarCode(fRegNo, fPackBarCode, ReqProductDRs, fBloodGroupDR, fProductBarCode, ReqFormDR, LisBloodGroupDR, IsBldDifficult, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "RowID,PackID,PackBarcode,ProductBarcode,BloodProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,IsCan,IsXMMatch,OutInfo,IsSameGroup,ABO,RH,Units")
+{
+}
+
+ClassMethod QryPackInfoByBarCodeExecute(ByRef qHandle As %Binary, fRegNo, fPackBarCode, ReqProductDRs, fBloodGroupDR, fProductBarCode, ReqFormDR, LisBloodGroupDR, IsBldDifficult, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0
+    //s ^tmpqrypackinfobycode=$lb(fRegNo, fPackBarCode, ReqProductDRs, fBloodGroupDR, fProductBarCode, ReqFormDR, LisBloodGroupDR, IsBldDifficult, P8, P9, P10, P11, P12, P13, Sessions)
+  	//s curhospital=$p(Sessions,"^",5)
+	s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	s AdmType=$lg(ReqFormData,52)
+	i (AdmType="A")&&(fBloodGroupDR="0") s fBloodGroupDR=LisBloodGroupDR
+	s fWorkGroupDR=$p(Sessions,"^",2)
+	k ^TMP($zn,$j) 
+	s NowDate=$p($h,",",1)
+	s nowTime=$p($h,",",2)
+	s IsCan=0 
+	s IndexPackBarCode=##Class(LIS.Util.Common).IndexData(fPackBarCode)
+	s SecondID="" f  s SecondID=$o(^dbo.BDPackI("IndexMaster",IndexPackBarCode,SecondID)) q:SecondID=""  d
+	.s PackDR=$o(^dbo.BDPackI("IndexMaster",IndexPackBarCode,SecondID,""))
+	.s PackData=$g(^dbo.BDPackD(PackDR))
+	.s BloodProductDR=$lg(PackData,3)
+	.s ProductBarcode=$lg(PackData,6)
+	.i $l(fProductBarCode),fProductBarCode'=ProductBarcode q
+	.s IsCan=1 //标识是否可用  
+	.s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	.s ProductName=$lg(BloodProductData,3)
+	.s PackBloodCompentsDR=$lg(BloodProductData,10)
+	.s Units=$lg(BloodProductData,15)  
+	.s PackStatus=$lg(PackData,35)
+	.s WorkGroupDR=$lg(PackData,40)
+    .s OutInfo="" // 消息内容
+	.i fWorkGroupDR'=WorkGroupDR s IsCan=0,OutInfo="当前血液不属于该工作组" // 不为库存状态
+	.i PackStatus'="10",IsCan="1"  s IsCan=0,OutInfo="当前血液不是库存状态" // 不为库存状态
+	.s IsXMMatch=0 //标识是否配血规则
+	.s IsSameCompents=0  //标识血袋血成分是否与申请血成分相同 
+	.s IsSameGroup=1 // 标识是否同一血型 
+	.s ExpiredDate=$lg(PackData,13)
+	.s hExpiredDate=$ZDateH(ExpiredDate,5)
+	.i hExpiredDate<NowDate,IsCan="1" s IsCan=0,OutInfo="血液已过期"
+	.s PackBarcode=$lg(PackData,5)
+	.s ExpiredTime=$lg(PackData,14) 
+	.i hExpiredDate=NowDate,ExpiredTime<nowTime,IsCan="1" s IsCan=0,OutInfo="血液已过期"
+	.s IsAutologous=$lg(PackData,22)
+	.s RegNo=$lg(PackData,23)
+	.i IsAutologous="1",RegNo'=fRegNo s IsCan=0,OutInfo="血袋“"_fPackBarCode_"”(登记号:"_RegNo_")不是本人(登记号:"_fRegNo_")的自体血"
+	.s BloodGroupDR=$lg(PackData,9) 
+	.i BloodGroupDR'=fBloodGroupDR,IsBldDifficult'="1",IsCan="1" s IsCan=0,OutInfo="血液血型与病人的复核血型不匹配"
+	.s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+	.s ABO=$lg(BloodGroupData,4)
+	.s RH=$lg(BloodGroupData,5)
+ 	.s IsXMatchProduct=$lg(BloodProductData,12)
+	.s PackID=$lg(PackData,2)
+	.s ProductBarcode=$lg(PackData,6)
+	.s BloodGroupName=$lg($g(^dbo.BBBloodGroupD(BloodGroupDR)),3)
+	.s PackVolume=$lg(PackData,10) 
+	.s IsXMatchProduct=$lg(BloodProductData,12)
+	.s IsAutologous=$lg(BloodProductData,13) 
+	.s IsBGChecked=$lg(PackData,78)
+	.i IsCan="1" d 
+	..f i=1:1:$l(ReqProductDRs,",") q:IsSameCompents="1"  d
+	...s ReqProductDR=$p(ReqProductDRs,",",i)
+	...s ReqProductData=$g(^dbo.BBReqProductD(ReqProductDR))
+ 	...s BloodComponentsDR=$lg(ReqProductData,7) // 申请血产品的血成分 
+ 	...i PackBloodCompentsDR'=BloodComponentsDR,IsBldDifficult'="1" s IsCan=0,OutInfo="血液"_fPackBarCode_"成分与申请血成分不同"  q
+ 	...s IsSameCompents="1" q
+ 	.i IsSameCompents="1" s IsCan="1"  
+	.s Data=$lb(PackDR,PackID,PackBarcode,ProductBarcode,ProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,IsCan,IsXMMatch,OutInfo,IsSameGroup,ABO,RH,Units)
+	.d OutPut
+	
+	Set qHandle=$lb(0,repid,0)
+	Quit $$$OK
+	
+OutPut
+   	Set ColFields="RowID,PackID,PackBarcode,ProductBarcode,BloodProductName,BloodGroupName,PackVolume,ExpiredDate,ExpiredTime,IsXMatchProduct,IsBGChecked,IsCan,IsXMMatch,OutInfo,IsSameGroup,ABO,RH,Units"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	Quit
+	
+ 	
+	
+XMatchFun
+ s XBloodGroupDR="" 
+ for
+ {
+	s XBloodGroupDR=$o(^dbo.BBBloodGroupXMatchI("IndexMaster",fBloodGroupDR,BloodComponentsDR,XBloodGroupDR))
+	q:XBloodGroupDR=""
+	s XBloodGroupDRs=XBloodGroupDRs_","_XBloodGroupDR
+ }
+ s XBloodGroupDRs=XBloodGroupDRs_","
+ Quit
+}
+
+ClassMethod QryPackInfoByBarCodeClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryPackInfoByBarCodeExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryPackInfoByBarCodeFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryPackInfoByBarCodeExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20191225
+/// Description:： 查询病人血型
+/// Input：          
+/// Output：       查询病人血型
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).QryPatBloodGroupMTHD("0000000025","","")
+ClassMethod QryPatBloodGroupMTHD(fRegNo, BldType, fReqFormDR, HospitalDR As %String = "", WorkGroupDR As %String = "") As %String
+{
+ 
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0
+    s fReqFormDR=$g(fReqFormDR),WorkGroupDR=$g(WorkGroupDR) 
+    i '$l(fRegNo)  d
+    .i $l(fReqFormDR) d
+    ..s ReqFormData=$g(^dbo.BDReqFormD(fReqFormDR))
+    ..s fRegNo=$lg(ReqFormData,8) 
+   
+    s (BloodGroupDR,BloodGroupABO,BloodGroupRhD,BloodGroupCode,BloodGroup)="" 
+	S (ABOCode,RHDCode)="U"  
+	s (ABODR,RHDR)=""
+	s ABOScode=##class(BLD.Common.SYSParameter).GetParaValue("ABOScode")
+	i '$l(ABOScode) s ABOScode="ABO"
+	//获取鉴定复查配置医嘱套
+	s TestSetDRs="" 
+	/*
+	s TestSetDR="" f  s TestSetDR=$o(^dbo.SYSParameterI("IndexCode"," BDTESTSETXM",$c(32)_BldType,TestSetDR)) q:TestSetDR=""  d
+    .s ITestSetDR=$tr(TestSetDR," ")
+    .i $l(TestSetDRs) s TestSetDRs=TestSetDRs_","_ITestSetDR
+    .e  s TestSetDRs=ITestSetDR
+    */
+    i $l(WorkGroupDR)&& $L(BldType) d
+    .s ParameterDR="" f  s ParameterDR=$o(^dbo.SYSParameterI("IndexCode",$c(32)_BldType," WG"," "_WorkGroupDR,ParameterDR)) q:ParameterDR=""  d
+    ..s ParameterData=$g(^dbo.SYSParameterD(ParameterDR))
+    ..s ITestSetDR=$lg(ParameterData,5)
+    ..i $l(TestSetDRs) s TestSetDRs=TestSetDRs_","_ITestSetDR
+    ..e  s TestSetDRs=ITestSetDR
+    
+    i '$l(TestSetDRs) d
+    .s TestSetDR="" f  s TestSetDR=$o(^dbo.SYSParameterI("IndexCode"," BDTESTSETXM",$c(32)_BldType,TestSetDR)) q:TestSetDR=""  d
+    ..s ITestSetDR=$tr(TestSetDR," ")
+    ..i $l(TestSetDRs) s TestSetDRs=TestSetDRs_","_ITestSetDR
+    ..e  s TestSetDRs=ITestSetDR
+     
+    s RetVal=""
+    i $l(fRegNo) d
+    .//s CheckABOD=##class(BLD.WS.BLL.DHCTCResult).GetTCResultByRegNoMTHD(fRegNo,ABOScode,BldType,fReqFormDR,"1")
+    .s CheckABOD=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,"",ABOScode,"",TestSetDRs,fReqFormDR,BldType,HospitalDR)
+    .s BloodFormat=$p(CheckABOD,$c(2),11) 
+    .s BloodGroupABO=$p(CheckABOD,$c(2),1)
+    .i BloodFormat="A"  d
+    ..s ABODR=$p(CheckABOD,$c(2),1) 
+    ..d GetBloodABO 
+    .i (BloodFormat="B")||(BloodFormat="REG") d
+    ..s BloodGroupDR=$p(CheckABOD,$c(2),1)
+    ..d GetBloodInfoB 
+    .e  d 
+    ..s RHScode=##class(BLD.Common.SYSParameter).GetParaValue("RHScode")
+	..i '$l(RHScode) s RHScode="RH"
+    ..s CheckRHD=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,"",RHScode,"",TestSetDRs,fReqFormDR,BldType,HospitalDR)   
+    ..s BloodFormat=$p(CheckRHD,$c(2),11)  
+    ..s BloodGroupRhD=$p(CheckRHD,$c(2),1)
+    ..i BloodFormat="R" d
+    ...s RHDR=$p(CheckRHD,$c(2),1)
+    ...d GetBloodRH 
+      
+    .s EntryUserName=""
+    .s AuthUserName=$p(CheckABOD,$c(2),7)
+    .s ReportAuthDate=$p(CheckABOD,$c(2),8)
+    .i $L(ReportAuthDate) s ReportAuthDate=##Class(LIS.Util.Common).FormatDate(ReportAuthDate)
+    .s ReportAuthTime=$p(CheckABOD,$c(2),9)
+    .i $L(ReportAuthTime) s ReportAuthTime=##Class(LIS.Util.Common).FormatTime(ReportAuthTime)
+    .s AbFlag=$p(CheckABOD,$c(2),4)
+    .i '$l(ABODR) d GetBloodABOX 
+    .i '$l(RHDR) d GetBloodRHX 
+    .i BloodFormat'="B" d GetBloodInfoX  
+    .s RetVal=BloodGroupDR_"^"_BloodGroupCode_"^"_BloodGroup_"^"_ABOCode_"^"_RHDCode_"^^"_EntryUserName_"^"_AuthUserName_"^"_ReportAuthDate_"^"_ReportAuthTime_"^"_AbFlag_"^"_ABODR_"^"_RHDR
+    
+    q RetVal
+     
+       
+ //文本格式血型结果查询
+GetBloodABOX
+   i $L(BloodGroupABO) S BloodGroupABO=$p(BloodGroupABO,"型",1)_"型"     
+   i $l(BloodGroupABO) d
+   .s ABOFlag=""
+   .s ABOBGDR="" f  s ABOBGDR=$o(^dbo.BTABOBGD(ABOBGDR)) q:(ABOBGDR="")||(ABOFlag="1")  d
+   ..s ABOBGData=$g(^dbo.BTABOBGD(ABOBGDR))
+   ..s ABOName=$lg(ABOBGData,3)
+   ..i ABOName'=BloodGroupABO q
+   ..s ABOCode=$lg(ABOBGData,4) 
+   ..s ABOFlag="1"
+   ..s ABODR=ABOBGDR  
+   q         
+GetBloodRHX 
+   i BloodGroupRhD["型"  s BloodGroupRhD=$p(BloodGroupRhD,"型",2)
+   s BloodGroupRhD=$ZCVT(BloodGroupRhD,"U")
+   S BloodGroupRhD=$replace(BloodGroupRhD,"RH(D)","") 
+   S BloodGroupRhD=$replace(BloodGroupRhD,"RH","") 
+   i $l(BloodGroupRhD) d
+   .s RHBGFlag=""
+   .s RHBGDR="" f  s RHBGDR=$o(^dbo.BTRHBGD(RHBGDR)) q:(RHBGDR="")||(RHBGFlag="1")  d
+   ..s RHBGData=$g(^dbo.BTRHBGD(RHBGDR))
+   ..s RHName=$lg(RHBGData,3)
+   ..i RHName'=BloodGroupRhD q
+   ..s RHDCode=$lg(RHBGData,4) 
+   ..s RHBGFlag="1"
+   ..s RHDR=RHBGDR 
+   q
+   
+GetBloodInfoX        
+   //处理患者的BloodGroup
+   i (ABOCode="U"),(RHDCode="U") s BloodGroupCode="X"
+   s BloodGroupCode="",BloodGroup="" 
+   s fBloodGroupDR="" f  s fBloodGroupDR=$o(^dbo.BBBloodGroupD(fBloodGroupDR)) q:((fBloodGroupDR="")||$l(BloodGroupCode))  d
+   .s BloodGroupData=$g(^dbo.BBBloodGroupD(fBloodGroupDR))
+   .s ABO=$lg(BloodGroupData,4) 
+   .s RH=$lg(BloodGroupData,5)
+   .i (ABO'=ABOCode)||(RH'=RHDCode) q   
+   .s BloodGroupCode=$lg(BloodGroupData,2)
+   .s BloodGroup=$lg(BloodGroupData,3)
+   .s BloodGroupDR=fBloodGroupDR
+   q
+        
+ //血型组格式血型结果查询
+GetBloodInfoB 
+  i '$l(BloodGroupDR) q 
+   s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+   s ABO=$lg(BloodGroupData,4)
+   s RH=$lg(BloodGroupData,5)
+   s BloodGroupCode=$lg(BloodGroupData,2)
+   s BloodGroup=$lg(BloodGroupData,3)
+   s ABOFlag=""
+   s ABOBGDR="" f  s ABOBGDR=$o(^dbo.BTABOBGD(ABOBGDR)) q:(ABOBGDR="")||(ABOFlag="1")  d
+   .s ABOBGData=$g(^dbo.BTABOBGD(ABOBGDR)) 
+   .s ABOCode=$lg(ABOBGData,4) 
+   .i ABOCode'=ABO q 
+   .s BloodGroupABO=$lg(ABOBGData,3)
+   .s ABOFlag="1"
+   .s ABODR=ABOBGDR 
+   
+   s RHBGFlag=""
+   s RHBGDR="" f  s RHBGDR=$o(^dbo.BTRHBGD(RHBGDR)) q:(RHBGDR="")||(RHBGFlag="1")  d
+   .s RHBGData=$g(^dbo.BTRHBGD(RHBGDR)) 
+   .s RHDCode=$lg(RHBGData,4) 
+   .i RHDCode'=RH q 
+   .s RHBGFlag="1"
+   .s BloodGroupRhD=$lg(RHBGData,3)
+   .s RHDR=RHBGDR 
+   q
+   
+ //ABO列表格式abo血型查询
+GetBloodABO
+  i '$l(ABODR) q
+  i '$d(^dbo.BTABOBGD(ABODR)) s ABODR="" q
+  s ABOBGData=$g(^dbo.BTABOBGD(ABODR))
+  s ABOName=$lg(ABOBGData,3)
+  s ABOCode=$lg(ABOBGData,4)
+  q
+ //RH列表格式RH血型查询
+GetBloodRH
+  i '$l(RHDR) q 
+  i '$d(^dbo.BTRHBGD(RHDR)) s RHDR="" q
+  s RHBGData=$g(^dbo.BTRHBGD(RHDR))
+  s RHName=$lg(RHBGData,3)
+  s RHDCode=$lg(RHBGData,4) 
+  q
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20160905
+/// Description:： 查询血袋库存信息
+/// Input：        血站：SupplierDR 血产品：BdProductDR 血型：BdGroupDR 血袋编号：PackCode  stockType:0库存，1库存+待输用
+/// Output：       血袋库存记录
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDPackQuery","StatPackCost","40","","","","","","","","","","","","","","")	
+Query StatPackPreCharge(pckDRs, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "CostItemDR,CostItemName,Price,Quantity,Amount")
+{
+}
+
+ClassMethod StatPackPreChargeExecute(ByRef qHandle As %Binary, pckDRs, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions, Output RowCount As %String) As %Status
+{
+	Set repid=$I(^CacheTemp)
+    If $g(ind)="" Set ind=1 
+    s RowCount=0
+ 	s PageSize=+$g(PageSize),PageIndex=+$g(PageIndex),ToRow=0,FormRow=0
+ 	i PageIndex>0,PageSize>0 s ToRow=PageIndex*PageSize,FormRow=ToRow-PageSize+1 
+ 	f j=1:1:$l(pckDRs,"^") d
+    .s pckDR=$p(pckDRs,"^",j)
+    .s pckData=$g(^dbo.BDPackD(pckDR))
+    .s BloodProductDR=$lg(pckData,3)
+    .s BloodGroupDR=$lg(pckData,9)
+    .s RH=$lg($g(^dbo.BBBloodGroupD(BloodGroupDR)),5)
+    .s PackVolume=$lg(pckData,10)
+    .s supplierDR=$lg(pckData,12) 
+    .s IndexRH=##Class(LIS.Util.Common).IndexData(RH)
+    .s CostItemDR="" f  s CostItemDR=$o(^dbo.BBBloodProductFeeI("IndexMaster",BloodProductDR,supplierDR,IndexRH,CostItemDR)) q:CostItemDR=""  d
+    ..s BloodProductFeeDR=$o(^dbo.BBBloodProductFeeI("IndexMaster",BloodProductDR,supplierDR,IndexRH,CostItemDR,""))
+    ..i '$l(BloodProductFeeDR) q
+    ..s BloodProductFeeData=$g(^dbo.BBBloodProductFeeD(BloodProductFeeDR))
+    ..s Active=$lg(BloodProductFeeData,10) 
+    ..s ScaleFactor=$lg(BloodProductFeeData,7)
+    ..i Active'=1 q
+    ..s Quantity=$NUMBER(PackVolume/ScaleFactor,2)
+    ..s ^TMP($zn,repid,$j,CostItemDR)=Quantity+$g(^TMP($zn,repid,$j,CostItemDR))
+    
+    .s CostItemDR="" f  s CostItemDR=$o(^dbo.BBBloodProductFeeOtherI("IndexMaster",BloodProductDR,CostItemDR)) q:CostItemDR=""  d 
+    ..s BdProductFeeOtherDR=$o(^dbo.BBBloodProductFeeOtherI("IndexMaster",BloodProductDR,CostItemDR,""))
+    ..i '$l(BdProductFeeOtherDR) q
+    ..s BdProductFeeOtherData=$g(^dbo.BBBloodProductFeeOtherD(BdProductFeeOtherDR))
+    ..s BillType=$lg(BdProductFeeOtherData,4)
+    ..s ItemNum=$lg(BdProductFeeOtherData,5)
+    ..s ScaleFactor=$lg(BdProductFeeOtherData,6)
+    ..s Active=$lg(BdProductFeeOtherData,8)
+    ..i Active'=1 q
+    ..i BillType=10 s Quantity=ItemNum
+    ..i BillType=20 s Quantity=$NUMBER(PackVolume/ScaleFactor,2)
+    ..s ^TMP($zn,repid,$j,CostItemDR)=Quantity+$g(^TMP($zn,repid,$j,CostItemDR))
+    
+    s CostItemDR="" f  s CostItemDR=$o(^TMP($zn,repid,$j,CostItemDR)) q:CostItemDR=""  d
+    .s Quantity=$g(^TMP($zn,repid,$j,CostItemDR))
+    .s CostItemName=$lg($g(^dbo.BTCostItemD(CostItemDR)),3)
+    .s Price=$lg($g(^dbo.BTCostItemD(CostItemDR)),5)
+    .s Amount=$NUMBER(Quantity*Price,2)
+    .d OutPut
+  
+ 	Set qHandle=$lb(0,repid,0)
+    q $$$OK
+     
+OutPut
+    Set Data=$lb(CostItemDR,CostItemName,Price,Quantity,Amount)
+	set ColFields="CostItemDR,CostItemName,Price,Quantity,Amount"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+    Set RowCount=RowCount+1
+ 	Set ind=ind+1
+	Quit
+}
+
+ClassMethod StatPackPreChargeClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = StatPackPreChargeExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod StatPackPreChargeFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = StatPackPreChargeExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20200219
+/// Description:： 发血前提示
+/// Output：       
+/// Return：       
+/// Others：     0成功。-1失败
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).PromptIssuePackMTHD("30572","235","20190314","","","","","","","","","","","","113^1^^^1") 
+ClassMethod PromptIssuePackMTHD(planDRs, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+{
+    
+	Set $ZTrap = "ErrorHandle" 
+    s err="",RetValue=""  
+	s IssPlanDRs="" 
+	s NowDate=$p($h,",",1)
+	s NowTime=$p($h,",",2)
+    s RetValue="1"
+    f i=1:1:$l(planDRs,"^") {
+	  s PlanDR=$p(planDRs,"^",i)
+	  i '$l(PlanDR) continue
+	  s PlanData=$g(^dbo.BDXMPlanD(PlanDR))
+	  s IsIssued=$lg(PlanData,32) 
+	  s PackDR=$lg(PlanData,3)
+	  s PackData=$g(^dbo.BDPackD(PackDR))
+	  s PackID=$lg(PackData,2)
+	  s ExpiredDate=$lg(PackData,13)
+	  s hExpiredDate=$ZDateH(ExpiredDate,5)
+	  s ExpiredTime=$lg(PackData,14)
+	  i '$l(ExpiredTime) s ExpiredTime=0 
+	  i hExpiredDate<NowDate s RetValue="-1^血液["_PackID_"]"_"已过有效期,不能发血" q 
+	  i hExpiredDate=NowDate,ExpiredTime<NowTime s RetValue="-1^血液["_PackID_"]"_"已过有效期" q
+	  
+	  S diffHours=$justify((hExpiredDate-NowDate)*24+((ExpiredTime-NowTime)/3600),"",2) 
+	  S sysParameterDR=$o(^dbo.SYSParameterI("IndexCode"," PROMPTPACKEXPHOURS"," SYS"," DHCC",""))
+	 
+	  i $l(sysParameterDR) {
+	   s sysParameterData=$g(^dbo.SYSParameterD(sysParameterDR))
+	   s PromptPackExpHours=$lg(sysParameterData,5) 
+	   i $l(PromptPackExpHours) { 
+	    i diffHours<PromptPackExpHours s RetValue="-2^血液["_PackID_"]"_"还有"_diffHours_"小时过期" q
+	   }
+	  }
+	} 
+	Q RetValue 
+ 
+	
+ErrorHandle
+	TROLLBACK
+	s ret="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit ret
+}
+
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).GetPatBloodInfoMTHD("0000000024","") 
+ClassMethod GetPatBloodInfoMTHD(fRegNo, fReqFormDR, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+{
+	i '$l(fRegNo) q ""
+	s fReqFormDR=$g(fReqFormDR)
+	s HospitalDR=$p(Sessions,"^",5),WorkGroupDR=$p(Sessions,"^",2)
+	s LISBdGroup=##class(BLD.WS.BLL.DHCBDXMTest).QryPatBloodGroupMTHD(fRegNo,"LIS",fReqFormDR,HospitalDR,WorkGroupDR)
+	s BLDBdGroup=##class(BLD.WS.BLL.DHCBDXMTest).QryPatBloodGroupMTHD(fRegNo,"BLD",fReqFormDR,HospitalDR,WorkGroupDR)
+	s SASScode=##class(BLD.Common.SYSParameter).GetParaValue("SASScode")
+	i '$l(SASScode) s SASScode="SAS"  //抗体筛查
+	s PatSasInfo=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,"",SASScode,"","",fReqFormDR,"",HospitalDR)
+    s PatSasRes=$p(PatSasInfo,$c(2),2)
+    
+    s SASScode="SAS2"  //抗体筛查
+	s PatSasInfo2=""
+	s PatSasInfo2=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,"",SASScode,"","",fReqFormDR,"",HospitalDR)
+    s PatSasRes2=$p(PatSasInfo2,$c(2),2)
+    
+    
+     s SASScode="SAS3"  //抗体筛查
+	s PatSasInfo3=""
+	s PatSasInfo3=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,"",SASScode,"","",fReqFormDR,"",HospitalDR)
+    s PatSasRes3=$p(PatSasInfo3,$c(2),2)
+    i $l(PatSasRes) d
+    .s Flag=""
+    .i PatSasRes["阳" s Flag=1
+    .i PatSasRes2["阳" s Flag=1
+     .i PatSasRes3["阳" s Flag=1
+    
+    .i Flag=1 s PatSasRes="阳性(+)"
+    .e  s PatSasRes="阴性(-)"
+    
+    s AbFlag=$p(PatSasInfo,$c(2),4)
+    s PatSasRes="^^"_PatSasRes_"^^^^^^^^"_AbFlag
+    s PHTScode=##class(BLD.Common.SYSParameter).GetParaValue("PHTScode")
+	i '$l(PHTScode) s PHTScode="PHT" //RH表型
+    s PatPhtInfo=##class(BLD.WS.BLL.DHCTCResult).GetTCResultBySCodeMTHD(fRegNo,PHTScode,"","",fReqFormDR,"",HospitalDR)
+    s PatPhtRes=$p(PatPhtInfo,$c(2),2)
+    s AbFlag=$p(PatPhtInfo,$c(2),4)
+    s PatPhtRes="^^"_PatPhtRes_"^^^^^^^^"_AbFlag
+    
+    q LISBdGroup_"@"_BLDBdGroup_"@"_PatSasRes_"@"_PatPhtRes
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20170829
+/// Description:： 根据就诊号查询患者住院信息
+/// Input：        接收起始时间，接收结束时间,Status:申请单状态
+/// Output：       输血申请单列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryPatInfoByAdmNo","195","2020-10-10","","","","","","","false","","","","","","8285^26^^39^1")
+Query QryPatInfoByAdmNo(AdmNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "admInpat,Patstatus,PAAdmDate")
+{
+}
+
+ClassMethod QryPatInfoByAdmNoExecute(ByRef qHandle As %Binary, AdmNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+ 	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    Set $ZTrap = "ErrorHandle"
+      
+    s curhospital=$p(Sessions,"^",5)
+    s WorkGroupDR=$p(Sessions,"^",2) 
+    s (admInpat,Patstatus,PAAdmDatetimes,PAAdmDate)=""  
+    s SpSource=##Class(Interface.Common.Base).GetSpSourceByAdm(AdmNo)
+    s Patient=##Class(LISProxy.BLL.Service).GetPatientInfo(AdmNo,SpSource) 
+    Set reader = ##class(%XML.Reader).%New()
+    Do reader.OpenStream(Patient)      
+    Do reader.Correlate("Data","LIS.Model.Patient")
+    S json=##Class(LIS.JSON.Json).%New() 
+    While (reader.Next(.obj,.sc)) {
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    {
+		    //住院信息列表
+		   s admInpat=obj.AdmInPatList
+		   //获取入院时间   
+            s PAAdmDatetimes=obj.AdmInDateTime
+            s Patstatus=obj.Patstatus
+	    }
+    } 
+  
+    i $L(PAAdmDatetimes) d
+    .s PAAdmDate=$ZD($p(PAAdmDatetimes,"^",1),3)
+    .s PAAdmTime=$zt($p(PAAdmDatetimes,"^",2),1)
+    .s PAAdmDate=PAAdmDate_" "_PAAdmTime  
+    d OutPut
+
+    k ^TMP($zn,repid,$j) 
+    Set qHandle=$lb(0,repid,0)
+    Quit $$$OK
+    
+OutPut
+    Set Data=$lb(admInpat,Patstatus,PAAdmDate)
+ 	Set ColFields="admInpat,Patstatus,PAAdmDate"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+	Quit	
+   
+ErrorHandle  
+    s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+   Set qHandle=$lb(0,repid,0)
+   Quit $$$OK
+}
+
+ClassMethod QryPatInfoByAdmNoClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryPatInfoByAdmNoExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryPatInfoByAdmNoFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryPatInfoByAdmNoExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20201103
+/// Description:： 查询申请单接收但是未备血的列表
+/// Input：         
+/// Output：       输血申请单列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryNoXMPlanRecReq","","","","","","","","","false","","","","","","8285^8^^39^1")
+Query QryNoXMPlanRecReq(SttAccDate, EndAccDate, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "ReceiveDate,ReceiveTime,ReceiveUser,ReqTypeName,RegNo,SurName,LISBdGroup,Species,AgeDesc,LocationDesc,WardDesc,UseSampleNo,ReceiveHours,CostItemName")
+{
+}
+
+ClassMethod QryNoXMPlanRecReqExecute(ByRef qHandle As %Binary, SttAccDate, EndAccDate, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+ 	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    Set $ZTrap = "ErrorHandle"
+    s WorkGroupDR=$p(Sessions,"^",2) 
+    i '$l(EndAccDate) s EndAccDate=$zd($h,8)
+    i '$l(SttAccDate) s SttAccDate=$p(##Class(LIS.Util.Common).GetSectionDT(EndAccDate,"","-3",""),"^",1)
+    s SttAccDate=$tr(SttAccDate,"-"),EndAccDate=$tr(EndAccDate,"-") 
+    s NowDate=$p($h,",",1)
+	s NowTime=$p($h,",",2)  
+    s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,SttAccDate),-1)
+    f  s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date)) q:(Date="")||($l(EndAccDate)&&(Date>EndAccDate))  d
+    .s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date,ReqFormDR)) q:(ReqFormDR="")  d
+    ..i $d(^dbo.BDXMPlanI("IndexMaster",ReqFormDR)) Q
+    ..s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+    ..s ReqTypeDR=$lg(ReqFormData,3)
+    ..s IsDefinitely=""
+    ..S IsDefinitelyUse=$lg(BDReqFormData,86)
+    ..I IsDefinitelyUse=1 s IsDefinitely="用血"
+    ..e  s IsDefinitely="备血"
+    
+    
+    ..i (ReqTypeDR=2)|| (ReqTypeDR=3) d
+    ...s ReqType = $lg($g(^dbo.BBReqTypeD(ReqTypeDR)),3)_IsDefinitely
+    ..e  s ReqTypeName = $lg($g(^dbo.BBReqTypeD(ReqTypeDR)),3)
+    ..s ReceiveDate=$lg(ReqFormData,68)
+    ..s ReceiveTime=$lg(ReqFormData,69)
+    ..s ReceiveUserDR=$lg(ReqFormData,70),ReceiveUser=""
+    ..i $l(ReceiveUserDR) s ReceiveUser=$lg($g(^dbo.SYSUserD(ReceiveUserDR)),3)
+    ..s RegNo=$lg(ReqFormData,8)
+    ..s SurName=$lg(ReqFormData,10)
+    ..s LISBdGroupInfo=##class(BLD.WS.BLL.DHCBDXMTest).QryPatBloodGroupMTHD(RegNo,"LIS","")
+    ..s LISBdGroup=$p(LISBdGroupInfo,"^",3)
+    ..s SpeciesDR=$lg(ReqFormData,12),Species=""
+    ..i $l(SpeciesDR) s Species=$lg($g(^dbo.BTSpeciesD(SpeciesDR)),3)
+    ..s AgeDesc=$lg(ReqFormData,85)
+    ..s LocationDR=$lg(ReqFormData,23),LocationDesc=""
+    ..i $l(LocationDR) s LocationDesc=$lg($g(^dbo.BTLocationD(LocationDR)),3)
+    ..s WardDR=$lg(ReqFormData,24),WardDesc=""
+    ..i $l(WardDR) s WardDesc=$lg($g(^dbo.BTWardD(WardDR)),3)
+    ..s UseSampleNo=$lg(ReqFormData,47)
+    ..s ReceiveHours=0 
+    ..i $l(ReceiveDate) d  
+    ...s hReceiveDate=$zdh(ReceiveDate,5) 
+    ...s ReceiveHours=(NowDate-hReceiveDate)*24+((NowTime-ReceiveTime)/3600)
+    ...s ReceiveHours=$fn(ReceiveHours,"",2) 
+    ..s ReqFormCostItemDR="" f  s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",ReqFormDR,ReqFormCostItemDR)) q:ReqFormCostItemDR=""  d
+    ...s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+    ...s CostType=$lg(ReqFormCostItemData,3)
+    ...i CostType'=5 q
+    ...s CostItemDR=$lg(ReqFormCostItemData,4)
+    ...s CostItemData=$g(^dbo.BTCostItemD(CostItemDR))
+    ...s CostItemName=$lg(CostItemData,3)
+    ...d OutPut
+     
+    k ^TMP($zn,repid,$j) 
+    Set qHandle=$lb(0,repid,0)
+    Quit $$$OK
+    
+OutPut
+    Set Data=$lb(ReceiveDate,ReceiveTime,ReceiveUser,ReqTypeName,RegNo,SurName,LISBdGroup,Species,AgeDesc,LocationDesc,WardDesc,UseSampleNo,ReceiveHours,CostItemName)
+ 	Set ColFields="ReceiveDate,ReceiveTime,ReceiveUser,ReqTypeName,RegNo,SurName,LISBdGroup,Species,AgeDesc,LocationDesc,WardDesc,UseSampleNo,ReceiveHours,CostItemName"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+	Quit	
+   
+ErrorHandle  
+    s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    b ;1
+   Set qHandle=$lb(0,repid,0)
+   Quit $$$OK
+}
+
+ClassMethod QryNoXMPlanRecReqClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryNoXMPlanRecReqExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryNoXMPlanRecReqFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryNoXMPlanRecReqExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20201103
+/// Description:： 查询申请单配血但是未发血的列表
+/// Input：         
+/// Output：       输血申请单列表信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryNoIssuePlan","","","","","","","","","false","","","","","","8285^8^^39^1")
+Query QryNoIssuePlan(SttAccDate, EndAccDate, fReqTypeDR, fCheckHours, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "XMCheckDate,XMCheckTime,PackID,BloodProductName,RegNo,SurName,LISBdGroup,Species,AgeDesc,UseSampleNo,CheckHours,CostItemName")
+{
+}
+
+ClassMethod QryNoIssuePlanExecute(ByRef qHandle As %Binary, SttAccDate, EndAccDate, fReqTypeDR, fCheckHours, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+ 	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0 
+    s fReqTypeDR=$g(fReqTypeDR),fCheckHours=$g(fCheckHours) 
+    Set $ZTrap = "ErrorHandle"
+    s WorkGroupDR=$p(Sessions,"^",2) 
+    i '$l(EndAccDate) s EndAccDate=$zd($h,8)
+    i '$l(SttAccDate) s SttAccDate=$p(##Class(LIS.Util.Common).GetSectionDT(EndAccDate,"","-3",""),"^",1)
+    s SttAccDate=$tr(SttAccDate,"-"),EndAccDate=$tr(EndAccDate,"-") 
+    s NowDate=$p($h,",",1)
+	s NowTime=$p($h,",",2)
+	s (fCheckHoursMin,fCheckHoursMax)=""
+	i $l(fCheckHours) d
+	.s fCheckHoursMin=$p(fCheckHours,"-",1)
+	.s fCheckHoursMax=$p(fCheckHours,"-",2)
+	  
+	s NormalCheckHours=##class(BLD.Common.SYSParameter).GetParaValue("NormalCheckHours")
+	i '$l(NormalCheckHours) s NormalCheckHours=1
+	s OpeCheckHours=##class(BLD.Common.SYSParameter).GetParaValue("OpeCheckHours")
+	i '$l(OpeCheckHours) s OpeCheckHours=3
+	s EmergCheckHous=##class(BLD.Common.SYSParameter).GetParaValue("EmergCheckHous")
+	i '$l(EmergCheckHous) s EmergCheckHous=0.5
+	  
+    s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,SttAccDate),-1)
+    f  s Date=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date)) q:(Date="")||($l(EndAccDate)&&(Date>EndAccDate))  d
+    .s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexWorkGroupDR",WorkGroupDR,Date,ReqFormDR)) q:(ReqFormDR="")  d
+    ..s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+    ..s ReqTypeDR=$lg(ReqFormData,3)
+    ..i $l(fReqTypeDR),fReqTypeDR'=ReqTypeDR q
+    ..s ReqTypeData=$g(^dbo.BBReqTypeD(ReqTypeDR))
+    ..s ReqTypeName=$lg(ReqTypeData,3)  
+    ..s ReqType=$lg(ReqTypeData,40)
+    ..s RegNo=$lg(ReqFormData,8)
+    ..s SurName=$lg(ReqFormData,10)
+    ..s LISBdGroupInfo=##class(BLD.WS.BLL.DHCBDXMTest).QryPatBloodGroupMTHD(RegNo,"LIS","")
+    ..s LISBdGroup=$p(LISBdGroupInfo,"^",3)
+    ..s SpeciesDR=$lg(ReqFormData,12),Species=""
+    ..i $l(SpeciesDR) s Species=$lg($g(^dbo.BTSpeciesD(SpeciesDR)),3)
+    ..s AgeDesc=$lg(ReqFormData,85)
+    ..s LocationDR=$lg(ReqFormData,23),LocationDesc=""
+    ..i $l(LocationDR) s LocationDesc=$lg($g(^dbo.BTLocationD(LocationDR)),3)
+    ..s WardDR=$lg(ReqFormData,24),WardDesc=""
+    ..i $l(WardDR) s WardDesc=$lg($g(^dbo.BTWardD(WardDR)),3)
+    ..s UseSampleNo=$lg(ReqFormData,47)
+    ..s CostItemName=""
+    ..s ReqFormCostItemDR="" f  s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",ReqFormDR,ReqFormCostItemDR)) q:ReqFormCostItemDR=""  d
+    ...s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+    ...s CostType=$lg(ReqFormCostItemData,3)
+    ...i CostType'=5 q
+    ...s CostItemDR=$lg(ReqFormCostItemData,4)
+    ...s CostItemData=$g(^dbo.BTCostItemD(CostItemDR))
+    ...s CostItemName=$lg(CostItemData,3)
+    ..s CheckHours=0 
+    ..s XMPlanDR="" f  s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,XMPlanDR)) Q:XMPlanDR=""  D
+    ...s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+    ...s IsFinished=$lg(XMPlanData,30)
+    ...s IsIssued=$lg(XMPlanData,32)
+    ...i IsFinished'=1 q
+    ...i IsIssued=1 q
+    ...s XMCheckDate=$lg(XMPlanData,27)
+    ...s XMCheckTime=$lg(XMPlanData,28)
+    ...s PackDR=$lg(XMPlanData,3)
+    ...s PackData=$g(^dbo.BDPackD(PackDR))
+    ...s PackID=$lg(PackData,2)
+    ...s BloodProductDR=$lg(PackData,3)
+    ...s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+    ...s BloodProductName=$lg(BloodProductData,3)
+    ...s hXMCheckDate=$zdh(XMCheckDate,5) 
+    ...s CheckHours=(NowDate-hXMCheckDate)*24+((NowTime-XMCheckTime)/3600)
+    ...s CheckHours=$fn(CheckHours,"",2)
+    ...i $l(fCheckHoursMin),fCheckHoursMin>CheckHours q
+    ...i $l(fCheckHoursMax),fCheckHoursMax<CheckHours q
+    ...i ReqType=10,CheckHours<NormalCheckHours q
+    ...i ReqType=20,CheckHours<OpeCheckHours q
+    ...i ReqType=30,CheckHours<EmergCheckHous q 
+    ...d OutPut
+     
+    k ^TMP($zn,repid,$j) 
+    Set qHandle=$lb(0,repid,0)
+    Quit $$$OK
+    
+OutPut
+    Set Data=$lb(XMCheckDate,XMCheckTime,PackID,BloodProductName,RegNo,SurName,LISBdGroup,Species,AgeDesc,UseSampleNo,CheckHours,CostItemName)
+ 	Set ColFields="XMCheckDate,XMCheckTime,PackID,BloodProductName,RegNo,SurName,LISBdGroup,Species,AgeDesc,UseSampleNo,CheckHours,CostItemName"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+	Quit	
+   
+ErrorHandle  
+   s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+   Set qHandle=$lb(0,repid,0)
+   Quit $$$OK
+}
+
+ClassMethod QryNoIssuePlanClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryNoIssuePlanExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryNoIssuePlanFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryNoIssuePlanExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20201103
+/// Description:： 
+/// Input：         
+/// Output：       输血申请单列表信息
+/// w ##Class(BLD.WS.BLL.DHCBDXMTest).QryBDSupervise("2508","","5","3","5","2017-10-20","","","","","","","","","")
+ClassMethod QryBDSupervise(P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+{
+ //获取病人信息	 
+	 	Set rsetInfo=##class(%XML.DataSet).%New()
+	    Set rsetInfo.ClassName = "BLD.WS.BLL.DHCBDXMTest"
+	    Set rsetInfo.QueryName = "QryNoXMPlanRecReq"
+		set rsetInfo.NeedSchema=1
+		set rsetInfo.DiffGram=0
+		Set sc=rsetInfo.Execute(P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,Sessions,.RowCount)
+		if sc'=1 q ""
+		Write "{""NoXMPlanInfo"":"
+		Write ##Class(LIS.WS.BLL.DHCDataJSON).DataSetOutJSON(rsetInfo)
+		Write ","
+	    s ret=rsetInfo.Close()
+  
+	//获取结果图形
+ 	Set rsetImg=##class(%XML.DataSet).%New()
+    Set rsetImg.ClassName = "BLD.WS.BLL.DHCBDXMTest"
+    Set rsetImg.QueryName = "QryNoIssuePlan"
+	set rsetImg.NeedSchema=1
+	set rsetImg.DiffGram=0
+	Set sc=rsetImg.Execute(P0,P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11,P12,P13,Sessions,.RowCount)
+	if sc'=1 q ""
+	Write """NoIssueInfo"":"
+	Write ##Class(LIS.WS.BLL.DHCDataJSON).DataSetOutJSON(rsetImg)
+	Write "}"
+    s ret=rsetImg.Close() 
+	Quit ""
+}
+
+/// Creator：      zyx
+/// CreatDate：    20180127
+/// Description:： 取消通知取血
+/// Output：       
+/// Return：       
+/// Others：     0成功。-1失败
+/// w ##class(BLD.WS.BLL.DHCBDXMTest).CancelInformXMPlanMTHD("29,28,27,26","","","","","","","","","","","","","","113^8^0^37^1") 
+ClassMethod CancelInformXMPlanMTHD(XMPlanDRs, AdmNo, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+{
+    S XMPlanDRs=$G(XMPlanDRs)
+	Q:'$L(XMPlanDRs) "100"
+	s UserID=$p(Sessions,"^",1)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	
+	TSTART
+	s UsrCode=$lg($g(^dbo.SYSUserD(UserID)),2)
+	s WebNamespace=##Class(OTH.SYSParameter).GetWebNamespace()
+	s CurNamespace=$ZUTIL(5)
+	s $namespace=WebNamespace
+	s UsrId=""
+	i $d(^SSU("SSUSR",0,"SSUSR_Initials",UsrCode)) s UsrId=$o(^SSU("SSUSR",0,"SSUSR_Initials",UsrCode,""),-1)
+	s ActionTypeCode="1038"	//消息动作代码
+	s FromUserRowId=UsrId	//发送消息的用户Id
+	s EpisodeId=AdmNo	//病人就诊Id
+	s OrdItemId=""	//医嘱Id
+	s ToUserRowId=""	//接收消息的用户Id
+	s OtherInfoJson=""  //	其它信息 
+	s ret=##class(websys.DHCMessageInterface).Cancel("",ActionTypeCode,EpisodeId,"","",FromUserRowId) 
+	s $namespace=CurNamespace
+    i ret<0 s RetVal=ret_"^取消取消通知失败" tro  Quit RetVal  
+	f i=1:1:$l(XMPlanDRs,",") d
+	.s XMPlanDR=$p(XMPlanDRs,",",i)
+	.s objXMPlan=##class(dbo.BDXMPlan).%OpenId(XMPlanDR)
+	.s objXMPlan.IsNoticed=0
+	.s sc=objXMPlan.%Save()
+	.s fReqFormDR=objXMPlan.ReqFormDR
+	.S PackDR=objXMPlan.PackDR
+	.s NoticeDR=""
+	.s NoticePackDR="" f  s NoticePackDR=$o(^dbo.BDNoticePackI("IndexPack",PackDR,NoticePackDR),-1) q:(NoticePackDR="")||$l(NoticeDR)  d
+	..s NoticePackData=$g(^dbo.BDNoticePackD(NoticePackDR))
+	..s ReqFormDR=$lg(NoticePackData,3)
+	..i fReqFormDR'=ReqFormDR q
+	..s NoticeDR=$lg(NoticePackData,2)
+	
+ 
+	i '$l(NoticeDR) tro  q "1"
+    s objBDNotice=##class(dbo.BDNotice).%OpenId(NoticeDR)
+    s objBDNotice.Status=40 //40 取消取消通知
+    s sc=objBDNotice.%Save()
+    s MsgStockDR=objBDNotice.MsgStockDR
+    i '$L(MsgStockDR) tro   q "1"
+    b ;a
+    s objMsgStock=##class(dbo.OTMsgStock).%OpenId(MsgStockDR)
+    s objMsgStock.IsReply=1
+    s sc=objMsgStock.%Save()
+    TCOMMIT
+	q "1"
+	
+ErrorHandle
+	TROLLBACK
+	s ret="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit ret
+}
+
+/// Description:： 审核评估单
+/// Table：        
+/// Input：        admId:就诊号,
+/// 	              
+/// Output：       无
+/// Return：       (admId, OrdItmList, Usercode, Loc, Doc, LABDATA, InsType, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %String
+/// Others: w ##Class(BLD.WS.BLL.DHCBDXMTest).UpdataPayMentTypeMTHD("1","1","2","","","","","","","","","","","","113^^110^36^1")
+ClassMethod UpdataPayMentTypeMTHD(ReqFormDR As %String, MedicalInsuranceType As %String, PayMentType As %String, P3, P4, P5, P6, P7, P8, P9, P10, P11, PageSize, PageIndex, Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String
+{
+	
+	S ReqFormDR=$G(ReqFormDR),MedicalInsuranceType=$G(MedicalInsuranceType),PayMentType=$G(PayMentType)
+	//s ^HH=$LB(ReqFormDR,MedicalInsuranceType,PayMentType)
+	I ReqFormDR="" Q "-1"
+	s UserDR=$p(Sessions,"^",1)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s obj=##class(dbo.BDReqForm).%OpenId(ReqFormDR)
+	s befPaymentTypeDR=obj.PaymentTypeDR
+	b ;a
+	s obj.MedicalInsuranceType =MedicalInsuranceType  
+	s obj.PaymentTypeDR =PayMentType           	    
+	s sc=obj.%Save()
+	If ($system.Status.IsError(sc)) q "-1"
+	b ;1
+	d ##Class(BLD.Common.BDSYSModifyLog).SaveBDSYSModifyLogMTHD("dbo.BDReqForm",ReqFormDR,"PaymentTypeDR",befPaymentTypeDR,PayMentType,UserDR,WorkGroupDR)
+	// --- sun yuan wei 20200904 记录改变医保时间数据
+	/*i $l(PayMentType) d
+	.s UserID=$p(Sessions,"^",1)
+	.s EditDateTime=$zdt($h,3)
+	.k ^DHCEditPaymentType("CostItemDR",ReqFormDR)
+	.s ^DHCEditPaymentType("ReqFormDR",ReqFormDR)=$lb(UserID,EditDateTime)*/
+	 // --- end
+ 	q "1"
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20201103
+/// Description:： 根据就诊号查询配血历史
+/// Input：         
+/// Output：       
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryNoIssuePlan","","","","","","","","","false","","","","","","8285^8^^39^1")
+Query QueryXMPHistoryByAdm(AdmNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "RowID,RegNo,SurName,LocationDesc,Diagnosis,AgeDesc,AddDate,AddTime,PackBarcode,ProductBarCode,BloodProductName,PackVolume,BloodGroupName,ABO,RH,XMCheckUser,IssueUser,XMAddUser")
+{
+}
+
+ClassMethod QueryXMPHistoryByAdmExecute(ByRef qHandle As %Binary, AdmNo, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+ 	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+    s RowCount=0  
+    Set $ZTrap = "ErrorHandle"
+    s ReqFormDR="" f  s ReqFormDR=$o(^dbo.BDReqFormI("IndexAdmNo",##Class(LIS.Util.Common).IndexData(AdmNo),ReqFormDR)) q:ReqFormDR=""  d
+    .s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+    .s Status=$lg(ReqFormData,51)
+    .i Status'=##class(BLD.ENUM.Common.ReqFormStatus).#Receive q
+    .s RegNo=$lg(ReqFormData,8)
+    .s SurName=$lg(ReqFormData,10)
+    .s LocationDR=$lg(ReqFormData,23),LocationDesc=""
+    .i $l(LocationDR) s LocationDesc=$lg($g(^dbo.BTLocationD(LocationDR)),3)
+    .s Diagnosis=$lg(ReqFormData,26)
+    .s AgeDesc=$lg(ReqFormData,85)
+    .s PackDR="" f  s PackDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,PackDR)) Q:PackDR=""  D
+    ..s XMPlanDR=$o(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,PackDR,""))
+    ..s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+    ..s IsFinished=$lg(XMPlanData,30)
+    ..i IsFinished'=1 q
+    ..s AddDate=$lg(XMPlanData,6)
+    ..s AddTime=$lg(XMPlanData,7)
+    ..s PackData=$g(^dbo.BDPackD(PackDR))
+    ..s PackBarcode=$lg(PackData,5)
+    ..s ProductBarCode=$lg(PackData,6)
+    ..s BloodProductDR=$lg(PackData,3)
+    ..s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+    ..s BloodProductName=$lg(BloodProductData,3)
+    ..s PackVolume=$lg(PackData,10)
+    ..s Unit=$lg(BloodProductData,15)
+    ..s PackVolume=PackVolume_Unit
+    ..s BloodGroupDR=$lg(PackData,9)
+    ..s BloodGroupData=$g(^dbo.BBBloodGroupD(BloodGroupDR))
+    ..s BloodGroupName=$lg(BloodGroupData,3)
+    ..s ABO=$lg(BloodGroupData,4)
+    ..s RH=$lg(BloodGroupData,5)
+    ..s XMCheckUserDR=$lg(XMPlanData,29),XMCheckUser=""
+    ..i $l(XMCheckUserDR) s XMCheckUser=$lg(^dbo.SYSUserD(XMCheckUserDR),3)
+    
+    ..s XMAddUserDR=$lg(XMPlanData,8),XMAddUser=""
+    ..i $l(XMAddUserDR) s XMAddUser=$lg($g(^dbo.SYSUserD(XMAddUserDR)),3)
+    
+    
+    
+    ..s IssueUser=""
+    ..i $d(^dbo.BDIssueRecordItemsI("IndexXMPlan",XMPlanDR)) d
+    ...s IssItemDR=$o(^dbo.BDIssueRecordItemsI("IndexXMPlan",XMPlanDR,""))
+    ...s IssueDR=$lg(^dbo.BDIssueRecordItemsD(IssItemDR),2),IssueUserDR=""
+    ...i $l(IssueDR) s IssueUserDR=$lg(^dbo.BDIssueRecordD(IssueDR),6)
+    ...i $l(IssueUserDR) s IssueUser=$lg(^dbo.SYSUserD(IssueUserDR),3)
+    ..d OutPut
+     
+    k ^TMP($zn,repid,$j) 
+    Set qHandle=$lb(0,repid,0)
+    Quit $$$OK
+    
+OutPut
+    Set Data=$lb(XMPlanDR,RegNo,SurName,LocationDesc,Diagnosis,AgeDesc,AddDate,AddTime,PackBarcode,ProductBarCode,BloodProductName,PackVolume,BloodGroupName,ABO,RH,XMCheckUser,IssueUser,XMAddUser)
+ 	Set ColFields="RowID,RegNo,SurName,LocationDesc,Diagnosis,AgeDesc,AddDate,AddTime,PackBarcode,ProductBarCode,BloodProductName,PackVolume,BloodGroupName,ABO,RH,XMCheckUser,IssueUser,XMAddUser"
+ 	Set ^CacheTemp(repid,ind)=##Class(LIS.Util.Common).TransListNull(Data,ColFields)
+ 	Set ind=ind+1
+	Quit	
+   
+ErrorHandle  
+   s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+   Set qHandle=$lb(0,repid,0)
+   Quit $$$OK
+}
+
+ClassMethod QueryXMPHistoryByAdmClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QueryXMPHistoryByAdmExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QueryXMPHistoryByAdmFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QueryXMPHistoryByAdmExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20221014
+/// Description:： 查询发血明细
+/// Input：        BDReqFormDR申请单DR
+/// Output：       发血明细信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryIssuePack","50","","","","","","","2","20","1","","","","","113^46^^2^1")
+/// Creator：      baoguotao
+/// CreatDate：    20221014
+/// Description:： 查询发血明细
+/// Input：        BDReqFormDR申请单DR
+/// Output：       发血明细信息
+/// d ##Class(%ResultSet).RunQuery("BLD.WS.BLL.DHCBDXMTest","QryIssuePack","","5582239","0002229001","","","","","2","20","1","","","","","113^46^^2^1")
+Query QryIssuePack(ReqFormDR, AdmNo, RegNo, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Query(ROWSPEC = "BDComponentCName,PackVolume")
+{
+}
+
+ClassMethod QryIssuePackExecute(ByRef qHandle As %Binary, ReqFormDR, AdmNo, RegNo, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, Sessions, Output RowCount As %String) As %Status
+{
+	s repid=$i(^CacheTemp) 
+ 	s ind=1 
+ 	Set qHandle=$lb(0,repid,0) 
+    s RowCount=0    
+    s HospitalDR=$p(Sessions,"^",5)
+    s BDGROUPShowType=##class(BLD.Common.SYSParameter).GetParaValue("BDGROUPShowType","HOS",HospitalDR)
+    i '$l(BDGROUPShowType) s BDGROUPShowType="3"
+    k ^TMP($zn,repid,$j) 
+    
+    i $l(ReqFormDR) d
+    .s IssueRecordDR="" f  s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexReqForm",ReqFormDR,IssueRecordDR)) Q:IssueRecordDR=""  D
+    ..s PackDR="" f  s PackDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR)) Q:PackDR=""  D
+    ...s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR,""))
+    ...s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+    ...s IsReturned=$lg(IssueRecordItemsData,4)
+    ...i IsReturned=1 q
+    ...s XMPlanDR=$lg(IssueRecordItemsData,6)  
+    ...d GetPackInfo
+	e  i $l(AdmNo) d
+	.s IndexRegNo=##class(LIS.Util.Common).IndexData(RegNo)
+	.s IssueRecordDR="" f  s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexRegNo",IndexRegNo,IssueRecordDR)) Q:IssueRecordDR=""  D
+    ..S IssueRecordData=$G(^dbo.BDIssueRecordD(IssueRecordDR))
+    ..S IssReqFormDR=$LG(IssueRecordData,11)
+    ..s IssReqFormData=$g(^dbo.BDReqFormD(IssReqFormDR))
+    ..s IssAdmNo=$lg(IssReqFormData,4)
+    ..i IssAdmNo'=AdmNo q
+    ..s PackDR="" f  s PackDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR)) Q:PackDR=""  D
+    ...s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR,""))
+    ...s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+    ...s IsReturned=$lg(IssueRecordItemsData,4)
+    ...i IsReturned=1 q
+    ...s XMPlanDR=$lg(IssueRecordItemsData,6) 
+    ...d GetPackInfo 
+	e  i $l(RegNo) d
+	.s IndexRegNo=##class(LIS.Util.Common).IndexData(RegNo)
+	.s IssueRecordDR="" f  s IssueRecordDR=$o(^dbo.BDIssueRecordI("IndexRegNo",IndexRegNo,IssueRecordDR)) Q:IssueRecordDR=""  D
+    ..s PackDR="" f  s PackDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR)) Q:PackDR=""  D
+    ...s IssueRecordItemsDR=$o(^dbo.BDIssueRecordItemsI("IndexMaster",IssueRecordDR,PackDR,""))
+    ...s IssueRecordItemsData=$g(^dbo.BDIssueRecordItemsD(IssueRecordItemsDR))
+    ...s IsReturned=$lg(IssueRecordItemsData,4)
+    ...i IsReturned=1 q
+    ...s XMPlanDR=$lg(IssueRecordItemsData,6) 
+    ...d GetPackInfo
+	
+	s BDComponentCName=""
+    for{
+      s BDComponentCName=$o(^TMP($zn,repid,$j,"PackCount",BDComponentCName))
+      q:BDComponentCName=""
+      s Unit=""
+      for{
+        s Unit=$o(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))
+        q:Unit=""
+        s PackVolume=$g(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit))_Unit
+    	Set RowCount=RowCount+1
+    	Set Data=$lb(BDComponentCName,PackVolume)
+ 		Set ^CacheTemp(repid,ind)=Data
+ 		Set ind=ind+1
+      }
+    }
+    k ^TMP($zn,repid,$j)
+	Quit $$$OK
+	 
+GetPackInfo
+	s XMPlanData = $g(^dbo.BDXMPlanD(XMPlanDR)) 
+	S PackDR=$LG(XMPlanData,3)
+	s PackData=$g(^dbo.BDPackD(PackDR))
+	s BloodProductDR=$lg(PackData,3)
+	s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	s Unit=$lg(BloodProductData,15)
+	s BloodComponentsDR=$lg(BloodProductData,10)
+	s BDComponentCName=$lg($g(^dbo.BBBloodComponentsD(BloodComponentsDR)),3)
+	s PackVolume=$lg(PackData,10)
+	i $d(^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)) s ^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)=^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)+PackVolume
+    e  s ^TMP($zn,repid,$j,"PackCount",BDComponentCName,Unit)=PackVolume
+
+	Quit
+}
+
+ClassMethod QryIssuePackClose(ByRef qHandle As %Binary) As %Status [ PlaceAfter = QryIssuePackExecute ]
+{
+	Set repid=$li(qHandle,2)
+ 	Kill ^CacheTemp(repid)
+	Quit $$$OK
+}
+
+ClassMethod QryIssuePackFetch(ByRef qHandle As %Binary, ByRef Row As %List, ByRef AtEnd As %Integer = 0) As %Status [ PlaceAfter = QryIssuePackExecute ]
+{
+	Set AtEnd=$li(qHandle,1)
+ 	Set repid=$li(qHandle,2)
+ 	Set ind=$li(qHandle,3) 	
+ 	Set ind=$o(^CacheTemp(repid,ind))
+ 	If ind="" {				
+ 		Set AtEnd=1
+ 		Set Row=""
+ 	}
+ 	else      {			
+ 		Set Row=^CacheTemp(repid,ind)
+ 	}
+ 	Set qHandle=$lb(AtEnd,repid,ind)
+	Quit $$$OK
+}
+
+Storage Default
+{
+<Data name="DHCBDXMTestDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+</Data>
+<DataLocation>^BLD.WS.BLL.DHCBDXMTestD</DataLocation>
+<DefaultData>DHCBDXMTestDefaultData</DefaultData>
+<IdLocation>^BLD.WS.BLL.DHCBDXMTestD</IdLocation>
+<IndexLocation>^BLD.WS.BLL.DHCBDXMTestI</IndexLocation>
+<StreamLocation>^BLD.WS.BLL.DHCBDXMTestS</StreamLocation>
+<Type>%Storage.Persistent</Type>
+}
+
+}

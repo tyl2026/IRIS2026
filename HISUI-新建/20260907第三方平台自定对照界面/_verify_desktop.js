@@ -10,7 +10,7 @@ const vc = new VirtualConsole();
 vc.on('log', (...a) => console.log(...a));
 vc.on('jsdomError', (e) => console.error('[jsdomError]', e.message));
 
-const jq  = fs.readFileSync(path.resolve('D:/claude code/IRIS/HISUI-新建/第三方平台自定对照界面', '_tmp', 'jquery-1.11.3.min.js'), 'utf-8');
+const jq  = fs.readFileSync(path.resolve('D:/claude code/IRIS/HISUI-新建/20260907第三方平台自定对照界面', '_tmp', 'jquery-1.11.3.min.js'), 'utf-8');
 const biz = fs.readFileSync(path.join(DIR, 'sanyidictmap.js'), 'utf-8');
 
 const inlined = HTML

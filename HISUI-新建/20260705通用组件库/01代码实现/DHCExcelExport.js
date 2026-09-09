@@ -1,5 +1,5 @@
 ﻿/**
- * DHCExcelExport — Excel(.xls) 导出通用组件（标准组件库：HISUI-新建/通用组件库）
+ * DHCExcelExport — Excel(.xls) 导出通用组件（标准组件库：HISUI-新建/20260705通用组件库）
  *
  * 功能：将二维数据 / datagrid 表格导出为 .xls 文件（Excel HTML 表格，Excel 双击直接打开）。
  *       UTF-8 BOM 保证中文不乱码；追溯码等长数字自动按文本处理，不转科学计数法、不丢精度。

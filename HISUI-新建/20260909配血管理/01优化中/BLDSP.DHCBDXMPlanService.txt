@@ -1,0 +1,983 @@
+Class BLDSP.DHCBDXMPlanService Extends %RegisteredObject
+{
+
+/// Creator：      baoguotao
+/// CreatDate：    20191226
+/// Description:： 配血保存逻辑
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).SaveXMPlan("39569^40135","<Data><P6>2^无凝聚无溶血</P6><P9>1^相合</P9><P8>2^阴性</P8><P0>25923</P0><P12></P12><P13></P13><P10>血型未知</P10><P11></P11><P4>1^相合</P4><P14></P14><P7>1^相合</P7><P1>14</P1><P3>2^无凝聚无溶血</P3><P2></P2><P5>2^阴性</P5></Data>","8285^26^0^37^1")	  
+ClassMethod SaveXMPlan(ReqPlanDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+	s ^tmpsavexmplan=$lb(ReqPlanDR,Param,Sessions)
+	s Sessions=$g(Sessions)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s UserDR=$p(Sessions,"^",1) 
+	s HospitalDR=$p(Sessions,"^",5) 
+	Set $ZTrap = "ErrorHandle" 
+    s err="",RetValue=""
+    Set reader = ##class(%XML.Reader).%New()  
+    Do reader.OpenString(Param)
+    D reader.Correlate("Data","LIS.WS.Model.InputParameter") 
+    s PackDR=""
+    While (reader.Next(.obj,.sc)) { 
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    {  
+		    s PackDR=$tr(obj.P0,$c(0)) 
+		    s XMMethodDR=$tr(obj.P1,$c(0))
+		    s MachineParameterDR=$tr(obj.P2,$c(0))
+		    s MajorXMDepict=$tr(obj.P3,$c(0))
+		    s MajorXMResult=$tr(obj.P4,$c(0))
+		    s MajorXMConclusion=$tr(obj.P5,$c(0))
+		    s MinorXMDepict=$tr(obj.P6,$c(0))
+		    s MinorXMResult=$tr(obj.P7,$c(0))
+		    s MinorXMConclusion=$tr(obj.P8,$c(0))
+		    s XMLastResult=$tr(obj.P9,$c(0))
+		    s CheckBloodGroupRes=$tr(obj.P10,$c(0))
+		    s AntibodyScreenRes=$tr(obj.P11,$c(0))
+		    s CheckBloodPhenotype=$tr(obj.P12,$c(0))
+		    s Remark=$tr(obj.P13,$c(0))
+		    s BldDifficult=$tr(obj.P14,$c(0))
+		   
+	    }
+    } 
+	D reader.Close()  
+	i '$l(PackDR) s RetValue="传入血液不能为空！" q RetValue
+	s ReqFormDR=$p(ReqPlanDR,"^",1)
+	s PlanDR=$p(ReqPlanDR,"^",2)
+	; 修复：配血保存/审核操作人取 .NET 显式传入的登录用户(ReqPlanDR第3段)，不依赖Sessions(可能被审核登录残留污染)
+	s ReqUserDR=$p(ReqPlanDR,"^",3)
+	i $l(ReqUserDR) s UserDR=ReqUserDR
+	s TransactionCode="" 
+	i PlanDR="0"  s TransactionCode="CreateXMPlan",TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData(TransactionCode),""))
+	e  s TransactionCode="SaveXMPlanTest",TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData(TransactionCode),""))
+	i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“"_TransactionCode_"”的数据维护!" q RetValue
+	i PlanDR="0",$d(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,PackDR)) s RetValue="该血液已经在该申请单上创建配血计划，请刷新配血计划列表！"  q RetValue
+    s MajorXMDepictDR=$p(MajorXMDepict,"^",1)
+    s MajorXMDepictStr=$p(MajorXMDepict,"^",2)
+    s MajorXMResultDR=$p(MajorXMResult,"^",1)
+    s MajorXMResultStr=$p(MajorXMResult,"^",2)
+    s MajorXMConclusionDR=$p(MajorXMConclusion,"^",1)
+    s MajorXMConclusionStr=$p(MajorXMConclusion,"^",2)
+    
+    s MinorXMDepictDR=$p(MinorXMDepict,"^",1)
+    s MinorXMDepictStr=$p(MinorXMDepict,"^",2)
+    s MinorXMResultDR=$p(MinorXMResult,"^",1)
+    s MinorXMResultStr=$p(MinorXMResult,"^",2)
+    s MinorXMConclusionDR=$p(MinorXMConclusion,"^",1)
+    s MinorXMConclusionStr=$p(MinorXMConclusion,"^",2)
+    s XMLastResultDR=$p(XMLastResult,"^",1)
+    s XMLastResultStr=$p(XMLastResult,"^",2)
+    s (IsBldDifficult,BldDifficultDesc)=""
+    i $l(BldDifficult){
+	    s IsBldDifficult=$p(BldDifficult,"^",1)
+	    s BldDifficultDesc=$p(BldDifficult,"^",2)
+    }
+    
+	TSTART
+	s PackData=$g(^dbo.BDPackD(PackDR))
+	s BloodProductDR=$lg(PackData,3)
+	s PackBarcode=$lg(PackData,5)
+	s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	s UseSampleNo=$lg(ReqFormData,47)
+	i PlanDR="0"  s objXMPlan=##class(dbo.BDXMPlan).%New()
+	e  s objXMPlan=##class(dbo.BDXMPlan).%OpenId(PlanDR)
+	i objXMPlan.IsFinished="1" s RetValue="该配血已经审核,不能进行配血操作！"  TROLLBACK  q RetValue
+    s objXMPlan.ReqFormDR=ReqFormDR
+    s objXMPlan.PackDR=PackDR
+    s objXMPlan.SampleNo=UseSampleNo
+    s objXMPlan.PackBarcode=PackBarcode
+    s objXMPlan.TransactionDR=TransactionDR
+    s objXMPlan.XMMethodDR=XMMethodDR
+    s objXMPlan.MachineParameterDR=MachineParameterDR
+    s objXMPlan.MajorXMDepictDR=MajorXMDepictDR
+    s objXMPlan.MajorXMDepictStr=MajorXMDepictStr
+    s objXMPlan.MajorXMResultDR=MajorXMResultDR
+    s objXMPlan.MajorXMResultStr=MajorXMResultStr
+    s objXMPlan.MajorXMConclusionDR=MajorXMConclusionDR
+    s objXMPlan.MajorXMConclusionStr=MajorXMConclusionStr
+    s objXMPlan.MinorXMDepictDR=MinorXMDepictDR
+    s objXMPlan.MinorXMDepictStr=MinorXMDepictStr
+    s objXMPlan.MinorXMResultDR=MinorXMResultDR
+    s objXMPlan.MinorXMResultStr=MinorXMResultStr
+    s objXMPlan.MinorXMConclusionDR=MinorXMConclusionDR
+    s objXMPlan.MinorXMConclusionStr=MinorXMConclusionStr
+    s objXMPlan.XMLastResultDR=XMLastResultDR
+    s objXMPlan.XMLastResultStr=XMLastResultStr
+    i $l(BldDifficult){
+     s objXMPlan.IsBldDifficult=IsBldDifficult
+     s objXMPlan.BldDifficultDesc=BldDifficultDesc
+    }
+    s objXMPlan.CheckBloodGroupRes=CheckBloodGroupRes
+    S objXMPlan.CheckBloodPhenotype=CheckBloodPhenotype
+    S objXMPlan.AntibodyScreenRes=AntibodyScreenRes
+    s objXMPlan.AddDate=$zd($h,8)
+    s objXMPlan.AddTime=$p($h,",",2)
+    s objXMPlan.AddUserDR=UserDR
+    s objXMPlan.IsFinished=0
+    s objXMPlan.IsIssued=0 
+    s objXMPlan.IsNoticed=0
+    s objXMPlan.Remark=Remark
+    s sc=objXMPlan.%Save()
+	S ^BLDSave("Save",objXMPlan.RowID)=UserDR
+    If ($SYSTEM.Status.IsOK(sc)) {
+	  s RetValue=1
+    }
+    else {
+	  s RetValue=$SYSTEM.Status.GetErrorText(sc)
+    } 
+	i RetValue'=1 TROLLBACK  Quit RetValue
+	
+	s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	s IsXMatchProduct=$lg(BloodProductData,12)
+	i IsXMatchProduct="1" {
+      i '$l(XMMethodDR) TROLLBACK  s RetValue="配血方法不能为空!" q RetValue 
+      i (PlanDR="0") {
+       s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%New()
+      }
+      else{
+	      i $d(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR)){
+		    s PackDR=$o(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR,"")) 
+	        s XMPlanHistoryDR=$o(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR,PackDR,XMMethodDR,""))
+            i $L(XMPlanHistoryDR){
+             s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%OpenId(XMPlanHistoryDR)
+            }
+            else{
+		      s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%New()
+	       }
+	      }
+	      else{
+		      s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%New()
+	      }
+	       
+      }
+	  s objXMPlanHistory.XMMethodDR=XMMethodDR
+      s objXMPlanHistory.MachineParameterDR=MachineParameterDR
+      s objXMPlanHistory.MajorXMDepictDR=MajorXMDepictDR
+      s objXMPlanHistory.MajorXMDepictStr=MajorXMDepictStr
+      s objXMPlanHistory.MajorXMResultDR=MajorXMResultDR
+      s objXMPlanHistory.MajorXMResultStr=MajorXMResultStr
+      s objXMPlanHistory.MajorXMConclusionDR=MajorXMConclusionDR
+      s objXMPlanHistory.MajorXMConclusionStr=MajorXMConclusionStr
+      s objXMPlanHistory.MinorXMDepictDR=MinorXMDepictDR
+      s objXMPlanHistory.MinorXMDepictStr=MinorXMDepictStr
+      s objXMPlanHistory.MinorXMResultDR=MinorXMResultDR
+      s objXMPlanHistory.MinorXMResultStr=MinorXMResultStr
+      s objXMPlanHistory.MinorXMConclusionDR=MinorXMConclusionDR
+      s objXMPlanHistory.MinorXMConclusionStr=MinorXMConclusionStr
+      s objXMPlanHistory.XMLastResultDR=XMLastResultDR
+      s objXMPlanHistory.XMLastResultStr=XMLastResultStr
+      s objXMPlanHistory.PackDR=PackDR
+      s objXMPlanHistory.XMPlanDR=objXMPlan.RowID
+      s objXMPlanHistory.Active=1
+      s objXMPlanHistory.AddDate=$zd($h,8)
+      s objXMPlanHistory.AddTime=$p($h,",",2)
+      s objXMPlanHistory.AddUserDR=UserDR
+       s objXMPlanHistory.ItemStatus=10
+      s sc=objXMPlanHistory.%Save()
+      If ($SYSTEM.Status.IsOK(sc)) {
+	   s RetValue=1
+      }
+      else {
+	   s RetValue=$SYSTEM.Status.GetErrorText(sc)
+      }
+      i RetValue'=1 TROLLBACK  Quit RetValue 
+     
+	} 
+	s RetValue=##class(BLDSP.DHCBDIssueService).AddPackTransaction(PackDR,TransactionDR,ReqFormDR,ReqFormDR,Remark,UserDR,WorkGroupDR)
+    i RetValue'=1 TROLLBACK  Quit RetValue 
+    TCOMMIT
+	Q RetValue 
+
+ErrorHandle 
+    TROLLBACK
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20191227
+/// Description:： 批量配血保存逻辑
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// 			   Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).BatchSaveXMPlan("159","<Data><P3>2^无凝聚无溶血</P3><P12></P12><P4>1^相合</P4><P0>150^151</P0><P8>2^双视野</P8><P10>O型阳性(+)</P10><P5>2^双视野</P5><P1>2</P1><P13></P13><P9>1^相合</P9><P14></P14><P6>2^无凝聚无溶血</P6><P2>9</P2><P11></P11><P7>1^相合</P7></Data>","8285^11^0^39^1")	  
+ClassMethod BatchSaveXMPlan(ReqFormDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+    s ^tmpsavexmplan=$lb(ReqFormDR,Param,Sessions)
+	s Sessions=$g(Sessions)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s UserDR=$p(Sessions,"^",1) 
+	s HospitalDR=$p(Sessions,"^",5) 
+	; 修复：创建配血计划操作人取 .NET 显式传入的登录用户(ReqFormDR第2段)，不依赖Sessions(可能被审核登录残留污染)
+	s ReqUserDR=$p(ReqFormDR,"^",2)
+	s ReqFormDR=$p(ReqFormDR,"^",1)
+	i $l(ReqUserDR) s UserDR=ReqUserDR
+	Set $ZTrap = "ErrorHandle" 
+    s err="",RetValue=""
+    Set reader = ##class(%XML.Reader).%New()  
+    Do reader.OpenString(Param)
+    D reader.Correlate("Data","LIS.WS.Model.InputParameter") 
+    s PackDR=""
+    While (reader.Next(.obj,.sc)) { 
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    { 
+		    s PackDRs=$tr(obj.P0,$c(0)) 
+		    s XMMethodDR=$tr(obj.P1,$c(0))
+		    s MachineParameterDR=$tr(obj.P2,$c(0))
+		   // s MajorXMDepict=$tr(obj.P3,$c(0))
+		    //s MajorXMResult=$tr(obj.P4,$c(0))
+		    //s MajorXMConclusion=$tr(obj.P5,$c(0))
+		    //s MinorXMDepict=$tr(obj.P6,$c(0))
+		    //s MinorXMResult=$tr(obj.P7,$c(0))
+		    //s MinorXMConclusion=$tr(obj.P8,$c(0))
+		    //s XMLastResult=$tr(obj.P9,$c(0))
+		    s CheckBloodGroupRes=$tr(obj.P10,$c(0))
+		    s AntibodyScreenRes=$tr(obj.P11,$c(0))
+		    s CheckBloodPhenotype=$tr(obj.P12,$c(0))
+		    s Remark=$tr(obj.P13,$c(0))
+		    s BldDifficult=$tr(obj.P14,$c(0))
+		   
+	    }
+    } 
+	D reader.Close() 
+	i '$l(PackDRs) s RetValue="传入血液不能为空！" q RetValue
+	  
+    s TransactionCode="CreateXMPlan",TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData(TransactionCode),""))
+ 	i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“CreateXMPlan”的数据维护!" q RetValue
+	/* 
+    s MajorXMDepictDR=$p(MajorXMDepict,"^",1)
+    s MajorXMDepictStr=$p(MajorXMDepict,"^",2)
+    s MajorXMResultDR=$p(MajorXMResult,"^",1)
+    s MajorXMResultStr=$p(MajorXMResult,"^",2)
+    s MajorXMConclusionDR=$p(MajorXMConclusion,"^",1)
+    s MajorXMConclusionStr=$p(MajorXMConclusion,"^",2)
+    
+    s MinorXMDepictDR=$p(MinorXMDepict,"^",1)
+    s MinorXMDepictStr=$p(MinorXMDepict,"^",2)
+    s MinorXMResultDR=$p(MinorXMResult,"^",1)
+    s MinorXMResultStr=$p(MinorXMResult,"^",2)
+    s MinorXMConclusionDR=$p(MinorXMConclusion,"^",1)
+    s MinorXMConclusionStr=$p(MinorXMConclusion,"^",2)
+    s XMLastResultDR=$p(XMLastResult,"^",1)
+    s XMLastResultStr=$p(XMLastResult,"^",2)
+    s (IsBldDifficult,BldDifficultDesc)=""
+    i $l(BldDifficult){
+	    s IsBldDifficult=$p(BldDifficult,"^",1)
+	    s BldDifficultDesc=$p(BldDifficult,"^",2)
+    }
+    */
+	TSTART
+	f i=1:1:$l(PackDRs,"^") {
+	    s PackDR=$p(PackDRs,"^",i) 
+	   i $d(^dbo.BDXMPlanI("IndexMaster",ReqFormDR,PackDR)) {
+       s PackData=$g(^dbo.BDPackD(PackDR))
+       s PackBarcode=$lg(PackData,5)
+	   s RetValue="血液["_PackBarcode_"]已经在该申请单上创建配血计划，请刷新配血计划列表！"  
+	   q
+	}
+ 	s PackData=$g(^dbo.BDPackD(PackDR))
+	s BloodProductDR=$lg(PackData,3)
+	s PackBarcode=$lg(PackData,5)
+	s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	s UseSampleNo=$lg(ReqFormData,47)
+    s objXMPlan=##class(dbo.BDXMPlan).%New() 
+    s objXMPlan.ReqFormDR=ReqFormDR
+    s objXMPlan.PackDR=PackDR
+    s objXMPlan.SampleNo=UseSampleNo
+    s objXMPlan.PackBarcode=PackBarcode
+    s objXMPlan.TransactionDR=TransactionDR
+    //s objXMPlan.XMMethodDR=XMMethodDR
+    s objXMPlan.MachineParameterDR=MachineParameterDR 
+    s objXMPlan.CheckBloodGroupRes=CheckBloodGroupRes
+    S objXMPlan.CheckBloodPhenotype=CheckBloodPhenotype
+    S objXMPlan.AntibodyScreenRes=AntibodyScreenRes
+    s objXMPlan.AddDate=$zd($h,8)
+    s objXMPlan.AddTime=$p($h,",",2)
+    s objXMPlan.AddUserDR=UserDR
+    s objXMPlan.IsFinished=0
+    s objXMPlan.IsIssued=0 
+    s objXMPlan.IsNoticed=0
+    s objXMPlan.Remark=Remark
+    s sc=objXMPlan.%Save()
+    If ($SYSTEM.Status.IsOK(sc)) {
+	  s RetValue=1
+    }
+    else {
+	  s RetValue=$SYSTEM.Status.GetErrorText(sc)
+    }  
+    i RetValue'=1 q
+	s BloodProductData=$g(^dbo.BBBloodProductD(BloodProductDR))
+	s IsXMatchProduct=$lg(BloodProductData,12)
+	i IsXMatchProduct="1" {
+      s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%New()
+	  s objXMPlanHistory.XMMethodDR=XMMethodDR
+      s objXMPlanHistory.MachineParameterDR=MachineParameterDR 
+      s objXMPlanHistory.PackDR=PackDR
+      s objXMPlanHistory.XMPlanDR=objXMPlan.RowID
+      s objXMPlanHistory.Active=1
+      s objXMPlanHistory.AddDate=$zd($h,8)
+      s objXMPlanHistory.AddTime=$p($h,",",2)
+      s objXMPlanHistory.AddUserDR=UserDR
+      s objXMPlanHistory.ItemStatus=10
+      s sc=objXMPlanHistory.%Save()
+      If ($SYSTEM.Status.IsOK(sc)) {
+	   s RetValue=1
+      }
+      else {
+	   s RetValue=$SYSTEM.Status.GetErrorText(sc)
+      }  
+      i RetValue'=1 q
+	 }
+	 s RetValue=##class(BLDSP.DHCBDIssueService).AddPackTransaction(PackDR,TransactionDR,ReqFormDR,ReqFormDR,Remark,UserDR,WorkGroupDR)
+     i RetValue'=1 q
+	}
+    i RetValue'=1 TROLLBACK  Quit RetValue
+    TCOMMIT
+	Q RetValue 
+
+ErrorHandle 
+    TROLLBACK
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20191227
+/// Description:： 批量配血审核逻辑
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// 			   Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).BatchCheckXMPlan("8286","<Data><P3></P3><P12></P12><P4></P4><P0>234^232</P0><P8></P8><P10></P10><P5></P5><P1></P1><P13></P13><P9></P9><P14></P14><P6></P6><P2></P2><P11></P11><P7></P7></Data>","8285^11^0^39^1")	  
+ClassMethod BatchCheckXMPlan(XMCheckUserDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+    s ^tmpcheckxmplan=$lb(XMCheckUserDR,Param,Sessions) 
+	s Sessions=$g(Sessions)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s UserDR=$p(Sessions,"^",1) 
+	s HospitalDR=$p(Sessions,"^",5) 
+	i XMCheckUserDR="0" s XMCheckUserDR=UserDR
+	Set $ZTrap = "ErrorHandle" 
+    s err="",RetValue=""
+    Set reader = ##class(%XML.Reader).%New()  
+    Do reader.OpenString(Param)
+    D reader.Correlate("Data","LIS.WS.Model.InputParameter") 
+    s PlanDRs=""
+    While (reader.Next(.obj,.sc)) { 
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    { 
+		    s PlanDRs=$tr(obj.P0,$c(0))  
+		   
+	    }
+    } 
+	D reader.Close() 
+	i '$l(PlanDRs) s RetValue="审核列表不能为空！" q RetValue 
+	s IsCheckUserSame=##class(BLD.Common.SYSParameter).GetParaValue("IsCheckUserSame"," WG"," "_WorkGroupDR)
+	s ValidTime = ##class(BLD.Common.SYSParameter).GetParaValue("BDCheckXMPValidTime"," WG"," "_WorkGroupDR)
+	s NeedTowAuth=0
+	i IsCheckUserSame="N"{
+	 s NeedTowAuth=1 
+	 i $l(ValidTime){ 
+	  s NeedTowAuth=0
+	  s CurTime=$p($h,",",2)
+	  f zt=1:1:$l(ValidTime,"@") {
+	   s OneTime=$p(ValidTime,"@",zt)
+	   s StartTime=$zth($p(OneTime,"-",1))
+	   s EndTime=$zth($p(OneTime,"-",2))
+	   i (CurTime>=StartTime),(CurTime<=EndTime) s NeedTowAuth=1 q
+	  }
+	  
+	 }
+	 
+	 
+	}
+    TSTART
+    s XMPlanNo=##Class(LISSP.DHCSYSRecordNumber).CreateNewNumber("XMP")
+    i '$l(XMPlanNo) TROLLBACK  s RetValue="请维护Code:XMP的流水号规则!!" q RetValue
+    s XMPlanNo="XMP"_XMPlanNo
+    s BatchPlanDRs=""
+    f i=1:1:$l(PlanDRs,"^") {
+	  s PlanDR=$p(PlanDRs,"^",i)
+	  i '$l(PlanDR) continue
+	  s PlanData=$g(^dbo.BDXMPlanD(PlanDR))
+	  s IsFinished=$lg(PlanData,30)
+	  i IsFinished=1  s RetValue="血液已经审核,不能重复审核" continue
+	  s IsIssued=$lg(PlanData,32)
+	  i IsIssued=1 s RetValue="血液已经全部发血,不能审核" continue
+	  s PackDR=$lg(PlanData,3)
+	  s PackData=$g(^dbo.BDPackD(PackDR))
+	  s PackID=$lg(PackData,2)
+	  s PackStatusDR=$lg(PackData,34)
+	  s StatusStock=$lg(PackData,35)
+	  i StatusStock'="10" s RetValue="血液["_PackID_"]不是在库可用状态，不能进行审核" Q 
+	  s AddUserDR=$lg(PlanData,8)
+	  i (NeedTowAuth=1),(XMCheckUserDR=AddUserDR) s RetValue="血液["_PackID_"]审核用户与配血用户不能同为一人" Q   
+	  s ReqFormDR=$lg(PlanData,2)
+	  s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	  s Status=$lg(ReqFormData,51)
+	  i Status'=##class(BLD.ENUM.Common.ReqFormStatus).#Receive s RetValue="申请单不是接收状态，请刷新页面核实申请单状态" Q
+	  s ReqTypeDR=$lg(ReqFormData,3)
+	  s AdmNo=$lg(ReqFormData,4)
+	  s AdmType=$lg(ReqFormData,52)
+	  s XMLastResultDR=$lg(PlanData,23)
+	  s IsBldDifficult=$lg(PlanData,38)
+	  s TransactionDR=""
+	  i IsBldDifficult="1" {
+	   s TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("PackDifficult"),""))
+ 	   i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“PackDifficult”的数据维护!" q
+ 	   s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+ 	   s TransactionCode=$lg(TransactionData,2) 
+	  } 
+	  else{ 
+	   i $l(XMLastResultDR){
+	    s XMLastResultData=$g(^dbo.BBXMLastResultD(XMLastResultDR))
+	    s ExtCode=$Lg(XMLastResultData,4) 
+	    i ExtCode="XMLR1" {
+	     s TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("CheckXMPlan"),""))
+ 	     i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“CheckXMPlan”的数据维护!" q
+ 	     s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+ 	     s TransactionCode=$lg(TransactionData,2)
+	    } 
+	    else{
+	     s TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("BloodMatchFail"),""))
+ 	     i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“BloodMatchFail”的数据维护!" q
+ 	     s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+ 	     s TransactionCode=$lg(TransactionData,2)
+	    } 
+	   }
+	   else{
+	     s TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("NoCheckXMPlan"),"")) 
+	     i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“NOCHECKXMPLAN”的数据维护!" q
+	     s TransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+ 	     s TransactionCode=$lg(TransactionData,2)
+	   }
+	  } 
+	  i '$l(TransactionDR) q
+	  s RetValue=##Class(BLDSP.DHCBDIssueService).GetPackStatus(PackDR,TransactionDR) 
+	  i RetValue'="1" q
+	  s (CheckXMPlanCostFlag,CheckXMPlanCostReqFlag,XMPlanFeeFlag)="1"
+	  s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue(AdmType_"BDCHECKXMPLANCOSTFLAG"," WG"," "_WorkGroupDR)
+	  i '$l(ParaValue) s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue(AdmType_"BDCHECKXMPLANCOSTFLAG")
+	  i $zcvt(ParaValue,"U")="FALSE" s CheckXMPlanCostFlag="0"
+	     
+	  s ReqTypeData=$g(^dbo.BBReqTypeD(ReqTypeDR))
+	  s ReqTypeCode=$lg(ReqTypeData,2)
+	  s ReqTypeCode=$zcvt(ReqTypeCode,"U")
+	  s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue(ReqTypeCode_"BDCHECKXMPLANCOSTFLAG"," WG"," "_WorkGroupDR)
+      i '$l(ParaValue) s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue(ReqTypeCode_"BDCHECKXMPLANCOSTFLAG")
+      i $zcvt(ParaValue,"U")="FALSE" s CheckXMPlanCostReqFlag="0"                      
+	  s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue("BLDXMMETHODISNEEDFEE"," WG"," "_WorkGroupDR)
+      i '$l(ParaValue) s ParaValue=##class(BLD.Common.SYSParameter).GetParaValue("BLDXMMETHODISNEEDFEE")
+      i $zcvt(ParaValue,"U")="FALSE" s XMPlanFeeFlag="0"
+             
+	  s XMatchCostFlag=""
+	  s ReqFormCostItemDR="" 
+	  for{
+	   s ReqFormCostItemDR=$o(^dbo.BDReqFormCostItemI("IndexReqForm",ReqFormDR,ReqFormCostItemDR))
+	   Q:ReqFormCostItemDR=""
+	   s ReqFormCostItemData=$g(^dbo.BDReqFormCostItemD(ReqFormCostItemDR))
+	   s ItemStatus=$lg(ReqFormCostItemData,17)
+	   i ItemStatus'=20 continue
+	   s fPackDR=$lg(ReqFormCostItemData,19)
+	   i fPackDR'=PackDR continue
+	   s CostType=$lg(ReqFormCostItemData,3)  
+	   i CostType=10 s XMatchCostFlag=1 q
+	  } 
+	  
+	  s MorePlan=""
+      s XMPlanDR=""
+      for{
+	     s XMPlanDR=$o(^dbo.BDXMPlanI("IndexPack",PackDR,XMPlanDR))
+	     q:XMPlanDR=""
+	     s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+	     s IsFinished=$lg(XMPlanData,30)
+	     i IsFinished'=1 continue
+	     s MorePlan="1"
+      }
+      
+	  s objXMPlan=##class(dbo.BDXMPlan).%OpenId(PlanDR)
+	  s objXMPlan.XMPlanNo=XMPlanNo 
+	  s objXMPlan.XMCheckDate=$zd($h,8)
+	  s objXMPlan.XMCheckTime=$p($h,",",2)
+	  s objXMPlan.XMCheckUserDR=XMCheckUserDR
+	  s objXMPlan.IsFinished=1
+	  s objXMPlan.TransactionDR=TransactionDR
+	  S ^BLDXMCheck("XMCheck",PlanDR)=XMCheckUserDR
+	  s sc=objXMPlan.%Save() 
+      If ($SYSTEM.Status.IsOK(sc)) {
+	    s RetValue=1
+       }
+       else {
+	    s RetValue=$SYSTEM.Status.GetErrorText(sc) q  
+      }
+    
+      s (TransactionStatusDR,StatusAfterDR,statusStock)=""
+      s BBTransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+      s TransactionName=$lg(BBTransactionData,3)
+      for
+      {  
+       s TransactionStatusDR=$o(^dbo.BBTransactionStatusI("IndexTransaction",TransactionDR,TransactionStatusDR)) 
+       Q:(TransactionStatusDR="")||($l(StatusAfterDR))  
+       s TransactionStatusData=$g(^dbo.BBTransactionStatusD(TransactionStatusDR))
+       s StatusBeforeDR=$lg(TransactionStatusData,4)
+       i StatusBeforeDR'=PackStatusDR continue
+       s StatusAfterDR=$lg(TransactionStatusData,5)
+       s BBPackStatus=$g(^dbo.BBPackStatusD(StatusAfterDR))
+       s statusStock=$lg(BBPackStatus,4)
+      }  
+      i '$l(StatusAfterDR) s RetValue="未找到事件["_TransactionName_"]对应的状态配置" q  
+     
+      s objPack=##class(dbo.BDPack).%OpenId(PackDR)
+      s TransactionCode=$zcvt(TransactionCode,"U")
+      i MorePlan="1"{
+	      s objPack.ReqDR=""
+	      s objPack.PatientLocationDR=""
+	      s objPack.PatientWardDR=""
+	      s objPack.PatientRegNo="" 
+      }
+      i (TransactionCode'="BLOODMATCHFAIL"){
+        s objPack.PackStatusDR=StatusAfterDR
+        s objPack.StatusStock=statusStock  
+      }
+      s sc=objPack.%Save() 
+      If ($SYSTEM.Status.IsOK(sc)) {
+	    s RetValue=1
+       }
+       else {
+	    s RetValue=$SYSTEM.Status.GetErrorText(sc) q  
+      }
+      i RetValue'=1 q  
+	  s RetValue=##Class(BLDSP.DHCBDIssueService).AddPackTransaction(PackDR,TransactionDR,ReqFormDR,"","",XMCheckUserDR,WorkGroupDR)
+	  i RetValue'=1 q 
+	  i (CheckXMPlanCostFlag="1")&&(CheckXMPlanCostReqFlag="1")&&(XMPlanFeeFlag="1") {
+		i XMatchCostFlag'="1"{ 
+		  s RetValue=..SaveXMMethodCostItem(PlanDR,AdmNo,"",XMCheckUserDR,Sessions)
+		  s XMMethodDR=$lg(PlanData,22) 
+		  i $l(XMMethodDR){
+		    s XMPlanHistoryDR=$o(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR,PackDR,XMMethodDR,""))
+		    i $l(XMPlanHistoryDR){
+		     s XMPlanHistoryData=##class(dbo.BDXMPlanHistory).%OpenId(XMPlanHistoryDR)
+		     s XMPlanHistoryData.ItemStatus=20
+		     s sc=XMPlanHistoryData.%Save()
+		    }
+		  }
+		} 
+	  }
+	  i RetValue'=1 q  
+	  i $l(BatchPlanDRs) s BatchPlanDRs=BatchPlanDRs_"^"_PlanDR
+	  e  s BatchPlanDRs=PlanDR
+	} 
+	i RetValue'=1 TROLLBACK  Quit RetValue 
+    TCOMMIT
+    d ##Class(BLD.Common.OTMsgStock).SaveOTMsgStockMTHD(BatchPlanDRs,"BLDMatching",XMCheckUserDR) 
+
+	Q RetValue  
+
+ErrorHandle 
+    TROLLBACK
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+/// 记录交叉配血费
+///  PlanDR:配血计划DR,AdmNo计费病人就诊号,MedicalType：医保标志 CheckUserDR:配血审核人DR
+ClassMethod SaveXMMethodCostItem(PlanDR As %String, AdmNo As %String, MedicalType As %String, CheckUserDR As %String, Sessions As %String) As %String
+{
+   s PlanData=$g(^dbo.BDXMPlanD(PlanDR))
+   s ReqFormDR=$lg(PlanData,2)
+   s PackDR=$lg(PlanData,3)
+   s PackData=$g(^dbo.BDPackD(PackDR)) 
+   s PackVolume=$lg(PackData,10) 
+   s IsAutologous=$lg(PackData,22)
+   i IsAutologous="1" q "1"
+   s XMMethodDR=$lg(PlanData,22) 
+   i '$l(XMMethodDR) q "1"
+   s XMMethodData=$g(^dbo.BBXMMethodD(XMMethodDR))
+   s XMMethodName=$lg(XMMethodData,3)
+   s RetVal=""  
+   s FeeFlag=""  //费用查询结束标志 
+   s (OrdItmList,OrdItmDRList)="" 
+   s CostItemDR="" f  s CostItemDR=$o(^dbo.BBXMMethodCostItemI("IndexMaster",XMMethodDR,CostItemDR)) q:(CostItemDR="")||(FeeFlag="1")  d
+   .s XMMethodCostDR=$o(^dbo.BBXMMethodCostItemI("IndexMaster",XMMethodDR,CostItemDR,"")) 
+   .s XMMethodCostItemData=$g(^dbo.BBXMMethodCostItemD(XMMethodCostDR))
+   .s Active=$lg(XMMethodCostItemData,7)
+   .i Active'=1 q
+   .s Quantity=$lg(XMMethodCostItemData,6)
+   .s BillType=$lg(XMMethodCostItemData,4)
+   .i BillType=20 d
+   ..s Volumn=$lg(XMMethodCostItemData,5)
+   ..s Volumn=+Volumn
+   ..i Volumn<=0 s RetVal="配血方法["_XMMethodName_"]费用中配置换算系数不能小于等于0",FeeFlag="1"  q
+   ..s Quantity=$NUMBER((+PackVolume)/Volumn,2)
+   .i $l(RetVal) q  
+   .s CostItemData=$g(^dbo.BTCostItemD(CostItemDR)) 
+   .s CostItemCode=$lg(CostItemData,2)
+   .i '$l(OrdItmList) s OrdItmList=CostItemCode_"@"_Quantity_"@"_MedicalType
+   .e  s OrdItmList=OrdItmList_"^"_CostItemCode_"@"_Quantity_"@"_MedicalType
+   .i '$l(OrdItmDRList) s OrdItmDRList=CostItemDR_"@"_Quantity_"@"_PackDR_"@"_PlanDR_"@"_MedicalType
+   .e  s OrdItmDRList=OrdItmDRList_"^"_CostItemDR_"@"_Quantity_"@"_PackDR_"@"_PlanDR_"@"_MedicalType
+   i $l(RetVal) q RetVal
+   i '$l(OrdItmDRList) s RetVal=" 配血方法["_XMMethodName_"]费用未进行配置，或者配置未被激活"  q RetVal 
+  
+   s CheckUserData=$g(^dbo.SYSUserD(CheckUserDR))
+   s CheckUserCode=$lg(CheckUserData,2) 
+   s Data="<Data>"
+   s Data=Data_"<P0>"_OrdItmList_"</P0>"
+   s Data=Data_"<P1>"_CheckUserCode_"</P1>"
+   s Data=Data_"<P2>10</P2>"
+   s Data=Data_"<P3>"_OrdItmDRList_"</P3>" 
+   s Data=Data_"<P4>"_ReqFormDR_"</P4>"   
+   s Data=Data_"</Data>" 
+   s RetVal=##class(BLDSP.HisOrder).SaveReqOrdItem(AdmNo,Data,Sessions)
+     
+   q RetVal
+}
+
+/// Creator：      baoguotao
+/// CreatDate：    20191227
+/// Description:： 批量配血审核逻辑
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// 			   Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).UnCheckXMPlan("0","<Data><P3></P3><P12></P12><P4></P4><P0>235^234^232</P0><P8></P8><P10></P10><P5></P5><P1>其他原因;</P1><P13></P13><P9></P9><P14></P14><P6></P6><P2></P2><P11></P11><P7></P7></Data>","8285^11^0^39^1")	  
+ClassMethod UnCheckXMPlan(UnCheckUserDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+	//s ^tmpUnCheckXMPlan=$lb(UnCheckUserDR,Param,Sessions)
+	s Sessions=$g(Sessions)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s UserDR=$p(Sessions,"^",1) 
+	s HospitalDR=$p(Sessions,"^",5) 
+	i UnCheckUserDR="0" s UnCheckUserDR=UserDR
+	Set $ZTrap = "ErrorHandle" 
+    s err="",RetValue=""
+    Set reader = ##class(%XML.Reader).%New()  
+    Do reader.OpenString(Param)
+    D reader.Correlate("Data","LIS.WS.Model.InputParameter") 
+    s PlanDRs=""
+    While (reader.Next(.obj,.sc)) { 
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    { 
+		    s PlanDRs=$tr(obj.P0,$c(0))  
+		    s Reason=$tr(obj.P1,$c(0))  
+	    }
+    } 
+	D reader.Close() 
+	i '$l(PlanDRs) s RetValue="取消审核列表不能为空！" q RetValue 
+	
+    TSTART
+      
+    f i=1:1:$l(PlanDRs,"^") {
+	  s PlanDR=$p(PlanDRs,"^",i)
+	  i '$l(PlanDR) continue
+	   s objXMPlan=##class(dbo.BDXMPlan).%OpenId(PlanDR)
+	  s IsFinished=objXMPlan.IsFinished
+	  i IsFinished'=1  s RetValue="配血计划还未被审核，不能执行取消审核" q
+	  s IsIssued=objXMPlan.IsIssued
+	  s PackBarcode=objXMPlan.PackBarcode
+	  i IsIssued=1 s RetValue="献血码[" + PackBarcode + "]血液已经发血，请先进行取消发血操作" q
+	  s PackDR=objXMPlan.PackDR
+	  s TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData("UnCheckXMPlan"),""))
+ 	  i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“UnCheckXMPlan”的数据维护!" q
+ 	  s ReqFormDR=objXMPlan.ReqFormDR
+ 	  s objXMPlan.XMPlanNo=""
+	  s objXMPlan.XMCheckDate=""
+	  s objXMPlan.XMCheckTime=""
+	  s objXMPlan.XMCheckUserDR=""
+	  s objXMPlan.IsFinished=0
+	  s objXMPlan.TransactionDR=TransactionDR
+	  s sc=objXMPlan.%Save() 
+      If ($SYSTEM.Status.IsOK(sc)) {
+	    s RetValue=1
+       }
+       else {
+	    s RetValue=$SYSTEM.Status.GetErrorText(sc) q  
+      }
+	     
+	  s MorePlan=""
+      s XMPlanDR=""
+      for{
+	     s XMPlanDR=$o(^dbo.BDXMPlanI("IndexPack",PackDR,XMPlanDR))
+	     q:XMPlanDR=""
+	     s XMPlanData=$g(^dbo.BDXMPlanD(XMPlanDR))
+	     s IsFinished=$lg(XMPlanData,30)
+	     i IsFinished'=1 continue
+	     s MorePlan="1"
+      }
+       
+	  s objPack=##class(dbo.BDPack).%OpenId(PackDR)
+	  s PackStatusDR=objPack.PackStatusDR
+      s (TransactionStatusDR,StatusAfterDR,statusStock)=""
+      s BBTransactionData=$g(^dbo.BBTransactionD(TransactionDR))
+      s TransactionName=$lg(BBTransactionData,3)
+      for
+      {  
+       s TransactionStatusDR=$o(^dbo.BBTransactionStatusI("IndexTransaction",TransactionDR,TransactionStatusDR)) 
+       Q:(TransactionStatusDR="")||($l(StatusAfterDR))  
+       s TransactionStatusData=$g(^dbo.BBTransactionStatusD(TransactionStatusDR))
+       s StatusBeforeDR=$lg(TransactionStatusData,4)
+       i StatusBeforeDR'=PackStatusDR continue
+       s StatusAfterDR=$lg(TransactionStatusData,5)
+       s BBPackStatus=$g(^dbo.BBPackStatusD(StatusAfterDR))
+       s statusStock=$lg(BBPackStatus,4)
+      } 
+      i '$l(StatusAfterDR) s RetVal="未找到事件["_TransactionName_"]对应的状态配置" q  
+      
+    
+      i MorePlan'="1"{
+	      s objPack.PackStatusDR=StatusAfterDR
+	      s objPack.StatusStock=statusStock 
+      }
+      
+      s sc=objPack.%Save() 
+      If ($SYSTEM.Status.IsOK(sc)) {
+	    s RetValue=1
+       }
+       else {
+	    s RetValue=$SYSTEM.Status.GetErrorText(sc) q  
+      }
+      i RetValue'=1 q 
+	  s RetValue=##Class(BLDSP.DHCBDIssueService).AddPackTransaction(PackDR,TransactionDR,ReqFormDR,"",Reason,UnCheckUserDR,WorkGroupDR)
+	  i RetValue'=1 q  
+	} 
+	i RetValue'=1 TROLLBACK  Quit RetValue 
+    TCOMMIT
+    d ##Class(BLD.Common.OTMsgStock).SaveOTMsgStockMTHD(PlanDRs,"BLDCMatching",UnCheckUserDR) 
+
+	Q RetValue  
+
+ErrorHandle 
+    TROLLBACK
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+/// Creator：      zyx
+/// CreatDate：    20211027
+/// Description:： 多配血方法保存
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).SaveXMPlanHistory("1812","<Data><P0>[{""PackDR"":2357,""XMMethodDR"":21,""MachineParameterDR"":null,""MajorXMDepictDR"":null,""MajorXMDepictStr"":"""",""MajorXMConclusionDR"":null,""MajorXMConclusionStr"":"""",""MajorXMResultDR"":null,""MajorXMResultStr"":"""",""MinorXMDepictDR"":null,""MinorXMDepictStr"":"""",""MinorXMConclusionDR"":null,""MinorXMConclusionStr"":"""",""MinorXMResultDR"":null,""MinorXMResultStr"":"""",""XMLastResultDR"":null,""XMLastResultStr"":"""",""RowID"":2491,""ItemStatus"":20},{""PackDR"":""2357"",""XMMethodDR"":""8"",""MachineParameterDR"":"""",""MajorXMDepictDR"":""1"",""MajorXMDepictStr"":""无凝聚无溶血"",""MajorXMConclusionDR"":""1"",""MajorXMConclusionStr"":""相合"",""MajorXMResultDR"":""1"",""MajorXMResultStr"":""阴性（无凝聚无溶血）"",""MinorXMDepictDR"":""1"",""MinorXMDepictStr"":""无凝聚无溶血"",""MinorXMConclusionDR"":""1"",""MinorXMConclusionStr"":""相合"",""MinorXMResultDR"":""1"",""MinorXMResultStr"":""阴性（无凝聚无溶血）"",""XMLastResultDR"":""1"",""XMLastResultStr"":""相合"",""ItemStatus"":20}]</P0><P11></P11><P9></P9><P4></P4><P1>{""SampleNo"":""0000635528"",""PackBarcode"":""0191722040539"",""ReqFormDR"":""1812"",""RowID"":""2123"",""PackDR"":""2357""}</P1><P7></P7><P14></P14><P8></P8><P13></P13><P2></P2><P6></P6><P5></P5><P10></P10><P12></P12><P3></P3></Data>","8280^2^0^2^1")
+ClassMethod SaveXMPlanHistory(ReqFormDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+	s ^tmpSaveXMPlanHistory=$lb(ReqFormDR,Param,Sessions)
+	s Sessions=$g(Sessions)
+	s WorkGroupDR=$p(Sessions,"^",2)
+	s UserDR=$p(Sessions,"^",1) 
+	s HospitalDR=$p(Sessions,"^",5) 
+	i ReqFormDR="" q "-1^获取患者申请单信息失败"
+    s err="",RetValue=""
+    //s Param="<Data><P6></P6><P8></P8><P3></P3><P12></P12><P2></P2><P10></P10><P11></P11><P13></P13><P4></P4><P14></P14><P0>[{""PackDR"":""45"",""XMMethodDR"":""13"",""MachineParameterDR"":"""",""MajorXMDepictDR"":""2"",""MajorXMDepictStr"":""无凝聚无溶血"",""MajorXMConclusionDR"":""2"",""MajorXMConclusionStr"":""双视野"",""MajorXMResultDR"":""1"",""MajorXMResultStr"":""相合"",""MinorXMDepictDR"":""2"",""MinorXMDepictStr"":""无凝聚无溶血"",""MinorXMConclusionDR"":""2"",""MinorXMConclusionStr"":""双视野"",""MinorXMResultDR"":""1"",""MinorXMResultStr"":""相合"",""XMLastResultDR"":""1"",""XMLastResultStr"":""相合""},    {""Remark"":""1"",""PackDR"":""45"",""XMMethodDR"":""8"",""MachineParameterDR"":"""",""MajorXMDepictDR"":""2"",""MajorXMDepictStr"":""无凝聚无溶血"",""MajorXMConclusionDR"":""2"",""MajorXMConclusionStr"":""双视野"",""MajorXMResultDR"":""1""   ,""MajorXMResultStr"":""相合"",""MinorXMDepictDR"":""2"",""MinorXMDepictStr"":""  无凝聚无溶血"",""MinorXMConclusionDR"":""2"",""MinorXMConclusionStr"":""双视野"",""MinorXMResultDR"":""1"",""MinorXMResultStr"":""相合"",""XMLastResultDR"":""1"",""XMLastResultStr"":""相合"",""SampleNo"":"""",""PackBarcode"":""3344556677"",""ReqFormDR"":""109"",""RowID"":""25""}]</P0><P1>{""Remark"":""1"",""PackDR"":""45"",""XMMethodDR"":""8"",""MachineParameterDR"":"""",""MajorXMDepictDR"":""2"",""MajorXMDepictStr"":""无凝聚无溶血"",""MajorXMConclusionDR"":""2"",""MajorXMCon      clusionStr"":""双视野"",""MajorXMResultDR"":""1"",""MajorXMResultStr"":""相合"",""MinorXMDepictDR"":""2"",""MinorXMDepictStr"":""无凝聚无溶血"",""MinorXMConclus      ionDR"":""2"",""MinorXMConclusionStr"":""双视野"",""MinorXMResultDR"":""1"",""Mi   norXMResultStr"":""相合"",""XMLastResultDR"":""1"",""XMLastResultStr"":""相合"",    ""SampleNo"":"""",""PackBarcode"":""3344556677"",""ReqFormDR"":""109"",""RowID"":""25""}</P1><Value></Value><P9></P9><P7></P7><P5></P5><Key></Key></Data>"
+    //开启事务存储
+    Set $ZTrap = "ErrorHandle"
+    TSTART
+    Set reader = ##class(%XML.Reader).%New()  
+    Do reader.OpenString(Param)
+    D reader.Correlate("Data","LIS.WS.Model.InputParameter") 
+    s PackDR=""
+    While (reader.Next(.obj,.sc)) { 
+	    If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+	    {  
+		    s PlanHistorys=$tr(obj.P0,$c(0)) 
+		    s XMPlans=$tr(obj.P1,$c(0))
+		   
+	    }
+    } 
+	D reader.Close() 
+    //第一步：对操作事件数据维护核查
+     
+	s TransactionCode="CreateXMPlan",TransactionDR=$o(^dbo.BBTransactionI("IndexCode",##Class(LIS.Util.Common).IndexData(TransactionCode),""))
+	i '$l(TransactionDR) s RetValue="处理事件基础表中缺少对code=“"_TransactionCode_"”的数据维护!" q RetValue
+    //-----解析多配血方法----
+	s objPlanHistory=##class(LIS.Util.COM.Array).FromJSON(PlanHistorys)   
+    s objXMPlan=##class(LIS.Util.COM.Array).FromJSON(XMPlans) 
+	
+	// 第二步：获取血袋及申请单信息，标本信息
+	s PackDR=objXMPlan.%data("PackDR")
+	s PlanDR=objXMPlan.%data("RowID")
+	s PackBarcode=objXMPlan.%data("PackBarcode")
+	s SampleNo=objXMPlan.%data("SampleNo")
+	s ReqFormData=$g(^dbo.BDReqFormD(ReqFormDR))
+	s AdmNo=$LG(ReqFormData,4)
+	i AdmNo="" tro  q "-1^就诊信息为空，请核实" 
+	i PlanDR="" tro  q "-1^配血计划信息为空，请核实"
+	i PackDR="" tro  q "-1^血袋信息为空，请核实"
+	
+	b ;//第三步：获取多配血方法详情
+	f k=0:1:objPlanHistory.%len-1{
+		//循环解析新加配血方法详情
+		s PlanHistory=objPlanHistory.%arr(k)
+		b ;111
+		i $l(PlanHistory){ 
+			  s XMMethodDR=PlanHistory.%data("XMMethodDR")
+			  s MachineParameterDR=PlanHistory.%data("MachineParameterDR")
+			  s MajorXMDepictDR=PlanHistory.%data("MajorXMDepictDR")
+			  s MajorXMDepictStr=PlanHistory.%data("MajorXMDepictStr")
+			  s MajorXMResultDR=PlanHistory.%data("MajorXMResultDR")
+			  s MajorXMResultStr=PlanHistory.%data("MajorXMResultStr")
+			  s MajorXMConclusionDR=PlanHistory.%data("MajorXMConclusionDR")
+			  s MajorXMConclusionStr=PlanHistory.%data("MajorXMConclusionStr")
+			  s MinorXMDepictDR=PlanHistory.%data("MinorXMDepictDR")
+			  s MinorXMDepictStr=PlanHistory.%data("MinorXMDepictStr")
+			  s MinorXMResultDR=PlanHistory.%data("MinorXMResultDR")
+			  s MinorXMResultStr=PlanHistory.%data("MinorXMResultStr")
+			  s MinorXMConclusionDR=PlanHistory.%data("MinorXMConclusionDR")
+			  s MinorXMConclusionStr=PlanHistory.%data("MinorXMConclusionStr")
+			  s XMLastResultDR=PlanHistory.%data("XMLastResultDR")
+			  s XMLastResultStr=PlanHistory.%data("XMLastResultStr")
+			  s Remark=""   //是否计费
+			  i $d(PlanHistory.%data("Remark")){
+			    s Remark=PlanHistory.%data("Remark")
+			  }
+			  i MachineParameterDR="null" s MachineParameterDR=""
+			  i MajorXMResultDR="null" s MajorXMResultDR="" 
+			  i MajorXMConclusionDR="null" s MajorXMConclusionDR="" 
+			  i MinorXMDepictDR="null" s MinorXMDepictDR="" 
+			  i MinorXMResultDR="null" s MinorXMResultDR="" 
+			  i MinorXMConclusionDR="null" s MinorXMConclusionDR="" 
+			  i XMLastResultDR="null" s XMLastResultDR=""  
+			  i MajorXMDepictDR="null" s MajorXMDepictDR=""
+			  
+			  s HistoryDR=$o(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR,PackDR,XMMethodDR,""))
+			  i $L(HistoryDR) s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%OpenId(HistoryDR)
+			  e  s objXMPlanHistory=##class(dbo.BDXMPlanHistory).%New()
+			 
+			  s objXMPlanHistory.XMMethodDR=XMMethodDR
+		      s objXMPlanHistory.MachineParameterDR=MachineParameterDR
+		      s objXMPlanHistory.MajorXMDepictDR=MajorXMDepictDR
+		      s objXMPlanHistory.MajorXMDepictStr=MajorXMDepictStr
+		      s objXMPlanHistory.MajorXMResultDR=MajorXMResultDR
+		      s objXMPlanHistory.MajorXMResultStr=MajorXMResultStr
+		      s objXMPlanHistory.MajorXMConclusionDR=MajorXMConclusionDR
+		      s objXMPlanHistory.MajorXMConclusionStr=MajorXMConclusionStr
+		      s objXMPlanHistory.MinorXMDepictDR=MinorXMDepictDR
+		      s objXMPlanHistory.MinorXMDepictStr=MinorXMDepictStr
+		      s objXMPlanHistory.MinorXMResultDR=MinorXMResultDR
+		      s objXMPlanHistory.MinorXMResultStr=MinorXMResultStr
+		      s objXMPlanHistory.MinorXMConclusionDR=MinorXMConclusionDR
+		      s objXMPlanHistory.MinorXMConclusionStr=MinorXMConclusionStr
+		      s objXMPlanHistory.XMLastResultDR=XMLastResultDR
+		      s objXMPlanHistory.XMLastResultStr=XMLastResultStr
+		      s objXMPlanHistory.PackDR=PackDR
+		      s objXMPlanHistory.XMPlanDR=PlanDR
+		      s objXMPlanHistory.Active=1
+		      s objXMPlanHistory.AddDate=$zd($h,8)
+		      s objXMPlanHistory.AddTime=$p($h,",",2)
+		      s objXMPlanHistory.AddUserDR=UserDR
+		      s objXMPlanHistory.Remark=Remark
+       		  s objXMPlanHistory.ItemStatus=10
+      		  s sc=objXMPlanHistory.%Save()
+              If ($system.Status.IsError(sc)) { 
+				s RetValue=$SYSTEM.Status.GetErrorText(sc)
+	 			q  
+			 } 
+			 
+			 
+			 b ;//第四步：计费
+			 i (Remark="1"){ 
+				  s RetValue=..SaveXMMethodCostItem(PlanDR,AdmNo,"",UserDR,Sessions)
+				  i $L(RetValue) q
+				  i $l(XMMethodDR){
+					    s XMPlanHistoryDR=$o(^dbo.BDXMPlanHistoryI("IndexMaster",PlanDR,PackDR,XMMethodDR,""))
+					    i $l(XMPlanHistoryDR){
+						     s XMPlanHistoryData=##class(dbo.BDXMPlanHistory).%OpenId(XMPlanHistoryDR)
+						     s XMPlanHistoryData.ItemStatus=20
+						     s sc=XMPlanHistoryData.%Save()
+					    }
+				  }
+		     } 
+		     
+     
+		}
+		
+	}
+	i '$l(RetValue) s RetValue="1"
+	i RetValue'=1 TROLLBACK  q "-1^"_RetValue
+    TCOMMIT
+    s RetValue="1^"_PlanDR
+	Q RetValue 
+
+ErrorHandle 
+    TROLLBACK
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+/// Creator：      zyx
+/// CreatDate：    20211027
+/// Description:： 绑定住院信息
+/// Table：        
+/// Input：        Param参数内容XML格式
+/// Param.P0 
+/// Output：       无
+/// Return：       
+/// Others: w ##Class(BLDSP.DHCBDXMPlanService).ChangeReqAdmInfo("110","<Data><P6></P6><P8></P8><P3></P3><P12></P12><P2>22</P2><P10></P10><P11></P11><P13></P13><P4></P4><P14></P14><P0>110</P0><P1>22</P1><Value></Value><P9></P9><P7></P7><P5></P5><Key></Key></Data>","113^8^0^37^1")
+ClassMethod ChangeReqAdmInfo(ReqFormDR As %String, Param As %String(MAXLEN=32767), Sessions As %String, Output RetValue As %String(MAXLEN=32767)) As %String [ SqlProc ]
+{
+    //记录入参
+    s ^TMPBDChangeReqAdmInfo=$lb(ReqFormDR,Param,Sessions)
+    //初始化入参
+	s ReqFormDR=$g(ReqFormDR)
+	s ReqFormDR=$tr(ReqFormDR,$c(0),"")
+	s Param=$g(Param),Sessions=$g(Sessions)
+    s HospitalDR=$p(Sessions,"^",5),WorkGroupDR=$p(Sessions,"^",2),UserDR=$p(Sessions,"^",1)
+    s RetValue=1 
+    
+    //获取入参信息
+    Set $ZTrap = "ErrorHandle"
+    TSTART
+    Set reader = ##class(%XML.Reader).%New()
+    Do reader.OpenString(Param)
+    Do reader.Correlate("Data","LIS.WS.Model.InputParameter")
+    While (reader.Next(.obj,.sc)) {
+		If ($SYSTEM.Status.IsOK(sc)) // check if this succeeded without errors
+		{	
+			//s ReqFormDR=$tr(obj.P0,$c(0))          //申请单基础信息                 
+			s AdmNo=$tr(obj.P1,$c(0))             //绑定就诊号           
+			s ReqAdmNo=$tr(obj.P2,$c(0))         //原就诊号
+			
+		}
+    }
+    D reader.Close() 
+    //第一步：更新申请单就诊信息
+    s objReqForm=##class(dbo.BDReqForm).%OpenId(ReqFormDR)   //更新操作
+    s objReqForm.AdmNo=AdmNo
+    s objReqForm.ReqAdmNo=ReqAdmNo
+    s objReqForm.AdmType="I"
+	s sc=objReqForm.%Save()
+    I '($SYSTEM.Status.IsOK(sc)) s RetValue="-1^绑定失败！"_$SYSTEM.Status.GetErrorText(sc)  TRO  q RetValue
+   
+    //第二步：记录操作日志
+	s objOperateRecord = ##class(dbo.BDSYSModifyLog).%New()
+	s objOperateRecord.TableName = "dbo.BDReqForm"                     //申请单表名
+	s objOperateRecord.TableRowID = ReqFormDR                         //主键信息
+	s objOperateRecord.ModifyItem="ReqAdmNo"                          //修改内容
+	s objOperateRecord.AddDate = $zd(+$h,8)                         //操作时间
+	s objOperateRecord.AddTime = $p($h,",",2)                       //操作人
+	s objOperateRecord.AddUserDR =UserDR                              //工作组
+	s objOperateRecord.WorkGroupDR =WorkGroupDR
+    s objOperateRecord.PreContent = ReqAdmNo
+    s objOperateRecord.AfterContent = AdmNo
+	s sc = objOperateRecord.%Save()
+	I '($SYSTEM.Status.IsOK(sc)) s RetValue="-1^操作记录信息保存失败！"_$SYSTEM.Status.GetErrorText(sc)  TRO  q RetValue
+    TCOMMIT
+    s RetValue="1^绑定信息成功"
+    q RetValue
+ErrorHandle
+    TRO 
+	s RetValue="-1^错误"_$tr($ZERROR,"^","--")_".错误代码:"_$ECODE
+    Quit RetValue
+}
+
+}
